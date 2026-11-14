@@ -3,8 +3,8 @@
   python3 pipeline/refdata.py            -> tag places with country codes and refresh price levels
   python3 pipeline/refdata.py tag        -> only add missing country codes to data/places/*.json
 
-Price levels: World Bank indicator PA.NUS.PPPC.RF, the price level ratio of the PPP conversion factor (GDP) to the
-market exchange rate. It says how expensive a country is compared with the United States (US = 1.0).
+Price levels: the World Bank PPP conversion factor (PA.NUS.PPP) divided by the official exchange rate (PA.NUS.FCRF).
+It says how expensive a country is compared with the United States (US = 1.0).
 """
 import glob, json, os, sys
 
@@ -60,12 +60,12 @@ def tag_places():
     print(f"tagged {changed} places with country codes")
 
 
-def price_levels():
-    import requests
-    url = "https://api.worldbank.org/v2/country/all/indicator/PA.NUS.PPPC.RF"
+def wb_latest(indicator):
+    """Latest value per country (ISO3) for one World Bank indicator, with patient retries."""
+    import time, requests
+    url = f"https://api.worldbank.org/v2/country/all/indicator/{indicator}"
     rows, page = [], 1
     while True:
-        import time
         r = None
         for attempt in range(5):
             try:
@@ -80,39 +80,44 @@ def price_levels():
         r.raise_for_status()
         j = r.json()
         if not isinstance(j, list) or len(j) < 2:
-            raise SystemExit(f"Unexpected World Bank response: {str(j)[:300]}")
-        meta, data = j[0], j[1]
-        rows += data or []
-        if page >= int(meta.get("pages", 1)):
+            raise SystemExit(f"Unexpected World Bank response for {indicator}: {str(j)[:300]}")
+        rows += j[1] or []
+        if page >= int(j[0].get("pages", 1)):
             break
         page += 1
     latest = {}
     for x in rows:
-        if x.get("value") is None or not x.get("countryiso3code"):
+        k = x.get("countryiso3code")
+        if x.get("value") is None or not k:
             continue
-        k = x["countryiso3code"]
         if k not in latest or int(x["date"]) > int(latest[k]["date"]):
             latest[k] = x
-    rows = list(latest.values())
+    return latest
+
+
+def price_levels():
+    # Price level = PPP conversion factor (local currency per international dollar) / market exchange rate (local currency per US dollar)
+    ppp = wb_latest("PA.NUS.PPP")
+    fx = wb_latest("PA.NUS.FCRF")
+    import pycountry
+    euro = {"AUT", "BEL", "HRV", "CYP", "EST", "FIN", "FRA", "DEU", "GRC", "IRL", "ITA", "LVA", "LTU", "LUX", "MLT", "NLD", "PRT", "SVK", "SVN", "ESP"}
+    emu = fx.get("EMU")
     out = {}
-    for x in rows:
-        iso3, v = x.get("countryiso3code"), x.get("value")
-        if not iso3 or v is None:
-            continue
-        try:
-            import pycountry
-            c = pycountry.countries.get(alpha_3=iso3)
-        except Exception:
-            c = None
+    for iso3, p in ppp.items():
+        c = pycountry.countries.get(alpha_3=iso3)
         if not c:
             continue   # regions and income groups
-        out[c.alpha_2] = {"ratio": round(float(v), 3), "year": int(x["date"]), "name": x["country"]["value"]}
+        f = fx.get(iso3) or (emu if iso3 in euro else None)
+        if not f or not f.get("value"):
+            continue
+        ratio = float(p["value"]) / float(f["value"])
+        out[c.alpha_2] = {"ratio": round(ratio, 3), "year": int(p["date"]), "name": p["country"]["value"]}
     us = out.get("US", {}).get("ratio") or 1.0
     for k in out:
         out[k]["factor"] = round(out[k]["ratio"] / us, 3)
-    json.dump({"source": "World Bank, price level ratio of PPP conversion factor (GDP) to market exchange rate (PA.NUS.PPPC.RF)",
+    json.dump({"source": "World Bank: PPP conversion factor, GDP (PA.NUS.PPP) divided by official exchange rate (PA.NUS.FCRF)",
                "countries": out}, open(os.path.join(ROOT, "data", "price-levels.json"), "w"), separators=(",", ":"), sort_keys=True)
-    print(f"price levels for {len(out)} countries; US ratio {us}")
+    print(f"price levels for {len(out)} countries; US ratio {us}; e.g. MX {out.get('MX')}, NG {out.get('NG')}, IT {out.get('IT')}")
 
 
 if __name__ == "__main__":
