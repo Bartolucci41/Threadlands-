@@ -55,6 +55,9 @@ css += """
   .lib-country li a:hover { text-decoration: underline; }
   .lib-country li span { font: 400 0.75rem var(--font-mono); color: var(--ink2); }
   .lib-empty { color: var(--ink2); }
+  .bio { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 22px; align-items: start; }
+  .bio-photo { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; }
+  @media (max-width: 560px) { .bio { grid-template-columns: minmax(0, 1fr); } .bio-photo { width: 120px; height: 120px; } }
   .about-grid { display: grid; gap: 28px; max-width: 46rem; }
   .about-grid h2 { font-size: 1.5rem; margin: 0 0 8px; }
   .about-grid p { margin: 0 0 10px; color: var(--ink2); }
