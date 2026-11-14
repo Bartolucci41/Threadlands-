@@ -525,11 +525,11 @@
   "when": "2026-11-14T00:47:44Z"
  },
  "mumbai": {
-  "minutes": 0.0,
-  "query": "osm:R7888990 || Mumbai, India",
+  "minutes": 1.2,
+  "query": "osm:R7888990 || Mumbai Suburban District, Maharashtra, India || Mumbai, India",
   "slug": "mumbai",
-  "status": "failed",
-  "when": "2026-11-14T02:00:48Z"
+  "status": "built with heat",
+  "when": "2026-11-14T02:03:23Z"
  },
  "munich": {
   "minutes": 1.1,
