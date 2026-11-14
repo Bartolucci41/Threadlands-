@@ -91,6 +91,9 @@ write("assets/model.js", read(SRC, "model2.js"))
 FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
          '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
          '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">\n')
+# Cloudflare Web Analytics: private visit counts for Robert, no cookies and no personal data
+ANALYTICS = ("<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' "
+             "data-cf-beacon='{\"token\": \"a92b6704e81e4aaba11a9f8a11832ae1\"}'></script><!-- End Cloudflare Web Analytics -->\n")
 PAGES = [("", "Home"), ("explore/", "Explore"), ("library/", "Library"), ("how-it-works/", "How it works"), ("about/", "About")]
 
 
@@ -99,7 +102,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css">\n</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css">\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
