@@ -466,7 +466,7 @@
           <li><b>Corridors:</b> median land restoration costs from US$185 to $3,012 per hectare depending on method (<a href="https://www.oneearth.org/true-cost-of-global-land-restoration-commitments/" target="_blank" rel="noopener">One Earth, on a study in Land Degradation &amp; Development</a>). Restored forest provides about US$3,000 per hectare per year in temperate regions and US$5,300 in the tropics (de Groot and others, 2013).</li>
           <li><b>Regenerative farming:</b> cover crops cost about US$37 per acre per year (US$90 per hectare) for seed and seeding, and often pay back in two to three years through better soil and lower inputs (<a href="https://www.sare.org/news/when-do-cover-crops-pay-new-usda-sare-report-addresses-the-question-2/" target="_blank" rel="noopener">USDA SARE</a>).</li>
           <li><b>Compact growth</b> is mostly a zoning decision rather than a construction cost. The most sprawling areas of Halifax, Canada, cost the city about three times as much per household each year as the most compact ones (<a href="https://usa.streetsblog.org/2015/03/05/sprawl-costs-the-public-more-than-twice-as-much-as-compact-development" target="_blank" rel="noopener">Halifax Regional Municipality study, summarized by Streetsblog</a>).</li>
-          <li><b>Prices by country:</b> every cost and benefit is scaled by the country&rsquo;s price level compared with the United States, from World Bank data: the <a href="https://data.worldbank.org/indicator/PA.NUS.PPP" target="_blank" rel="noopener">PPP conversion factor</a> divided by the <a href="https://data.worldbank.org/indicator/PA.NUS.FCRF" target="_blank" rel="noopener">official exchange rate</a>. Planting and building costs depend largely on local wages, so this is a fair first adjustment, but imported materials and equipment can cost close to US prices anywhere.</li>
+          <li><b>Prices by country:</b> about 70% of each cost and benefit is scaled by the country&rsquo;s price level compared with the United States, for local labor and services, and about 30% stays at US prices, for materials and equipment traded worldwide. Price levels come from World Bank data: the <a href="https://data.worldbank.org/indicator/PA.NUS.PPP" target="_blank" rel="noopener">PPP conversion factor</a> divided by the <a href="https://data.worldbank.org/indicator/PA.NUS.FCRF" target="_blank" rel="noopener">official exchange rate</a>. Taiwan and Cuba have no World Bank price data, so they are shown at US prices.</li>
           <li>Ecosystem values are averages across many studies and are not cash returns. Benefits and costs are not discounted over time.</li>
         </ul>
       </details>
@@ -1537,9 +1537,10 @@
   function renderCosts() {
     var box = $('#costs');
     if (!box || !P || !res) return;
-    var pl = priceLevel(), F = pl ? pl.factor : 1;
+    // About 70% of these costs are local labor and services, which follow local prices; about 30% are materials and equipment at world prices
+    var pl = priceLevel(), F = pl ? 0.7 * pl.factor + 0.3 : 1;
     var hintTxt = 'What this plan might cost and return across the whole map, city and surrounding land. A first-pass estimate for comparing plans, not a budget.';
-    if (pl && P.place.country_code !== 'US') hintTxt += ' Prices are scaled from US studies to ' + pl.name + '\u2019s price level, about ' + (F >= 0.995 && F <= 1.005 ? 'the same as' : Math.round(F * 100) + '% of') + ' US prices (World Bank, ' + pl.year + '), and shown in US dollars.';
+    if (pl && P.place.country_code !== 'US') hintTxt += ' Prices are adjusted from US studies to ' + pl.name + ', where costs come to about ' + (F >= 0.995 && F <= 1.005 ? 'the same as' : Math.round(F * 100) + '% of') + ' US levels, and shown in US dollars.';
     else if (pl) hintTxt += ' US prices, in US dollars.';
     else hintTxt += ' Shown at US prices in US dollars; costs in many countries are far lower.';
     $('#cost-hint').textContent = hintTxt;
