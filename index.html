@@ -123,6 +123,13 @@
   .sugg .s-sub { font: 400 0.8125rem var(--font-mono); color: var(--ink2); white-space: nowrap; }
   .sugg .s-none { cursor: default; color: var(--ink2); display: block; }
   .sugg .s-none:hover { background: none; }
+  .sugg .s-world { color: var(--accent); font-weight: 600; display: block; }
+  .sugg .s-head { cursor: default; display: block; font: 500 0.68rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); padding: 8px 12px 4px; }
+  .sugg .s-head:hover { background: none; }
+  .req { max-width: 34rem; margin: 0; padding: 14px 16px; border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 10px; background: var(--surface); font-size: 0.9375rem; display: grid; gap: 10px; }
+  .req b { color: var(--ink); }
+  .req p { margin: 0; color: var(--ink2); }
+  .req .row { display: flex; flex-wrap: wrap; gap: 8px; }
   .search-note { margin: 0; font: 400 0.8125rem var(--font-mono); color: var(--ink2); }
   a.btn { text-decoration: none; }
   .byline { margin: 0; font-size: 0.9375rem; color: var(--ink2); }
@@ -360,6 +367,7 @@
         <button class="btn" type="submit">Explore</button>
         <ul class="sugg" id="sugg-hero" role="listbox" hidden></ul>
       </form>
+      <div class="req" id="req-hero" hidden></div>
       <p class="search-note" id="lib-note" hidden></p>
       <div class="hero-cta" id="hero-cta"><a class="btn" href="#explore">Explore the tool</a><a class="btn ghost" href="#cities">See three cities</a></div>
       <p class="byline">Created by <b>Robert Bartolucci</b></p>
@@ -390,6 +398,7 @@
         <input id="q-bar" type="search" placeholder="Search another city" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sugg-bar" aria-autocomplete="list">
         <ul class="sugg" id="sugg-bar" role="listbox" hidden></ul>
       </form>
+      <div class="req" id="req-bar" hidden></div>
       <div class="presets" role="group" aria-label="Example places" id="examples" style="margin-top:0"></div>
       <input class="file-input" type="file" id="file" accept=".json,application/json">
       <label class="btn" for="file">Load a place file</label>
@@ -2314,18 +2323,101 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
       if (scroll) $('#explore').scrollIntoView({ behavior: 'smooth' });
     }).catch(function () { showError('Could not load ' + e.name + '. Check your connection and try again.'); });
   }
-  function wireSearch(formId, inputId, listId, scroll) {
+  var REQUEST_URL = 'https://threadlands-relay.rob41pitt.workers.dev/';   // the relay that asks the robot to build a place; empty until it is set up
+  var KIND_WORDS = { postcode: 'Postal code', city: 'City', town: 'Town', village: 'Village', county: 'County', state: 'State or region',
+    administrative: 'Area', suburb: 'Neighborhood', neighbourhood: 'Neighborhood', quarter: 'Neighborhood', hamlet: 'Village', municipality: 'Municipality', country: 'Country', island: 'Island', region: 'Region' };
+  function worldHit(h) {
+    var a = h.address || {}, parts = String(h.display_name || '').split(',').map(function (t) { return t.trim(); });
+    var name = h.name || parts[0] || 'Place';
+    var area = [a.state || a.region || a.county, a.country].filter(Boolean).filter(function (t) { return t !== name; });
+    var kind = KIND_WORDS[h.addresstype] || KIND_WORDS[h.type] || (h.addresstype || h.type || 'Place').replace(/_/g, ' ');
+    return { name: name, country: a.country || parts[parts.length - 1] || '', title: [name].concat(area).join(', '), kind: kind.charAt(0).toUpperCase() + kind.slice(1),
+      display: h.display_name, osm: (h.osm_type || '').charAt(0).toUpperCase() + h.osm_id, lat: Number(h.lat), lng: Number(h.lon) };
+  }
+  function showRequest(reqId, h) {
+    var box = $(reqId);
+    box.hidden = false;
+    var small = /Postal|Neighborhood|Village/.test(h.kind);
+    box.innerHTML = '<p><b>' + esc(h.title) + '</b> is not in the library yet.</p>' +
+      '<p>' + (small ? 'It will be built with the land around it, so you can see the region it depends on. ' : '') + 'Building a new place takes about 10 to 15 minutes, and then it is saved for everyone.</p>' +
+      '<div class="row">' + (REQUEST_URL ? '<button class="btn" type="button" data-req="go">Build this place</button>' : '<span class="tag" style="margin:0">Building on request is coming soon</span>') +
+      '<button class="btn ghost" type="button" data-req="close">Close</button></div>';
+    box.onclick = function (ev) {
+      var b = ev.target.closest('[data-req]');
+      if (!b) return;
+      if (b.dataset.req === 'close') { box.hidden = true; return; }
+      requestBuild(box, h);
+    };
+  }
+  function requestBuild(box, h) {
+    box.innerHTML = '<p>Sending your request…</p>';
+    fetch(REQUEST_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: h.display, osm: h.osm, name: h.name, country: h.country }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || !j.slug) { box.innerHTML = '<p>' + esc((j && j.error) || 'The request could not be sent. Please try again later.') + '</p>'; return; }
+        waitForPlace(box, h, j.slug, Date.now());
+      }).catch(function () { box.innerHTML = '<p>The request could not be sent. Please try again later.</p>'; });
+  }
+  function waitForPlace(box, h, slug, t0) {
+    var mins = Math.floor((Date.now() - t0) / 60000);
+    box.innerHTML = '<p><b>Building ' + esc(h.title) + '…</b></p><p>' + (mins ? mins + ' min so far. ' : '') + 'This usually takes 10 to 15 minutes. You can keep exploring; it will open here when it is ready.</p>';
+    fetch('data/places/' + slug + '.json', { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw new Error('not yet');
+      return r.json();
+    }).then(function (d) {
+      box.hidden = true;
+      LIB.push({ slug: slug, name: d.name || h.name, country: h.country, display: h.display, query: h.display, pop: 0 });
+      setPlace(d, 'real'); current = slug; markExamples();
+      try { history.replaceState(null, '', '#' + slug); } catch (err) { /* ignore */ }
+      $('#explore').scrollIntoView({ behavior: 'smooth' });
+    }).catch(function () {
+      if (Date.now() - t0 > 45 * 60000) { box.innerHTML = '<p>This is taking longer than expected. Check back later; the place will appear in search once it is built.</p>'; return; }
+      setTimeout(function () { waitForPlace(box, h, slug, t0); }, 30000);
+    });
+  }
+  function wireSearch(formId, inputId, listId, scroll, reqId) {
     var form = $(formId), input = $(inputId), list = $(listId), items = [], active = -1;
     form.hidden = false;
     function close() { list.hidden = true; input.setAttribute('aria-expanded', 'false'); active = -1; }
+    var world = null;   // results from OpenStreetMap for the current text, or 'loading'
     function show() {
       items = libMatches(input.value);
-      if (!input.value.trim()) { close(); return; }
-      list.innerHTML = items.length ? items.map(function (e, k) {
+      var q = input.value.trim();
+      if (!q) { close(); return; }
+      var html = items.map(function (e, k) {
         return '<li role="option" id="' + listId.slice(1) + '-' + k + '" data-slug="' + e.slug + '" aria-selected="' + (k === active ? 'true' : 'false') + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + esc(e.country) + '</span></li>';
-      }).join('') : '<li class="s-none">Not in the library yet. Threadlands has ' + LIB.length + ' places so far, with more added regularly.</li>';
+      }).join('');
+      if (world && world.q === q) {
+        if (world.loading) html += '<li class="s-none">Searching everywhere…</li>';
+        else if (!world.hits.length) html += '<li class="s-none">Nothing was found for “' + esc(q) + '”. Try adding the country or state.</li>';
+        else html += '<li class="s-head">Anywhere on Earth</li>' + world.hits.map(function (h, k) {
+          return '<li role="option" data-world="' + k + '"><span class="s-name">' + esc(h.title) + '</span><span class="s-sub">' + esc(h.kind) + '</span></li>';
+        }).join('');
+      } else {
+        if (!items.length) html += '<li class="s-none">Not in the library yet.</li>';
+        html += '<li role="option" data-worldsearch="1"><span class="s-world">Search everywhere for “' + esc(q) + '”</span></li>';
+      }
+      list.innerHTML = html;
       list.hidden = false; input.setAttribute('aria-expanded', 'true');
       if (active >= 0) input.setAttribute('aria-activedescendant', listId.slice(1) + '-' + active); else input.removeAttribute('aria-activedescendant');
+    }
+    function searchWorld() {
+      var q = input.value.trim();
+      if (!q) return;
+      world = { q: q, loading: true, hits: [] };
+      show();
+      fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&accept-language=en&q=' + encodeURIComponent(q))
+        .then(function (r) { return r.json(); })
+        .then(function (hits) {
+          world = { q: q, loading: false, hits: (hits || []).map(worldHit) };
+          show();
+        }).catch(function () { world = { q: q, loading: false, hits: [] }; show(); });
+    }
+    function chooseWorld(h) {
+      close(); input.blur();
+      var same = LIB.filter(function (e) { return norm(e.display) === norm(h.display) || (norm(e.name) === norm(h.name) && norm(e.country) === norm(h.country)); })[0];
+      if (same) { input.value = ''; openLibrary(same.slug, false, scroll); return; }
+      showRequest(reqId, h);
     }
     function pick(slug) { input.value = ''; close(); input.blur(); openLibrary(slug, false, scroll); }
     input.addEventListener('input', function () { active = -1; show(); });
@@ -2337,17 +2429,26 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
       if (!items.length) items = libMatches(input.value);
-      if (items.length) pick(items[Math.max(0, active)].slug); else show();
+      if (items.length && active >= 0) pick(items[active].slug);
+      else if (items.length && !(world && world.q === input.value.trim())) pick(items[0].slug);
+      else searchWorld();
     });
-    list.addEventListener('mousedown', function (ev) { var li = ev.target.closest('[data-slug]'); if (li) { ev.preventDefault(); pick(li.dataset.slug); } });
+    list.addEventListener('mousedown', function (ev) {
+      var li = ev.target.closest('[data-slug],[data-world],[data-worldsearch]');
+      if (!li) return;
+      ev.preventDefault();
+      if (li.dataset.slug) pick(li.dataset.slug);
+      else if (li.dataset.worldsearch) searchWorld();
+      else chooseWorld(world.hits[Number(li.dataset.world)]);
+    });
     input.addEventListener('blur', function () { setTimeout(close, 120); });
   }
   if (location.protocol.indexOf('http') === 0 && window.fetch) {
     fetch('data/index.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (ix) {
       LIB = (ix.places || []).filter(function (e) { return e && e.slug; });
       if (!LIB.length) return;
-      wireSearch('#search-hero', '#q-hero', '#sugg-hero', true);
-      wireSearch('#search-bar', '#q-bar', '#sugg-bar', false);
+      wireSearch('#search-hero', '#q-hero', '#sugg-hero', true, '#req-hero');
+      wireSearch('#search-bar', '#q-bar', '#sugg-bar', false, '#req-bar');
       var countries = {};
       LIB.forEach(function (e) { countries[e.country] = 1; });
       var note = $('#lib-note');
