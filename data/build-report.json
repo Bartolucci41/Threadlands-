@@ -35,11 +35,11 @@
   "when": "2026-11-14T01:00:01Z"
  },
  "athens": {
-  "minutes": 8.7,
-  "query": "Athens, Greece",
+  "minutes": 1.3,
+  "query": "Municipality of Athens, Greece || Athens, Greece",
   "slug": "athens",
   "status": "built with heat",
-  "when": "2026-11-14T01:12:12Z"
+  "when": "2026-11-14T01:50:39Z"
  },
  "atlanta": {
   "minutes": 1.1,
@@ -140,11 +140,11 @@
   "when": "2026-11-14T01:01:39Z"
  },
  "cape-town": {
-  "minutes": 1.5,
-  "query": "Cape Town, South Africa",
+  "minutes": 1.7,
+  "query": "City of Cape Town, Western Cape, South Africa || Cape Town, South Africa",
   "slug": "cape-town",
   "status": "built with heat",
-  "when": "2026-11-14T01:07:33Z"
+  "when": "2026-11-14T01:54:13Z"
  },
  "casablanca": {
   "minutes": 3.4,
@@ -175,11 +175,11 @@
   "when": "2026-11-14T01:10:14Z"
  },
  "copenhagen": {
-  "minutes": 1.7,
-  "query": "Copenhagen, Denmark",
+  "minutes": 1.5,
+  "query": "Copenhagen Municipality, Capital Region of Denmark, Denmark || Copenhagen, Denmark",
   "slug": "copenhagen",
   "status": "built with heat",
-  "when": "2026-11-14T00:51:52Z"
+  "when": "2026-11-14T01:49:21Z"
  },
  "curitiba": {
   "minutes": 8.7,
@@ -329,11 +329,11 @@
   "when": "2026-11-14T01:19:49Z"
  },
  "johannesburg": {
-  "minutes": 4.1,
-  "query": "Johannesburg, South Africa",
+  "minutes": 1.8,
+  "query": "City of Johannesburg Metropolitan Municipality, South Africa || Johannesburg, South Africa",
   "slug": "johannesburg",
   "status": "built with heat",
-  "when": "2026-11-14T01:06:01Z"
+  "when": "2026-11-14T01:52:30Z"
  },
  "kampala": {
   "minutes": 3.7,
@@ -525,11 +525,11 @@
   "when": "2026-11-14T00:47:44Z"
  },
  "mumbai": {
-  "minutes": 1.1,
-  "query": "Mumbai, India",
+  "minutes": 1.6,
+  "query": "Mumbai City, Maharashtra, India || Greater Mumbai, Maharashtra, India || Mumbai, India",
   "slug": "mumbai",
   "status": "built with heat",
-  "when": "2026-11-14T01:11:45Z"
+  "when": "2026-11-14T01:55:49Z"
  },
  "munich": {
   "minutes": 1.1,
@@ -581,11 +581,11 @@
   "when": "2026-11-14T00:58:02Z"
  },
  "panama-city": {
-  "minutes": 1.5,
-  "query": "Panama City, Panama",
+  "minutes": 1.3,
+  "query": "Panama District, Panama Province, Panama || Panama City, Panama",
   "slug": "panama-city",
   "status": "built with heat",
-  "when": "2026-11-14T00:48:04Z"
+  "when": "2026-11-14T01:47:47Z"
  },
  "paris": {
   "minutes": 1.9,
@@ -595,11 +595,11 @@
   "when": "2026-11-14T00:55:38Z"
  },
  "perth": {
-  "minutes": 5.0,
-  "query": "Perth, Western Australia, Australia",
+  "minutes": 1.7,
+  "query": "City of Perth, Western Australia, Australia || Perth, Western Australia, Australia",
   "slug": "perth",
   "status": "built with heat",
-  "when": "2026-11-14T01:19:45Z"
+  "when": "2026-11-14T01:48:08Z"
  },
  "phoenix": {
   "minutes": 2.2,
