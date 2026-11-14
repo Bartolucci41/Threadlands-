@@ -103,6 +103,27 @@
   .u-forest { text-decoration-color: var(--m-forest); }
   .hero-sub { margin: 0; max-width: 34rem; font-size: 1.1875rem; line-height: 1.5; color: var(--ink2); }
   .hero-cta { display: flex; flex-wrap: wrap; gap: 10px; }
+  .search { position: relative; display: flex; gap: 8px; max-width: 34rem; width: 100%; }
+  .search input {
+    flex: 1; min-width: 0; min-height: 50px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--ink);
+    background: var(--surface); color: var(--ink); font: 500 1.0625rem var(--font-body);
+  }
+  .search input:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .search .btn { min-height: 50px; }
+  .search.compact { max-width: 22rem; }
+  .search.compact input, .search.compact .btn { min-height: 42px; font-size: 0.9375rem; }
+  .sugg {
+    position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 30; margin: 0; padding: 6px; list-style: none;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.14);
+    max-height: 340px; overflow-y: auto;
+  }
+  .sugg li { padding: 10px 12px; border-radius: 9px; cursor: pointer; display: flex; justify-content: space-between; gap: 12px; }
+  .sugg li[aria-selected="true"], .sugg li:hover { background: var(--surface2); }
+  .sugg .s-name { font-weight: 600; color: var(--ink); }
+  .sugg .s-sub { font: 400 0.8125rem var(--font-mono); color: var(--ink2); white-space: nowrap; }
+  .sugg .s-none { cursor: default; color: var(--ink2); display: block; }
+  .sugg .s-none:hover { background: none; }
+  .search-note { margin: 0; font: 400 0.8125rem var(--font-mono); color: var(--ink2); }
   a.btn { text-decoration: none; }
   .byline { margin: 0; font-size: 0.9375rem; color: var(--ink2); }
   .byline b { color: var(--ink); font-weight: 600; }
@@ -333,7 +354,14 @@
       <p class="eyebrow">A planning support system for city-regions</p>
       <h1 class="hero-h">Every city lives on <span class="u u-river">water</span>, <span class="u u-farm">farms</span> and <span class="u u-forest">wild places</span>.</h1>
       <p class="hero-sub">Threadlands helps planners, community groups and students plan a city together with the land that sustains it. Map how heat, flooding, food and wildlife connect across a region, test plans against the climate of 2050, and see where to act first.</p>
-      <div class="hero-cta"><a class="btn" href="#explore">Explore the tool</a><a class="btn ghost" href="#cities">See three cities</a></div>
+      <form class="search" id="search-hero" role="search" hidden>
+        <label class="sr-only" for="q-hero">Search for a city</label>
+        <input id="q-hero" type="search" placeholder="Type a city, like Lagos or Lisbon" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sugg-hero" aria-autocomplete="list">
+        <button class="btn" type="submit">Explore</button>
+        <ul class="sugg" id="sugg-hero" role="listbox" hidden></ul>
+      </form>
+      <p class="search-note" id="lib-note" hidden></p>
+      <div class="hero-cta" id="hero-cta"><a class="btn" href="#explore">Explore the tool</a><a class="btn ghost" href="#cities">See three cities</a></div>
       <p class="byline">Created by <b>Robert Bartolucci</b></p>
     </div>
     <figure class="hero-fig" id="hero-fig" hidden>
@@ -357,6 +385,11 @@
       <span class="place-meta" id="place-meta"></span>
     </div>
     <div class="place-actions">
+      <form class="search compact" id="search-bar" role="search" hidden>
+        <label class="sr-only" for="q-bar">Search for another city</label>
+        <input id="q-bar" type="search" placeholder="Search another city" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sugg-bar" aria-autocomplete="list">
+        <ul class="sugg" id="sugg-bar" role="listbox" hidden></ul>
+      </form>
       <div class="presets" role="group" aria-label="Example places" id="examples" style="margin-top:0"></div>
       <input class="file-input" type="file" id="file" accept=".json,application/json">
       <label class="btn" for="file">Load a place file</label>
@@ -2008,6 +2041,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
   window.addEventListener('hashchange', function () {
     var h = location.hash.replace('#', '');
     if (h && h !== current && EXAMPLES.some(function (x) { return x.id === h; })) openExample(h, true);
+    else if (h && h !== current && libEntry(h)) openLibrary(h, true);
   });
   var mw = $('#mapwrap'), dragDepth = 0;
   mw.addEventListener('dragenter', function (e) { e.preventDefault(); dragDepth++; mw.classList.add('dragging'); });
@@ -2250,6 +2284,80 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
   window.addEventListener('resize', drawOpening);
   new MutationObserver(drawOpening).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   if (window.matchMedia) { var mq3 = window.matchMedia('(prefers-color-scheme: dark)'); if (mq3.addEventListener) mq3.addEventListener('change', drawOpening); }
+
+  // ---- City library and search: only where the site is served with its data folder (threadlands.org)
+  var LIB = null;
+  function norm(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+  function libEntry(slug) { return LIB ? LIB.filter(function (e) { return e.slug === slug; })[0] : null; }
+  function libMatches(q) {
+    var n = norm(q);
+    if (!n || !LIB) return [];
+    var starts = [], inside = [];
+    LIB.forEach(function (e) {
+      var nm = norm(e.name), all = norm(e.name + ' ' + e.query + ' ' + e.display);
+      if (nm.indexOf(n) === 0 || norm(e.slug.replace(/-/g, ' ')).indexOf(n) === 0) starts.push(e);
+      else if (all.indexOf(n) >= 0) inside.push(e);
+    });
+    return starts.concat(inside).slice(0, 8);
+  }
+  function openLibrary(slug, fromHash, scroll) {
+    if (EXAMPLES.some(function (x) { return x.id === slug; })) { openExample(slug, fromHash); if (scroll) $('#explore').scrollIntoView({ behavior: 'smooth' }); return; }
+    var e = libEntry(slug);
+    if (!e) return;
+    showError('Loading ' + e.name + '…');
+    fetch('data/places/' + slug + '.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
+      clearError();
+      setPlace(d, 'real');
+      current = slug;
+      markExamples();
+      if (!fromHash) { try { history.replaceState(null, '', '#' + slug); } catch (err) { /* ignore */ } }
+      if (scroll) $('#explore').scrollIntoView({ behavior: 'smooth' });
+    }).catch(function () { showError('Could not load ' + e.name + '. Check your connection and try again.'); });
+  }
+  function wireSearch(formId, inputId, listId, scroll) {
+    var form = $(formId), input = $(inputId), list = $(listId), items = [], active = -1;
+    form.hidden = false;
+    function close() { list.hidden = true; input.setAttribute('aria-expanded', 'false'); active = -1; }
+    function show() {
+      items = libMatches(input.value);
+      if (!input.value.trim()) { close(); return; }
+      list.innerHTML = items.length ? items.map(function (e, k) {
+        return '<li role="option" id="' + listId.slice(1) + '-' + k + '" data-slug="' + e.slug + '" aria-selected="' + (k === active ? 'true' : 'false') + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + esc(e.country) + '</span></li>';
+      }).join('') : '<li class="s-none">Not in the library yet. Threadlands has ' + LIB.length + ' places so far, with more added regularly.</li>';
+      list.hidden = false; input.setAttribute('aria-expanded', 'true');
+      if (active >= 0) input.setAttribute('aria-activedescendant', listId.slice(1) + '-' + active); else input.removeAttribute('aria-activedescendant');
+    }
+    function pick(slug) { input.value = ''; close(); input.blur(); openLibrary(slug, false, scroll); }
+    input.addEventListener('input', function () { active = -1; show(); });
+    input.addEventListener('keydown', function (ev) {
+      if (ev.key === 'ArrowDown' && items.length) { active = Math.min(items.length - 1, active + 1); show(); ev.preventDefault(); }
+      else if (ev.key === 'ArrowUp' && items.length) { active = Math.max(0, active - 1); show(); ev.preventDefault(); }
+      else if (ev.key === 'Escape') close();
+    });
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      if (!items.length) items = libMatches(input.value);
+      if (items.length) pick(items[Math.max(0, active)].slug); else show();
+    });
+    list.addEventListener('mousedown', function (ev) { var li = ev.target.closest('[data-slug]'); if (li) { ev.preventDefault(); pick(li.dataset.slug); } });
+    input.addEventListener('blur', function () { setTimeout(close, 120); });
+  }
+  if (location.protocol.indexOf('http') === 0 && window.fetch) {
+    fetch('data/index.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (ix) {
+      LIB = (ix.places || []).filter(function (e) { return e && e.slug; });
+      if (!LIB.length) return;
+      wireSearch('#search-hero', '#q-hero', '#sugg-hero', true);
+      wireSearch('#search-bar', '#q-bar', '#sugg-bar', false);
+      var countries = {};
+      LIB.forEach(function (e) { countries[e.country] = 1; });
+      var note = $('#lib-note');
+      note.textContent = LIB.length + ' cities in ' + Object.keys(countries).length + ' countries so far, built from open global data.';
+      note.hidden = false;
+      $('#hero-cta').hidden = true;
+      var h = location.hash.replace('#', '');
+      if (h && h !== current && libEntry(h)) openLibrary(h, true);
+    }).catch(function () { /* no library here: the page still works with its built-in cities */ });
+  }
 
   var startHash = location.hash.replace('#', '');
   openExample(EXAMPLES.some(function (x) { return x.id === startHash; }) ? startHash : 'milan', true);
