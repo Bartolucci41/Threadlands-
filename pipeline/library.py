@@ -98,7 +98,7 @@ def summary(path, slug):
         "slug": slug, "name": d.get("name") or slug, "country": disp.split(",")[-1].strip(),
         "display": disp, "lat": round(lat, 4), "lng": round(lng, 4),
         "pop": int(sum(c["pop"])), "hexes": n, "heat": "lst_rel" in c,
-        "regional": bool(reg), "generated": d.get("generated"),
+        "regional": bool(reg), "generated": d.get("generated"), "cc": d.get("country_code"),
         "kb": round(os.path.getsize(path) / 1024),
     }
 
@@ -120,6 +120,12 @@ def publish():
             print("skipping bad file", f, e)
             continue
         shutil.copyfile(f, os.path.join(PLACES, os.path.basename(f)))
+    try:
+        sys.path.insert(0, os.path.join(ROOT, "pipeline"))
+        import refdata
+        refdata.tag_places()
+    except Exception as e:
+        print("could not tag country codes:", e)
     names = dict(cities("requested.txt"))
     names.update(dict(cities()))
     # Library places show the familiar name from cities.txt ("Lagos", not "Lagos State")

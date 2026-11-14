@@ -46,6 +46,7 @@ jobs:
           path: out/
           if-no-files-found: ignore
           retention-days: 7
+      - run: pip install pycountry
       - run: python3 pipeline/library.py publish
       - name: Commit the new place
         run: |

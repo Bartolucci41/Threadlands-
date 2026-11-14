@@ -115,7 +115,7 @@
       <div id="tests"></div>
 
       <h2>Rough costs and benefits</h2>
-      <p class="hint">What this plan might cost and return across the whole map, city and surrounding land, at US prices. Costs in many countries are far lower. A first-pass estimate for comparing plans, not a budget.</p>
+      <p class="hint" id="cost-hint">What this plan might cost and return across the whole map, city and surrounding land, at US prices. A first-pass estimate for comparing plans, not a budget.</p>
       <div class="tablewrap"><table class="costs" id="costs"></table></div>
       <details class="cost-src"><summary>Sources and assumptions</summary>
         <ul>
@@ -124,6 +124,7 @@
           <li><b>Corridors:</b> median land restoration costs from US$185 to $3,012 per hectare depending on method (<a href="https://www.oneearth.org/true-cost-of-global-land-restoration-commitments/" target="_blank" rel="noopener">One Earth, on a study in Land Degradation &amp; Development</a>). Restored forest provides about US$3,000 per hectare per year in temperate regions and US$5,300 in the tropics (de Groot and others, 2013).</li>
           <li><b>Regenerative farming:</b> cover crops cost about US$37 per acre per year (US$90 per hectare) for seed and seeding, and often pay back in two to three years through better soil and lower inputs (<a href="https://www.sare.org/news/when-do-cover-crops-pay-new-usda-sare-report-addresses-the-question-2/" target="_blank" rel="noopener">USDA SARE</a>).</li>
           <li><b>Compact growth</b> is mostly a zoning decision rather than a construction cost. The most sprawling areas of Halifax, Canada, cost the city about three times as much per household each year as the most compact ones (<a href="https://usa.streetsblog.org/2015/03/05/sprawl-costs-the-public-more-than-twice-as-much-as-compact-development" target="_blank" rel="noopener">Halifax Regional Municipality study, summarized by Streetsblog</a>).</li>
+          <li><b>Prices by country:</b> every cost and benefit is scaled by the country&rsquo;s price level compared with the United States, from the World Bank&rsquo;s <a href="https://data.worldbank.org/indicator/PA.NUS.PPPC.RF" target="_blank" rel="noopener">price level ratio</a> (PA.NUS.PPPC.RF). Planting and building costs depend largely on local wages, so this is a fair first adjustment, but imported materials and equipment can cost close to US prices anywhere.</li>
           <li>Ecosystem values are averages across many studies and are not cash returns. Benefits and costs are not discounted over time.</li>
         </ul>
       </details>
@@ -1882,9 +1883,24 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
   }
   function range(lo, hi) { return lo === hi ? money(lo) : money(lo) + ' to ' + money(hi).replace('$', ''); }
   function num(v) { return Math.round(v).toLocaleString('en-US'); }
+  var PRICES = null;
+  if (location.protocol.indexOf('http') === 0 && window.fetch) {
+    fetch(BASE + 'data/price-levels.json').then(function (r) { return r.json(); }).then(function (d) { PRICES = d.countries || null; if (P && res) renderCosts(); })
+      .catch(function () { /* US prices */ });
+  }
+  function priceLevel() {
+    var cc = P && P.place.country_code, x = cc && PRICES && PRICES[cc];
+    return x && x.factor > 0 ? x : null;
+  }
   function renderCosts() {
     var box = $('#costs');
     if (!box || !P || !res) return;
+    var pl = priceLevel(), F = pl ? pl.factor : 1;
+    var hintTxt = 'What this plan might cost and return across the whole map, city and surrounding land. A first-pass estimate for comparing plans, not a budget.';
+    if (pl && P.place.country_code !== 'US') hintTxt += ' Prices are scaled from US studies to ' + pl.name + '\u2019s price level, about ' + (F >= 0.995 && F <= 1.005 ? 'the same as' : Math.round(F * 100) + '% of') + ' US prices (World Bank, ' + pl.year + '), and shown in US dollars.';
+    else if (pl) hintTxt += ' US prices, in US dollars.';
+    else hintTxt += ' Shown at US prices in US dollars; costs in many countries are far lower.';
+    $('#cost-hint').textContent = hintTxt;
     var c = P.place.cells, base = P.BAU_TODAY.cover, cov = res.cover;
     var wetHa = 0, corHa = 0, regHa = 0, sprHa = 0, sprPop = 0, builtKm2 = 0, lat = 0, n = 0;
     for (var i = 0; i < P.N; i++) {
@@ -1900,21 +1916,21 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     var cv = 1 - Math.pow(1 - Math.min(100, state.canopy) / 100, 1.8), trees = cv * builtKm2 * 850;
     var rows = [], once = [0, 0], yearCost = [0, 0], yearBen = [0, 0];
     if (trees >= 1) {
-      rows.push(['Street trees', num(trees) + ' trees', range(trees * 1400, trees * 2700), range(trees * 13, trees * 65), range(trees * 31, trees * 89)]);
-      once[0] += trees * 1400; once[1] += trees * 2700; yearCost[0] += trees * 13; yearCost[1] += trees * 65; yearBen[0] += trees * 31; yearBen[1] += trees * 89;
+      rows.push(['Street trees', num(trees) + ' trees', range(trees * 1400 * F, trees * 2700 * F), range(trees * 13 * F, trees * 65 * F), range(trees * 31 * F, trees * 89 * F)]);
+      once[0] += trees * 1400 * F; once[1] += trees * 2700 * F; yearCost[0] += trees * 13 * F; yearCost[1] += trees * 65 * F; yearBen[0] += trees * 31 * F; yearBen[1] += trees * 89 * F;
     }
     if (wetHa > 0) {
-      rows.push(['Wetlands', num(wetHa) + ' ha', range(wetHa * 47000, wetHa * 57000), '—', 'about ' + money(wetHa * 25700) + ' in services']);
-      once[0] += wetHa * 47000; once[1] += wetHa * 57000; yearBen[0] += wetHa * 25700; yearBen[1] += wetHa * 25700;
+      rows.push(['Wetlands', num(wetHa) + ' ha', range(wetHa * 47000 * F, wetHa * 57000 * F), '—', 'about ' + money(wetHa * 25700 * F) + ' in services']);
+      once[0] += wetHa * 47000 * F; once[1] += wetHa * 57000 * F; yearBen[0] += wetHa * 25700 * F; yearBen[1] += wetHa * 25700 * F;
     }
     if (corHa > 0) {
-      var cb = tropical ? 5300 : 3000;
-      rows.push(['Corridors', num(corHa) + ' ha', range(corHa * 185, corHa * 3012), '—', 'about ' + money(corHa * cb) + ' in services']);
-      once[0] += corHa * 185; once[1] += corHa * 3012; yearBen[0] += corHa * cb; yearBen[1] += corHa * cb;
+      var cb = (tropical ? 5300 : 3000) * F;
+      rows.push(['Corridors', num(corHa) + ' ha', range(corHa * 185 * F, corHa * 3012 * F), '—', 'about ' + money(corHa * cb) + ' in services']);
+      once[0] += corHa * 185 * F; once[1] += corHa * 3012 * F; yearBen[0] += corHa * cb; yearBen[1] += corHa * cb;
     }
     if (regHa > 0) {
-      rows.push(['Regenerative farming', num(regHa) + ' ha', '—', money(regHa * 90), 'often pays back in 2 to 3 years']);
-      yearCost[0] += regHa * 90; yearCost[1] += regHa * 90;
+      rows.push(['Regenerative farming', num(regHa) + ' ha', '—', money(regHa * 90 * F), 'often pays back in 2 to 3 years']);
+      yearCost[0] += regHa * 90 * F; yearCost[1] += regHa * 90 * F;
     }
     if (sprHa > 0) rows.push(['Compact growth', num(sprHa) + ' ha of sprawl', 'mostly a zoning change', '—', num(sprPop) + ' people in neighborhoods that cost the city less to serve']);
     if (!rows.length) { box.innerHTML = '<tbody><tr><td class="msub">Drag a lever or choose a preset to see what the plan might cost.</td></tr></tbody>'; return; }
