@@ -23,6 +23,8 @@ jobs:
       chunks: ${{ steps.plan.outputs.chunks }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - id: plan
         run: python3 pipeline/library.py plan 6 >> "$GITHUB_OUTPUT"
 
@@ -38,6 +40,8 @@ jobs:
         chunk: ${{ fromJson(needs.plan.outputs.chunks) }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -63,6 +67,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/download-artifact@v4
         with:
           pattern: places-*

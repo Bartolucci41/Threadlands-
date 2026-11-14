@@ -120,6 +120,17 @@ def publish():
         shutil.copyfile(f, os.path.join(PLACES, os.path.basename(f)))
     names = dict(cities("requested.txt"))
     names.update(dict(cities()))
+    # Library places show the familiar name from cities.txt ("Lagos", not "Lagos State")
+    for slug, query in cities():
+        f = os.path.join(PLACES, slug + ".json")
+        label = query.split(",")[0].strip()
+        if not os.path.exists(f) or not label:
+            continue
+        d = json.load(open(f))
+        if d.get("name") != label:
+            d.setdefault("osm_name", d.get("name"))
+            d["name"] = label
+            json.dump(d, open(f, "w"), separators=(",", ":"))
     index = []
     for f in sorted(glob.glob(os.path.join(PLACES, "*.json"))):
         slug = os.path.basename(f)[:-5]
