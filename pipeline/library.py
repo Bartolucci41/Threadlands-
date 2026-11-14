@@ -45,8 +45,10 @@ def build(slugs, q=None):
         status = "failed"
         try:
             with open(log, "w") as lf:
-                r = subprocess.run([sys.executable, script, q[slug], dest], cwd=CACHE, stdout=lf, stderr=subprocess.STDOUT,
+                lf.write(f"query: {q[slug]}\n"); lf.flush()
+                r = subprocess.run([sys.executable, "-u", script, q[slug], dest], cwd=CACHE, stdout=lf, stderr=subprocess.STDOUT,
                                    timeout=60 * 60)
+                lf.write(f"\nexit code: {r.returncode}\n")
             text = open(log).read()
             if os.path.exists(dest):
                 status = "built with heat" if "HEAT_OK" in text else "built without heat"
