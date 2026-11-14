@@ -1,0 +1,11 @@
+# The city library: one place per line, as "slug | search text".
+# Add a line and push, and the robot builds that place. Places already in data/places are skipped.
+milan | Milan, Italy
+san-francisco | San Francisco, California, USA
+bangkok | Bangkok, Thailand
+new-york | New York City, New York, USA
+mexico-city | Mexico City, Mexico
+london | London, United Kingdom
+lagos | Lagos, Nigeria
+mumbai | Mumbai, India
+sydney | Sydney, New South Wales, Australia
