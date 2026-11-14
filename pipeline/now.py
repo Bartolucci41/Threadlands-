@@ -158,7 +158,8 @@ def build_one(slug, cat):
         "land_anom": med(land_ok), "built_anom": med(land_ok & built), "land_now": round(float(np.nanmedian(now[land_ok])), 1),
         "clear_share": round(float(land_ok.sum()) / land_n, 2),
         # Thin cloud, fog or haze that slips past the cloud mask reads as cold ground, so flag readings that look off
-        "uncertain": bool(med(land_ok) is None or abs(med(land_ok)) > 10 or float(land_ok.sum()) / land_n < 0.5 or len(used) < 4),
+        "uncertain": bool(med(land_ok) is None or abs(med(land_ok)) > 10 or abs(med(land_ok & built) or 0) > 10
+                          or float(land_ok.sum()) / land_n < 0.5 or len(used) < 4),
         "cells": {"now": rnd(now, 1), "anom": rnd(anom, 1)},
         "source": "Landsat 8-9 Collection 2 surface temperature (USGS/NASA), via Microsoft Planetary Computer",
     }
@@ -193,6 +194,16 @@ def publish():
             old = json.load(open(dest))
             old["last_check"] = {"checked": r.get("checked"), "status": r.get("status")}
             json.dump(old, open(dest, "w"), separators=(",", ":"))
+    # Re-check every saved reading with the current rules
+    for f in glob.glob(os.path.join(NOW, "*.json")):
+        if f.endswith("index.json"):
+            continue
+        r = json.load(open(f))
+        if r.get("status") == "ok":
+            big = any(v is not None and abs(v) > 10 for v in (r.get("land_anom"), r.get("built_anom")))
+            if big and not r.get("uncertain"):
+                r["uncertain"] = True
+                json.dump(r, open(f, "w"), separators=(",", ":"))
     names = {e["slug"]: e for e in json.load(open(os.path.join(ROOT, "data", "index.json")))["places"]}
     rows = []
     for f in sorted(glob.glob(os.path.join(NOW, "*.json"))):
