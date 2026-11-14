@@ -175,6 +175,13 @@
   .gl .gl-k { font: 500 0.68rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); }
   .gl .gl-v { font: 700 1.5rem/1.1 var(--font-body); color: var(--ink); }
   .gl .gl-t { font-size: 0.875rem; color: var(--ink2); text-wrap: pretty; }
+  table.costs td, table.costs th { font-size: 0.8125rem; vertical-align: top; }
+  table.costs td:first-child { font-weight: 600; white-space: nowrap; }
+  table.costs .cost-total td { font-weight: 700; border-top: 2px solid var(--ink); }
+  .cost-src { margin: 8px 0 0; font-size: 0.8125rem; color: var(--ink2); }
+  .cost-src summary { cursor: pointer; color: var(--ink); font-weight: 600; min-height: 32px; display: flex; align-items: center; }
+  .cost-src ul { margin: 6px 0 0; padding-left: 1.1em; display: grid; gap: 6px; }
+  .cost-src a { color: var(--accent); }
   .alert { margin: -8px 0 18px; padding: 10px 14px; border-left: 3px solid var(--neg); background: var(--surface); color: var(--ink); font-size: 0.9375rem; }
 
   /* Lab */
