@@ -2,6 +2,7 @@
 <!-- description: Threadlands helps planners and communities plan a city together with the land that sustains it, for any place on Earth. -->
 
 <main class="wrap">
+<script src="{B}assets/model.js"></script>
   <div class="hero2">
     <div class="hero-copy">
       <div class="defn" role="note" aria-label="Definition of Threadlands">
@@ -22,9 +23,30 @@
       <p class="search-note" id="lib-note">Any city, town, county or postal code on Earth.</p>
       <p class="byline">Created by <b>Robert Bartolucci</b></p>
     </div>
-    <figure class="hero-fig">
-      <img src="{B}assets/hero-bangkok.webp" width="563" height="666" alt="Regional map of the river basin that drains through Bangkok, outlined in blue, with the city marked at its mouth.">
-      <figcaption>Rain on 144,310 km&sup2; of land, outlined in blue, drains through Bangkok at its mouth.</figcaption>
+    <figure class="live" id="live" aria-labelledby="live-cap">
+      <div class="live-top">
+        <div class="live-cities" role="group" aria-label="City">
+          <button type="button" class="chip" data-city="milan" aria-pressed="true">Milan</button>
+          <button type="button" class="chip" data-city="mexico-city" aria-pressed="false">Mexico City</button>
+          <button type="button" class="chip" data-city="lagos" aria-pressed="false">Lagos</button>
+          <button type="button" class="chip" data-city="bangkok" aria-pressed="false">Bangkok</button>
+        </div>
+        <div class="live-layers" role="group" aria-label="Map layer">
+          <button type="button" class="chip" data-show="land" aria-pressed="true">Land</button>
+          <button type="button" class="chip" data-show="heat" aria-pressed="false">Heat</button>
+          <button type="button" class="chip" data-show="flood" aria-pressed="false">Flooding</button>
+        </div>
+      </div>
+      <div class="live-map" id="live-map">
+        <canvas id="live-canvas" role="img" aria-label="Hex map of the city and the land around it"></canvas>
+        <div class="live-badge"><span class="eyebrow">Resilience index</span><span class="live-score" id="live-score">&ndash;</span><span class="live-delta" id="live-delta"></span></div>
+        <p class="live-loading" id="live-loading">Loading the map&hellip;</p>
+      </div>
+      <div class="live-ctl">
+        <label for="live-range"><b>Pull the threads.</b> <span id="live-what">Drag to plant street trees, restore wetlands, link habitat, farm for living soil and grow compactly.</span></label>
+        <input type="range" id="live-range" min="0" max="100" step="1" value="0">
+      </div>
+      <figcaption id="live-cap"><span id="live-msg">Each hex is about half a square kilometer of real land, from satellite data.</span> <a href="{B}explore/#milan" id="live-open">Open Milan in the full tool &rarr;</a></figcaption>
     </figure>
   </div>
 
@@ -126,6 +148,93 @@
     if (li.dataset.slug) goSlug(li.dataset.slug); else goWorld();
   });
   input.addEventListener('blur', function () { setTimeout(close, 120); });
+
+  // ---- Live map: a real city and its region, with one slider that pulls every thread at once
+  var LIVE = { slug: 'milan', show: 'land', P: null, res: null, cache: {} };
+  var BAL = { canopy: 40, corridors: 60, wetlands: 40, regen: 60, compact: 40 };
+  var cv = $('#live-canvas'), ctx = cv.getContext('2d');
+  function css(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function rgb(h) { h = h.replace('#', ''); var n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  function mixc(a, b, t) { return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ',' + Math.round(a[1] + (b[1] - a[1]) * t) + ',' + Math.round(a[2] + (b[2] - a[2]) * t) + ')'; }
+  function ramp(st, t) { t = Math.max(0, Math.min(1, t)); return t < 0.5 ? mixc(st[0], st[1], t * 2) : mixc(st[1], st[2], (t - 0.5) * 2); }
+  var URB = { core: 1, mid: 1, suburb: 1, greenway: 1 };
+  function levers(t) { var L = {}; for (var k in BAL) L[k] = Math.round(BAL[k] * t); return L; }
+  function draw() {
+    var P = LIVE.P, res = LIVE.res;
+    if (!P || !res) return;
+    var W = cv.parentNode.clientWidth;
+    if (!W) return;
+    var minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+    P.POLY.forEach(function (p) { for (var j = 0; j + 1 < p.length; j += 2) { minx = Math.min(minx, p[j]); maxx = Math.max(maxx, p[j]); miny = Math.min(miny, p[j + 1]); maxy = Math.max(maxy, p[j + 1]); } });
+    var H = Math.round(Math.min(W * 1.05, Math.max(320, window.innerHeight * 0.62)));
+    var S = Math.min((W - 16) / (maxx - minx), (H - 16) / (maxy - miny)), OX = (W - (maxx - minx) * S) / 2 - minx * S, OY = (H - (maxy - miny) * S) / 2 - miny * S;
+    var dpr = window.devicePixelRatio || 1;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    var C = { core: css('--m-core'), mid: css('--m-mid'), suburb: css('--m-sub'), farm: css('--m-farm'), regen: css('--m-regen'), forest: css('--m-forest'),
+      wetland: css('--m-wet'), water: css('--m-water'), park: css('--m-park'), open: css('--m-open'), barren: css('--m-barren'), corridor: css('--m-corr'),
+      canopy: css('--m-canopy'), dim: css('--m-dim'), surface: css('--surface'), f0: css('--f0') };
+    var heat = [css('--h0'), css('--h1'), css('--h2')].map(rgb), flood = [css('--f0'), css('--f1'), css('--f2')].map(rgb);
+    var t = Number($('#live-range').value) / 100, canopy = 1 - Math.pow(1 - BAL.canopy * t / 100, 1.8), keep = 1 - res.retention;
+    for (var i = 0; i < P.N; i++) {
+      var p = P.POLY[i];
+      if (!p || p.length < 6) continue;
+      var cov = res.cover[i], fill = C[cov] || C.open, alpha = 1;
+      if (cov === 'greenway') fill = C.corridor;
+      if (LIVE.show === 'heat') { if (URB[cov]) fill = ramp(heat, res.heat[i] / 1.4); else if (cov === 'water') { fill = C.water; alpha = 0.5; } else { fill = C.dim; alpha = 0.55; } }
+      else if (LIVE.show === 'flood') {
+        if (URB[cov]) { if (res.floodExp[i] > 0) fill = ramp(flood, Math.sqrt(res.floodExp[i] * keep / P.maxFloodExp)); else { fill = C.dim; alpha = 0.45; } }
+        else if (cov !== 'wetland' && cov !== 'water') { fill = C.dim; alpha = 0.45; }
+      }
+      ctx.beginPath();
+      for (var j = 0; j + 1 < p.length; j += 2) { var x = p[j] * S + OX, y = p[j + 1] * S + OY; if (j) ctx.lineTo(x, y); else ctx.moveTo(x, y); }
+      ctx.closePath();
+      ctx.globalAlpha = alpha; ctx.fillStyle = fill; ctx.fill();
+      if (LIVE.show === 'land' && canopy > 0 && URB[cov]) { ctx.globalAlpha = 0.6 * canopy; ctx.fillStyle = C.canopy; ctx.fill(); }
+      if (!P.inside[i]) { ctx.globalAlpha = 0.38; ctx.fillStyle = C.surface; ctx.fill(); }
+    }
+    ctx.globalAlpha = 1;
+  }
+  function update() {
+    var P = LIVE.P;
+    if (!P) return;
+    var t = Number($('#live-range').value) / 100;
+    LIVE.res = P.evaluate(levers(t));
+    var now = Math.round(LIVE.res.index), base = Math.round(P.BAU.index), d = now - base;
+    $('#live-score').textContent = now;
+    $('#live-delta').textContent = d ? (d > 0 ? '+' : '−') + Math.abs(d) : '';
+    var name = P.place.name || 'this city';
+    $('#live-msg').textContent = t === 0 ? name + ' as it is today, with the land around it faded. Drag the slider to change it.'
+      : (LIVE.show === 'heat' ? 'Street trees and cool neighbors pull heat out of ' + name + '’s busiest blocks.'
+        : LIVE.show === 'flood' ? 'Restored wetlands upstream soak up water before it reaches homes.'
+        : 'New wetlands, corridors and living farmland reconnect ' + name + ' with its wild land.') + ' Index ' + base + ' → ' + now + '.';
+    draw();
+  }
+  function load(slug) {
+    LIVE.slug = slug;
+    document.querySelectorAll('[data-city]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.city === slug ? 'true' : 'false'); });
+    var name = { 'milan': 'Milan', 'mexico-city': 'Mexico City', 'lagos': 'Lagos', 'bangkok': 'Bangkok' }[slug] || slug;
+    $('#live-open').href = '{B}explore/#' + slug; $('#live-open').textContent = 'Open ' + name + ' in the full tool →';
+    if (LIVE.cache[slug]) { LIVE.P = LIVE.cache[slug]; update(); return; }
+    $('#live-loading').hidden = false;
+    fetch('{B}data/places/' + slug + '.json').then(function (r) { return r.json(); }).then(function (d) {
+      var P = ThreadModel.prepare(d);
+      LIVE.cache[slug] = P;
+      if (LIVE.slug !== slug) return;
+      LIVE.P = P; $('#live-loading').hidden = true; update();
+    }).catch(function () { $('#live-loading').textContent = 'The map could not be loaded.'; });
+  }
+  $('#live-range').addEventListener('input', update);
+  document.querySelector('.live-cities').addEventListener('click', function (e) { var b = e.target.closest('[data-city]'); if (b && b.dataset.city !== LIVE.slug) load(b.dataset.city); });
+  document.querySelector('.live-layers').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-show]'); if (!b) return;
+    LIVE.show = b.dataset.show;
+    document.querySelectorAll('[data-show]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    update();
+  });
+  window.addEventListener('resize', draw);
+  if (window.matchMedia) { var mq = window.matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', draw); }
+  load('milan');
 
   // Right now, from space: the places running furthest from their usual heat this week
   var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

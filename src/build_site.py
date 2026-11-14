@@ -42,6 +42,21 @@ css += """
   .hero-copy { grid-template-columns: minmax(0, 1fr); }
   .city-card img { display: block; width: 100%; height: auto; }
   .hero-fig img { display: block; width: 100%; height: auto; border-radius: 14px; }
+  .live { margin: 0; display: grid; gap: 10px; min-width: 0; }
+  .live-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+  .live-top .chip { min-height: 34px; font-size: 0.8125rem; padding: 0 12px; }
+  .live-cities, .live-layers { display: flex; flex-wrap: wrap; gap: 6px; }
+  .live-map { position: relative; background: var(--surface); border-radius: 14px; overflow: hidden; min-height: 320px; }
+  .live-map canvas { display: block; width: 100%; }
+  .live-badge { position: absolute; left: 10px; top: 10px; display: grid; padding: 8px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
+  .live-score { font: 800 2rem/1 var(--font-display); color: var(--ink); }
+  .live-delta { font: 500 0.8125rem var(--font-mono); color: var(--pos); min-height: 1em; }
+  .live-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--ink2); }
+  .live-ctl { display: grid; gap: 6px; font-size: 0.9375rem; color: var(--ink2); }
+  .live-ctl b { color: var(--ink); }
+  .live-ctl input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; }
+  .live figcaption { font-size: 0.875rem; color: var(--ink2); }
+  .live figcaption a { color: var(--accent); font-weight: 600; white-space: nowrap; }
   .now { margin: 0 0 40px; }
   .now-sub { margin: -6px 0 16px; max-width: 44rem; color: var(--ink2); font-size: 0.9375rem; }
   .now-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
@@ -71,6 +86,7 @@ css += """
   .about-grid p { margin: 0 0 10px; color: var(--ink2); }
 """
 write("assets/site.css", css.strip() + "\n")
+write("assets/model.js", read(SRC, "model2.js"))
 
 FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
          '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
