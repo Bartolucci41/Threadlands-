@@ -1,0 +1,123 @@
+<!-- title: Threadlands: every city lives on water, farms and wild places -->
+<!-- description: Threadlands helps planners and communities plan a city together with the land that sustains it, for any place on Earth. -->
+
+<main class="wrap">
+  <div class="hero2">
+    <div class="hero-copy">
+      <div class="defn" role="note" aria-label="Definition of Threadlands">
+        <p class="defn-head"><span class="defn-word">thread&middot;lands</span> <span class="defn-ipa">/&#712;&#952;r&#603;d&#716;l&aelig;ndz/</span> <span class="defn-pos">noun</span></p>
+        <ol class="defn-list">
+          <li>The land that ties a city to what keeps it alive: the rivers that water it, the farms that feed it and the wild places that cool and shelter it.</li>
+          <li>A planning tool for seeing those ties and making them stronger.</li>
+        </ol>
+      </div>
+      <h1 class="hero-h">Every city lives on <span class="u u-river">water</span>, <span class="u u-farm">farms</span> and <span class="u u-forest">wild places</span>.</h1>
+      <p class="hero-sub">Threadlands helps planners and communities plan a city together with the land that sustains it. See how heat, flooding, food and wildlife connect across a region. Then test your plan against the climate of 2050 and find where to act&nbsp;first.</p>
+      <form class="search" id="search-home" role="search">
+        <label class="sr-only" for="q-home">Search for a place</label>
+        <input id="q-home" type="search" placeholder="Type a city, town or postal code" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sugg-home" aria-autocomplete="list">
+        <button class="btn" type="submit">Explore</button>
+        <ul class="sugg" id="sugg-home" role="listbox" hidden></ul>
+      </form>
+      <p class="search-note" id="lib-note">Any city, town, county or postal code on Earth.</p>
+      <p class="byline">Created by <b>Robert Bartolucci</b></p>
+    </div>
+    <figure class="hero-fig">
+      <img src="{B}assets/hero-bangkok.webp" width="563" height="666" alt="Regional map of the river basin that drains through Bangkok, outlined in blue, with the city marked at its mouth.">
+      <figcaption>Rain on 144,310 km&sup2; of land, outlined in blue, drains through Bangkok at its mouth.</figcaption>
+    </figure>
+  </div>
+
+  <h2 class="sect-h" id="cities">Three cities, one pattern</h2>
+  <div class="cities">
+    <article class="city-card"><span class="eyebrow">Milan, Italy</span><div class="mini"><img src="{B}assets/card-milan.webp" width="395" height="211" alt="Regional map around Milan"></div><span class="city-num">33%</span><p>of the land that drains into Milan is already built up, so rain runs off fast into small rivers like the Seveso.</p><a class="btn ghost" href="{B}explore/#milan">Open Milan</a></article>
+    <article class="city-card"><span class="eyebrow">San Francisco, USA</span><div class="mini"><img src="{B}assets/card-san-francisco.webp" width="396" height="211" alt="Regional map around San Francisco"></div><span class="city-num">1%</span><p>of the people within 50 km could be fed by the farmland within 50 km. The Bay Area eats from far away.</p><a class="btn ghost" href="{B}explore/#san-francisco">Open San Francisco</a></article>
+    <article class="city-card"><span class="eyebrow">Bangkok, Thailand</span><div class="mini"><img src="{B}assets/card-bangkok.webp" width="396" height="211" alt="Regional map around Bangkok"></div><span class="city-num">144,000 km&sup2;</span><p>of river basin drains down through Bangkok, from the mountains of northern Thailand to the Gulf.</p><a class="btn ghost" href="{B}explore/#bangkok">Open Bangkok</a></article>
+  </div>
+
+  <section class="story" aria-labelledby="how-h" style="margin-top:24px">
+    <h2 id="how-h">From a place to a plan</h2>
+    <div class="three">
+      <div><span class="n">1</span><h3>Find your place</h3><p>Type any city, town or postal code. Threadlands maps it with the river basin it drinks from, the farmland around it and its wild places.</p></div>
+      <div><span class="n">2</span><h3>Pull the threads</h3><p>Drag levers for street trees, wetlands, wildlife corridors, regenerative farming and compact growth, or sketch your own plan on the map.</p></div>
+      <div><span class="n">3</span><h3>Act first where it counts</h3><p>Test the plan against a heatwave, a flood, a drought and the climate of 2050, then get a ranked list of where to start.</p></div>
+    </div>
+  </section>
+
+  <section class="story" aria-labelledby="threads-h">
+    <h2 id="threads-h">What each thread carries</h2>
+    <div class="threads">
+      <div class="thread"><span class="eyebrow">Water</span><h3>Flood or supply</h3><p>Rain that falls upstream reaches the city as a flood or as a steady supply. Wetlands, healthy soils and street trees decide which.</p></div>
+      <div class="thread"><span class="eyebrow">Heat</span><h3>Stored or released</h3><p>Dense surfaces hold heat through the night. Shade, water and nearby vegetation pull it back out of the air.</p></div>
+      <div class="thread"><span class="eyebrow">Food</span><h3>Buffer or exposure</h3><p>A region that grows more of its own food has more buffer when supply chains break. Farmland managed for soil is also habitat.</p></div>
+      <div class="thread"><span class="eyebrow">Habitat</span><h3>Islands or network</h3><p>Species move along connected land. A city park and a forest stay separate islands until a corridor joins them.</p></div>
+    </div>
+  </section>
+
+  <section class="story" aria-labelledby="lib-h">
+    <h2 id="lib-h">A growing library of places</h2>
+    <div class="prose">
+      <p id="lib-count">Over 120 cities on six continents open instantly, each with measured satellite heat, its river basin and its foodshed. Anyone can add a place, and every new place is saved for the next person.</p>
+    </div>
+    <div class="hero-cta" style="margin-top:16px"><a class="btn" href="{B}library/">Browse the library</a><a class="btn ghost" href="{B}how-it-works/">How it works</a></div>
+  </section>
+</main>
+<!--SCRIPT-->
+(function () {
+  // Old shared links such as threadlands.org/#lagos now live on the Explore page
+  var h = location.hash.replace('#', '');
+  if (h && !/^(top|cities|how-h|threads-h|lib-h)$/.test(h)) { location.replace('{B}explore/#' + h); return; }
+  var $ = function (s) { return document.querySelector(s); };
+  function norm(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+  function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  var LIB = [], form = $('#search-home'), input = $('#q-home'), list = $('#sugg-home'), items = [], active = -1;
+  fetch('{B}data/index.json').then(function (r) { return r.json(); }).then(function (ix) {
+    LIB = (ix.places || []).filter(function (e) { return e && e.slug; });
+    var countries = {};
+    LIB.forEach(function (e) { countries[e.country] = 1; });
+    $('#lib-note').textContent = LIB.length + ' places in ' + Object.keys(countries).length + ' countries open instantly, and any other place on Earth can be built in minutes.';
+    $('#lib-count').textContent = LIB.length + ' places in ' + Object.keys(countries).length + ' countries open instantly, each with measured satellite heat, its river basin and its foodshed. Anyone can add a place, and every new place is saved for the next person.';
+  }).catch(function () { /* the search still sends people to Explore */ });
+  function matches(q) {
+    var n = norm(q), a = [], b = [];
+    if (!n) return [];
+    LIB.forEach(function (e) {
+      if (norm(e.name).indexOf(n) === 0) a.push(e);
+      else if (norm(e.name + ' ' + e.query + ' ' + e.display).indexOf(n) >= 0) b.push(e);
+    });
+    return a.concat(b).slice(0, 8);
+  }
+  function close() { list.hidden = true; input.setAttribute('aria-expanded', 'false'); active = -1; }
+  function show() {
+    var q = input.value.trim();
+    items = matches(q);
+    if (!q) { close(); return; }
+    list.innerHTML = items.map(function (e, k) {
+      return '<li role="option" id="sh-' + k + '" data-slug="' + e.slug + '" aria-selected="' + (k === active) + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + esc(e.country) + '</span></li>';
+    }).join('') + '<li role="option" data-world="1"><span class="s-world">Search everywhere for “' + esc(q) + '”</span></li>';
+    list.hidden = false; input.setAttribute('aria-expanded', 'true');
+  }
+  function goWorld() { location.href = '{B}explore/?q=' + encodeURIComponent(input.value.trim()); }
+  function goSlug(slug) { location.href = '{B}explore/#' + slug; }
+  input.addEventListener('input', function () { active = -1; show(); });
+  input.addEventListener('keydown', function (ev) {
+    if (ev.key === 'ArrowDown' && items.length) { active = Math.min(items.length - 1, active + 1); show(); ev.preventDefault(); }
+    else if (ev.key === 'ArrowUp' && items.length) { active = Math.max(0, active - 1); show(); ev.preventDefault(); }
+    else if (ev.key === 'Escape') close();
+  });
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (!input.value.trim()) return;
+    items = matches(input.value);
+    if (active >= 0 && items[active]) goSlug(items[active].slug);
+    else if (items.length && norm(items[0].name) === norm(input.value.split(',')[0])) goSlug(items[0].slug);
+    else goWorld();
+  });
+  list.addEventListener('mousedown', function (ev) {
+    var li = ev.target.closest('[data-slug],[data-world]');
+    if (!li) return;
+    ev.preventDefault();
+    if (li.dataset.slug) goSlug(li.dataset.slug); else goWorld();
+  });
+  input.addEventListener('blur', function () { setTimeout(close, 120); });
+})();

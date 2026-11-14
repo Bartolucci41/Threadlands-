@@ -1,0 +1,1736 @@
+<title>Threadlands</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+  /* Layout concept: a survey sheet. A sticky hex map on one side, the levers and scores on the other,
+     rules instead of cards, and the map is the only loud thing on the page. */
+  :root {
+    --bg: #E8EDE6;
+    --surface: #F5F8F1;
+    --surface2: #D9E2D6;
+    --ink: #12231E;
+    --ink2: #42554D;
+    --line: #C2CEC3;
+    --accent: #0B6B5B;
+    --accent-ink: #FFFFFF;
+    --neg: #9C3418;
+    --pos: #0B6B5B;
+    --m-core: #6C7476; --m-mid: #97A09E; --m-sub: #BBC3BC;
+    --m-farm: #D8CB8E; --m-regen: #A6BA4A; --m-forest: #2E6B49;
+    --m-wet: #3E9AA8; --m-water: #2F6DAF; --m-park: #7FD28E;
+    --m-corr: #3FBF68; --m-canopy: #2E8B4E; --m-dim: #C9D2C9;
+    --m-open: #9DBF7A; --m-barren: #CDBFAE;
+    --h0: #F4E5A0; --h1: #EE9A45; --h2: #BC3F0C;
+    --f0: #CDE5F1; --f1: #5E9BD0; --f2: #17457E;
+    --font-display: 'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+    --font-body: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0D1613; --surface: #14211D; --surface2: #1E322C; --ink: #E2EEE7; --ink2: #9BB0A6;
+      --line: #294039; --accent: #5ED3B6; --accent-ink: #07211B; --neg: #FF9B7C; --pos: #5ED3B6;
+      --m-core: #A2ABAD; --m-mid: #79817F; --m-sub: #555D5A;
+      --m-farm: #9A8E52; --m-regen: #90A63B; --m-forest: #2B7A52;
+      --m-wet: #3FA6B6; --m-water: #3B7DC4; --m-park: #8FE3A0;
+      --m-corr: #55E07C; --m-canopy: #3FB468; --m-dim: #2A3A35;
+      --m-open: #6F8F4E; --m-barren: #6B6157;
+      --h0: #5E5320; --h1: #D88A2D; --h2: #FF6A3D;
+      --f0: #1F4358; --f1: #4C8FCB; --f2: #9CCBFF;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0D1613; --surface: #14211D; --surface2: #1E322C; --ink: #E2EEE7; --ink2: #9BB0A6;
+    --line: #294039; --accent: #5ED3B6; --accent-ink: #07211B; --neg: #FF9B7C; --pos: #5ED3B6;
+    --m-core: #A2ABAD; --m-mid: #79817F; --m-sub: #555D5A;
+    --m-farm: #9A8E52; --m-regen: #90A63B; --m-forest: #2B7A52;
+    --m-wet: #3FA6B6; --m-water: #3B7DC4; --m-park: #8FE3A0;
+    --m-corr: #55E07C; --m-canopy: #3FB468; --m-dim: #2A3A35;
+    --m-open: #6F8F4E; --m-barren: #6B6157;
+    --h0: #5E5320; --h1: #D88A2D; --h2: #FF6A3D;
+    --f0: #1F4358; --f1: #4C8FCB; --f2: #9CCBFF;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 400 1rem/1.55 var(--font-body);
+    padding-block: 0 56px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+    z-index: 10; background: var(--bg);
+  }
+  .wrap { max-width: 1240px; margin: 0 auto; }
+  .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .eyebrow {
+    font: 500 0.72rem/1.2 var(--font-mono); letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink2);
+  }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Hero */
+  .hero { padding-block: 40px 18px; display: grid; gap: 14px; }
+  h1 { font-size: clamp(2.8rem, 9vw, 5.2rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.035em; }
+  .lede { margin: 0; max-width: 42rem; font-size: 1.125rem; color: var(--ink2); }
+
+  /* Opening: top bar, hero, city cards */
+  .topbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; padding-block: 18px 6px; }
+  .wordmark { font: 800 1.3rem/1 var(--font-display); letter-spacing: -0.02em; color: var(--ink); text-decoration: none; }
+  .topnav { display: flex; flex-wrap: wrap; gap: 0 18px; }
+  .topnav a { color: var(--ink2); text-decoration: none; font: 500 0.875rem var(--font-body); min-height: 36px; display: inline-flex; align-items: center; }
+  .topnav a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+  .hero2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; padding-block: 28px 36px; align-items: center; }
+  .hero-copy { display: grid; gap: 20px; align-content: center; min-width: 0; }
+  .defn { max-width: 34rem; margin: 0 0 6px; padding: 2px 0 2px 14px; border-left: 3px solid var(--accent); }
+  .defn-head { margin: 0 0 4px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  .defn-word { font: 700 1.25rem var(--font-body); color: var(--ink); letter-spacing: -0.01em; }
+  .defn-ipa { font: 400 0.9375rem var(--font-mono); color: var(--ink2); }
+  .defn-pos { font: italic 400 0.9375rem var(--font-body); color: var(--ink2); }
+  .defn-list { margin: 0; padding-left: 1.3em; font-size: 0.9375rem; color: var(--ink2); display: grid; gap: 2px; text-wrap: pretty; }
+  .hero-h { font-size: clamp(2.6rem, 6.4vw, 5.1rem); font-weight: 800; line-height: 0.98; letter-spacing: -0.035em; }
+  .hero-h .u { text-decoration-line: underline; text-decoration-thickness: 0.12em; text-underline-offset: 0.1em; text-decoration-skip-ink: none; }
+  .u-river { text-decoration-color: var(--m-water); }
+  .u-farm { text-decoration-color: var(--m-farm); }
+  .u-forest { text-decoration-color: var(--m-forest); }
+  .hero-sub { text-wrap: balance; margin: 0; max-width: 34rem; font-size: 1.1875rem; line-height: 1.5; color: var(--ink2); }
+  .hero-cta { display: flex; flex-wrap: wrap; gap: 10px; }
+  .search { position: relative; display: flex; gap: 8px; max-width: 34rem; width: 100%; }
+  .search input {
+    flex: 1; min-width: 0; min-height: 50px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--ink);
+    background: var(--surface); color: var(--ink); font: 500 1.0625rem var(--font-body);
+  }
+  .search input:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .search .btn { min-height: 50px; }
+  .search.compact { max-width: 22rem; }
+  .search.compact input, .search.compact .btn { min-height: 42px; font-size: 0.9375rem; }
+  .sugg {
+    position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 30; margin: 0; padding: 6px; list-style: none;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.14);
+    max-height: 340px; overflow-y: auto;
+  }
+  .sugg li { padding: 10px 12px; border-radius: 9px; cursor: pointer; display: flex; justify-content: space-between; gap: 12px; }
+  .sugg li[aria-selected="true"], .sugg li:hover { background: var(--surface2); }
+  .sugg .s-name { font-weight: 600; color: var(--ink); }
+  .sugg .s-sub { font: 400 0.8125rem var(--font-mono); color: var(--ink2); white-space: nowrap; }
+  .sugg .s-none { cursor: default; color: var(--ink2); display: block; }
+  .sugg .s-none:hover { background: none; }
+  .sugg .s-world { color: var(--accent); font-weight: 600; display: block; }
+  .sugg .s-head { cursor: default; display: block; font: 500 0.68rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); padding: 8px 12px 4px; }
+  .sugg .s-head:hover { background: none; }
+  .req { max-width: 34rem; margin: 0; padding: 14px 16px; border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 10px; background: var(--surface); font-size: 0.9375rem; display: grid; gap: 10px; }
+  .req b { color: var(--ink); }
+  .req p { margin: 0; color: var(--ink2); }
+  .req .row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .search-note { margin: 0; font: 400 0.8125rem var(--font-mono); color: var(--ink2); }
+  a.btn { text-decoration: none; }
+  .byline { margin: 0; font-size: 0.9375rem; color: var(--ink2); }
+  .byline b { color: var(--ink); font-weight: 600; }
+  .hero-fig { margin: 0; display: grid; gap: 8px; min-width: 0; }
+  .hero-map { position: relative; background: var(--surface); border-radius: 14px; overflow: hidden; }
+  .hero-map canvas, .mini canvas { display: block; cursor: default; }
+  .pulse { position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; border: 2px solid var(--accent); pointer-events: none; animation: pulse 2.8s ease-out infinite; }
+  @keyframes pulse { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(5); opacity: 0; } }
+  .hero-fig figcaption { font-size: 0.8125rem; color: var(--ink2); }
+  .cities { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 28px; padding-block: 8px 56px; }
+  .city-card { display: grid; gap: 10px; align-content: start; border-top: 2px solid var(--ink); padding-top: 12px; min-width: 0; }
+  .city-card .mini { background: var(--surface); border-radius: 10px; overflow: hidden; }
+  .city-num { font: 800 clamp(2rem, 4.2vw, 2.7rem)/1 var(--font-display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .city-card p { margin: 0; font-size: 0.9375rem; color: var(--ink2); }
+  .city-card .btn { justify-self: start; }
+  .sect-h { font-size: clamp(1.7rem, 4.5vw, 2.4rem); font-weight: 700; letter-spacing: -0.02em; margin: 0 0 14px; }
+  @media (prefers-reduced-motion: reduce) { .pulse { animation: none; opacity: 0.6; transform: scale(1.6); } }
+
+  /* Place bar */
+  .placebar {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px;
+    padding-block: 14px; margin-bottom: 20px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+  .place-id { display: grid; gap: 2px; min-width: 0; }
+  .place-name { font: 700 1.5rem/1.15 var(--font-display); letter-spacing: -0.01em; overflow-wrap: anywhere; }
+  .place-meta { font: 400 0.8125rem/1.3 var(--font-mono); color: var(--ink2); font-variant-numeric: tabular-nums; }
+  .tag {
+    display: inline-block; font: 500 0.68rem/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 4px 7px; border-radius: 4px; background: var(--surface2); color: var(--ink); vertical-align: 2px; margin-left: 8px;
+  }
+  .place-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .btn {
+    font: 600 0.875rem/1 var(--font-body); min-height: 42px; padding: 0 16px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  .btn[disabled] { opacity: 0.55; cursor: progress; }
+  .file-input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .file-input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .glance { margin: 0 0 22px; }
+  .glance-h { margin: 0 0 4px; font: 600 1.125rem var(--font-body); color: var(--ink); }
+  .glance-sub { margin: 0 0 12px; font-size: 0.9375rem; color: var(--ink2); max-width: 46rem; }
+  .glance-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+  .gl { padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); display: grid; gap: 4px; align-content: start; }
+  .gl .gl-k { font: 500 0.68rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); }
+  .gl .gl-v { font: 700 1.5rem/1.1 var(--font-body); color: var(--ink); }
+  .gl .gl-t { font-size: 0.875rem; color: var(--ink2); text-wrap: pretty; }
+  .alert { margin: -8px 0 18px; padding: 10px 14px; border-left: 3px solid var(--neg); background: var(--surface); color: var(--ink); font-size: 0.9375rem; }
+
+  /* Lab */
+  .lab { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-items: start; }
+  .stage {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    background: var(--bg); padding-block: 8px 10px; border-bottom: 1px solid var(--line);
+  }
+  .mapwrap { position: relative; background: var(--surface); border-radius: 12px; overflow: hidden; }
+  .mapwrap.dragging::after {
+    content: "Drop the place file to load it"; position: absolute; inset: 0; display: grid; place-items: center;
+    background: color-mix(in srgb, var(--surface) 86%, transparent); border: 2px dashed var(--accent); border-radius: 12px;
+    font: 600 1rem var(--font-body); color: var(--ink);
+  }
+  canvas { display: block; touch-action: pan-y; cursor: crosshair; margin: 0 auto; }
+  .badge {
+    position: absolute; top: 8px; left: 8px; display: grid; gap: 1px; padding: 6px 10px 7px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px; opacity: 0.96;
+  }
+  .badge-row { display: flex; align-items: baseline; gap: 8px; }
+  .badge-num { font: 800 1.9rem/1 var(--font-display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .badge-d { font: 500 0.8rem var(--font-mono); font-variant-numeric: tabular-nums; }
+  .layers { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 10px; }
+  .chip {
+    font: 500 0.8125rem/1 var(--font-body); min-height: 40px; padding: 0 14px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .sketchbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding-top: 8px; }
+  .sk-tools { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip.sk-on { border-color: var(--accent); }
+  .chip[data-tool][aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+  .sk-sum { margin: 6px 0 0; font-size: 0.8125rem; color: var(--ink); }
+  .sk-sum span { color: var(--ink2); }
+  .wts-add { margin-left: auto; }
+  .climbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding-top: 10px; }
+  .climbar .eyebrow { margin-right: 4px; }
+  .chip[data-clim="mid"][aria-pressed="true"], .chip[data-clim="high"][aria-pressed="true"] { background: var(--h2); border-color: var(--h2); color: var(--bg); }
+  .clim-note { margin: 10px 0 0; padding: 10px 12px; border-left: 3px solid var(--h2); background: var(--surface); font-size: 0.9375rem; color: var(--ink); max-width: 36rem; }
+  .clim-note span { color: var(--ink2); }
+  .hc-lead { margin: 4px 0 10px; font-size: 0.9375rem; color: var(--ink); }
+  .hc-lead b { font-weight: 700; }
+  .hc-rows { display: grid; grid-template-columns: max-content 1fr 3.6em; gap: 6px 10px; align-items: center; margin: 8px 0 6px; font-size: 0.8125rem; }
+  .hc-rows .lbl { color: var(--ink); }
+  .hc-rows .val { font-family: var(--font-mono); font-size: 0.75rem; text-align: right; color: var(--ink2); }
+  .hc-bar { position: relative; height: 12px; background: var(--surface2); border-radius: 3px; }
+  .hc-bar::after { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--ink2); }
+  .hc-bar i { position: absolute; top: 0; bottom: 0; border-radius: 2px; }
+  .hc-small { font-size: 0.8125rem; color: var(--ink2); margin: 6px 0 0; }
+  .readout { margin: 8px 0 0; font-size: 0.8125rem; line-height: 1.35; color: var(--ink2); min-height: 2.8em; }
+  .readout b { color: var(--ink); font-weight: 600; }
+  .key { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  .key li { display: flex; align-items: center; gap: 6px; font: 400 0.72rem/1.2 var(--font-mono); color: var(--ink2); }
+  .key i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; flex: none; border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); }
+  .key .grad i { width: 64px; }
+  .legend-wide { display: none; }
+  .legend-narrow { margin-top: 28px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .legend-narrow summary { cursor: pointer; font: 500 0.8125rem var(--font-body); min-height: 32px; }
+
+  .panel { min-width: 0; display: grid; gap: 6px; align-content: start; }
+  .panel h2 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; margin-top: 18px; }
+  .panel h2:first-child { margin-top: 0; }
+  .hint { margin: 0; font-size: 0.9375rem; color: var(--ink2); max-width: 36rem; }
+  .budget { display: grid; gap: 6px; margin-top: 10px; }
+  .budget-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .budget-row .mono { font-size: 0.875rem; }
+  .note { margin: 0; font-size: 0.8125rem; color: var(--neg); }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .best { display: grid; gap: 6px; margin-top: 8px; }
+  .best-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .best-msg { margin: 0; font-size: 0.875rem; color: var(--ink2); }
+
+  .bar { position: relative; height: 10px; background: var(--surface2); border-radius: 5px; }
+  .bar .fill { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--accent); border-radius: 5px; transition: width 0.25s ease; }
+  .bar .tick { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); opacity: 0.6; }
+
+  #levers { margin-top: 6px; }
+  .lever { display: grid; gap: 4px; padding: 14px 0 12px; border-top: 1px solid var(--line); }
+  .lever-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .lever-head label { font: 600 1rem/1.25 var(--font-body); }
+  .lever-head output { font: 500 1rem var(--font-mono); font-variant-numeric: tabular-nums; }
+  input[type="range"] { width: 100%; height: 30px; margin: 0; accent-color: var(--accent); }
+  .lever p { margin: 0; font-size: 0.875rem; color: var(--ink2); }
+  .lever .cost { margin-left: 6px; white-space: nowrap; }
+
+  .mrow, .trow { display: grid; gap: 6px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .mhead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .mname { font: 600 0.9375rem var(--font-body); }
+  .mval { display: flex; align-items: baseline; gap: 8px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .mval b { font-weight: 500; font-size: 1.05rem; }
+  .delta { font-size: 0.8rem; min-width: 2.4em; text-align: right; color: var(--ink2); }
+  .delta.pos { color: var(--pos); }
+  .delta.neg { color: var(--neg); }
+  .msub { margin: 0; font-size: 0.8125rem; color: var(--ink2); }
+  .trow { width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--line); color: inherit; font: inherit; cursor: pointer; }
+  .trow:hover .mname { text-decoration: underline; text-underline-offset: 3px; }
+
+  .wts-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  ol.wts { list-style: none; margin: 8px 0 0; padding: 0; }
+  ol.wts li { border-top: 1px solid var(--line); }
+  .wts-item { width: 100%; display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 2px 10px; padding: 10px 0; background: none; border: 0; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+  .wts-item:hover .wts-loc { text-decoration: underline; text-underline-offset: 3px; }
+  .wts-num { grid-row: span 2; width: 1.7rem; height: 1.7rem; border-radius: 50%; display: grid; place-items: center; font: 600 0.8rem var(--font-mono); background: var(--surface2); color: var(--ink); }
+  .wts-item[aria-pressed="true"] .wts-num { background: var(--accent); color: var(--accent-ink); }
+  .wts-loc { font: 600 0.9375rem/1.3 var(--font-body); }
+  .wts-why { font-size: 0.8125rem; line-height: 1.4; color: var(--ink2); }
+  .wts-link { display: inline-block; margin: 0 0 10px 2.65rem; font-size: 0.8125rem; color: var(--accent); }
+  .wts-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+  .wts-text { width: 100%; min-height: 9rem; margin-top: 8px; font: 400 0.8125rem/1.4 var(--font-mono); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+  .datalist { margin: 4px 0 0; padding: 0; list-style: none; }
+  .datalist li { padding: 9px 0; border-top: 1px solid var(--line); font-size: 0.875rem; color: var(--ink2); }
+  .datalist li.warn { color: var(--ink); }
+
+  /* Story sections */
+  section.story { margin-top: 72px; padding-top: 28px; border-top: 1px solid var(--line); }
+  section.story > h2 { font-size: clamp(1.7rem, 4.5vw, 2.4rem); font-weight: 700; letter-spacing: -0.02em; max-width: 30rem; }
+  .threads { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 28px 32px; margin-top: 24px; }
+  .thread { display: grid; gap: 6px; align-content: start; border-top: 2px solid var(--ink); padding-top: 10px; }
+  .thread h3 { font-size: 1.25rem; font-weight: 700; }
+  .thread p { margin: 0; font-size: 0.9375rem; color: var(--ink2); }
+  .prose { max-width: 44rem; margin-top: 18px; display: grid; gap: 14px; }
+  .prose p { margin: 0; color: var(--ink2); }
+  ol.steps { margin: 18px 0 0; padding: 0; list-style: none; counter-reset: s; max-width: 44rem; }
+  ol.steps li { counter-increment: s; display: grid; grid-template-columns: 2.2rem minmax(0, 1fr); gap: 4px 12px; padding: 12px 0; border-top: 1px solid var(--line); color: var(--ink2); font-size: 0.9375rem; }
+  ol.steps li::before { content: counter(s); font: 700 1.25rem/1.2 var(--font-display); color: var(--ink); }
+  ol.steps b { color: var(--ink); font-weight: 600; }
+  dl.defs { display: grid; gap: 0; margin: 8px 0 0; max-width: 44rem; }
+  dl.defs > div { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr); gap: 4px 20px; padding: 12px 0; border-top: 1px solid var(--line); }
+  dl.defs dt { font: 600 0.9375rem var(--font-body); }
+  dl.defs dd { margin: 0; font-size: 0.9375rem; color: var(--ink2); }
+  .tablewrap { overflow-x: auto; max-width: 44rem; margin-top: 8px; }
+  table { border-collapse: collapse; width: 100%; min-width: 420px; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 10px 14px 10px 0; border-top: 1px solid var(--line); vertical-align: top; }
+  th { font: 500 0.72rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); border-top: 0; }
+  td:first-child { font-weight: 600; white-space: nowrap; }
+  td { color: var(--ink2); }
+  ul.next { margin: 6px 0 0; padding: 0; list-style: none; max-width: 44rem; }
+  ul.next li { padding: 12px 0; border-top: 1px solid var(--line); color: var(--ink2); font-size: 0.9375rem; }
+  ul.next b { color: var(--ink); font-weight: 600; }
+  footer { margin-top: 72px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 0.8125rem; color: var(--ink2); }
+
+  /* Beyond the city */
+  .regional { margin-top: 56px; padding-top: 28px; border-top: 1px solid var(--line); }
+  .regional > h2 { font-size: clamp(1.7rem, 4.5vw, 2.4rem); font-weight: 700; letter-spacing: -0.02em; }
+  .reg-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; margin-top: 18px; align-items: start; }
+  .reg-map { background: var(--surface); border-radius: 12px; overflow: hidden; }
+  .reg-map canvas { cursor: default; }
+  .reg-facts { min-width: 0; display: grid; gap: 22px; align-content: start; }
+  .thread-block { display: grid; gap: 8px; border-top: 2px solid var(--ink); padding-top: 10px; }
+  .thread-block h3 { font-size: 1.25rem; font-weight: 700; }
+  .thread-block p { margin: 0; font-size: 0.9375rem; color: var(--ink2); }
+  .stack { display: flex; height: 14px; border-radius: 4px; overflow: hidden; background: var(--surface2); }
+  .stack span { display: block; height: 100%; }
+  .reg-empty { margin: 0; padding: 18px; background: var(--surface); border-radius: 12px; color: var(--ink2); }
+  .reg-table { min-width: 0; }
+  .reg-table td:first-child { white-space: nowrap; }
+  .num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+  @media (min-width: 960px) {
+    .hero2 { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 56px; padding-block: 44px 64px; }
+    .reg-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; }
+    .lab { grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr); gap: 48px; }
+    .stage { top: calc(env(safe-area-inset-top, 0px) + 12px); align-self: start; border-bottom: 0; background: transparent; padding-block: 0; }
+    .legend-wide { display: flex; }
+    .legend-narrow { display: none; }
+    .hero { padding-block: 64px 26px; }
+  }
+  @media (max-width: 520px) {
+    dl.defs > div { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bar .fill { transition: none; }
+  }
+</style>
+
+<!--NAV-->
+
+<main class="wrap">
+  <h1 class="sect-h page-h" id="explore">Explore a place</h1>
+  <div class="placebar" id="placebar">
+    <div class="place-id">
+      <span class="eyebrow">Place</span>
+      <span class="place-name"><span id="place-name">Fictional river city</span><span class="tag" id="place-tag">Demo</span></span>
+      <span class="place-meta" id="place-meta"></span>
+    </div>
+    <div class="place-actions">
+      <form class="search compact" id="search-bar" role="search" hidden>
+        <label class="sr-only" for="q-bar">Search for another city</label>
+        <input id="q-bar" type="search" placeholder="Search another city" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sugg-bar" aria-autocomplete="list">
+        <ul class="sugg" id="sugg-bar" role="listbox" hidden></ul>
+      </form>
+      <div class="req" id="req-bar" hidden></div>
+      <div class="presets" role="group" aria-label="Example places" id="examples" style="margin-top:0"></div>
+      <input class="file-input" type="file" id="file" accept=".json,application/json">
+      <label class="btn" for="file">Load a place file</label>
+      <button class="btn ghost" type="button" id="reopen" hidden></button>
+    </div>
+  </div>
+  <p class="alert" id="alert" role="alert" hidden></p>
+  <section class="glance" id="glance" aria-labelledby="glance-h" hidden>
+    <h3 class="glance-h" id="glance-h"></h3>
+    <p class="glance-sub" id="glance-sub"></p>
+    <div class="glance-grid" id="glance-grid"></div>
+  </section>
+
+  <section class="lab" aria-labelledby="lab-h">
+    <div class="stage">
+      <div class="mapwrap" id="mapwrap">
+        <canvas id="map" role="img" aria-label="Hex map of the loaded city-region. Colors show land cover, heat, flood exposure or habitat depending on the selected layer."></canvas>
+        <div class="badge">
+          <span class="eyebrow" id="badge-label">Resilience index</span>
+          <span class="badge-row"><span class="badge-num" id="idx">0</span><span class="badge-d" id="idxd"></span></span>
+        </div>
+      </div>
+      <div class="climbar" role="group" aria-label="Climate">
+        <span class="eyebrow">Climate</span>
+        <button class="chip" type="button" data-clim="today" aria-pressed="true">Today</button>
+        <button class="chip" type="button" data-clim="mid" aria-pressed="false">2050, middle path</button>
+        <button class="chip" type="button" data-clim="high" aria-pressed="false">2050, high emissions</button>
+      </div>
+      <div class="layers" role="group" aria-label="Map layer">
+        <button class="chip" type="button" data-layer="land" aria-pressed="true">Land</button>
+        <button class="chip" type="button" data-layer="heat" aria-pressed="false">Heat</button>
+        <button class="chip" type="button" data-layer="flood" aria-pressed="false">Flood</button>
+        <button class="chip" type="button" data-layer="habitat" aria-pressed="false">Habitat</button>
+        <button class="chip" type="button" data-layer="sat" aria-pressed="false" id="sat-chip" hidden>Measured heat</button>
+      </div>
+      <div class="sketchbar">
+        <button class="chip sk-on" type="button" id="sk-toggle" aria-pressed="false">Sketch a plan</button>
+        <div class="sk-tools" id="sk-tools" role="group" aria-label="Sketch tool" hidden>
+          <button class="chip" type="button" data-tool="park" aria-pressed="true">Park or forest</button>
+          <button class="chip" type="button" data-tool="wetland" aria-pressed="false">Wetland</button>
+          <button class="chip" type="button" data-tool="corridor" aria-pressed="false">Corridor</button>
+          <button class="chip" type="button" data-tool="regen" aria-pressed="false">Regenerative farm</button>
+          <button class="chip" type="button" data-tool="erase" aria-pressed="false">Erase</button>
+          <button class="chip" type="button" id="sk-clear">Clear sketch</button>
+        </div>
+      </div>
+      <p class="sk-sum" id="sk-sum" hidden></p>
+      <p class="readout" id="readout">Tap or hover a hex to inspect it.</p>
+      <ul class="key legend-wide" id="legend-wide"></ul>
+    </div>
+
+    <div class="panel">
+      <h2 id="lab-h">Pull the threads</h2>
+      <p class="hint">Drag a lever. The map and every score update together. Effort is capped, so the levers compete with each other.</p>
+      <p class="clim-note" id="clim-note" hidden></p>
+      <div class="budget">
+        <div class="budget-row"><span class="eyebrow">Effort used</span><span class="mono" id="budget-txt"></span></div>
+        <div class="bar"><span class="fill" id="budget-fill"></span></div>
+        <p class="note" id="budget-note" hidden>Effort is full. Lower another lever to raise this one.</p>
+      </div>
+      <div class="presets" id="presets" role="group" aria-label="Scenarios"></div>
+      <div class="best">
+        <div class="best-row">
+          <button class="btn ghost" type="button" id="best-btn">Find the best mix for this place</button>
+        </div>
+        <p class="best-msg" id="best-msg" aria-live="polite">Tries about 4,000 lever settings within the effort cap and applies the highest-scoring one.</p>
+      </div>
+      <div id="levers"></div>
+
+      <h2>Scores</h2>
+      <p class="hint">Each bar runs 0 to 100. The dark tick marks business as usual for this place.</p>
+      <div id="metrics"></div>
+
+      <h2>Stress tests</h2>
+      <p class="hint">The same map, hit three ways. Select one to see where it bites.</p>
+      <div id="tests"></div>
+
+      <h2>Where to start</h2>
+      <p class="hint">The specific places where each action pays off most, ranked on today's map before any lever changes. Select a place to see it on the map.</p>
+      <div class="wts-actions" role="group" aria-label="Action to rank" id="wts-actions"></div>
+      <p class="msub" id="wts-intro" style="margin-top:8px"></p>
+      <ol class="wts" id="wts-list"></ol>
+      <div class="wts-tools">
+        <button class="btn" type="button" id="wts-add" hidden>Add these to my sketch</button>
+        <button class="btn ghost" type="button" id="wts-copy">Copy this list</button>
+        <button class="btn ghost" type="button" id="wts-hide" hidden>Hide from map</button>
+        <span class="msub" id="wts-copied" aria-live="polite"></span>
+      </div>
+      <textarea class="wts-text" id="wts-text" readonly hidden aria-label="List to copy"></textarea>
+
+      <div id="hc-wrap" hidden>
+        <h2>Satellite heat check</h2>
+        <div id="hc-body"></div>
+      </div>
+
+      <h2>About this place's data</h2>
+      <ul class="datalist" id="datalist"></ul>
+
+      <details class="legend-narrow">
+        <summary>Map key</summary>
+        <ul class="key" id="legend-narrow"></ul>
+      </details>
+    </div>
+    <p class="sr-only" id="live" aria-live="polite"></p>
+  </section>
+
+  <section class="regional" aria-labelledby="reg-h">
+    <span class="eyebrow">Regional threads</span>
+    <h2 id="reg-h">Beyond the city</h2>
+    <p class="hint" style="margin-top:8px">A city drinks from a whole river basin and eats from land far beyond its edge. This view zooms out to show both for <span id="reg-name">this place</span>.</p>
+    <div id="reg-body"></div>
+  </section>
+
+</main>
+<!--FOOTER-->
+
+<script type="application/json" id="demo-place">/*DEMO*/</script>
+<script type="application/json" id="example-places">/*EXAMPLES*/</script>
+<script>
+/*MODEL*/
+</script>
+<script>
+(function () {
+  'use strict';
+  var TM = ThreadModel;
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+
+  var LEVERS = [
+    { key: 'canopy', name: 'Street trees and shade', desc: 'Shade and cooler streets in every built-up hex.', trade: 'Uses little land. Does not link habitats on its own.' },
+    { key: 'corridors', name: 'Wildlife corridors', desc: 'Greenways grow from the largest natural area toward the city parks.', trade: 'Takes some farmland. Habitat jumps when the last gap closes.' },
+    { key: 'wetlands', name: 'Floodplain wetlands', desc: 'Restores wetlands on flood-prone farmland and open land, wettest first.', trade: 'Takes farmland. Holds water for floods and for drought.' },
+    { key: 'regen', name: 'Regenerative farming', desc: 'Cover crops and living soil on more of the farmland.', trade: 'Slightly lower yield in a good year, much better in a drought.' },
+    { key: 'compact', name: 'Compact growth', desc: 'Pulls the outermost sprawl back to farmland and houses the same people inside the existing city.', trade: 'Cuts car travel and frees land. A denser core runs hotter and may sit nearer the water.' }
+  ];
+  var PRESETS = [
+    { id: 'bau', name: 'Business as usual', v: { canopy: 0, corridors: 0, wetlands: 0, regen: 0, compact: 0 } },
+    { id: 'balanced', name: 'Balanced', v: { canopy: 40, corridors: 60, wetlands: 40, regen: 60, compact: 40 } },
+    { id: 'water', name: 'Water first', v: { canopy: 40, corridors: 40, wetlands: 100, regen: 55, compact: 30 } },
+    { id: 'food', name: 'Food first', v: { canopy: 30, corridors: 50, wetlands: 10, regen: 100, compact: 50 } },
+    { id: 'shade', name: 'Shade first', v: { canopy: 100, corridors: 60, wetlands: 30, regen: 30, compact: 40 } }
+  ];
+  var METRICS = [
+    { k: 'heat', name: 'Heat relief', sub: 'Cooler streets for the people who live there.' },
+    { k: 'flood', name: 'Flood safety', sub: 'Less exposure for people near rivers, lakes and coast.' },
+    { k: 'habitat', name: 'Habitat network', sub: 'How much habitat exists and how well it connects, parks included.' },
+    { k: 'food', name: 'Local food', sub: 'Share of this map’s people its own cropland could feed. The wider foodshed is under Beyond the city.' },
+    { k: 'mobility', name: 'Low-carbon travel', sub: 'Less sprawl and shorter trips.' }
+  ];
+  var TESTS = [
+    { k: 'heatwave', name: 'Heatwave', layer: 'heat' },
+    { k: 'flood', name: 'River flood', layer: 'flood' },
+    { k: 'drought', name: 'Drought year', layer: 'land' }
+  ];
+  var NAMES = { core: 'Dense core', mid: 'Mid-density district', suburb: 'Sprawl edge', farm: 'Farmland', regen: 'Regenerative farmland', forest: 'Forest', open: 'Grassland and scrub', barren: 'Bare ground', wetland: 'Wetland', water: 'Water', park: 'City park', corridor: 'Wildlife corridor', greenway: 'Greenway' };
+  var BLURB = {
+    core: 'Hard surfaces store heat and shed rain fast.',
+    mid: 'Mixed buildings with some room for trees.',
+    suburb: 'Car-dependent, and it covers land that could grow food or hold water.',
+    farm: 'Productive in a good year and thirsty in a drought.',
+    regen: 'Cover crops and living soil hold water and give wildlife stepping stones.',
+    forest: 'Core habitat that anchors the network and cools the air.',
+    open: 'Grassland and scrub: open habitat and room for water to spread.',
+    barren: 'Little cover for wildlife or shade.',
+    wetland: 'Slows floodwater, keeps water in the landscape and shelters wildlife.',
+    water: 'River, lake or sea. It ties the watershed together.',
+    corridor: 'A strip of habitat linking the wild land to the city.',
+    greenway: 'Shade, cooler air and a path for wildlife through the city.'
+  };
+
+  var state = Object.assign({}, PRESETS[1].v);
+  var layer = 'land', sel = -1, res = null, P = null, kind = 'demo', search = null, bestMix = null;
+  var DEMO = JSON.parse($('#demo-place').textContent);
+  var BASE = '../';   // the site root, seen from /explore/
+  var EXAMPLES = JSON.parse($('#example-places').textContent).map(function (x) {
+    return { id: x.id, name: x.label, data: null, kind: 'real' };
+  });
+  EXAMPLES.push({ id: 'demo', name: 'Fictional demo', data: DEMO, kind: 'demo' });
+  var current = null;
+  var PRI = null;
+  var WTS = { action: 'canopy', show: false, sel: -1 };
+  var WTS_ACTIONS = [
+    { key: 'canopy', name: 'Street trees', intro: 'Plant shade first in the hottest, most crowded blocks.', none: 'No built-up blocks were found to shade.' },
+    { key: 'wetlands', name: 'Wetlands', intro: 'Restore low floodplain land with the most people in flood-prone homes nearby.', none: 'No flood-prone farmland or open land was found.' },
+    { key: 'corridors', name: 'Corridors', intro: 'Link parks that are cut off from the wild land, starting with short links near many people. The outlined hexes are the corridor route.', none: 'No corridor routes were found for this place.' },
+    { key: 'regen', name: 'Regenerative farming', intro: 'Start on farmland in the floodplain or next to habitat, where living soil does double duty.', none: 'No farmland sits in the floodplain or next to habitat.' },
+    { key: 'compact', name: 'Compact growth', intro: 'Pull back the outermost sprawl first, and flood-prone sprawl sooner.', none: 'No sprawl edge was found.' }
+  ];
+  var WTS_PAINT = { wetlands: 'wetland', corridors: 'corridor', regen: 'regen', canopy: null, compact: null };
+  function wtsAction() { return WTS_ACTIONS.filter(function (a) { return a.key === WTS.action; })[0]; }
+  function renderWTS() {
+    if (!P || !PRI) return;
+    $('#wts-actions').innerHTML = WTS_ACTIONS.map(function (a) {
+      return '<button type="button" class="chip" data-wts="' + a.key + '" aria-pressed="' + (a.key === WTS.action ? 'true' : 'false') + '">' + a.name + '</button>';
+    }).join('');
+    var a = wtsAction(), items = PRI[WTS.action] || [];
+    $('#wts-intro').textContent = a.intro;
+    var c = P.place.cells;
+    $('#wts-list').innerHTML = items.length ? items.map(function (it, n) {
+      var lat = Number(c.lat[it.i]), lng = Number(c.lng[it.i]);
+      var link = kind !== 'demo' && isFinite(lat) && isFinite(lng)
+        ? '<a class="wts-link" href="https://www.openstreetmap.org/?mlat=' + lat.toFixed(5) + '&amp;mlon=' + lng.toFixed(5) + '#map=15/' + lat.toFixed(5) + '/' + lng.toFixed(5) + '" target="_blank" rel="noopener">Open in OpenStreetMap</a>' : '';
+      return '<li><button type="button" class="wts-item" data-wi="' + n + '" aria-pressed="' + (n === WTS.sel ? 'true' : 'false') + '">' +
+        '<span class="wts-num">' + (n + 1) + '</span><span class="wts-loc">' + esc(P.locate(it.i)) + '</span><span class="wts-why">' + esc(it.why) + '</span></button>' + link + '</li>';
+    }).join('') : '<li class="msub" style="padding:10px 0">' + a.none + '</li>';
+    $('#wts-hide').hidden = !WTS.show;
+    $('#wts-add').hidden = !items.length || !WTS_PAINT[WTS.action];
+    if (WTS_PAINT[WTS.action]) $('#wts-add').textContent = 'Add these ' + items.length + ' to my sketch';
+    $('#wts-copy').disabled = !items.length;
+    $('#wts-text').hidden = true;
+    $('#wts-copied').textContent = '';
+  }
+  function wtsText() {
+    var a = wtsAction(), items = PRI[WTS.action] || [], c = P.place.cells;
+    var lines = ['Threadlands: where to start with ' + a.name.toLowerCase() + ' in ' + (P.place.name || 'this place'), a.intro, ''];
+    items.forEach(function (it, n) {
+      var coord = kind !== 'demo' ? ' (' + Number(c.lat[it.i]).toFixed(5) + ', ' + Number(c.lng[it.i]).toFixed(5) + ')' : '';
+      lines.push((n + 1) + '. ' + P.locate(it.i) + coord + ': ' + it.why);
+    });
+    lines.push('', 'Ranked on open global data. A screening view, not a site survey.');
+    return lines.join('\n');
+  }
+  var STORE_KEY = 'threadlands:last-place';
+  $('#examples').innerHTML = EXAMPLES.map(function (x) {
+    return '<button type="button" class="chip" data-example="' + x.id + '" aria-pressed="false">' + x.name + '</button>';
+  }).join('');
+  function markExamples() {
+    document.querySelectorAll('[data-example]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.example === current ? 'true' : 'false'); });
+    document.querySelectorAll('[data-regcity]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.regcity === current ? 'true' : 'false'); });
+  }
+  function openExample(id, fromHash) {
+    var x = EXAMPLES.filter(function (e) { return e.id === id; })[0] || EXAMPLES[0];
+    function go() {
+      clearError();
+      setPlace(x.data, x.kind);
+      current = x.id;
+      markExamples();
+      if (!fromHash) { try { history.replaceState(null, '', '#' + x.id); } catch (e) { /* ignore */ } }
+    }
+    if (x.data) { go(); return; }
+    showError('Loading ' + x.name + '\u2026');
+    fetch(BASE + 'data/places/' + x.id + '.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (d) { x.data = d; go(); })
+      .catch(function () { showError('Could not load ' + x.name + '. Check your connection and try again.'); });
+  }
+
+  // ---- Controls
+  $('#levers').innerHTML = LEVERS.map(function (L) {
+    return '<div class="lever">' +
+      '<div class="lever-head"><label for="in-' + L.key + '">' + L.name + '</label>' +
+      '<output id="out-' + L.key + '" for="in-' + L.key + '">' + state[L.key] + '</output></div>' +
+      '<input type="range" id="in-' + L.key + '" min="0" max="100" step="5" value="' + state[L.key] + '">' +
+      '<p id="desc-' + L.key + '">' + L.desc + '</p>' +
+      '<p><span class="eyebrow">Trade-off</span> ' + L.trade + '<span class="mono cost eyebrow">effort ×' + TM.COST[L.key] + '</span></p>' +
+      '</div>';
+  }).join('');
+  function renderPresets() {
+    var list = PRESETS.slice();
+    if (bestMix) list.push({ id: 'best', name: 'Best mix', v: bestMix });
+    $('#presets').innerHTML = list.map(function (p) {
+      return '<button type="button" class="chip" data-preset="' + p.id + '" aria-pressed="false">' + p.name + '</button>';
+    }).join('');
+  }
+  renderPresets();
+  $('#metrics').innerHTML = METRICS.map(function (m) {
+    return '<div class="mrow"><div class="mhead"><span class="mname">' + m.name + '</span>' +
+      '<span class="mval"><b id="mv-' + m.k + '">0</b><span class="delta" id="md-' + m.k + '"></span></span></div>' +
+      '<div class="bar"><span class="fill" id="mf-' + m.k + '"></span><span class="tick" id="mt-' + m.k + '"></span></div>' +
+      '<p class="msub">' + m.sub + '</p></div>';
+  }).join('');
+  $('#tests').innerHTML = TESTS.map(function (t) {
+    return '<button type="button" class="trow" data-layer="' + t.layer + '">' +
+      '<span class="mhead"><span class="mname">' + t.name + '</span>' +
+      '<span class="mval"><b id="tv-' + t.k + '">0</b><span class="delta" id="td-' + t.k + '"></span></span></span>' +
+      '<span class="bar"><span class="fill" id="tf-' + t.k + '"></span><span class="tick" id="tt-' + t.k + '"></span></span></button>';
+  }).join('');
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fmtDelta(d) { return d > 0 ? '+' + d : d < 0 ? '−' + Math.abs(d) : '±0'; }
+  function setDelta(el, d) { el.textContent = fmtDelta(d); el.className = 'delta' + (d > 0 ? ' pos' : d < 0 ? ' neg' : ''); }
+  function fmtPop(n) {
+    if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + ' million';
+    if (n >= 1e4) return Math.round(n / 1e3).toLocaleString('en-US') + ',000';
+    return Math.round(n).toLocaleString('en-US');
+  }
+
+  // ---- Legend
+  function legendHTML() {
+    var sw = function (label, v) { return '<li><i style="background:var(' + v + ')"></i>' + label + '</li>'; };
+    var grad = function (a, b, vs) {
+      return '<li class="grad"><span>' + a + '</span><i style="background:linear-gradient(90deg,var(' + vs[0] + '),var(' + vs[1] + '),var(' + vs[2] + '))"></i><span>' + b + '</span></li>';
+    };
+    var faded = P && P.inside.some(function (x) { return !x; }) ? '<li>Faded hexes are the surrounding land added around ' + esc(P.place.name) + '</li>' : '';
+    if (P && P.hasRivers && (layer === 'land' || layer === 'flood')) {
+      faded = '<li><i style="background:var(--m-water);height:5px;width:18px;border:0"></i>River</li>' +
+        (layer === 'land' ? '<li><i style="background:var(--m-water);opacity:0.5;height:2px;width:18px;border:0"></i>Canal or stream</li>' : '') + faded;
+    }
+    if (P && P.paint && P.paint.size) faded = '<li><i style="background:transparent;border:1.5px dashed var(--ink)"></i>Your sketch</li>' + faded;
+    if (layer === 'heat') return grad('Cooler', 'Hotter', ['--h0', '--h1', '--h2']) + sw('Not built up', '--m-dim') + sw('Water', '--m-water') + faded;
+    if (layer === 'flood') return grad('Low exposure', 'High exposure', ['--f0', '--f1', '--f2']) + sw('Flood-prone land', '--f0') + sw('Wetland', '--m-wet') + sw('Water', '--m-water') + sw('Away from water', '--m-dim') + faded;
+    if (layer === 'sat') return '<li class="grad"><span>6 \u00b0C cooler</span><i style="background:linear-gradient(90deg,var(--f2),var(--f0),var(--h0),var(--h2))"></i><span>6 \u00b0C hotter</span></li>' +
+      '<li>Measured from space, compared with typical land nearby</li>' + sw('No clear reading', '--m-dim') + faded;
+    if (layer === 'habitat') return sw('Connected network', '--m-corr') + sw('Isolated patch', '--h1') + sw('Not habitat', '--m-dim') + faded;
+    return sw('Dense core', '--m-core') + sw('Mid-density', '--m-mid') + sw('Sprawl edge', '--m-sub') + sw('Farmland', '--m-farm') +
+      sw('Regenerative farm', '--m-regen') + sw('Forest', '--m-forest') + sw('Grassland and scrub', '--m-open') + sw('Bare ground', '--m-barren') +
+      sw('Wetland', '--m-wet') + sw('Water', '--m-water') + sw('Park (ringed)', '--m-park') + sw('Corridor and greenway', '--m-corr') +
+      '<li>Green tint on built-up hexes marks street trees</li>' + faded;
+  }
+  function renderLegend() { var h = legendHTML(); $('#legend-wide').innerHTML = h; $('#legend-narrow').innerHTML = h; }
+
+  // ---- Canvas
+  var cv = $('#map'), ctx = cv.getContext('2d');
+  var W = 0, H = 0, dpr = 1, S = 1, OX = 0, OY = 0, hexPx = 10, bbox = null;
+  function computeBBox() {
+    var minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+    P.POLY.forEach(function (p) {
+      for (var j = 0; j + 1 < p.length; j += 2) {
+        if (p[j] < minx) minx = p[j]; if (p[j] > maxx) maxx = p[j];
+        if (p[j + 1] < miny) miny = p[j + 1]; if (p[j + 1] > maxy) maxy = p[j + 1];
+      }
+    });
+    if (!isFinite(minx)) { minx = -1; maxx = 1; miny = -1; maxy = 1; }
+    bbox = { minx: minx, miny: miny, maxx: maxx, maxy: maxy };
+    var a = 0;
+    for (var i = 0; i < P.N; i++) a += Number(P.place.cells.area[i]) || 0;
+    var hexKm = Math.sqrt(Math.max(1e-6, a / P.N) / 2.598) ;   // circumradius from area
+    P.hexKm = hexKm;
+  }
+  function resize() {
+    if (!P) return;
+    var wrap = $('#mapwrap');
+    var avail = wrap.clientWidth;
+    if (!avail) return;
+    var maxH = Math.max(240, Math.min(window.innerHeight * (window.innerWidth >= 960 ? 0.72 : 0.5), 760));
+    var bw = bbox.maxx - bbox.minx, bh = bbox.maxy - bbox.miny;
+    var pad = 10;
+    S = Math.min((avail - 2 * pad) / bw, (maxH - 2 * pad) / bh);
+    W = avail;
+    H = Math.ceil(bh * S + 2 * pad);
+    OX = (W - bw * S) / 2 - bbox.minx * S;
+    OY = pad - bbox.miny * S;
+    hexPx = P.hexKm * S;
+    dpr = window.devicePixelRatio || 1;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    scheduleDraw();
+  }
+  function hex2rgb(h) {
+    h = h.replace('#', '');
+    if (h.length === 3) h = h.split('').map(function (c) { return c + c; }).join('');
+    var n = parseInt(h, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function mix(a, b, t) { return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ',' + Math.round(a[1] + (b[1] - a[1]) * t) + ',' + Math.round(a[2] + (b[2] - a[2]) * t) + ')'; }
+  function ramp(stops, t) { t = Math.max(0, Math.min(1, t)); return t < 0.5 ? mix(stops[0], stops[1], t * 2) : mix(stops[1], stops[2], (t - 0.5) * 2); }
+  function palette() {
+    var css = getComputedStyle(document.documentElement);
+    var g = function (n) { return css.getPropertyValue(n).trim(); };
+    return {
+      core: g('--m-core'), mid: g('--m-mid'), suburb: g('--m-sub'), farm: g('--m-farm'), regen: g('--m-regen'),
+      forest: g('--m-forest'), wetland: g('--m-wet'), water: g('--m-water'), park: g('--m-park'), open: g('--m-open'),
+      barren: g('--m-barren'), corridor: g('--m-corr'), canopy: g('--m-canopy'), dim: g('--m-dim'), ink: g('--ink'),
+      iso: g('--h1'), surface: g('--surface'), f0: g('--f0'), accent: g('--accent'), accentInk: g('--accent-ink'),
+      heat: [g('--h0'), g('--h1'), g('--h2')].map(hex2rgb),
+      flood: [g('--f0'), g('--f1'), g('--f2')].map(hex2rgb)
+    };
+  }
+  function pathFor(i, shrink) {
+    var p = P.POLY[i];
+    if (!p || p.length < 6) return false;
+    var cx = P.X[i] * S + OX, cy = P.Y[i] * S + OY;
+    ctx.beginPath();
+    for (var j = 0; j + 1 < p.length; j += 2) {
+      var x = p[j] * S + OX, y = p[j + 1] * S + OY;
+      x = cx + (x - cx) * shrink; y = cy + (y - cy) * shrink;
+      if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    return true;
+  }
+  function isUrban(c) { return c === 'core' || c === 'mid' || c === 'suburb' || c === 'greenway'; }
+  var drawQueued = false;
+  function scheduleDraw() {
+    if (drawQueued) return;
+    drawQueued = true;
+    requestAnimationFrame(function () { drawQueued = false; draw(); });
+  }
+  function draw() {
+    if (!W || !res || !P) return;
+    var C = palette();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    var canopy = 1 - Math.pow(1 - state.canopy / 100, 1.8);
+    var keep = 1 - res.retention;
+    var shrink = hexPx > 7 ? 0.93 : 1.0;
+    var cells = P.place.cells;
+    for (var i = 0; i < P.N; i++) {
+      var cov = res.cover[i], fill = C[cov] || C.open, alpha = 1, inner = null;
+      if (cov === 'greenway') fill = C[res.ucls[i]];
+      if (layer === 'heat') {
+        if (isUrban(cov)) fill = ramp(C.heat, res.heat[i] / 1.4);
+        else if (cov === 'water') { fill = C.water; alpha = 0.55; }
+        else { fill = C.dim; alpha = 0.6; }
+      } else if (layer === 'flood') {
+        var fl = Number(cells.flood[i]) || 0;
+        if (isUrban(cov)) {
+          if (res.floodExp[i] > 0) fill = ramp(C.flood, Math.sqrt(res.floodExp[i] * keep / P.maxFloodExp));
+          else { fill = C.dim; alpha = 0.45; }
+        } else if (cov === 'wetland' || cov === 'water') { /* own colour */ }
+        else if (fl > 0) { fill = C.f0; alpha = 0.35 + 0.55 * fl; }
+        else { fill = C.dim; alpha = 0.5; }
+      } else if (layer === 'sat') {
+        var lr = HC ? HC.rel[i] : NaN;
+        if (isFinite(lr)) fill = lr >= 0 ? ramp(C.heat, 0.15 + 0.85 * Math.min(1, lr / 6)) : ramp(C.flood, 0.15 + 0.85 * Math.min(1, -lr / 6));
+        else { fill = C.dim; alpha = 0.5; }
+      } else if (layer === 'habitat') {
+        if (res.comp[i] >= 0) fill = res.comp[i] === res.lcc ? C.corridor : C.iso;
+        else { fill = C.dim; alpha = 0.55; }
+      } else if (cov === 'greenway') {
+        inner = C.corridor;
+      }
+      if (!pathFor(i, shrink)) continue;
+      ctx.globalAlpha = alpha; ctx.fillStyle = fill; ctx.fill();
+      if (layer === 'land' && canopy > 0 && isUrban(cov)) {
+        ctx.globalAlpha = 0.6 * canopy; ctx.fillStyle = C.canopy; ctx.fill();
+      }
+      if (inner && hexPx > 4) { pathFor(i, 0.5); ctx.globalAlpha = 1; ctx.fillStyle = inner; ctx.fill(); }
+      if (!P.inside[i]) { pathFor(i, shrink); ctx.globalAlpha = 0.38; ctx.fillStyle = C.surface; ctx.fill(); }
+      ctx.globalAlpha = 1;
+    }
+    if (SPOT && SPOT.segs.length) {
+      ctx.beginPath();
+      for (var sg = 0; sg < SPOT.segs.length; sg += 4) {
+        ctx.moveTo(SPOT.segs[sg] * S + OX, SPOT.segs[sg + 1] * S + OY);
+        ctx.lineTo(SPOT.segs[sg + 2] * S + OX, SPOT.segs[sg + 3] * S + OY);
+      }
+      ctx.lineCap = 'round'; ctx.lineWidth = SPOT.small ? 2.6 : 1.6; ctx.strokeStyle = C.ink; ctx.globalAlpha = SPOT.small ? 0.95 : 0.6; ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    if (P.paint && P.paint.size && hexPx > 2.5) {
+      ctx.setLineDash([Math.max(2, hexPx * 0.25), Math.max(2, hexPx * 0.18)]);
+      ctx.lineWidth = Math.max(1.2, hexPx * 0.11); ctx.strokeStyle = C.ink; ctx.globalAlpha = 0.9;
+      P.paint.forEach(function (tool, i) { if (pathFor(i, 0.82)) ctx.stroke(); });
+      ctx.setLineDash([]); ctx.globalAlpha = 1;
+    }
+    if (P.hasRivers && (layer === 'land' || layer === 'flood')) {
+      ctx.strokeStyle = C.water; ctx.fillStyle = C.water; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      var passes = layer === 'flood' ? [true] : [false, true];
+      passes.forEach(function (major) {
+        var net = major ? P.rivNet.major : P.rivNet.minor;
+        ctx.globalAlpha = major ? 0.95 : 0.5;
+        ctx.lineWidth = major ? Math.max(1.8, hexPx * 0.32) : Math.max(1, hexPx * 0.12);
+        ctx.beginPath();
+        for (var s = 0; s < net.segs.length; s += 2) {
+          var a = net.segs[s], bj = net.segs[s + 1];
+          ctx.moveTo(P.X[a] * S + OX, P.Y[a] * S + OY);
+          ctx.lineTo(P.X[bj] * S + OX, P.Y[bj] * S + OY);
+        }
+        ctx.stroke();
+        net.lone.forEach(function (a) {
+          ctx.beginPath(); ctx.arc(P.X[a] * S + OX, P.Y[a] * S + OY, ctx.lineWidth / 2, 0, Math.PI * 2); ctx.fill();
+        });
+      });
+      ctx.globalAlpha = 1;
+    }
+    if (hexPx >= 3.5) {
+      ctx.lineWidth = Math.max(1.2, hexPx * 0.14); ctx.strokeStyle = C.ink; ctx.globalAlpha = 0.85;
+      for (var k = 0; k < P.PARKS.length; k++) {
+        var q = P.PARKS[k];
+        ctx.beginPath(); ctx.arc(P.X[q] * S + OX, P.Y[q] * S + OY, Math.max(2.5, hexPx * 0.45), 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+    if (WTS.show && PRI) {
+      var items = PRI[WTS.action] || [];
+      ctx.globalAlpha = 1;
+      items.forEach(function (it) {
+        if (it.cells.length > 1) {
+          ctx.lineWidth = Math.max(1.5, hexPx * 0.12); ctx.strokeStyle = C.accent;
+          it.cells.forEach(function (ci) { if (pathFor(ci, 0.9)) ctx.stroke(); });
+        }
+      });
+      var r = Math.max(7, Math.min(12, hexPx * 0.65));
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = '600 ' + Math.round(r * 1.05) + 'px ' + getComputedStyle(document.documentElement).getPropertyValue('--font-mono');
+      items.forEach(function (it, n) {
+        var x = P.X[it.i] * S + OX, y = P.Y[it.i] * S + OY, on = n === WTS.sel;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = on ? C.accent : C.surface; ctx.fill();
+        ctx.lineWidth = 1.5; ctx.strokeStyle = on ? C.accent : C.ink; ctx.stroke();
+        ctx.fillStyle = on ? C.accentInk : C.ink; ctx.fillText(String(n + 1), x, y + 0.5);
+      });
+    }
+    if (sel >= 0) { pathFor(sel, 1.0); ctx.lineWidth = 2.5; ctx.strokeStyle = C.ink; ctx.stroke(); }
+  }
+  function hexAt(e) {
+    var rect = cv.getBoundingClientRect();
+    var px = e.clientX - rect.left, py = e.clientY - rect.top;
+    var best = -1, bd = Infinity;
+    for (var i = 0; i < P.N; i++) {
+      var dx = P.X[i] * S + OX - px, dy = P.Y[i] * S + OY - py, d = dx * dx + dy * dy;
+      if (d < bd) { bd = d; best = i; }
+    }
+    return Math.sqrt(bd) < Math.max(hexPx * 1.05, 6) ? best : -1;
+  }
+  function describe() {
+    var el = $('#readout');
+    if (sel < 0 || !res || !P) { el.textContent = 'Tap or hover a hex to inspect it.'; return; }
+    var c = P.place.cells, cov = res.cover[sel], txt = BLURB[cov] || '';
+    if (cov === 'park') txt = res.comp[sel] === res.lcc ? 'Joined to the main habitat network.' : 'A habitat island until a corridor reaches it.';
+    var bits = [];
+    var pop = Number(c.pop[sel]) || 0;
+    if (pop >= 1) bits.push('About ' + fmtPop(pop) + ' people');
+    if (c.elev && isFinite(Number(c.elev[sel])) && kind !== 'demo') bits.push(Math.round(Number(c.elev[sel])) + ' m above sea level');
+    if (P.hasRivers && P.river[sel] > 0) bits.push(P.river[sel] >= 1 ? 'a river runs through it' : P.river[sel] >= 0.7 ? 'a canal runs through it' : 'a stream runs through it');
+    if (Number(c.flood[sel]) > 0.05 && cov !== 'water') bits.push('flood-prone');
+    if (isUrban(cov)) bits.push('heat load ' + Math.round(res.heat[sel] / 1.4 * 100) + ' of 100');
+    if (HC && isFinite(HC.rel[sel])) bits.push('measured ' + (HC.rel[sel] >= 0 ? '+' : '\u2212') + Math.abs(HC.rel[sel]).toFixed(1) + ' \u00b0C against typical land');
+    el.innerHTML = '<b>' + (NAMES[cov] || cov) + '.</b> ' + txt + (bits.length ? ' ' + bits.join(' · ') + '.' : '');
+  }
+  var painting = false, lastPainted = -1;
+  cv.addEventListener('pointermove', function (e) {
+    if (!P) return;
+    var h = hexAt(e);
+    if (SK.on && painting) { if (h >= 0 && h !== lastPainted) { lastPainted = h; paintHex(h); } return; }
+    if (e.pointerType === 'mouse' && h !== sel) { sel = h; describe(); scheduleDraw(); }
+  });
+  cv.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse' && sel !== -1 && !painting) { sel = -1; describe(); scheduleDraw(); } });
+  cv.addEventListener('pointerdown', function (e) {
+    if (!P) return;
+    var h = hexAt(e);
+    if (SK.on) {
+      painting = true; lastPainted = h;
+      try { cv.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      if (h >= 0) paintHex(h);
+      return;
+    }
+    if (e.pointerType !== 'mouse') { sel = h === sel ? -1 : h; describe(); scheduleDraw(); }
+  });
+  ['pointerup', 'pointercancel'].forEach(function (ev) {
+    cv.addEventListener(ev, function () { if (painting) { painting = false; lastPainted = -1; saveSketch(); } });
+  });
+
+  // ---- Updates
+  var announceTimer = 0;
+  function render() {
+    res = P.evaluate(state);
+    var bau = P.BAU;
+    METRICS.forEach(function (m) {
+      var v = Math.round(res.metrics[m.k]), b = Math.round(bau.metrics[m.k]);
+      $('#mv-' + m.k).textContent = v; setDelta($('#md-' + m.k), v - b);
+      $('#mf-' + m.k).style.width = v + '%'; $('#mt-' + m.k).style.left = 'calc(' + b + '% - 1px)';
+    });
+    TESTS.forEach(function (t) {
+      var v = Math.round(res.tests[t.k]), b = Math.round(bau.tests[t.k]);
+      $('#tv-' + t.k).textContent = v; setDelta($('#td-' + t.k), v - b);
+      $('#tf-' + t.k).style.width = v + '%'; $('#tt-' + t.k).style.left = 'calc(' + b + '% - 1px)';
+    });
+    var idx = Math.round(res.index), bidx = Math.round(bau.index);
+    $('#idx').textContent = idx;
+    var d = $('#idxd');
+    d.textContent = fmtDelta(idx - bidx);
+    d.style.color = idx - bidx > 0 ? 'var(--pos)' : idx - bidx < 0 ? 'var(--neg)' : 'var(--ink2)';
+    var used = TM.effort(state);
+    $('#budget-txt').textContent = Math.round(used) + ' of ' + TM.BUDGET;
+    $('#budget-fill').style.width = Math.min(100, used / TM.BUDGET * 100) + '%';
+    LEVERS.forEach(function (L) { $('#out-' + L.key).textContent = state[L.key]; $('#in-' + L.key).value = state[L.key]; });
+    document.querySelectorAll('[data-preset]').forEach(function (b) {
+      var p = b.dataset.preset === 'best' ? { v: bestMix } : PRESETS.filter(function (x) { return x.id === b.dataset.preset; })[0];
+      var same = p && p.v && LEVERS.every(function (L) { return p.v[L.key] === state[L.key]; });
+      b.setAttribute('aria-pressed', same ? 'true' : 'false');
+    });
+    renderSketchSum();
+    renderClimNote();
+    describe();
+    scheduleDraw();
+    clearTimeout(announceTimer);
+    announceTimer = setTimeout(function () {
+      $('#live').textContent = 'Resilience index ' + idx + ', ' + (idx - bidx >= 0 ? 'up ' : 'down ') + Math.abs(idx - bidx) + ' from business as usual.';
+    }, 500);
+  }
+
+  function renderPlaceInfo() {
+    var pl = P.place;
+    $('#place-name').textContent = pl.name || 'Unnamed place';
+    $('#place-tag').textContent = kind === 'demo' ? 'Demo' : 'Real data';
+    var hexKm2 = pl.hex_km2 || (P.hexKm * P.hexKm * 2.598);
+    var meta = [P.N.toLocaleString('en-US') + ' hexes', 'about ' + (hexKm2 >= 10 ? Math.round(hexKm2) : hexKm2.toFixed(2)) + ' km² each', fmtPop(P.totalPop) + ' people'];
+    if (pl.buffer_km) meta.push('plus ' + Math.round(pl.buffer_km) + ' km of surrounding land');
+    $('#place-meta').textContent = meta.join(' · ');
+    var items = [];
+    (pl.sources || []).forEach(function (s) { items.push('<li>' + esc(s) + '</li>'); });
+    if (pl.display_name) items.unshift('<li>' + esc(pl.display_name) + '</li>');
+    if (pl.generated && kind !== 'demo') items.push('<li>Built ' + esc(pl.generated) + (pl.h3_res != null ? ' at H3 resolution ' + esc(pl.h3_res) : '') + '</li>');
+    (pl.notes || []).concat(P.notes).forEach(function (n) { items.push('<li class="warn">' + esc(n) + '</li>'); });
+    if (kind !== 'demo') items.push('<li class="warn">Global data is coarser than local data. Use the scores to compare scenarios here, not as forecasts.</li>');
+    $('#datalist').innerHTML = items.join('');
+    var corrNote = P.Lmax > 0 ? 'Greenways grow from the largest natural area toward ' + P.PARKS.length + ' city park' + (P.PARKS.length === 1 ? '' : 's') + '.' : 'No corridor route was found for this place.';
+    $('#desc-corridors').textContent = corrNote;
+    $('#desc-wetlands').textContent = P.restorableCount ? 'Restores wetlands on ' + P.restorableCount + ' flood-prone hexes of farmland and open land, wettest first.' : 'No flood-prone farmland or open land was found, so this lever has nothing to restore here.';
+    $('#desc-compact').textContent = P.subCount ? 'Pulls back ' + P.subCount + ' sprawl hexes, outermost first, and houses the same people inside the existing city.' : 'No sprawl edge was found, so this lever only changes travel a little.';
+  }
+
+  // Waterways are stored per hex, so draw each network as a tree (no loops) to keep the lines clean
+  function riverNetwork(Pp) {
+    function build(inClass) {
+      var seen = new Uint8Array(Pp.N), segs = [], lone = [];
+      for (var i = 0; i < Pp.N; i++) {
+        if (seen[i] || !inClass(i)) continue;
+        seen[i] = 1;
+        var q = [i], head = 0, linked = false;
+        while (head < q.length) {
+          var a = q[head++];
+          var nbs = Pp.NB[a];
+          for (var m = 0; m < nbs.length; m++) {
+            var j = nbs[m];
+            if (seen[j] || !inClass(j)) continue;
+            seen[j] = 1; q.push(j); segs.push(a, j); linked = true;
+          }
+        }
+        if (!linked) lone.push(i);
+      }
+      return { segs: segs, lone: lone };
+    }
+    if (!Pp.hasRivers) return { major: { segs: [], lone: [] }, minor: { segs: [], lone: [] } };
+    return {
+      major: build(function (i) { return Pp.river[i] >= 1; }),
+      minor: build(function (i) { return Pp.river[i] > 0 && Pp.river[i] < 1; })
+    };
+  }
+
+  function setPlace(data, k) {
+    var prepared = TM.prepare(data);   // throws on a bad file
+    prepared.rivNet = riverNetwork(prepared);
+    if (search) { search.cancel(); search = null; }
+    P = prepared; kind = k; sel = -1; bestMix = null;
+    P.setClimate(CLIM);
+    $('#best-btn').disabled = false;
+    $('#best-btn').textContent = 'Find the best mix for this place';
+    $('#best-msg').textContent = 'Tries about 4,000 lever settings within the effort cap and applies the highest-scoring one.';
+    renderPresets();
+    computeBBox();
+    loadSketch();
+    PRI = P.priorities(8);
+    WTS.sel = -1; WTS.show = false;
+    renderWTS();
+    HC = heatCheck(P);
+    $('#sat-chip').hidden = !HC;
+    if (!HC && layer === 'sat') setLayer('land');
+    renderHeatCheck();
+    renderPlaceInfo();
+    renderLegend();
+    SPOT = spotOutline(P);
+    renderGlance();
+    render();
+    resize();
+    renderRegional();
+  }
+
+  // ---- Your place at a glance, and its outline within the region
+  var SPOT = null;
+  function spotOutline(Pp) {
+    var n = Pp.N, ins = 0, segs = [];
+    for (var i = 0; i < n; i++) if (Pp.inside[i]) ins++;
+    if (!ins || ins === n) return { segs: segs, small: false, share: 1 };
+    for (i = 0; i < n; i++) {
+      if (!Pp.inside[i]) continue;
+      var p = Pp.POLY[i], cx = Pp.X[i], cy = Pp.Y[i];
+      if (!p || p.length < 6) continue;
+      var m = p.length / 2;
+      for (var k = 0; k < m; k++) {
+        var x1 = p[2 * k], y1 = p[2 * k + 1], x2 = p[(2 * k + 2) % p.length], y2 = p[(2 * k + 3) % p.length];
+        var nx = cx + 2 * ((x1 + x2) / 2 - cx), ny = cy + 2 * ((y1 + y2) / 2 - cy), tol = 0.35 * Math.hypot((x1 + x2) / 2 - cx, (y1 + y2) / 2 - cy);
+        var shared = (Pp.NB[i] || []).some(function (j) { return Pp.inside[j] && Math.hypot(Pp.X[j] - nx, Pp.Y[j] - ny) < tol; });
+        if (!shared) segs.push(x1, y1, x2, y2);
+      }
+    }
+    return { segs: segs, small: ins / n < 0.15, share: ins / n };
+  }
+  function fmtPeople(v) { return v >= 1e6 ? (v / 1e6).toFixed(v >= 1e7 ? 0 : 1) + ' million' : v >= 1e4 ? Math.round(v / 1000).toLocaleString('en-US') + ',000' : Math.round(v).toLocaleString('en-US'); }
+  function fmtKm(v) { return v >= 100 ? Math.round(v).toLocaleString('en-US') : v >= 10 ? Math.round(v) : v.toFixed(1); }
+  function renderGlance() {
+    var box = $('#glance');
+    if (!P || kind === 'demo') { box.hidden = true; return; }
+    var c = P.place.cells, base = P.BAU_TODAY, n = P.N, name = P.place.name || 'This place';
+    var pop = 0, area = 0, land = 0, flood = 0, hot = 0, hotN = 0, sx = 0, sy = 0, sw = 0;
+    for (var i = 0; i < n; i++) {
+      if (!P.inside[i]) continue;
+      var a = Number(c.area[i]) || 0, pp = Number(c.pop[i]) || 0, isLand = (Number(c.water[i]) || 0) < 0.5;
+      pop += pp; area += a;
+      if (isLand) { land += a; if ((Number(c.flood[i]) || 0) >= 0.5) flood += a; }
+      if (HC && isLand && isFinite(HC.rel[i])) { hot += HC.rel[i]; hotN++; }
+      var w = pp + 0.01; sx += P.X[i] * w; sy += P.Y[i] * w; sw += w;
+    }
+    var cx = sx / sw, cy = sy / sw, wild = Infinity, natural = 0, natTotal = 0;
+    for (i = 0; i < n; i++) {
+      var cv = base.cover[i];
+      if (cv === 'water') continue;
+      natTotal++;
+      if (cv === 'forest' || cv === 'wetland' || cv === 'open') natural++;
+      if (cv === 'forest' || cv === 'wetland') { var d = Math.hypot(P.X[i] - cx, P.Y[i] - cy); if (d < wild) wild = d; }
+    }
+    var cards = [];
+    cards.push(['People', fmtPeople(pop), 'living on ' + fmtKm(area) + ' km²' + (SPOT && SPOT.share < 1 ? ' inside the outline' : '')]);
+    if (HC && hotN) {
+      var h = hot / hotN;
+      cards.push(['Heat, measured', (h >= 0 ? '+' : '−') + Math.abs(h).toFixed(1) + ' °C', h >= 0 ? 'hotter than typical land around it, from Landsat satellite readings' : 'cooler than land around it, from Landsat readings: the dry open ground nearby heats up even more in the sun']);
+    }
+    if (land > 0) cards.push(['Flooding', Math.round(100 * flood / land) + '%', 'of its land sits low beside rivers, lakes or the sea, where floods reach first']);
+    var reg = P.place.regional;
+    if (reg && reg.basin && reg.basin.area_km2) {
+      var sh = reg.basin.shares || {};
+      cards.push(['Water', fmtKm(reg.basin.area_km2) + ' km²', 'of river basin drains toward it: ' + pct(sh.forest || 0) + ' forest, ' + pct(sh.cropland || 0) + ' farmland, ' + pct(sh.built || 0) + ' built-up']);
+    }
+    if (reg && reg.foodshed && reg.foodshed.length && pop > 0) {
+      var f = reg.foodshed[0], ratio = f.crop_km2 / (pop * (reg.need_km2_per_person || 0.0019));
+      cards.push(['Food', ratio >= 1 ? (ratio >= 10 ? Math.round(ratio) : ratio.toFixed(1)) + '×' : Math.round(ratio * 100) + '%',
+        ratio >= 1 ? 'its residents’ food needs: what the farmland within ' + f.km + ' km could grow' : 'of its residents’ food needs could be grown on farmland within ' + f.km + ' km']);
+    }
+    if (isFinite(wild)) cards.push(['Wild places', wild < 1 ? 'Under 1 km' : fmtKm(wild) + ' km', 'to the nearest forest or wetland. ' + pct(natTotal ? natural / natTotal : 0) + ' of the land in view is wild or open']);
+    var small = SPOT && SPOT.small;
+    $('#glance-h').textContent = small ? name + ' within its region' : name + ' at a glance';
+    $('#glance-sub').textContent = small ? 'The outlined area is ' + name + '. The faded land around it is the region it depends on for water, food and nature, and every score below counts both.'
+      : 'The essentials before you start planning. Drag the levers below to see how they change.';
+    $('#glance-grid').innerHTML = cards.map(function (k) {
+      return '<div class="gl"><span class="gl-k">' + k[0] + '</span><span class="gl-v">' + k[1] + '</span><span class="gl-t">' + esc(k[2]) + '</span></div>';
+    }).join('');
+    box.hidden = false;
+  }
+
+  // ---- Beyond the city: regional threads
+  var REG_COLORS = { t: '--m-forest', s: '--m-open', g: '--m-open', c: '--m-farm', b: '--m-core', n: '--m-barren', w: '--m-water', e: '--m-wet', '.': '--m-water' };
+  var SHARE_PARTS = [
+    { k: 'forest', name: 'Forest', v: '--m-forest' }, { k: 'shrub_grass', name: 'Grass and scrub', v: '--m-open' },
+    { k: 'cropland', name: 'Cropland', v: '--m-farm' }, { k: 'built', name: 'Built-up', v: '--m-core' },
+    { k: 'wetland', name: 'Wetland', v: '--m-wet' }, { k: 'water', name: 'Water', v: '--m-water' }, { k: 'bare', name: 'Bare', v: '--m-barren' }
+  ];
+  function pct(x) { return Math.round(x * 100) + '%'; }
+  function renderRegional() {
+    var reg = P && P.place.regional, body = $('#reg-body');
+    $('#reg-name').textContent = P ? (P.place.name || 'this place') : 'this place';
+    var chips = '<div class="wts-actions" role="group" aria-label="City to show" style="margin:4px 0 14px">' +
+      EXAMPLES.filter(function (x) { return x.kind === 'real'; }).map(function (x) {
+        return '<button type="button" class="chip" data-regcity="' + x.id + '" aria-pressed="' + (x.id === current ? 'true' : 'false') + '">' + x.name + '</button>';
+      }).join('') + '</div>';
+    if (!reg || !reg.grid) {
+      body.innerHTML = chips + '<p class="reg-empty">' + (kind === 'demo'
+        ? 'The fictional demo has no wider region. Choose a real place above to see its river basin and foodshed.'
+        : 'This place file has no regional threads yet. Rebuild it with the latest place builder to see its river basin and foodshed.') + '</p>';
+      return;
+    }
+    var html = chips + '<div class="reg-grid"><div class="reg-map"><canvas id="reg-canvas" role="img" aria-label="Regional map: land cover around the city, its upstream river basin outlined, and rings at 50, 100 and 250 km."></canvas></div><div class="reg-facts">';
+    var b = reg.basin;
+    if (b) {
+      html += '<div class="thread-block"><span class="eyebrow">Water thread</span><h3>The river basin upstream</h3>' +
+        '<p>About <b>' + Math.round(b.area_km2).toLocaleString('en-US') + ' km²</b> of land drains toward the city' + (b.subbasins > 1 ? ', across ' + b.subbasins + ' sub-basins' : '') + '. Rain anywhere inside the blue outline reaches its rivers. Forest and wetland upstream slow that water down; pavement and bare fields speed it up.</p>' +
+        '<div class="stack" aria-hidden="true">' + SHARE_PARTS.map(function (s) { var v = b.shares[s.k] || 0; return v > 0.002 ? '<span style="width:' + (v * 100).toFixed(1) + '%;background:var(' + s.v + ')"></span>' : ''; }).join('') + '</div>' +
+        '<ul class="key" style="margin-top:2px">' + SHARE_PARTS.filter(function (s) { return (b.shares[s.k] || 0) >= 0.005; }).map(function (s) { return '<li><i style="background:var(' + s.v + ')"></i>' + s.name + ' ' + pct(b.shares[s.k]) + '</li>'; }).join('') + '</ul></div>';
+    } else {
+      html += '<div class="thread-block"><span class="eyebrow">Water thread</span><h3>The river basin upstream</h3><p>The upstream basin could not be loaded for this place.</p></div>';
+    }
+    var need = reg.need_km2_per_person || 0.0019;
+    html += '<div class="thread-block"><span class="eyebrow">Food thread</span><h3>The foodshed</h3><p>How much of the region’s food could come from cropland within reach, at about 0.19 hectares per person.</p>' +
+      '<div class="tablewrap reg-table"><table style="min-width:0"><thead><tr><th>Within</th><th class="num">Cropland</th><th class="num">People</th><th class="num">Could feed</th></tr></thead><tbody>' +
+      reg.foodshed.map(function (f) {
+        var feed = f.pop ? Math.min(999, Math.round(100 * f.crop_km2 / (f.pop * need))) : null;
+        return '<tr><td>' + f.km + ' km</td><td class="num">' + Math.round(f.crop_km2).toLocaleString('en-US') + ' km²</td><td class="num">' + (f.pop != null ? fmtPop(f.pop) : '—') + '</td><td class="num">' + (feed != null ? (feed >= 100 ? 'everyone' : feed + '%') : '—') + '</td></tr>';
+      }).join('') + '</tbody></table></div></div>';
+    html += '<div class="thread-block"><span class="eyebrow">Heat and habitat threads</span><h3>Local, for now</h3><p>Heat is a neighborhood-scale problem, so it stays on the city map above. Regional wildlife corridors are the next thread to add.</p></div>';
+    if (reg.notes && reg.notes.length) html += '<ul class="datalist">' + reg.notes.map(function (n) { return '<li class="warn">' + esc(n) + '</li>'; }).join('') + '</ul>';
+    html += '</div></div>';
+    body.innerHTML = html;
+    drawRegional();
+  }
+  // Paint a regional land-cover map with the basin, optional foodshed rings and the city map's box
+  function paintRegion(cvs, reg, Wr, maxH, opts) {
+    opts = opts || {};
+    var g = reg.grid, bd = g.bounds;
+    var lat0 = (bd[1] + bd[3]) / 2, kx = Math.cos(lat0 * Math.PI / 180);
+    var bw = (bd[2] - bd[0]) * kx, bh = bd[3] - bd[1];
+    var Hr = Math.round(Math.min(Wr * bh / bw, maxH));
+    var Ws = Math.min(Wr, Math.round(Hr * bw / bh));
+    var d = window.devicePixelRatio || 1;
+    cvs.width = Math.round(Wr * d); cvs.height = Math.round(Hr * d);
+    cvs.style.width = Wr + 'px'; cvs.style.height = Hr + 'px';
+    var c2 = cvs.getContext('2d');
+    c2.setTransform(d, 0, 0, d, 0, 0);
+    var ox = (Wr - Ws) / 2;
+    var css = getComputedStyle(document.documentElement), col = {};
+    Object.keys(REG_COLORS).forEach(function (k) { col[k] = css.getPropertyValue(REG_COLORS[k]).trim(); });
+    var surface = css.getPropertyValue('--surface').trim(), ink = css.getPropertyValue('--ink').trim(), water = css.getPropertyValue('--m-water').trim(), accent = css.getPropertyValue('--accent').trim();
+    c2.fillStyle = surface; c2.fillRect(0, 0, Wr, Hr);
+    var cw = Ws / g.w, ch = Hr / g.h, codes = g.codes;
+    for (var r = 0; r < g.h; r++) {
+      for (var cI = 0; cI < g.w; cI++) {
+        var k = codes.charAt(r * g.w + cI);
+        if (!col[k]) continue;
+        c2.fillStyle = col[k];
+        c2.fillRect(ox + cI * cw, r * ch, Math.ceil(cw), Math.ceil(ch));
+      }
+    }
+    function px(la, lo) { return [ox + (lo - bd[0]) / (bd[2] - bd[0]) * Ws, (bd[3] - la) / (bd[3] - bd[1]) * Hr]; }
+    c2.fillStyle = surface; c2.globalAlpha = opts.soften == null ? 0.35 : opts.soften; c2.fillRect(0, 0, Wr, Hr); c2.globalAlpha = 1;
+    if (reg.basin && reg.basin.rings) {
+      c2.strokeStyle = water; c2.lineWidth = opts.basinWidth || 2.5; c2.lineJoin = 'round'; c2.fillStyle = water;
+      reg.basin.rings.forEach(function (ring) {
+        c2.beginPath();
+        for (var j = 0; j + 1 < ring.length; j += 2) { var p = px(ring[j], ring[j + 1]); if (j === 0) c2.moveTo(p[0], p[1]); else c2.lineTo(p[0], p[1]); }
+        c2.closePath();
+        c2.globalAlpha = opts.basinFill == null ? 0.12 : opts.basinFill; c2.fill(); c2.globalAlpha = 1; c2.stroke();
+      });
+    }
+    var cen = px(reg.center[0], reg.center[1]);
+    if (opts.rings !== false) {
+      c2.strokeStyle = ink; c2.lineWidth = 1.2; c2.setLineDash([5, 5]);
+      c2.font = '500 11px ' + css.getPropertyValue('--font-mono'); c2.fillStyle = ink; c2.textAlign = 'left'; c2.textBaseline = 'bottom';
+      reg.foodshed.forEach(function (f) {
+        var rx = f.km / (111.32 * kx) / (bd[2] - bd[0]) * Ws, ry = f.km / 110.57 / (bd[3] - bd[1]) * Hr;
+        c2.beginPath(); c2.ellipse(cen[0], cen[1], rx, ry, 0, 0, Math.PI * 2); c2.stroke();
+        if (opts.labels !== false && cen[1] - ry > 14) c2.fillText(f.km + ' km', cen[0] + 4, cen[1] - ry - 2);
+      });
+      c2.setLineDash([]);
+    }
+    if (opts.cells) {
+      var cl = opts.cells, mnla = Infinity, mxla = -Infinity, mnlo = Infinity, mxlo = -Infinity;
+      for (var i = 0; i < cl.lat.length; i++) { var la = Number(cl.lat[i]), lo = Number(cl.lng[i]); if (la < mnla) mnla = la; if (la > mxla) mxla = la; if (lo < mnlo) mnlo = lo; if (lo > mxlo) mxlo = lo; }
+      var a = px(mxla, mnlo), z = px(mnla, mxlo);
+      c2.strokeStyle = accent; c2.lineWidth = 2; c2.strokeRect(a[0], a[1], Math.max(3, z[0] - a[0]), Math.max(3, z[1] - a[1]));
+    }
+    c2.beginPath(); c2.arc(cen[0], cen[1], opts.dot || 4, 0, Math.PI * 2); c2.fillStyle = accent; c2.fill();
+    c2.lineWidth = 2; c2.strokeStyle = surface; c2.stroke();
+    return { cen: cen, H: Hr };
+  }
+  function drawRegional() {
+    var reg = P && P.place.regional, cvs = $('#reg-canvas');
+    if (!reg || !cvs) return;
+    var Wr = cvs.parentNode.clientWidth;
+    if (!Wr) return;
+    paintRegion(cvs, reg, Wr, window.innerHeight * 0.8, { cells: P.place.cells });
+  }
+
+  function showError(msg) { var a = $('#alert'); a.textContent = msg; a.hidden = false; }
+  function clearError() { $('#alert').hidden = true; }
+
+  function remember(text, name) {
+    try {
+      if (text.length < 4.5e6) localStorage.setItem(STORE_KEY, text);
+    } catch (e) { /* storage full or blocked: skip */ }
+  }
+  function offerReopen() {
+    try {
+      var t = localStorage.getItem(STORE_KEY);
+      if (!t) return;
+      var d = JSON.parse(t);
+      var b = $('#reopen');
+      b.textContent = 'Reopen ' + (d.name || 'last place');
+      b.hidden = false;
+      b.onclick = function () {
+        try { clearError(); setPlace(d, 'real'); current = null; markExamples(); b.hidden = true; }
+        catch (err) { showError('The saved place could not be opened: ' + err.message); }
+      };
+    } catch (e) { /* ignore */ }
+  }
+
+  function loadFile(file) {
+    if (!file) return;
+    if (file.size > 25 * 1024 * 1024) { showError('That file is ' + Math.round(file.size / 1048576) + ' MB. Place files are usually under 5 MB. Rebuild it with fewer hexes.'); return; }
+    var reader = new FileReader();
+    reader.onload = function () {
+      var text = String(reader.result || '');
+      var data;
+      try { data = JSON.parse(text); }
+      catch (err) { showError('This file is not valid JSON. Choose the .threadlands.json file the place builder made.'); return; }
+      try {
+        setPlace(data, 'real');
+        current = null; markExamples();
+        clearError();
+        $('#reopen').hidden = true;
+        remember(text);
+        $('#live').textContent = 'Loaded ' + (data.name || 'the place') + '.';
+      } catch (err) { showError(err.message); }
+    };
+    reader.onerror = function () { showError('The file could not be read. Try choosing it again.'); };
+    reader.readAsText(file);
+  }
+
+  // ---- Events
+  LEVERS.forEach(function (L) {
+    $('#in-' + L.key).addEventListener('input', function (e) {
+      var val = Number(e.target.value), others = 0;
+      LEVERS.forEach(function (o) { if (o.key !== L.key) others += state[o.key] * TM.COST[o.key]; });
+      var room = Math.floor(((TM.BUDGET - others) / TM.COST[L.key]) / 5) * 5;
+      var allowed = Math.max(0, Math.min(100, room));
+      var note = $('#budget-note');
+      if (val > allowed) { val = allowed; note.hidden = false; } else note.hidden = true;
+      state[L.key] = val;
+      render();
+    });
+  });
+  $('#presets').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-preset]');
+    if (!b) return;
+    var v = b.dataset.preset === 'best' ? bestMix : PRESETS.filter(function (x) { return x.id === b.dataset.preset; })[0].v;
+    if (!v) return;
+    Object.assign(state, v);
+    $('#budget-note').hidden = true;
+    render();
+  });
+  $('#best-btn').addEventListener('click', function () {
+    if (search || !P) return;
+    var btn = this, msg = $('#best-msg'), forP = P;
+    btn.disabled = true;
+    search = TM.searchBest(P, 20, function (f) {
+      btn.textContent = 'Searching… ' + Math.round(f * 100) + '%';
+    }, function (best, score) {
+      search = null;
+      if (forP !== P) return;
+      bestMix = best;
+      btn.disabled = false;
+      btn.textContent = 'Search again';
+      renderPresets();
+      Object.assign(state, best);
+      $('#budget-note').hidden = true;
+      render();
+      var SHORT = { canopy: 'shade', corridors: 'corridors', wetlands: 'wetlands', regen: 'regenerative farming', compact: 'compact growth' };
+      var parts = LEVERS.map(function (L) { return SHORT[L.key] + ' ' + best[L.key]; });
+      msg.textContent = 'Best mix found: resilience index ' + Math.round(score) + ' (' + parts.join(', ') + '). It is now applied and saved as the Best mix scenario.';
+    });
+  });
+  function setLayer(l) {
+    layer = l;
+    document.querySelectorAll('.layers .chip').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.layer === l ? 'true' : 'false'); });
+    renderLegend(); scheduleDraw();
+  }
+  window.addEventListener('resize', function () { drawRegional(); });
+  $('#reg-body').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-regcity]');
+    if (!b || b.dataset.regcity === current) return;
+    openExample(b.dataset.regcity);
+    try { $('#reg-h').scrollIntoView({ block: 'start' }); } catch (err) { /* ignore */ }
+  });
+  new MutationObserver(function () { drawRegional(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  if (window.matchMedia) { var mq2 = window.matchMedia('(prefers-color-scheme: dark)'); if (mq2.addEventListener) mq2.addEventListener('change', drawRegional); }
+  document.querySelector('.layers').addEventListener('click', function (e) { var b = e.target.closest('[data-layer]'); if (b) setLayer(b.dataset.layer); });
+  $('#tests').addEventListener('click', function (e) { var b = e.target.closest('[data-layer]'); if (b) setLayer(b.dataset.layer); });
+  $('#file').addEventListener('change', function (e) { loadFile(e.target.files && e.target.files[0]); e.target.value = ''; });
+  $('#wts-actions').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-wts]');
+    if (!b) return;
+    WTS.action = b.dataset.wts; WTS.show = true; WTS.sel = -1; sel = -1;
+    renderWTS(); describe(); scheduleDraw();
+  });
+  $('#wts-list').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-wi]');
+    if (!b) return;
+    var n = Number(b.dataset.wi), it = (PRI[WTS.action] || [])[n];
+    if (!it) return;
+    WTS.show = true; WTS.sel = n; sel = it.i;
+    renderWTS(); describe(); scheduleDraw();
+    if (window.innerWidth < 960) { try { $('#mapwrap').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (err) { /* ignore */ } }
+  });
+  $('#wts-add').addEventListener('click', function () {
+    var tool = WTS_PAINT[WTS.action], items = (PRI && PRI[WTS.action]) || [];
+    if (!tool) return;
+    var added = 0, already = 0;
+    items.forEach(function (it) {
+      var cells = tool === 'corridor' ? it.cells.filter(function (c) { return P.base[c] !== 'park'; }) : [it.i];
+      cells.forEach(function (c) {
+        if (P.paint.get(c) === tool) return;
+        if (sketchBlock(c, tool)) { already++; return; }
+        P.paint.set(c, tool); added++;
+      });
+    });
+    saveSketch(); render();
+    $('#wts-copied').textContent = added ? 'Added ' + added + ' hex' + (added === 1 ? '' : 'es') + ' to your sketch' + (already ? '; ' + already + ' already had this under the current levers' : '') + '. Dashed outlines on the map mark your changes.'
+      : 'These sites already have this under the current levers. Lower the matching lever to see what the sketch adds.';
+  });
+  $('#wts-hide').addEventListener('click', function () { WTS.show = false; WTS.sel = -1; sel = -1; renderWTS(); describe(); scheduleDraw(); });
+  $('#wts-copy').addEventListener('click', function () {
+    var text = wtsText(), note = $('#wts-copied'), ta = $('#wts-text');
+    function fallback() {
+      ta.value = text; ta.hidden = false; ta.focus(); ta.select();
+      note.textContent = 'Select the text below and copy it.';
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { note.textContent = 'Copied.'; ta.hidden = true; }, fallback);
+      } else fallback();
+    } catch (err) { fallback(); }
+  });
+  $('#examples').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-example]');
+    if (b) openExample(b.dataset.example);
+  });
+  window.addEventListener('hashchange', function () {
+    var h = location.hash.replace('#', '');
+    if (h && h !== current && EXAMPLES.some(function (x) { return x.id === h; })) openExample(h, true);
+    else if (h && h !== current && libEntry(h)) openLibrary(h, true);
+  });
+  var mw = $('#mapwrap'), dragDepth = 0;
+  mw.addEventListener('dragenter', function (e) { e.preventDefault(); dragDepth++; mw.classList.add('dragging'); });
+  mw.addEventListener('dragover', function (e) { e.preventDefault(); });
+  mw.addEventListener('dragleave', function () { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) mw.classList.remove('dragging'); });
+  mw.addEventListener('drop', function (e) {
+    e.preventDefault(); dragDepth = 0; mw.classList.remove('dragging');
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    loadFile(f);
+  });
+
+  if (window.ResizeObserver) new ResizeObserver(function () { resize(); }).observe(mw);
+  window.addEventListener('resize', resize);
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', scheduleDraw);
+  }
+  new MutationObserver(scheduleDraw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // ---- Satellite heat check: the model's heat estimate against Landsat surface temperature
+  var HC = null;
+  function ranks(a) {
+    var idx = a.map(function (v, i) { return i; }).sort(function (x, y) { return a[x] - a[y]; });
+    var r = new Array(a.length), k = 0;
+    while (k < idx.length) {
+      var j = k; while (j + 1 < idx.length && a[idx[j + 1]] === a[idx[k]]) j++;
+      for (var m = k; m <= j; m++) r[idx[m]] = (k + j) / 2;
+      k = j + 1;
+    }
+    return r;
+  }
+  function pearson(a, b) {
+    var n = a.length, ma = 0, mb = 0, sab = 0, saa = 0, sbb = 0;
+    for (var i = 0; i < n; i++) { ma += a[i]; mb += b[i]; }
+    ma /= n; mb /= n;
+    for (i = 0; i < n; i++) { var da = a[i] - ma, db = b[i] - mb; sab += da * db; saa += da * da; sbb += db * db; }
+    return saa > 0 && sbb > 0 ? sab / Math.sqrt(saa * sbb) : 0;
+  }
+  var HC_CLASSES = [['core', 'Dense core', '--m-core'], ['mid', 'Mid-density', '--m-mid'], ['suburb', 'Sprawl edge', '--m-sub'], ['barren', 'Bare ground', '--m-barren'],
+    ['farm', 'Farmland', '--m-farm'], ['open', 'Grassland and scrub', '--m-open'], ['park', 'City parks', '--m-park'], ['forest', 'Forest', '--m-forest'],
+    ['wetland', 'Wetland', '--m-wet'], ['water', 'Water', '--m-water']];
+  function median(v) { v = v.slice().sort(function (a, b) { return a - b; }); var n = v.length; return n ? (n % 2 ? v[(n - 1) / 2] : (v[n / 2 - 1] + v[n / 2]) / 2) : NaN; }
+  function heatCheck(Pp) {
+    var c = Pp.place.cells;
+    if (!c.lst_rel) return null;
+    var rel = new Float64Array(Pp.N), got = 0;
+    for (var i = 0; i < Pp.N; i++) { var v = c.lst_rel[i]; rel[i] = v == null ? NaN : Number(v); if (isFinite(rel[i])) got++; }
+    if (got < 20) return null;
+    var base = Pp.BAU_TODAY, mh = [], st = [], raw = Pp.HEAT_MODEL || base.heat;
+    for (i = 0; i < Pp.N; i++) if (isUrban(base.cover[i]) && isFinite(rel[i]) && raw[i] > 0) { mh.push(raw[i]); st.push(rel[i]); }
+    var out = { rel: rel, got: got, n: mh.length, rho: null, hit: null, classes: [], meta: Pp.place.heat_check || {} };
+    if (mh.length >= 20) {
+      out.rho = pearson(ranks(mh), ranks(st));
+      var sOrd = st.map(function (v, k) { return k; }).sort(function (a, b) { return st[b] - st[a]; });
+      var mOrd = mh.map(function (v, k) { return k; }).sort(function (a, b) { return mh[b] - mh[a]; });
+      var topM = new Set(mOrd.slice(0, Math.ceil(mh.length * 0.25)));
+      var hot = sOrd.slice(0, Math.max(3, Math.ceil(mh.length * 0.1))), hits = 0;
+      hot.forEach(function (k) { if (topM.has(k)) hits++; });
+      out.hit = hits / hot.length;
+    }
+    HC_CLASSES.forEach(function (cl) {
+      var v = [];
+      for (var i = 0; i < Pp.N; i++) if (base.cover[i] === cl[0] && isFinite(rel[i])) v.push(rel[i]);
+      if (v.length >= 5) out.classes.push({ name: cl[1], color: cl[2], v: median(v), n: v.length });
+    });
+    return out;
+  }
+  function renderHeatCheck() {
+    var wrap = $('#hc-wrap'), body = $('#hc-body');
+    wrap.hidden = !HC;
+    if (!HC) { body.innerHTML = ''; return; }
+    var h = '';
+    if (HC.rho != null) {
+      var r = HC.rho, word = r >= 0.6 ? 'closely' : r >= 0.4 ? 'fairly well' : r >= 0.2 ? 'only loosely' : 'poorly';
+      h += '<p class="hc-lead">The model’s heat map matches satellite readings <b>' + word + '</b> across ' + HC.n.toLocaleString('en-US') + ' built-up hexes (rank correlation ' + r.toFixed(2) + ').';
+      h += ' Of the hottest tenth measured from space, the model puts <b>' + Math.round(HC.hit * 100) + '%</b> in its own hottest quarter, where chance alone would give 25%.' + (P.calibrated ? ' Where the two disagree, Threadlands now trusts the satellite: each hex\u2019s heat is nudged toward what was measured, so shade goes where the ground is really hottest.' : '') + '</p>';
+    }
+    if (HC.classes.length) {
+      var mx = Math.max(4, Math.max.apply(null, HC.classes.filter(function (c) { return c.name !== 'Water'; }).map(function (c) { return Math.abs(c.v); })));
+      h += '<span class="eyebrow">Measured surface temperature, compared with typical land</span><div class="hc-rows">' + HC.classes.map(function (c) {
+        var w = Math.min(50, Math.abs(c.v) / mx * 50), left = c.v >= 0 ? 50 : 50 - w;
+        return '<span class="lbl">' + c.name + '</span><span class="hc-bar"><i style="left:' + left.toFixed(1) + '%;width:' + w.toFixed(1) + '%;background:var(' + c.color + ')"></i></span>' +
+          '<span class="val">' + (c.v >= 0 ? '+' : '−') + Math.abs(c.v).toFixed(1) + '°</span>';
+      }).join('') + '</div>';
+    }
+    var m = HC.meta;
+    h += '<p class="hc-small">Daytime land surface temperature from Landsat 8 and 9' + (m.scenes ? ', ' + m.scenes + ' clear scenes' : '') + (m.years ? ', ' + String(m.years).replace('-', '–') : '') + (m.season ? ', ' + m.season : '') + '. Surfaces run hotter than the air, so read these as a ranking of hot and cool ground, not as air temperature.</p>' +
+      '<div class="wts-actions"><button class="btn ghost" type="button" data-layer="sat">Show measured heat on the map</button></div>';
+    body.innerHTML = h;
+  }
+  $('#hc-body').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-layer]');
+    if (b) { setLayer(b.dataset.layer); try { $('#map').scrollIntoView({ block: 'center' }); } catch (err) { /* ignore */ } }
+  });
+
+  // ---- 2050 stress test
+  var CLIM = 'today';
+  var CLIM_TEXT = {
+    mid: 'summers about 1.3 \u00b0C hotter over land, downpours about 9% heavier, seas about 20 cm higher',
+    high: 'summers about 1.9 \u00b0C hotter over land, downpours about 13% heavier, seas about 23 cm higher'
+  };
+  function renderClimNote() {
+    var el = $('#clim-note');
+    $('#badge-label').textContent = CLIM === 'today' ? 'Resilience index' : 'Resilience index \u00b7 2050';
+    if (!P || CLIM === 'today') { el.hidden = true; return; }
+    var today = P.evaluateIn('today', state), r0 = Math.round(P.BAU_TODAY.index), r1 = Math.round(P.BAU.index);
+    var now = Math.round(res.index), was = Math.round(today.index);
+    el.hidden = false;
+    el.innerHTML = '<b>' + TM.CLIMATE[CLIM].name + ':</b> ' + CLIM_TEXT[CLIM] + '. <span>Business as usual falls from ' + r0 + ' to ' + r1 + '. Your current plan scores ' + now + ', compared with ' + was + ' today' +
+      (now - r1 > was - r0 ? ', so its lead over doing nothing grows.' : now - r1 < was - r0 ? ', so its lead over doing nothing shrinks a little.' : '.') + ' Bars and ticks now compare with business as usual in the same climate.</span>';
+  }
+  function setClimate(k) {
+    if (search) return;
+    CLIM = k;
+    document.querySelectorAll('[data-clim]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.clim === k ? 'true' : 'false'); });
+    P.setClimate(k);
+    render();
+  }
+  document.querySelector('.climbar').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-clim]');
+    if (b) setClimate(b.dataset.clim);
+  });
+
+  // ---- Sketch a plan: hand-painted parks, wetlands, corridors and regenerative farms
+  var SK = { on: false, tool: 'park' };
+  var SK_NAMES = { park: 'park or forest', wetland: 'wetland', corridor: 'corridor', regen: 'regenerative farm' };
+  function sketchKey() { return 'threadlands:sketch:' + (P.place.name || 'place') + ':' + P.N; }
+  function saveSketch() {
+    try {
+      var arr = []; P.paint.forEach(function (t, i) { arr.push([i, t]); });
+      if (arr.length) localStorage.setItem(sketchKey(), JSON.stringify(arr)); else localStorage.removeItem(sketchKey());
+    } catch (e) { /* storage blocked: the sketch lasts until the page closes */ }
+  }
+  function loadSketch() {
+    P.paint = new Map();
+    try {
+      var t = localStorage.getItem(sketchKey());
+      if (t) JSON.parse(t).forEach(function (x) { if (x[0] >= 0 && x[0] < P.N && SK_NAMES[x[1]]) P.paint.set(x[0], x[1]); });
+    } catch (e) { /* ignore */ }
+  }
+  // Why a tool can't go on this hex, or '' when it can
+  function sketchBlock(i, tool) {
+    var c = res ? res.cover[i] : P.base[i], urban = c === 'core' || c === 'mid' || c === 'suburb' || c === 'greenway';
+    if (tool === 'park') return c === 'water' || c === 'wetland' ? 'Parks and forest go on land, not on water or wetland.' : '';
+    if (tool === 'wetland') return urban ? 'Wetlands go on farmland or open land, not on built-up blocks.' : (c === 'water' || c === 'wetland' || c === 'park') ? 'This hex is already water, wetland or park.' : '';
+    if (tool === 'corridor') return c === 'water' ? 'Corridors run over land, not water.' : '';
+    if (tool === 'regen') return c === 'farm' || c === 'regen' ? '' : 'Regenerative farming goes on farmland.';
+    return '';
+  }
+  function paintHex(i) {
+    if (SK.tool === 'erase') { if (P.paint.delete(i)) render(); return; }
+    var why = sketchBlock(i, SK.tool);
+    if (why) { $('#readout').textContent = why; return; }
+    if (P.paint.get(i) === SK.tool) return;
+    P.paint.set(i, SK.tool);
+    sel = i;
+    render();
+  }
+  function renderSketchSum() {
+    renderLegend();
+    var el = $('#sk-sum');
+    if (!P || !P.paint || !P.paint.size) { el.hidden = !SK.on; el.innerHTML = SK.on ? '<span>Pick a tool, then click or drag across the map. Sketches sit on top of the levers and are not limited by the effort cap.</span>' : ''; return; }
+    var saved = P.paint; P.paint = new Map();
+    var without = P.evaluate(state); P.paint = saved;
+    var dIdx = res.index - without.index, km2 = 0, counts = {};
+    var moved = METRICS.map(function (m) { return { name: m.name, d: res.metrics[m.k] - without.metrics[m.k] }; })
+      .filter(function (x) { return Math.abs(x.d) >= 0.1; }).sort(function (a, b) { return Math.abs(b.d) - Math.abs(a.d); }).slice(0, 3);
+    var sd = function (v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(1); };
+    var areas = P.place.cells.area;
+    P.paint.forEach(function (t, i) { km2 += Number(areas[i]) || 0; counts[t] = (counts[t] || 0) + 1; });
+    var parts = Object.keys(counts).map(function (t) { return counts[t] + ' ' + SK_NAMES[t]; });
+    el.hidden = false;
+    el.innerHTML = '<b>Your sketch:</b> ' + parts.join(', ') + ' (about ' + (km2 >= 10 ? Math.round(km2) : km2.toFixed(1)) + ' km²). <span>On its own it moves the resilience index ' + sd(dIdx) + (moved.length ? ': ' + moved.map(function (x) { return x.name.toLowerCase() + ' ' + sd(x.d); }).join(', ') : '') + '.</span>';
+  }
+  $('#sk-toggle').addEventListener('click', function () {
+    SK.on = !SK.on;
+    this.setAttribute('aria-pressed', SK.on ? 'true' : 'false');
+    this.textContent = SK.on ? 'Done sketching' : 'Sketch a plan';
+    $('#sk-tools').hidden = !SK.on;
+    cv.style.touchAction = SK.on ? 'none' : 'pan-y';
+    cv.style.cursor = SK.on ? 'cell' : 'crosshair';
+    renderSketchSum();
+  });
+  $('#sk-tools').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tool]');
+    if (!b) return;
+    SK.tool = b.dataset.tool;
+    document.querySelectorAll('[data-tool]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+  });
+  $('#sk-clear').addEventListener('click', function () { P.paint.clear(); saveSketch(); render(); });
+
+  // ---- Opening: hero map and city cards, drawn from the built-in places' own data
+  function exampleById(id) { return EXAMPLES.filter(function (x) { return x.id === id; })[0]; }
+  function feedShare(d, km) {
+    var r = d.regional, f = r && r.foodshed && r.foodshed.filter(function (x) { return x.km === km; })[0];
+    return f && f.pop ? Math.round(100 * f.crop_km2 / (f.pop * (r.need_km2_per_person || 0.0019))) : null;
+  }
+  // ---- City library and search: only where the site is served with its data folder (threadlands.org)
+  var LIB = null;
+  function norm(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+  function libEntry(slug) { return LIB ? LIB.filter(function (e) { return e.slug === slug; })[0] : null; }
+  function libMatches(q) {
+    var n = norm(q);
+    if (!n || !LIB) return [];
+    var starts = [], inside = [];
+    LIB.forEach(function (e) {
+      var nm = norm(e.name), all = norm(e.name + ' ' + e.query + ' ' + e.display);
+      if (nm.indexOf(n) === 0 || norm(e.slug.replace(/-/g, ' ')).indexOf(n) === 0) starts.push(e);
+      else if (all.indexOf(n) >= 0) inside.push(e);
+    });
+    return starts.concat(inside).slice(0, 8);
+  }
+  function openLibrary(slug, fromHash, scroll) {
+    if (EXAMPLES.some(function (x) { return x.id === slug; })) { openExample(slug, fromHash); if (scroll) $('#explore').scrollIntoView({ behavior: 'smooth' }); return; }
+    var e = libEntry(slug);
+    if (!e) return;
+    showError('Loading ' + e.name + '…');
+    fetch(BASE + 'data/places/' + slug + '.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
+      clearError();
+      setPlace(d, 'real');
+      current = slug;
+      markExamples();
+      if (!fromHash) { try { history.replaceState(null, '', '#' + slug); } catch (err) { /* ignore */ } }
+      if (scroll) $('#explore').scrollIntoView({ behavior: 'smooth' });
+    }).catch(function () { showError('Could not load ' + e.name + '. Check your connection and try again.'); });
+  }
+  var REQUEST_URL = 'https://threadlands-relay.rob41pitt.workers.dev/';   // the relay that asks the robot to build a place; empty until it is set up
+  var KIND_WORDS = { postcode: 'Postal code', city: 'City', town: 'Town', village: 'Village', county: 'County', state: 'State or region',
+    administrative: 'Area', suburb: 'Neighborhood', neighbourhood: 'Neighborhood', quarter: 'Neighborhood', hamlet: 'Village', municipality: 'Municipality', country: 'Country', island: 'Island', region: 'Region' };
+  function worldHit(h) {
+    var a = h.address || {}, parts = String(h.display_name || '').split(',').map(function (t) { return t.trim(); });
+    var name = h.name || parts[0] || 'Place';
+    var area = [a.state || a.region || a.county, a.country].filter(Boolean).filter(function (t) { return t !== name; });
+    var kind = KIND_WORDS[h.addresstype] || KIND_WORDS[h.type] || (h.addresstype || h.type || 'Place').replace(/_/g, ' ');
+    return { name: name, country: a.country || parts[parts.length - 1] || '', title: [name].concat(area).join(', '), kind: kind.charAt(0).toUpperCase() + kind.slice(1),
+      display: h.display_name, osm: (h.osm_type || '').charAt(0).toUpperCase() + h.osm_id, lat: Number(h.lat), lng: Number(h.lon) };
+  }
+  function showRequest(reqId, h) {
+    var box = $(reqId);
+    box.hidden = false;
+    var small = /Postal|Neighborhood|Village/.test(h.kind);
+    box.innerHTML = '<p><b>' + esc(h.title) + '</b> is not in the library yet.</p>' +
+      '<p>' + (small ? 'It will be built with the land around it, so you can see the region it depends on. ' : '') + 'Building a new place takes about 10 to 15 minutes, and then it is saved for everyone.</p>' +
+      '<div class="row">' + (REQUEST_URL ? '<button class="btn" type="button" data-req="go">Build this place</button>' : '<span class="tag" style="margin:0">Building on request is coming soon</span>') +
+      '<button class="btn ghost" type="button" data-req="close">Close</button></div>';
+    box.onclick = function (ev) {
+      var b = ev.target.closest('[data-req]');
+      if (!b) return;
+      if (b.dataset.req === 'close') { box.hidden = true; return; }
+      requestBuild(box, h);
+    };
+  }
+  function requestBuild(box, h) {
+    box.innerHTML = '<p>Sending your request…</p>';
+    fetch(REQUEST_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: h.display, osm: h.osm, name: h.name, country: h.country }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || !j.slug) { box.innerHTML = '<p>' + esc((j && j.error) || 'The request could not be sent. Please try again later.') + '</p>'; return; }
+        waitForPlace(box, h, j.slug, Date.now());
+      }).catch(function () { box.innerHTML = '<p>The request could not be sent. Please try again later.</p>'; });
+  }
+  function waitForPlace(box, h, slug, t0) {
+    var mins = Math.floor((Date.now() - t0) / 60000);
+    box.innerHTML = '<p><b>Building ' + esc(h.title) + '…</b></p><p>' + (mins ? mins + ' min so far. ' : '') + 'This usually takes 10 to 15 minutes. You can keep exploring; it will open here when it is ready.</p>';
+    fetch(BASE + 'data/places/' + slug + '.json', { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw new Error('not yet');
+      return r.json();
+    }).then(function (d) {
+      box.hidden = true;
+      LIB.push({ slug: slug, name: d.name || h.name, country: h.country, display: h.display, query: h.display, pop: 0 });
+      setPlace(d, 'real'); current = slug; markExamples();
+      try { history.replaceState(null, '', '#' + slug); } catch (err) { /* ignore */ }
+      $('#explore').scrollIntoView({ behavior: 'smooth' });
+    }).catch(function () {
+      if (Date.now() - t0 > 45 * 60000) { box.innerHTML = '<p>This is taking longer than expected. Check back later; the place will appear in search once it is built.</p>'; return; }
+      setTimeout(function () { waitForPlace(box, h, slug, t0); }, 30000);
+    });
+  }
+  function wireSearch(formId, inputId, listId, scroll, reqId) {
+    var form = $(formId), input = $(inputId), list = $(listId), items = [], active = -1;
+    form.hidden = false;
+    function close() { list.hidden = true; input.setAttribute('aria-expanded', 'false'); active = -1; }
+    var world = null;   // results from OpenStreetMap for the current text, or 'loading'
+    function show() {
+      items = libMatches(input.value);
+      var q = input.value.trim();
+      if (!q) { close(); return; }
+      var html = items.map(function (e, k) {
+        return '<li role="option" id="' + listId.slice(1) + '-' + k + '" data-slug="' + e.slug + '" aria-selected="' + (k === active ? 'true' : 'false') + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + esc(e.country) + '</span></li>';
+      }).join('');
+      if (world && world.q === q) {
+        if (world.loading) html += '<li class="s-none">Searching everywhere…</li>';
+        else if (!world.hits.length) html += '<li class="s-none">Nothing was found for “' + esc(q) + '”. Try adding the country or state.</li>';
+        else html += '<li class="s-head">Anywhere on Earth</li>' + world.hits.map(function (h, k) {
+          return '<li role="option" data-world="' + k + '"><span class="s-name">' + esc(h.title) + '</span><span class="s-sub">' + esc(h.kind) + '</span></li>';
+        }).join('');
+      } else {
+        if (!items.length) html += '<li class="s-none">Not in the library yet.</li>';
+        html += '<li role="option" data-worldsearch="1"><span class="s-world">Search everywhere for “' + esc(q) + '”</span></li>';
+      }
+      list.innerHTML = html;
+      list.hidden = false; input.setAttribute('aria-expanded', 'true');
+      if (active >= 0) input.setAttribute('aria-activedescendant', listId.slice(1) + '-' + active); else input.removeAttribute('aria-activedescendant');
+    }
+    function searchWorld() {
+      var q = input.value.trim();
+      if (!q) return;
+      world = { q: q, loading: true, hits: [] };
+      show();
+      fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&accept-language=en&q=' + encodeURIComponent(q))
+        .then(function (r) { return r.json(); })
+        .then(function (hits) {
+          world = { q: q, loading: false, hits: (hits || []).map(worldHit) };
+          show();
+        }).catch(function () { world = { q: q, loading: false, hits: [] }; show(); });
+    }
+    function chooseWorld(h) {
+      close(); input.blur();
+      var same = LIB.filter(function (e) { return norm(e.display) === norm(h.display) || (norm(e.name) === norm(h.name) && norm(e.country) === norm(h.country)); })[0];
+      if (same) { input.value = ''; openLibrary(same.slug, false, scroll); return; }
+      showRequest(reqId, h);
+    }
+    function pick(slug) { input.value = ''; close(); input.blur(); openLibrary(slug, false, scroll); }
+    input.addEventListener('input', function () { active = -1; show(); });
+    input.addEventListener('keydown', function (ev) {
+      if (ev.key === 'ArrowDown' && items.length) { active = Math.min(items.length - 1, active + 1); show(); ev.preventDefault(); }
+      else if (ev.key === 'ArrowUp' && items.length) { active = Math.max(0, active - 1); show(); ev.preventDefault(); }
+      else if (ev.key === 'Escape') close();
+    });
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      if (!items.length) items = libMatches(input.value);
+      if (items.length && active >= 0) pick(items[active].slug);
+      else if (items.length && !(world && world.q === input.value.trim())) pick(items[0].slug);
+      else searchWorld();
+    });
+    list.addEventListener('mousedown', function (ev) {
+      var li = ev.target.closest('[data-slug],[data-world],[data-worldsearch]');
+      if (!li) return;
+      ev.preventDefault();
+      if (li.dataset.slug) pick(li.dataset.slug);
+      else if (li.dataset.worldsearch) searchWorld();
+      else chooseWorld(world.hits[Number(li.dataset.world)]);
+    });
+    input.addEventListener('blur', function () { setTimeout(close, 120); });
+    return { input: input, searchWorld: searchWorld };
+  }
+  if (location.protocol.indexOf('http') === 0 && window.fetch) {
+    fetch(BASE + 'data/index.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (ix) {
+      LIB = (ix.places || []).filter(function (e) { return e && e.slug; });
+      if (!LIB.length) return;
+      var bar = wireSearch('#search-bar', '#q-bar', '#sugg-bar', false, '#req-bar');
+      var h = location.hash.replace('#', '');
+      if (h && h !== current && libEntry(h)) openLibrary(h, true);
+      else if (!current) openExample('milan', true);
+      var q = new URLSearchParams(location.search).get('q');
+      if (q) { bar.input.value = q; bar.searchWorld(); bar.input.focus(); }
+    }).catch(function () { if (!current) openExample('milan', true); });
+  }
+
+  var startHash = location.hash.replace('#', '');
+  if (EXAMPLES.some(function (x) { return x.id === startHash; })) openExample(startHash, true);
+  else if (startHash === 'demo' || location.protocol.indexOf('http') !== 0) openExample(startHash === 'demo' ? 'demo' : 'milan', true);
+  offerReopen();
+})();
+</script>
