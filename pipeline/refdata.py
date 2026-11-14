@@ -65,7 +65,18 @@ def price_levels():
     url = "https://api.worldbank.org/v2/country/all/indicator/PA.NUS.PPPC.RF"
     rows, page = [], 1
     while True:
-        r = requests.get(url, params={"format": "json", "date": "2015:2025", "per_page": 5000, "page": page}, timeout=90)
+        import time
+        r = None
+        for attempt in range(5):
+            try:
+                r = requests.get(url, params={"format": "json", "date": "2018:2025", "per_page": 1000, "page": page}, timeout=180)
+                if r.status_code < 500:
+                    break
+            except requests.RequestException as e:
+                print("World Bank busy, retrying:", e)
+            time.sleep(20 * (attempt + 1))
+        if r is None:
+            raise SystemExit("World Bank did not answer")
         r.raise_for_status()
         j = r.json()
         if not isinstance(j, list) or len(j) < 2:
@@ -107,4 +118,7 @@ def price_levels():
 if __name__ == "__main__":
     tag_places()
     if len(sys.argv) < 2 or sys.argv[1] != "tag":
-        price_levels()
+        try:
+            price_levels()
+        except BaseException as e:   # keep last month's prices and still save the country codes
+            print("Price levels not refreshed this time:", repr(e)[:300])
