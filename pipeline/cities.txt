@@ -3,9 +3,128 @@
 milan | Milan, Italy
 san-francisco | San Francisco, California, USA
 bangkok | Bangkok, Thailand
+# North America
 new-york | New York City, New York, USA
+los-angeles | Los Angeles, California, USA
+chicago | Chicago, Illinois, USA
+houston | Houston, Texas, USA
+phoenix | Phoenix, Arizona, USA
+miami | Miami, Florida, USA
+seattle | Seattle, Washington, USA
+denver | Denver, Colorado, USA
+new-orleans | New Orleans, Louisiana, USA
+atlanta | Atlanta, Georgia, USA
+boston | Boston, Massachusetts, USA
+washington-dc | Washington, District of Columbia, USA
+austin | Austin, Texas, USA
+detroit | Detroit, Michigan, USA
+toronto | Toronto, Ontario, Canada
+vancouver | Vancouver, British Columbia, Canada
+montreal | Montreal, Quebec, Canada
 mexico-city | Mexico City, Mexico
+guadalajara | Guadalajara, Jalisco, Mexico
+monterrey | Monterrey, Nuevo Leon, Mexico
+toluca | Toluca, State of Mexico, Mexico
+havana | Havana, Cuba
+guatemala-city | Guatemala City, Guatemala
+panama-city | Panama City, Panama
+# South America
+bogota | Bogota, Colombia
+medellin | Medellin, Colombia
+lima | Lima, Peru
+quito | Quito, Ecuador
+santiago | Santiago, Chile
+buenos-aires | Buenos Aires, Argentina
+sao-paulo | Sao Paulo, Brazil
+rio-de-janeiro | Rio de Janeiro, Brazil
+curitiba | Curitiba, Brazil
+manaus | Manaus, Brazil
+montevideo | Montevideo, Uruguay
+la-paz | La Paz, Bolivia
+# Europe
 london | London, United Kingdom
+paris | Paris, France
+berlin | Berlin, Germany
+madrid | Madrid, Spain
+barcelona | Barcelona, Spain
+valencia | Valencia, Spain
+seville | Seville, Spain
+lisbon | Lisbon, Portugal
+porto | Porto, Portugal
+rome | Rome, Italy
+naples | Naples, Italy
+turin | Turin, Italy
+amsterdam | Amsterdam, Netherlands
+rotterdam | Rotterdam, Netherlands
+copenhagen | Copenhagen, Denmark
+stockholm | Stockholm, Sweden
+oslo | Oslo, Norway
+helsinki | Helsinki, Finland
+vienna | Vienna, Austria
+zurich | Zurich, Switzerland
+munich | Munich, Germany
+warsaw | Warsaw, Poland
+prague | Prague, Czechia
+budapest | Budapest, Hungary
+athens | Athens, Greece
+istanbul | Istanbul, Turkey
+dublin | Dublin, Ireland
+edinburgh | Edinburgh, United Kingdom
+manchester | Manchester, United Kingdom
+marseille | Marseille, France
+# Africa
 lagos | Lagos, Nigeria
+cairo | Cairo, Egypt
+nairobi | Nairobi, Kenya
+addis-ababa | Addis Ababa, Ethiopia
+johannesburg | Johannesburg, South Africa
+cape-town | Cape Town, South Africa
+accra | Accra, Ghana
+dakar | Dakar, Senegal
+kinshasa | Kinshasa, Democratic Republic of the Congo
+casablanca | Casablanca, Morocco
+dar-es-salaam | Dar es Salaam, Tanzania
+kampala | Kampala, Uganda
+kigali | Kigali, Rwanda
+luanda | Luanda, Angola
+tunis | Tunis, Tunisia
+# Asia
+tokyo | Tokyo, Japan
+osaka | Osaka, Japan
+seoul | Seoul, South Korea
+beijing | Beijing, China
+shanghai | Shanghai, China
+hong-kong | Hong Kong
+shenzhen | Shenzhen, Guangdong, China
+guangzhou | Guangzhou, Guangdong, China
+taipei | Taipei, Taiwan
+singapore | Singapore
+kuala-lumpur | Kuala Lumpur, Malaysia
+jakarta | Jakarta, Indonesia
+manila | Manila, Philippines
+ho-chi-minh-city | Ho Chi Minh City, Vietnam
+hanoi | Hanoi, Vietnam
 mumbai | Mumbai, India
+delhi | Delhi, India
+bengaluru | Bengaluru, India
+chennai | Chennai, India
+kolkata | Kolkata, India
+dhaka | Dhaka, Bangladesh
+karachi | Karachi, Pakistan
+lahore | Lahore, Pakistan
+kathmandu | Kathmandu, Nepal
+colombo | Colombo, Sri Lanka
+dubai | Dubai, United Arab Emirates
+riyadh | Riyadh, Saudi Arabia
+tehran | Tehran, Iran
+tel-aviv | Tel Aviv, Israel
+amman | Amman, Jordan
+tashkent | Tashkent, Uzbekistan
+almaty | Almaty, Kazakhstan
+ulaanbaatar | Ulaanbaatar, Mongolia
+# Oceania
 sydney | Sydney, New South Wales, Australia
+melbourne | Melbourne, Victoria, Australia
+brisbane | Brisbane, Queensland, Australia
+perth | Perth, Western Australia, Australia
+auckland | Auckland, New Zealand

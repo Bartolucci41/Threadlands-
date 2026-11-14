@@ -54,21 +54,51 @@ from shapely.geometry import shape, Point, Polygon, MultiPolygon, mapping
 from shapely.ops import transform as shp_transform
 from shapely.prepared import prep
 
-HEADERS = {"User-Agent": "Threadlands-place-builder/1.0 (educational prototype)"}
-resp = requests.get("https://nominatim.openstreetmap.org/search",
-                    params={"q": PLACE, "format": "jsonv2", "polygon_geojson": 1, "addressdetails": 1, "limit": 5, "accept-language": "en"},
-                    headers=HEADERS, timeout=60)
-resp.raise_for_status()
-hits = resp.json()
+import time
+HEADERS = {"User-Agent": "Threadlands-place-builder/1.0 (educational prototype; https://threadlands.org)"}
+def nominatim(path, params):
+    """Ask OpenStreetMap's Nominatim, waiting and retrying politely if it is busy."""
+    r = None
+    for k in range(5):
+        r = requests.get("https://nominatim.openstreetmap.org/" + path, params=params, headers=HEADERS, timeout=60)
+        if r.status_code in (429, 500, 502, 503, 504):
+            time.sleep(5 * (k + 1))
+            continue
+        break
+    r.raise_for_status()
+    time.sleep(1)   # Nominatim asks for at most one request per second
+    return r.json()
+
+COMMON = {"format": "jsonv2", "polygon_geojson": 1, "addressdetails": 1, "accept-language": "en"}
+if PLACE.lower().startswith("osm:"):
+    # An exact OpenStreetMap object, such as "osm:R123456", chosen on the website
+    hits = nominatim("lookup", dict(COMMON, osm_ids=PLACE[4:]))
+else:
+    hits = nominatim("search", dict(COMMON, q=PLACE, limit=8))
 if not hits:
     raise SystemExit(f'No place was found for "{PLACE}". Add the country, for example "Toluca, Mexico".')
-hit = next((h for h in hits if (h.get("geojson") or {}).get("type") in ("Polygon", "MultiPolygon")), hits[0])
+def has_outline(h):
+    return (h.get("geojson") or {}).get("type") in ("Polygon", "MultiPolygon")
+AREA_KINDS = {"city", "town", "village", "municipality", "county", "state", "region", "province", "country", "borough",
+              "city_district", "district", "state_district", "suburb", "quarter", "neighbourhood", "postcode", "island", "administrative"}
+outlined = [h for h in hits if has_outline(h)]
+hit = next((h for h in outlined if h.get("addresstype") in AREA_KINDS), outlined[0] if outlined else hits[0])
 NAME = hit.get("name") or PLACE
 DISPLAY = hit.get("display_name", PLACE)
 CC = ((hit.get("address") or {}).get("country_code") or "").upper()
 NOTES = []
 
-geom = shape(hit["geojson"]) if hit.get("geojson") else Point(float(hit["lon"]), float(hit["lat"]))
+shape_src = hit
+if not has_outline(hit) and hit.get("addresstype") != "postcode":
+    # OpenStreetMap sometimes knows a city only as a point; use the city-level boundary that contains it
+    try:
+        rev = nominatim("reverse", dict(COMMON, lat=hit["lat"], lon=hit["lon"], zoom=10))
+        if has_outline(rev):
+            shape_src = rev
+            NOTES.append(f"OpenStreetMap has no outline for {NAME}, so the boundary of {rev.get('name') or 'the surrounding district'} is used.")
+    except Exception as e:
+        print("Could not look up a boundary around the point:", e)
+geom = shape(shape_src["geojson"]) if has_outline(shape_src) else Point(float(hit["lon"]), float(hit["lat"]))
 if geom.geom_type == "MultiPolygon":
     parts = sorted(geom.geoms, key=lambda g: g.area, reverse=True)
     kept = [g for g in parts if g.area >= 0.02 * parts[0].area]
@@ -363,7 +393,7 @@ try:
                "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
                "https://overpass.private.coffee/api/interpreter"]
     data, last_err = None, None
-    for attempt in range(2):
+    for attempt in range(3):
         for url in SERVERS:
             host = url.split("/")[2]
             try:
@@ -379,9 +409,9 @@ try:
                 print(f"  {host} did not answer: {e}")
         if data is not None:
             break
-        if attempt == 0:
-            print("  all servers busy; waiting 30 seconds and trying again...")
-            time.sleep(30)
+        if attempt < 2:
+            print(f"  all servers busy; waiting {45 * (attempt + 1)} seconds and trying again...")
+            time.sleep(45 * (attempt + 1))
     if data is None:
         raise RuntimeError(f"no waterway server answered ({last_err})")
     ways = [(el.get("tags", {}).get("waterway"), [(p["lat"], p["lon"]) for p in el.get("geometry", [])])

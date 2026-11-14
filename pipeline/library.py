@@ -12,9 +12,12 @@ OUT = os.path.join(ROOT, "out")
 CACHE = os.path.join(ROOT, "cache")
 
 
-def cities():
+def cities(name="cities.txt"):
     rows = []
-    for line in open(os.path.join(ROOT, "pipeline", "cities.txt"), encoding="utf-8"):
+    path = os.path.join(ROOT, "pipeline", name)
+    if not os.path.exists(path):
+        return rows
+    for line in open(path, encoding="utf-8"):
         line = line.strip()
         if not line or line.startswith("#") or "|" not in line:
             continue
@@ -30,8 +33,8 @@ def plan(size=6):
     print(f"{len(todo)} places to build in {len(chunks)} batches", file=sys.stderr)
 
 
-def build(slugs):
-    q = dict(cities())
+def build(slugs, q=None):
+    q = q or dict(cities())
     os.makedirs(os.path.join(OUT, "logs"), exist_ok=True)
     os.makedirs(CACHE, exist_ok=True)
     script = os.path.join(ROOT, "pipeline", "run_place.py")
@@ -51,6 +54,11 @@ def build(slugs):
             status = "timed out"
         mins = (time.time() - t0) / 60
         print(f"{slug}: {status} in {mins:.1f} min", flush=True)
+        if status != "built with heat":
+            lines = open(log, errors="replace").read().splitlines()
+            print(f"---- last lines of the {slug} log ----")
+            print("\n".join(l[:300] for l in lines[-25:]), flush=True)
+            print("----")
         json.dump({"slug": slug, "query": q[slug], "status": status, "minutes": round(mins, 1),
                    "when": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")},
                   open(os.path.join(OUT, "logs", slug + ".status.json"), "w"))
@@ -58,6 +66,22 @@ def build(slugs):
         for f in glob.glob(os.path.join(CACHE, "*.threadlands.json")):
             os.remove(f)
         time.sleep(2)
+
+
+def one(slug, query):
+    """Build a single requested place (from the website's "Build this place" button)."""
+    import re
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,79}", slug) or len(query) > 200 or "\n" in query:
+        raise SystemExit("bad request")
+    if os.path.exists(os.path.join(PLACES, slug + ".json")):
+        print("already built:", slug)
+        return
+    req = os.path.join(ROOT, "pipeline", "requested.txt")
+    known = dict(cities("requested.txt"))
+    if slug not in known:
+        with open(req, "a", encoding="utf-8") as f:
+            f.write(f"{slug} | {query}\n")
+    build(slug, {slug: query})
 
 
 def summary(path, slug):
@@ -94,7 +118,8 @@ def publish():
             print("skipping bad file", f, e)
             continue
         shutil.copyfile(f, os.path.join(PLACES, os.path.basename(f)))
-    names = dict(cities())
+    names = dict(cities("requested.txt"))
+    names.update(dict(cities()))
     index = []
     for f in sorted(glob.glob(os.path.join(PLACES, "*.json"))):
         slug = os.path.basename(f)[:-5]
@@ -103,7 +128,9 @@ def publish():
         except Exception as ex:
             print("could not index", slug, ex)
             continue
-        e["query"] = names.get(slug, e["display"])
+        q = names.get(slug, e["display"])
+        e["query"] = e["display"] if q.lower().startswith("osm:") else q
+        e["requested"] = slug not in dict(cities())
         index.append(e)
     index.sort(key=lambda e: -e["pop"])
     json.dump({"format": "threadlands-index", "version": 1,
@@ -119,5 +146,7 @@ if __name__ == "__main__":
         plan(int(sys.argv[2]) if len(sys.argv) > 2 else 6)
     elif cmd == "build":
         build(sys.argv[2])
+    elif cmd == "one":
+        one(sys.argv[2], sys.argv[3])
     elif cmd == "publish":
         publish()

@@ -1,0 +1,57 @@
+name: Build a requested place
+
+on:
+  repository_dispatch:
+    types: [build-place]
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "Short name for the place, like toluca-mexico"
+        required: true
+      query:
+        description: "What to search for, like 'Toluca, Mexico' or 'osm:R123456'"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-place-${{ github.event.client_payload.slug || inputs.slug }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      SLUG: ${{ github.event.client_payload.slug || inputs.slug }}
+      QUERY: ${{ github.event.client_payload.query || inputs.query }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pipeline/requirements.txt
+      - run: pip install -r pipeline/requirements.txt
+      - uses: actions/cache@v4
+        with:
+          path: cache/hybas_*.zip
+          key: hydrobasins-lev08-v1
+      - run: python3 pipeline/library.py one "$SLUG" "$QUERY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: request-${{ github.run_id }}
+          path: out/
+          if-no-files-found: ignore
+          retention-days: 7
+      - run: python3 pipeline/library.py publish
+      - name: Commit the new place
+        run: |
+          git config user.name "threadlands-robot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/ pipeline/requested.txt
+          if git diff --cached --quiet; then echo "nothing new"; exit 0; fi
+          git commit -m "Build requested place: $SLUG"
+          for i in 1 2 3 4 5; do git pull --rebase -X theirs origin main && git push && break; sleep $((RANDOM % 20 + 5)); done
