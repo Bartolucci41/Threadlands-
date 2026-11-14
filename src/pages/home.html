@@ -28,6 +28,12 @@
     </figure>
   </div>
 
+  <section class="now" id="now" aria-labelledby="now-h" hidden>
+    <h2 class="sect-h" id="now-h">Right now, from space</h2>
+    <p class="now-sub" id="now-sub">The latest clear satellite pass over each place, compared with the same weeks in earlier years.</p>
+    <div class="now-grid" id="now-grid"></div>
+  </section>
+
   <h2 class="sect-h" id="cities">Three cities, one pattern</h2>
   <div class="cities">
     <article class="city-card"><span class="eyebrow">Milan, Italy</span><div class="mini"><img src="{B}assets/card-milan.webp" width="395" height="211" alt="Regional map around Milan"></div><span class="city-num">33%</span><p>of the land that drains into Milan is already built up, so rain runs off fast into small rivers like the Seveso.</p><a class="btn ghost" href="{B}explore/#milan">Open Milan</a></article>
@@ -120,4 +126,23 @@
     if (li.dataset.slug) goSlug(li.dataset.slug); else goWorld();
   });
   input.addEventListener('blur', function () { setTimeout(close, 120); });
+
+  // Right now, from space: the places running furthest from their usual heat this week
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function nice(iso) { var d = String(iso).split('-'); return MONTHS[Number(d[1]) - 1] + ' ' + Number(d[2]); }
+  fetch('{B}data/now/index.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (ix) {
+    var cutoff = Date.now() - 45 * 864e5;
+    var rows = (ix.places || []).filter(function (r) { return r.land_anom != null && Date.parse(r.date) >= cutoff; });
+    if (rows.length < 4) return;
+    var val = function (r) { return r.built_anom != null ? r.built_anom : r.land_anom; };
+    rows.sort(function (a, b) { return val(b) - val(a); });
+    var pick = rows.slice(0, 4).concat(rows.slice(-2).reverse().filter(function (r) { return val(r) < 0; }));
+    $('#now-grid').innerHTML = pick.map(function (r) {
+      var v = val(r), hot = v >= 0;
+      return '<a class="now-card ' + (hot ? 'hot' : 'cool') + '" href="{B}explore/#' + r.slug + '"><span class="eyebrow">' + esc(r.name) + ', ' + esc(r.country) + '</span>' +
+        '<span class="now-v">' + (hot ? '+' : '\u2212') + Math.abs(v).toFixed(1) + ' \u00b0C</span><span class="now-t">' + (hot ? 'warmer' : 'cooler') + ' than usual, pass on ' + nice(r.date) + '</span></a>';
+    }).join('');
+    $('#now-sub').textContent = 'Surface heat from the latest clear satellite pass over each of ' + rows.length + ' places, compared with the same weeks in earlier years. Updated twice a week.';
+    $('#now').hidden = false;
+  }).catch(function () { /* readings not published yet */ });
 })();

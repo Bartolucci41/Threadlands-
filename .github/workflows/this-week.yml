@@ -1,0 +1,81 @@
+name: This week from space
+
+on:
+  schedule:
+    - cron: "17 7 * * 1,4"   # Mondays and Thursdays
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - pipeline/now.py
+      - .github/workflows/this-week.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: this-week
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      chunks: ${{ steps.plan.outputs.chunks }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - id: plan
+        run: python3 pipeline/now.py plan 16 >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        chunk: ${{ fromJson(needs.plan.outputs.chunks) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pipeline/requirements.txt
+      - run: pip install -r pipeline/requirements.txt
+      - run: python3 pipeline/now.py build "${{ matrix.chunk }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: now-${{ strategy.job-index }}
+          path: out-now/
+          if-no-files-found: ignore
+          retention-days: 3
+
+  publish:
+    needs: build
+    if: always() && needs.build.result != 'skipped'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: now-*
+          path: out-now
+          merge-multiple: true
+      - run: python3 pipeline/now.py publish
+      - name: Commit this week's readings
+        run: |
+          git config user.name "threadlands-robot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/now
+          if git diff --cached --quiet; then echo "nothing new"; exit 0; fi
+          git commit -m "This week from space: new satellite readings"
+          for i in 1 2 3 4 5; do git pull --rebase -X theirs origin main && git push && break; sleep 10; done

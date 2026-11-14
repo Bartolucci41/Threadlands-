@@ -42,6 +42,14 @@ css += """
   .hero-copy { grid-template-columns: minmax(0, 1fr); }
   .city-card img { display: block; width: 100%; height: auto; }
   .hero-fig img { display: block; width: 100%; height: auto; border-radius: 14px; }
+  .now { margin: 0 0 40px; }
+  .now-sub { margin: -6px 0 16px; max-width: 44rem; color: var(--ink2); font-size: 0.9375rem; }
+  .now-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .now-card { display: grid; gap: 4px; padding: 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); text-decoration: none; color: var(--ink); border-top: 4px solid var(--h2); }
+  .now-card.cool { border-top-color: var(--f1); }
+  .now-card:hover { border-color: var(--ink2); }
+  .now-v { font: 800 1.9rem/1.05 var(--font-display); }
+  .now-t { font-size: 0.8125rem; color: var(--ink2); }
   .lib-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 16px; }
   .lib-tools input { flex: 1 1 260px; max-width: 26rem; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink); font: 500 1rem var(--font-body); }
   .lib-map { background: var(--surface); border-radius: 14px; overflow: hidden; margin: 0 0 24px; position: relative; }

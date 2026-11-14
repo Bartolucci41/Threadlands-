@@ -70,6 +70,7 @@
         <button class="chip" type="button" data-layer="flood" aria-pressed="false">Flood</button>
         <button class="chip" type="button" data-layer="habitat" aria-pressed="false">Habitat</button>
         <button class="chip" type="button" data-layer="sat" aria-pressed="false" id="sat-chip" hidden>Measured heat</button>
+        <button class="chip" type="button" data-layer="now" aria-pressed="false" id="now-chip" hidden>This week</button>
       </div>
       <div class="sketchbar">
         <button class="chip sk-on" type="button" id="sk-toggle" aria-pressed="false">Sketch a plan</button>
@@ -961,7 +962,25 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
   $('#examples').innerHTML = EXAMPLES.map(function (x) {
     return '<button type="button" class="chip" data-example="' + x.id + '" aria-pressed="false">' + x.name + '</button>';
   }).join('');
+  // ---- This week from space: the latest clear Landsat pass against the usual for this time of year
+  var NOWD = null, NOW_FOR = null;
+  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  function niceDate(iso) { var d = String(iso).split('-'); return Number(d[2]) + ' ' + MONTHS[Number(d[1]) - 1]; }
+  function loadNow(slug) {
+    NOW_FOR = slug;
+    if (!slug || slug === 'demo' || location.protocol.indexOf('http') !== 0 || !window.fetch) return;
+    fetch(BASE + 'data/now/' + slug + '.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
+      if (NOW_FOR !== slug || !P || !d || d.status !== 'ok' || !d.cells || d.cells.anom.length !== P.N) return;
+      var a = new Float64Array(P.N);
+      for (var i = 0; i < P.N; i++) { var v = d.cells.anom[i]; a[i] = v == null ? NaN : Number(v); }
+      NOWD = { date: d.date, anom: a, land: d.land_anom, built: d.built_anom, usual: d.usual_scenes };
+      $('#now-chip').hidden = false;
+      renderGlance();
+      if (layer === 'now') { renderLegend(); scheduleDraw(); }
+    }).catch(function () { /* no reading for this place yet */ });
+  }
   function markExamples() {
+    if (current !== NOW_FOR) loadNow(current);
     document.querySelectorAll('[data-example]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.example === current ? 'true' : 'false'); });
     document.querySelectorAll('[data-regcity]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.regcity === current ? 'true' : 'false'); });
   }
@@ -1035,6 +1054,8 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     if (P && P.paint && P.paint.size) faded = '<li><i style="background:transparent;border:1.5px dashed var(--ink)"></i>Your sketch</li>' + faded;
     if (layer === 'heat') return grad('Cooler', 'Hotter', ['--h0', '--h1', '--h2']) + sw('Not built up', '--m-dim') + sw('Water', '--m-water') + faded;
     if (layer === 'flood') return grad('Low exposure', 'High exposure', ['--f0', '--f1', '--f2']) + sw('Flood-prone land', '--f0') + sw('Wetland', '--m-wet') + sw('Water', '--m-water') + sw('Away from water', '--m-dim') + faded;
+    if (layer === 'now') return '<li class="grad"><span>8 \u00b0C cooler</span><i style="background:linear-gradient(90deg,var(--f2),var(--f0),var(--h0),var(--h2))"></i><span>8 \u00b0C hotter</span></li>' +
+      '<li>' + (NOWD ? 'Landsat pass on ' + niceDate(NOWD.date) + ', compared with the same weeks in earlier years' : 'No recent reading') + '</li>' + sw('Clouds or no reading', '--m-dim') + faded;
     if (layer === 'sat') return '<li class="grad"><span>6 \u00b0C cooler</span><i style="background:linear-gradient(90deg,var(--f2),var(--f0),var(--h0),var(--h2))"></i><span>6 \u00b0C hotter</span></li>' +
       '<li>Measured from space, compared with typical land nearby</li>' + sw('No clear reading', '--m-dim') + faded;
     if (layer === 'habitat') return sw('Connected network', '--m-corr') + sw('Isolated patch', '--h1') + sw('Not habitat', '--m-dim') + faded;
@@ -1146,6 +1167,10 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
         } else if (cov === 'wetland' || cov === 'water') { /* own colour */ }
         else if (fl > 0) { fill = C.f0; alpha = 0.35 + 0.55 * fl; }
         else { fill = C.dim; alpha = 0.5; }
+      } else if (layer === 'now') {
+        var na = NOWD ? NOWD.anom[i] : NaN;
+        if (isFinite(na)) fill = na >= 0 ? ramp(C.heat, 0.15 + 0.85 * Math.min(1, na / 8)) : ramp(C.flood, 0.15 + 0.85 * Math.min(1, -na / 8));
+        else { fill = C.dim; alpha = 0.5; }
       } else if (layer === 'sat') {
         var lr = HC ? HC.rel[i] : NaN;
         if (isFinite(lr)) fill = lr >= 0 ? ramp(C.heat, 0.15 + 0.85 * Math.min(1, lr / 6)) : ramp(C.flood, 0.15 + 0.85 * Math.min(1, -lr / 6));
@@ -1252,6 +1277,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     if (P.hasRivers && P.river[sel] > 0) bits.push(P.river[sel] >= 1 ? 'a river runs through it' : P.river[sel] >= 0.7 ? 'a canal runs through it' : 'a stream runs through it');
     if (Number(c.flood[sel]) > 0.05 && cov !== 'water') bits.push('flood-prone');
     if (isUrban(cov)) bits.push('heat load ' + Math.round(res.heat[sel] / 1.4 * 100) + ' of 100');
+    if (NOWD && isFinite(NOWD.anom[sel])) bits.push('this week ' + (NOWD.anom[sel] >= 0 ? '+' : '\u2212') + Math.abs(NOWD.anom[sel]).toFixed(1) + ' \u00b0C against usual');
     if (HC && isFinite(HC.rel[sel])) bits.push('measured ' + (HC.rel[sel] >= 0 ? '+' : '\u2212') + Math.abs(HC.rel[sel]).toFixed(1) + ' \u00b0C against typical land');
     el.innerHTML = '<b>' + (NAMES[cov] || cov) + '.</b> ' + txt + (bits.length ? ' ' + bits.join(' · ') + '.' : '');
   }
@@ -1382,6 +1408,8 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     WTS.sel = -1; WTS.show = false;
     renderWTS();
     HC = heatCheck(P);
+    NOWD = null; NOW_FOR = null; $('#now-chip').hidden = true;
+    if (layer === 'now') setLayer('land');
     $('#sat-chip').hidden = !HC;
     if (!HC && layer === 'sat') setLayer('land');
     renderHeatCheck();
@@ -1442,6 +1470,10 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     if (HC && hotN) {
       var h = hot / hotN;
       cards.push(['Heat, measured', (h >= 0 ? '+' : '−') + Math.abs(h).toFixed(1) + ' °C', h >= 0 ? 'hotter than typical land around it, from Landsat satellite readings' : 'cooler than land around it, from Landsat readings: the dry open ground nearby heats up even more in the sun']);
+    }
+    if (NOWD && NOWD.land != null) {
+      var nv = NOWD.built != null ? NOWD.built : NOWD.land;
+      cards.push(['This week', (nv >= 0 ? '+' : '\u2212') + Math.abs(nv).toFixed(1) + ' \u00b0C', (nv >= 0 ? 'warmer' : 'cooler') + ' than usual for this time of year' + (NOWD.built != null ? ' across its built-up land' : '') + ', from the Landsat pass on ' + niceDate(NOWD.date)]);
     }
     if (land > 0) cards.push(['Flooding', Math.round(100 * flood / land) + '%', 'of its land sits low beside rivers, lakes or the sea, where floods reach first']);
     var reg = P.place.regional;
