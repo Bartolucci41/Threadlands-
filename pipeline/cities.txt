@@ -27,7 +27,7 @@ monterrey | Monterrey, Nuevo Leon, Mexico
 toluca | Toluca, State of Mexico, Mexico
 havana | Havana, Cuba
 guatemala-city | Guatemala City, Guatemala
-panama-city | Panama City, Panama
+panama-city | Panama District, Panama Province, Panama || Panama City, Panama
 # South America
 bogota | Bogota, Colombia
 medellin | Medellin, Colombia
@@ -56,7 +56,7 @@ naples | Naples, Italy
 turin | Turin, Italy
 amsterdam | Amsterdam, Netherlands
 rotterdam | Rotterdam, Netherlands
-copenhagen | Copenhagen, Denmark
+copenhagen | Copenhagen Municipality, Capital Region of Denmark, Denmark || Copenhagen, Denmark
 stockholm | Stockholm, Sweden
 oslo | Oslo, Norway
 helsinki | Helsinki, Finland
@@ -66,7 +66,7 @@ munich | Munich, Germany
 warsaw | Warsaw, Poland
 prague | Prague, Czechia
 budapest | Budapest, Hungary
-athens | Athens, Greece
+athens | Municipality of Athens, Greece || Athens, Greece
 istanbul | Istanbul, Turkey
 dublin | Dublin, Ireland
 edinburgh | Edinburgh, United Kingdom
@@ -77,8 +77,8 @@ lagos | Lagos, Nigeria
 cairo | Cairo, Egypt
 nairobi | Nairobi, Kenya
 addis-ababa | Addis Ababa, Ethiopia
-johannesburg | Johannesburg, South Africa
-cape-town | Cape Town, South Africa
+johannesburg | City of Johannesburg Metropolitan Municipality, South Africa || Johannesburg, South Africa
+cape-town | City of Cape Town, Western Cape, South Africa || Cape Town, South Africa
 accra | Accra, Ghana
 dakar | Dakar, Senegal
 kinshasa | Kinshasa, Democratic Republic of the Congo
@@ -104,7 +104,7 @@ jakarta | Jakarta, Indonesia
 manila | Manila, Philippines
 ho-chi-minh-city | Ho Chi Minh City, Vietnam
 hanoi | Hanoi, Vietnam
-mumbai | Mumbai, India
+mumbai | Mumbai City, Maharashtra, India || Greater Mumbai, Maharashtra, India || Mumbai, India
 delhi | Delhi, India
 bengaluru | Bengaluru, India
 chennai | Chennai, India
@@ -126,5 +126,5 @@ ulaanbaatar | Ulaanbaatar, Mongolia
 sydney | Sydney, New South Wales, Australia
 melbourne | Melbourne, Victoria, Australia
 brisbane | Brisbane, Queensland, Australia
-perth | Perth, Western Australia, Australia
+perth | City of Perth, Western Australia, Australia || Perth, Western Australia, Australia
 auckland | Auckland, New Zealand

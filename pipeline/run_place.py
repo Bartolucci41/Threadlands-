@@ -253,7 +253,17 @@ if PLACE.lower().startswith("osm:"):
     # An exact OpenStreetMap object, such as "osm:R123456", chosen on the website
     hits = nominatim("lookup", dict(COMMON, osm_ids=PLACE[4:]))
 else:
-    hits = nominatim("search", dict(COMMON, q=PLACE, limit=8))
+    # PLACE may list fallbacks, best first: "City of Cape Town, South Africa || Cape Town, South Africa"
+    hits = []
+    for q in [x.strip() for x in PLACE.split("||") if x.strip()]:
+        found = nominatim("search", dict(COMMON, q=q, limit=8))
+        good = [h for h in found if (h.get("geojson") or {}).get("type") in ("Polygon", "MultiPolygon")
+                and h.get("addresstype") in ("city", "town", "village", "municipality", "county", "state", "region", "province",
+                                             "country", "borough", "city_district", "district", "state_district", "administrative")]
+        if good:
+            hits = good + [h for h in found if h not in good]
+            break
+        hits = hits or found
 if not hits:
     raise SystemExit(f'No place was found for "{PLACE}". Add the country, for example "Toluca, Mexico".')
 def has_outline(h):

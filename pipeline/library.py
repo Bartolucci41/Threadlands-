@@ -123,7 +123,7 @@ def publish():
     # Library places show the familiar name from cities.txt ("Lagos", not "Lagos State")
     for slug, query in cities():
         f = os.path.join(PLACES, slug + ".json")
-        label = query.split(",")[0].strip()
+        label = query.split("||")[-1].split(",")[0].strip()
         if not os.path.exists(f) or not label:
             continue
         d = json.load(open(f))
