@@ -90,6 +90,12 @@
   .topnav a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
   .hero2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; padding-block: 28px 36px; align-items: center; }
   .hero-copy { display: grid; gap: 20px; align-content: center; min-width: 0; }
+  .defn { max-width: 34rem; margin: 0 0 6px; padding: 2px 0 2px 14px; border-left: 3px solid var(--accent); }
+  .defn-head { margin: 0 0 4px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  .defn-word { font: 700 1.25rem var(--font-body); color: var(--ink); letter-spacing: -0.01em; }
+  .defn-ipa { font: 400 0.9375rem var(--font-mono); color: var(--ink2); }
+  .defn-pos { font: italic 400 0.9375rem var(--font-body); color: var(--ink2); }
+  .defn-list { margin: 0; padding-left: 1.3em; font-size: 0.9375rem; color: var(--ink2); display: grid; gap: 2px; text-wrap: pretty; }
   .hero-h { font-size: clamp(2.6rem, 6.4vw, 5.1rem); font-weight: 800; line-height: 0.98; letter-spacing: -0.035em; }
   .hero-h .u { text-decoration-line: underline; text-decoration-thickness: 0.12em; text-underline-offset: 0.1em; text-decoration-skip-ink: none; }
   .u-river { text-decoration-color: var(--m-water); }
@@ -357,7 +363,13 @@
   </div>
   <div class="hero2">
     <div class="hero-copy">
-      <p class="eyebrow">A planning support system for city-regions</p>
+      <div class="defn" role="note" aria-label="Definition of Threadlands">
+        <p class="defn-head"><span class="defn-word">thread&middot;lands</span> <span class="defn-ipa">/&#712;&#952;r&#603;d&#716;l&aelig;ndz/</span> <span class="defn-pos">noun</span></p>
+        <ol class="defn-list">
+          <li>The land that ties a city to what keeps it alive: the rivers that water it, the farms that feed it and the wild places that cool and shelter it.</li>
+          <li>A planning tool for seeing those ties and making them stronger.</li>
+        </ol>
+      </div>
       <h1 class="hero-h">Every city lives on <span class="u u-river">water</span>, <span class="u u-farm">farms</span> and <span class="u u-forest">wild places</span>.</h1>
       <p class="hero-sub">Threadlands helps planners and communities plan a city together with the land that sustains it. See how heat, flooding, food and wildlife connect across a region. Then test your plan against the climate of 2050 and find where to act&nbsp;first.</p>
       <form class="search" id="search-hero" role="search" hidden>
