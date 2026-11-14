@@ -1,10 +1,416 @@
 {
+ "accra": {
+  "minutes": 6.0,
+  "query": "Accra, Ghana",
+  "slug": "accra",
+  "status": "built with heat",
+  "when": "2026-11-14T01:13:34Z"
+ },
+ "addis-ababa": {
+  "minutes": 5.7,
+  "query": "Addis Ababa, Ethiopia",
+  "slug": "addis-ababa",
+  "status": "built with heat",
+  "when": "2026-11-14T01:01:51Z"
+ },
+ "almaty": {
+  "minutes": 1.7,
+  "query": "Almaty, Kazakhstan",
+  "slug": "almaty",
+  "status": "built with heat",
+  "when": "2026-11-14T01:17:31Z"
+ },
+ "amman": {
+  "minutes": 1.7,
+  "query": "Amman, Jordan",
+  "slug": "amman",
+  "status": "built with heat",
+  "when": "2026-11-14T01:17:59Z"
+ },
+ "amsterdam": {
+  "minutes": 1.6,
+  "query": "Amsterdam, Netherlands",
+  "slug": "amsterdam",
+  "status": "built with heat",
+  "when": "2026-11-14T01:00:01Z"
+ },
+ "athens": {
+  "minutes": 8.7,
+  "query": "Athens, Greece",
+  "slug": "athens",
+  "status": "built with heat",
+  "when": "2026-11-14T01:12:12Z"
+ },
+ "atlanta": {
+  "minutes": 1.1,
+  "query": "Atlanta, Georgia, USA",
+  "slug": "atlanta",
+  "status": "built with heat",
+  "when": "2026-11-14T00:51:00Z"
+ },
+ "auckland": {
+  "minutes": 4.7,
+  "query": "Auckland, New Zealand",
+  "slug": "auckland",
+  "status": "built with heat",
+  "when": "2026-11-14T01:24:27Z"
+ },
+ "austin": {
+  "minutes": 5.8,
+  "query": "Austin, Texas, USA",
+  "slug": "austin",
+  "status": "built with heat",
+  "when": "2026-11-14T01:06:06Z"
+ },
+ "barcelona": {
+  "minutes": 1.3,
+  "query": "Barcelona, Spain",
+  "slug": "barcelona",
+  "status": "built with heat",
+  "when": "2026-11-14T00:49:14Z"
+ },
+ "beijing": {
+  "minutes": 2.0,
+  "query": "Beijing, China",
+  "slug": "beijing",
+  "status": "built with heat",
+  "when": "2026-11-14T01:12:37Z"
+ },
+ "bengaluru": {
+  "minutes": 1.1,
+  "query": "Bengaluru, India",
+  "slug": "bengaluru",
+  "status": "built with heat",
+  "when": "2026-11-14T01:14:18Z"
+ },
+ "berlin": {
+  "minutes": 1.6,
+  "query": "Berlin, Germany",
+  "slug": "berlin",
+  "status": "built with heat",
+  "when": "2026-11-14T00:40:08Z"
+ },
+ "bogota": {
+  "minutes": 1.3,
+  "query": "Bogota, Colombia",
+  "slug": "bogota",
+  "status": "built with heat",
+  "when": "2026-11-14T00:49:25Z"
+ },
+ "boston": {
+  "minutes": 1.2,
+  "query": "Boston, Massachusetts, USA",
+  "slug": "boston",
+  "status": "built with heat",
+  "when": "2026-11-14T00:52:16Z"
+ },
+ "brisbane": {
+  "minutes": 2.2,
+  "query": "Brisbane, Queensland, Australia",
+  "slug": "brisbane",
+  "status": "built with heat",
+  "when": "2026-11-14T01:26:57Z"
+ },
+ "budapest": {
+  "minutes": 1.2,
+  "query": "Budapest, Hungary",
+  "slug": "budapest",
+  "status": "built with heat",
+  "when": "2026-11-14T01:03:28Z"
+ },
+ "buenos-aires": {
+  "minutes": 1.5,
+  "query": "Buenos Aires, Argentina",
+  "slug": "buenos-aires",
+  "status": "built with heat",
+  "when": "2026-11-14T01:00:58Z"
+ },
+ "cairo": {
+  "minutes": 2.1,
+  "query": "Cairo, Egypt",
+  "slug": "cairo",
+  "status": "built with heat",
+  "when": "2026-11-14T01:01:39Z"
+ },
+ "cape-town": {
+  "minutes": 1.5,
+  "query": "Cape Town, South Africa",
+  "slug": "cape-town",
+  "status": "built with heat",
+  "when": "2026-11-14T01:07:33Z"
+ },
+ "casablanca": {
+  "minutes": 3.4,
+  "query": "Casablanca, Morocco",
+  "slug": "casablanca",
+  "status": "built with heat",
+  "when": "2026-11-14T01:06:50Z"
+ },
+ "chennai": {
+  "minutes": 1.2,
+  "query": "Chennai, India",
+  "slug": "chennai",
+  "status": "built with heat",
+  "when": "2026-11-14T01:09:15Z"
+ },
+ "chicago": {
+  "minutes": 1.6,
+  "query": "Chicago, Illinois, USA",
+  "slug": "chicago",
+  "status": "built with heat",
+  "when": "2026-11-14T00:43:12Z"
+ },
+ "colombo": {
+  "minutes": 1.2,
+  "query": "Colombo, Sri Lanka",
+  "slug": "colombo",
+  "status": "built with heat",
+  "when": "2026-11-14T01:10:14Z"
+ },
+ "copenhagen": {
+  "minutes": 1.7,
+  "query": "Copenhagen, Denmark",
+  "slug": "copenhagen",
+  "status": "built with heat",
+  "when": "2026-11-14T00:51:52Z"
+ },
+ "curitiba": {
+  "minutes": 8.7,
+  "query": "Curitiba, Brazil",
+  "slug": "curitiba",
+  "status": "built with heat",
+  "when": "2026-11-14T00:49:24Z"
+ },
+ "dakar": {
+  "minutes": 1.3,
+  "query": "Dakar, Senegal",
+  "slug": "dakar",
+  "status": "built with heat",
+  "when": "2026-11-14T01:14:56Z"
+ },
+ "dar-es-salaam": {
+  "minutes": 3.8,
+  "query": "Dar es Salaam, Tanzania",
+  "slug": "dar-es-salaam",
+  "status": "built with heat",
+  "when": "2026-11-14T01:10:41Z"
+ },
+ "delhi": {
+  "minutes": 1.4,
+  "query": "Delhi, India",
+  "slug": "delhi",
+  "status": "built with heat",
+  "when": "2026-11-14T01:13:09Z"
+ },
+ "denver": {
+  "minutes": 1.5,
+  "query": "Denver, Colorado, USA",
+  "slug": "denver",
+  "status": "built with heat",
+  "when": "2026-11-14T00:40:11Z"
+ },
+ "detroit": {
+  "minutes": 2.2,
+  "query": "Detroit, Michigan, USA",
+  "slug": "detroit",
+  "status": "built with heat",
+  "when": "2026-11-14T00:40:50Z"
+ },
+ "dhaka": {
+  "minutes": 1.3,
+  "query": "Dhaka, Bangladesh",
+  "slug": "dhaka",
+  "status": "built with heat",
+  "when": "2026-11-14T01:11:52Z"
+ },
+ "dubai": {
+  "minutes": 1.4,
+  "query": "Dubai, United Arab Emirates",
+  "slug": "dubai",
+  "status": "built with heat",
+  "when": "2026-11-14T01:11:40Z"
+ },
+ "dublin": {
+  "minutes": 1.5,
+  "query": "Dublin, Ireland",
+  "slug": "dublin",
+  "status": "built with heat",
+  "when": "2026-11-14T00:54:44Z"
+ },
+ "edinburgh": {
+  "minutes": 1.3,
+  "query": "Edinburgh, United Kingdom",
+  "slug": "edinburgh",
+  "status": "built with heat",
+  "when": "2026-11-14T00:56:03Z"
+ },
+ "guadalajara": {
+  "minutes": 1.2,
+  "query": "Guadalajara, Jalisco, Mexico",
+  "slug": "guadalajara",
+  "status": "built with heat",
+  "when": "2026-11-14T00:50:33Z"
+ },
+ "guangzhou": {
+  "minutes": 2.7,
+  "query": "Guangzhou, Guangdong, China",
+  "slug": "guangzhou",
+  "status": "built with heat",
+  "when": "2026-11-14T01:08:02Z"
+ },
+ "guatemala-city": {
+  "minutes": 1.6,
+  "query": "Guatemala City, Guatemala",
+  "slug": "guatemala-city",
+  "status": "built with heat",
+  "when": "2026-11-14T00:46:31Z"
+ },
+ "hanoi": {
+  "minutes": 1.0,
+  "query": "Hanoi, Vietnam",
+  "slug": "hanoi",
+  "status": "built with heat",
+  "when": "2026-11-14T01:10:36Z"
+ },
+ "havana": {
+  "minutes": 1.5,
+  "query": "Havana, Cuba",
+  "slug": "havana",
+  "status": "built with heat",
+  "when": "2026-11-14T00:44:54Z"
+ },
+ "helsinki": {
+  "minutes": 1.4,
+  "query": "Helsinki, Finland",
+  "slug": "helsinki",
+  "status": "built with heat",
+  "when": "2026-11-14T00:59:28Z"
+ },
+ "ho-chi-minh-city": {
+  "minutes": 1.6,
+  "query": "Ho Chi Minh City, Vietnam",
+  "slug": "ho-chi-minh-city",
+  "status": "built with heat",
+  "when": "2026-11-14T01:09:35Z"
+ },
+ "hong-kong": {
+  "minutes": 1.5,
+  "query": "Hong Kong",
+  "slug": "hong-kong",
+  "status": "built with heat",
+  "when": "2026-11-14T01:15:39Z"
+ },
+ "houston": {
+  "minutes": 1.5,
+  "query": "Houston, Texas, USA",
+  "slug": "houston",
+  "status": "built with heat",
+  "when": "2026-11-14T00:44:46Z"
+ },
+ "istanbul": {
+  "minutes": 1.5,
+  "query": "Istanbul, Turkey",
+  "slug": "istanbul",
+  "status": "built with heat",
+  "when": "2026-11-14T01:13:47Z"
+ },
+ "jakarta": {
+  "minutes": 1.5,
+  "query": "Jakarta, Indonesia",
+  "slug": "jakarta",
+  "status": "built with heat",
+  "when": "2026-11-14T01:19:49Z"
+ },
+ "johannesburg": {
+  "minutes": 4.1,
+  "query": "Johannesburg, South Africa",
+  "slug": "johannesburg",
+  "status": "built with heat",
+  "when": "2026-11-14T01:06:01Z"
+ },
+ "kampala": {
+  "minutes": 3.7,
+  "query": "Kampala, Uganda",
+  "slug": "kampala",
+  "status": "built with heat",
+  "when": "2026-11-14T01:14:26Z"
+ },
+ "karachi": {
+  "minutes": 1.4,
+  "query": "Karachi, Pakistan",
+  "slug": "karachi",
+  "status": "built with heat",
+  "when": "2026-11-14T01:13:18Z"
+ },
+ "kathmandu": {
+  "minutes": 1.1,
+  "query": "Kathmandu, Nepal",
+  "slug": "kathmandu",
+  "status": "built with heat",
+  "when": "2026-11-14T01:16:06Z"
+ },
+ "kigali": {
+  "minutes": 1.2,
+  "query": "Kigali, Rwanda",
+  "slug": "kigali",
+  "status": "built with heat",
+  "when": "2026-11-14T01:15:41Z"
+ },
+ "kinshasa": {
+  "minutes": 2.2,
+  "query": "Kinshasa, Democratic Republic of the Congo",
+  "slug": "kinshasa",
+  "status": "built with heat",
+  "when": "2026-11-14T01:17:08Z"
+ },
+ "kolkata": {
+  "minutes": 1.3,
+  "query": "Kolkata, India",
+  "slug": "kolkata",
+  "status": "built with heat",
+  "when": "2026-11-14T01:10:34Z"
+ },
+ "kuala-lumpur": {
+  "minutes": 1.2,
+  "query": "Kuala Lumpur, Malaysia",
+  "slug": "kuala-lumpur",
+  "status": "built with heat",
+  "when": "2026-11-14T01:18:16Z"
+ },
+ "la-paz": {
+  "minutes": 1.7,
+  "query": "La Paz, Bolivia",
+  "slug": "la-paz",
+  "status": "built with heat",
+  "when": "2026-11-14T00:53:40Z"
+ },
  "lagos": {
   "minutes": 1.7,
   "query": "Lagos, Nigeria",
   "slug": "lagos",
   "status": "built with heat",
   "when": "2026-11-14T00:19:05Z"
+ },
+ "lahore": {
+  "minutes": 1.6,
+  "query": "Lahore, Pakistan",
+  "slug": "lahore",
+  "status": "built with heat",
+  "when": "2026-11-14T01:14:56Z"
+ },
+ "lima": {
+  "minutes": 9.5,
+  "query": "Lima, Peru",
+  "slug": "lima",
+  "status": "built with heat",
+  "when": "2026-11-14T00:56:47Z"
+ },
+ "lisbon": {
+  "minutes": 2.9,
+  "query": "Lisbon, Portugal",
+  "slug": "lisbon",
+  "status": "built with heat",
+  "when": "2026-11-14T01:08:28Z"
  },
  "london": {
   "minutes": 2.2,
@@ -13,19 +419,138 @@
   "status": "built with heat",
   "when": "2026-11-14T00:17:24Z"
  },
+ "los-angeles": {
+  "minutes": 2.9,
+  "query": "Los Angeles, California, USA",
+  "slug": "los-angeles",
+  "status": "built with heat",
+  "when": "2026-11-14T00:41:33Z"
+ },
+ "luanda": {
+  "minutes": 3.3,
+  "query": "Luanda, Angola",
+  "slug": "luanda",
+  "status": "built with heat",
+  "when": "2026-11-14T01:19:02Z"
+ },
+ "madrid": {
+  "minutes": 7.8,
+  "query": "Madrid, Spain",
+  "slug": "madrid",
+  "status": "built with heat",
+  "when": "2026-11-14T00:47:56Z"
+ },
+ "manaus": {
+  "minutes": 1.2,
+  "query": "Manaus, Brazil",
+  "slug": "manaus",
+  "status": "built with heat",
+  "when": "2026-11-14T00:50:37Z"
+ },
+ "manchester": {
+  "minutes": 1.8,
+  "query": "Manchester, United Kingdom",
+  "slug": "manchester",
+  "status": "built with heat",
+  "when": "2026-11-14T00:57:53Z"
+ },
+ "manila": {
+  "minutes": 1.2,
+  "query": "Manila, Philippines",
+  "slug": "manila",
+  "status": "built with heat",
+  "when": "2026-11-14T01:07:59Z"
+ },
+ "marseille": {
+  "minutes": 1.6,
+  "query": "Marseille, France",
+  "slug": "marseille",
+  "status": "built with heat",
+  "when": "2026-11-14T00:59:29Z"
+ },
+ "medellin": {
+  "minutes": 8.7,
+  "query": "Medellin, Colombia",
+  "slug": "medellin",
+  "status": "built with heat",
+  "when": "2026-11-14T00:47:14Z"
+ },
+ "melbourne": {
+  "minutes": 1.4,
+  "query": "Melbourne, Victoria, Australia",
+  "slug": "melbourne",
+  "status": "built with heat",
+  "when": "2026-11-14T01:24:46Z"
+ },
  "mexico-city": {
-  "minutes": 0.1,
+  "minutes": 1.5,
   "query": "Mexico City, Mexico",
   "slug": "mexico-city",
-  "status": "failed",
-  "when": "2026-11-14T00:15:11Z"
+  "status": "built with heat",
+  "when": "2026-11-14T00:49:17Z"
+ },
+ "miami": {
+  "minutes": 2.7,
+  "query": "Miami, Florida, USA",
+  "slug": "miami",
+  "status": "built with heat",
+  "when": "2026-11-14T00:49:40Z"
+ },
+ "monterrey": {
+  "minutes": 3.2,
+  "query": "Monterrey, Nuevo Leon, Mexico",
+  "slug": "monterrey",
+  "status": "built with heat",
+  "when": "2026-11-14T00:41:50Z"
+ },
+ "montevideo": {
+  "minutes": 1.3,
+  "query": "Montevideo, Uruguay",
+  "slug": "montevideo",
+  "status": "built with heat",
+  "when": "2026-11-14T00:51:57Z"
+ },
+ "montreal": {
+  "minutes": 3.0,
+  "query": "Montreal, Quebec, Canada",
+  "slug": "montreal",
+  "status": "built with heat",
+  "when": "2026-11-14T00:47:44Z"
  },
  "mumbai": {
-  "minutes": 1.8,
+  "minutes": 1.1,
   "query": "Mumbai, India",
   "slug": "mumbai",
   "status": "built with heat",
-  "when": "2026-11-14T00:20:57Z"
+  "when": "2026-11-14T01:11:45Z"
+ },
+ "munich": {
+  "minutes": 1.1,
+  "query": "Munich, Germany",
+  "slug": "munich",
+  "status": "built with heat",
+  "when": "2026-11-14T00:52:10Z"
+ },
+ "nairobi": {
+  "minutes": 1.6,
+  "query": "Nairobi, Kenya",
+  "slug": "nairobi",
+  "status": "built with heat",
+  "when": "2026-11-14T01:03:16Z"
+ },
+ "naples": {
+  "minutes": 1.4,
+  "query": "Naples, Italy",
+  "slug": "naples",
+  "status": "built with heat",
+  "when": "2026-11-14T00:57:12Z"
+ },
+ "new-orleans": {
+  "minutes": 9.6,
+  "query": "New Orleans, Louisiana, USA",
+  "slug": "new-orleans",
+  "status": "built with heat",
+  "when": "2026-11-14T00:49:50Z"
  },
  "new-york": {
   "minutes": 5.7,
@@ -34,11 +559,277 @@
   "status": "built with heat",
   "when": "2026-11-14T00:15:02Z"
  },
+ "osaka": {
+  "minutes": 3.4,
+  "query": "Osaka, Japan",
+  "slug": "osaka",
+  "status": "built with heat",
+  "when": "2026-11-14T01:08:57Z"
+ },
+ "oslo": {
+  "minutes": 4.6,
+  "query": "Oslo, Norway",
+  "slug": "oslo",
+  "status": "built with heat",
+  "when": "2026-11-14T00:58:02Z"
+ },
+ "panama-city": {
+  "minutes": 1.5,
+  "query": "Panama City, Panama",
+  "slug": "panama-city",
+  "status": "built with heat",
+  "when": "2026-11-14T00:48:04Z"
+ },
+ "paris": {
+  "minutes": 1.9,
+  "query": "Paris, France",
+  "slug": "paris",
+  "status": "built with heat",
+  "when": "2026-11-14T00:55:38Z"
+ },
+ "perth": {
+  "minutes": 5.0,
+  "query": "Perth, Western Australia, Australia",
+  "slug": "perth",
+  "status": "built with heat",
+  "when": "2026-11-14T01:19:45Z"
+ },
+ "phoenix": {
+  "minutes": 2.2,
+  "query": "Phoenix, Arizona, USA",
+  "slug": "phoenix",
+  "status": "built with heat",
+  "when": "2026-11-14T00:46:58Z"
+ },
+ "porto": {
+  "minutes": 8.6,
+  "query": "Porto, Portugal",
+  "slug": "porto",
+  "status": "built with heat",
+  "when": "2026-11-14T00:47:12Z"
+ },
+ "prague": {
+  "minutes": 1.4,
+  "query": "Prague, Czechia",
+  "slug": "prague",
+  "status": "built with heat",
+  "when": "2026-11-14T01:02:11Z"
+ },
+ "quito": {
+  "minutes": 1.2,
+  "query": "Quito, Ecuador",
+  "slug": "quito",
+  "status": "built with heat",
+  "when": "2026-11-14T00:57:58Z"
+ },
+ "rio-de-janeiro": {
+  "minutes": 2.0,
+  "query": "Rio de Janeiro, Brazil",
+  "slug": "rio-de-janeiro",
+  "status": "built with heat",
+  "when": "2026-11-14T00:40:40Z"
+ },
+ "riyadh": {
+  "minutes": 1.9,
+  "query": "Riyadh, Saudi Arabia",
+  "slug": "riyadh",
+  "status": "built with heat",
+  "when": "2026-11-14T01:13:35Z"
+ },
+ "rome": {
+  "minutes": 8.6,
+  "query": "Rome, Italy",
+  "slug": "rome",
+  "status": "built with heat",
+  "when": "2026-11-14T00:55:49Z"
+ },
+ "rotterdam": {
+  "minutes": 3.2,
+  "query": "Rotterdam, Netherlands",
+  "slug": "rotterdam",
+  "status": "built with heat",
+  "when": "2026-11-14T01:03:14Z"
+ },
+ "santiago": {
+  "minutes": 1.5,
+  "query": "Santiago, Chile",
+  "slug": "santiago",
+  "status": "built with heat",
+  "when": "2026-11-14T00:59:28Z"
+ },
+ "sao-paulo": {
+  "minutes": 1.8,
+  "query": "Sao Paulo, Brazil",
+  "slug": "sao-paulo",
+  "status": "built with heat",
+  "when": "2026-11-14T01:02:50Z"
+ },
+ "seattle": {
+  "minutes": 2.9,
+  "query": "Seattle, Washington, USA",
+  "slug": "seattle",
+  "status": "built with heat",
+  "when": "2026-11-14T00:52:37Z"
+ },
+ "seoul": {
+  "minutes": 1.6,
+  "query": "Seoul, South Korea",
+  "slug": "seoul",
+  "status": "built with heat",
+  "when": "2026-11-14T01:10:33Z"
+ },
+ "seville": {
+  "minutes": 15.1,
+  "query": "Seville, Spain",
+  "slug": "seville",
+  "status": "built with heat",
+  "when": "2026-11-14T01:05:34Z"
+ },
+ "shanghai": {
+  "minutes": 1.5,
+  "query": "Shanghai, China",
+  "slug": "shanghai",
+  "status": "built with heat",
+  "when": "2026-11-14T01:14:07Z"
+ },
+ "shenzhen": {
+  "minutes": 1.5,
+  "query": "Shenzhen, Guangdong, China",
+  "slug": "shenzhen",
+  "status": "built with heat",
+  "when": "2026-11-14T01:05:20Z"
+ },
+ "singapore": {
+  "minutes": 1.3,
+  "query": "Singapore",
+  "slug": "singapore",
+  "status": "built with heat",
+  "when": "2026-11-14T01:17:04Z"
+ },
+ "stockholm": {
+  "minutes": 1.5,
+  "query": "Stockholm, Sweden",
+  "slug": "stockholm",
+  "status": "built with heat",
+  "when": "2026-11-14T00:53:22Z"
+ },
  "sydney": {
-  "minutes": 14.7,
+  "minutes": 1.9,
   "query": "Sydney, New South Wales, Australia",
   "slug": "sydney",
   "status": "built with heat",
-  "when": "2026-11-14T00:35:40Z"
+  "when": "2026-11-14T01:23:17Z"
+ },
+ "taipei": {
+  "minutes": 7.7,
+  "query": "Taipei, Taiwan",
+  "slug": "taipei",
+  "status": "built with heat",
+  "when": "2026-11-14T01:15:44Z"
+ },
+ "tashkent": {
+  "minutes": 1.5,
+  "query": "Tashkent, Uzbekistan",
+  "slug": "tashkent",
+  "status": "built with heat",
+  "when": "2026-11-14T01:15:46Z"
+ },
+ "tehran": {
+  "minutes": 1.3,
+  "query": "Tehran, Iran",
+  "slug": "tehran",
+  "status": "built with heat",
+  "when": "2026-11-14T01:14:58Z"
+ },
+ "tel-aviv": {
+  "minutes": 1.3,
+  "query": "Tel Aviv, Israel",
+  "slug": "tel-aviv",
+  "status": "built with heat",
+  "when": "2026-11-14T01:16:16Z"
+ },
+ "tokyo": {
+  "minutes": 1.7,
+  "query": "Tokyo, Japan",
+  "slug": "tokyo",
+  "status": "built with heat",
+  "when": "2026-11-14T01:05:33Z"
+ },
+ "toluca": {
+  "minutes": 1.5,
+  "query": "Toluca, State of Mexico, Mexico",
+  "slug": "toluca",
+  "status": "built with heat",
+  "when": "2026-11-14T00:43:22Z"
+ },
+ "toronto": {
+  "minutes": 1.8,
+  "query": "Toronto, Ontario, Canada",
+  "slug": "toronto",
+  "status": "built with heat",
+  "when": "2026-11-14T00:42:42Z"
+ },
+ "tunis": {
+  "minutes": 3.3,
+  "query": "Tunis, Tunisia",
+  "slug": "tunis",
+  "status": "built with heat",
+  "when": "2026-11-14T01:22:25Z"
+ },
+ "turin": {
+  "minutes": 1.2,
+  "query": "Turin, Italy",
+  "slug": "turin",
+  "status": "built with heat",
+  "when": "2026-11-14T00:58:24Z"
+ },
+ "ulaanbaatar": {
+  "minutes": 3.8,
+  "query": "Ulaanbaatar, Mongolia",
+  "slug": "ulaanbaatar",
+  "status": "built with heat",
+  "when": "2026-11-14T01:21:24Z"
+ },
+ "valencia": {
+  "minutes": 1.2,
+  "query": "Valencia, Spain",
+  "slug": "valencia",
+  "status": "built with heat",
+  "when": "2026-11-14T00:50:29Z"
+ },
+ "vancouver": {
+  "minutes": 2.0,
+  "query": "Vancouver, British Columbia, Canada",
+  "slug": "vancouver",
+  "status": "built with heat",
+  "when": "2026-11-14T00:44:44Z"
+ },
+ "vienna": {
+  "minutes": 1.6,
+  "query": "Vienna, Austria",
+  "slug": "vienna",
+  "status": "built with heat",
+  "when": "2026-11-14T01:01:06Z"
+ },
+ "warsaw": {
+  "minutes": 8.6,
+  "query": "Warsaw, Poland",
+  "slug": "warsaw",
+  "status": "built with heat",
+  "when": "2026-11-14T01:00:46Z"
+ },
+ "washington-dc": {
+  "minutes": 8.0,
+  "query": "Washington, District of Columbia, USA",
+  "slug": "washington-dc",
+  "status": "built with heat",
+  "when": "2026-11-14T01:00:18Z"
+ },
+ "zurich": {
+  "minutes": 6.4,
+  "query": "Zurich, Switzerland",
+  "slug": "zurich",
+  "status": "built with heat",
+  "when": "2026-11-14T01:07:33Z"
  }
 }
