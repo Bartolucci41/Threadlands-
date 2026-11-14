@@ -581,11 +581,11 @@
   "when": "2026-11-14T00:58:02Z"
  },
  "panama-city": {
-  "minutes": 0.8,
-  "query": "Distrito Panam\u00e1, Panam\u00e1 || Panama District, Panama || Panama City, Panama",
+  "minutes": 1.4,
+  "query": "Panama City, Panama",
   "slug": "panama-city",
   "status": "built with heat",
-  "when": "2026-11-14T01:58:58Z"
+  "when": "2026-11-14T17:22:03Z"
  },
  "paris": {
   "minutes": 1.9,
