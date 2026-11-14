@@ -7,11 +7,16 @@ time of year in earlier years.
 """
 import datetime, glob, json, os, sys, time, traceback
 
-import numpy as np
-
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
-from heatcore import clear_mask, hex_means, to_celsius  # noqa: E402
+np = clear_mask = hex_means = to_celsius = None   # loaded only when building, so plan and publish need no extra packages
+
+
+def _load():
+    global np, clear_mask, hex_means, to_celsius
+    import numpy
+    import heatcore
+    np, clear_mask, hex_means, to_celsius = numpy, heatcore.clear_mask, heatcore.hex_means, heatcore.to_celsius
 
 PLACES = os.path.join(ROOT, "data", "places")
 NOW = os.path.join(ROOT, "data", "now")
@@ -158,6 +163,7 @@ def build_one(slug, cat):
 
 
 def build(chunk):
+    _load()
     import planetary_computer, pystac_client
     os.makedirs(OUT, exist_ok=True)
     os.environ.update({"GDAL_DISABLE_READDIR_ON_OPEN": "EMPTY_DIR", "GDAL_HTTP_MAX_RETRY": "4", "GDAL_HTTP_RETRY_DELAY": "2"})
