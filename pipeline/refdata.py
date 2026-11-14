@@ -65,13 +65,24 @@ def price_levels():
     url = "https://api.worldbank.org/v2/country/all/indicator/PA.NUS.PPPC.RF"
     rows, page = [], 1
     while True:
-        r = requests.get(url, params={"format": "json", "mrnev": 1, "per_page": 400, "page": page}, timeout=60)
+        r = requests.get(url, params={"format": "json", "date": "2015:2025", "per_page": 5000, "page": page}, timeout=90)
         r.raise_for_status()
-        meta, data = r.json()
+        j = r.json()
+        if not isinstance(j, list) or len(j) < 2:
+            raise SystemExit(f"Unexpected World Bank response: {str(j)[:300]}")
+        meta, data = j[0], j[1]
         rows += data or []
-        if page >= meta.get("pages", 1):
+        if page >= int(meta.get("pages", 1)):
             break
         page += 1
+    latest = {}
+    for x in rows:
+        if x.get("value") is None or not x.get("countryiso3code"):
+            continue
+        k = x["countryiso3code"]
+        if k not in latest or int(x["date"]) > int(latest[k]["date"]):
+            latest[k] = x
+    rows = list(latest.values())
     out = {}
     for x in rows:
         iso3, v = x.get("countryiso3code"), x.get("value")
