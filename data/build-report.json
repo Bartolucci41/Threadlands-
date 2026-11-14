@@ -104,6 +104,13 @@
   "status": "built with heat",
   "when": "2026-11-14T00:52:16Z"
  },
+ "boulder-united-states-r112298": {
+  "minutes": 7.0,
+  "query": "osm:R112298",
+  "slug": "boulder-united-states-r112298",
+  "status": "built with heat",
+  "when": "2026-11-14T01:44:40Z"
+ },
  "brisbane": {
   "minutes": 2.2,
   "query": "Brisbane, Queensland, Australia",
