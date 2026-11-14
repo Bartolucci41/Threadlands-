@@ -251,7 +251,7 @@ def nominatim(path, params):
 COMMON = {"format": "jsonv2", "polygon_geojson": 1, "addressdetails": 1, "accept-language": "en"}
 if PLACE.lower().startswith("osm:"):
     # An exact OpenStreetMap object, such as "osm:R123456", chosen on the website
-    hits = nominatim("lookup", dict(COMMON, osm_ids=PLACE[4:]))
+    hits = nominatim("lookup", dict(COMMON, osm_ids=PLACE[4:].split("||")[0].strip()))
 else:
     # PLACE may list fallbacks, best first: "City of Cape Town, South Africa || Cape Town, South Africa"
     hits = []
@@ -263,7 +263,7 @@ else:
         if good:
             hits = good + [h for h in found if h not in good]
             break
-        hits = hits or found
+        hits = found   # nothing outlined yet: keep the last (plainest) phrase's results
 if not hits:
     raise SystemExit(f'No place was found for "{PLACE}". Add the country, for example "Toluca, Mexico".')
 def has_outline(h):

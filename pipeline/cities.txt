@@ -27,7 +27,7 @@ monterrey | Monterrey, Nuevo Leon, Mexico
 toluca | Toluca, State of Mexico, Mexico
 havana | Havana, Cuba
 guatemala-city | Guatemala City, Guatemala
-panama-city | Panama District, Panama Province, Panama || Panama City, Panama
+panama-city | Distrito Panamá, Panamá || Panama District, Panama || Panama City, Panama
 # South America
 bogota | Bogota, Colombia
 medellin | Medellin, Colombia
@@ -104,7 +104,7 @@ jakarta | Jakarta, Indonesia
 manila | Manila, Philippines
 ho-chi-minh-city | Ho Chi Minh City, Vietnam
 hanoi | Hanoi, Vietnam
-mumbai | Mumbai City, Maharashtra, India || Greater Mumbai, Maharashtra, India || Mumbai, India
+mumbai | osm:R7888990 || Mumbai, India
 delhi | Delhi, India
 bengaluru | Bengaluru, India
 chennai | Chennai, India
