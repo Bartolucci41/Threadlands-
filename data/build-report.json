@@ -1,1 +1,44 @@
-{}
+{
+ "lagos": {
+  "minutes": 1.7,
+  "query": "Lagos, Nigeria",
+  "slug": "lagos",
+  "status": "built with heat",
+  "when": "2026-11-14T00:19:05Z"
+ },
+ "london": {
+  "minutes": 2.2,
+  "query": "London, United Kingdom",
+  "slug": "london",
+  "status": "built with heat",
+  "when": "2026-11-14T00:17:24Z"
+ },
+ "mexico-city": {
+  "minutes": 0.1,
+  "query": "Mexico City, Mexico",
+  "slug": "mexico-city",
+  "status": "failed",
+  "when": "2026-11-14T00:15:11Z"
+ },
+ "mumbai": {
+  "minutes": 1.8,
+  "query": "Mumbai, India",
+  "slug": "mumbai",
+  "status": "built with heat",
+  "when": "2026-11-14T00:20:57Z"
+ },
+ "new-york": {
+  "minutes": 5.7,
+  "query": "New York City, New York, USA",
+  "slug": "new-york",
+  "status": "built with heat",
+  "when": "2026-11-14T00:15:02Z"
+ },
+ "sydney": {
+  "minutes": 14.7,
+  "query": "Sydney, New South Wales, Australia",
+  "slug": "sydney",
+  "status": "built with heat",
+  "when": "2026-11-14T00:35:40Z"
+ }
+}
