@@ -5,6 +5,7 @@
   <h1 class="page-h">The library</h1>
   <p class="page-lede" id="lib-lede">Every place that opens instantly in Threadlands. Each one has measured satellite heat, the river basin it drinks from and the farmland around it. Don&rsquo;t see yours? <a href="{B}explore/">Search for it on the Explore page</a> and build it in about ten minutes.</p>
   <div class="lib-map" id="lib-map"><canvas id="lib-canvas" role="img" aria-label="World map with a dot for every place in the library"></canvas><span class="lib-tip" id="lib-tip" hidden></span></div>
+  <p class="hint" style="margin:-16px 0 20px">Map outlines from Natural Earth, public domain. Dot size shows population.</p>
   <div class="lib-tools">
     <label class="sr-only" for="lib-q">Filter places</label>
     <input id="lib-q" type="search" placeholder="Filter by city or country" autocomplete="off">
@@ -17,7 +18,8 @@
   var $ = function (s) { return document.querySelector(s); };
   function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function norm(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
-  var LIB = [], shown = [], dots = [], cv = $('#lib-canvas'), tip = $('#lib-tip');
+  var LIB = [], shown = [], dots = [], LAND = null, cv = $('#lib-canvas'), tip = $('#lib-tip');
+  fetch('{B}assets/land.json').then(function (r) { return r.json(); }).then(function (l) { LAND = l; drawMap(); }).catch(function () { /* map without coastlines */ });
   function color(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
   function drawMap() {
     var W = cv.parentNode.clientWidth;
@@ -29,9 +31,15 @@
     ctx.fillStyle = color('--surface'); ctx.fillRect(0, 0, W, H);
     // Equirectangular view from 60 S to 75 N, where nearly all cities are
     var X = function (lng) { return (lng + 180) / 360 * W; }, Y = function (lat) { return (75 - lat) / 135 * H; };
-    ctx.strokeStyle = color('--line'); ctx.lineWidth = 1;
+    if (LAND) {
+      ctx.beginPath();
+      LAND.forEach(function (r) { for (var k = 0; k + 1 < r.length; k += 2) { var lx = X(r[k]), ly = Y(r[k + 1]); if (k) ctx.lineTo(lx, ly); else ctx.moveTo(lx, ly); } ctx.closePath(); });
+      ctx.fillStyle = color('--surface2'); ctx.fill('evenodd');
+    }
+    ctx.strokeStyle = color('--line'); ctx.lineWidth = 1; ctx.globalAlpha = 0.6;
     for (var g = -150; g <= 180; g += 30) { ctx.beginPath(); ctx.moveTo(X(g), 0); ctx.lineTo(X(g), H); ctx.stroke(); }
     for (var t = -60; t <= 75; t += 15) { ctx.beginPath(); ctx.moveTo(0, Y(t)); ctx.lineTo(W, Y(t)); ctx.stroke(); }
+    ctx.globalAlpha = 1;
     ctx.strokeStyle = color('--ink2'); ctx.setLineDash([3, 4]);
     ctx.beginPath(); ctx.moveTo(0, Y(0)); ctx.lineTo(W, Y(0)); ctx.stroke(); ctx.setLineDash([]);
     var ids = {}; shown.forEach(function (e) { ids[e.slug] = 1; });

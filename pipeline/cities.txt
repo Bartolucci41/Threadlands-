@@ -27,7 +27,7 @@ monterrey | Monterrey, Nuevo Leon, Mexico
 toluca | Toluca, State of Mexico, Mexico
 havana | Havana, Cuba
 guatemala-city | Guatemala City, Guatemala
-panama-city | Distrito Panamá, Panamá || Panama District, Panama || Panama City, Panama
+panama-city | Panama City, Panama
 # South America
 bogota | Bogota, Colombia
 medellin | Medellin, Colombia

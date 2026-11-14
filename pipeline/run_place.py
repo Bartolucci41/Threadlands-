@@ -283,10 +283,18 @@ shape_src = hit
 if not has_outline(hit) and hit.get("addresstype") != "postcode":
     # OpenStreetMap sometimes knows a city only as a point; use the city-level boundary that contains it
     try:
-        rev = nominatim("reverse", dict(COMMON, lat=hit["lat"], lon=hit["lon"], zoom=10))
-        if has_outline(rev):
+        # Neighborhood-level first; if that is too small to be the city, step out to the district or county
+        for zoom in (10, 8):
+            rev = nominatim("reverse", dict(COMMON, lat=hit["lat"], lon=hit["lon"], zoom=zoom))
+            if not has_outline(rev):
+                continue
+            g_rev = shape(rev["geojson"])
+            km2 = g_rev.area * 111.32 * 110.57 * math.cos(math.radians(float(hit["lat"])))
             shape_src = rev
-            NOTES.append(f"OpenStreetMap has no outline for {NAME}, so the boundary of {rev.get('name') or 'the surrounding district'} is used.")
+            if km2 >= 40:
+                break
+        if shape_src is not hit:
+            NOTES.append(f"OpenStreetMap has no outline for {NAME}, so the boundary of {shape_src.get('name') or 'the surrounding district'} is used.")
     except Exception as e:
         print("Could not look up a boundary around the point:", e)
 geom = shape(shape_src["geojson"]) if has_outline(shape_src) else Point(float(hit["lon"]), float(hit["lat"]))
