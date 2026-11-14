@@ -104,7 +104,7 @@ jakarta | Jakarta, Indonesia
 manila | Manila, Philippines
 ho-chi-minh-city | Ho Chi Minh City, Vietnam
 hanoi | Hanoi, Vietnam
-mumbai | osm:R7888990 || Mumbai, India
+mumbai | osm:R7888990 || Mumbai Suburban District, Maharashtra, India || Mumbai, India
 delhi | Delhi, India
 bengaluru | Bengaluru, India
 chennai | Chennai, India

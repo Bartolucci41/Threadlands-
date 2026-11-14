@@ -249,10 +249,12 @@ def nominatim(path, params):
     return r.json()
 
 COMMON = {"format": "jsonv2", "polygon_geojson": 1, "addressdetails": 1, "accept-language": "en"}
+hits = []
 if PLACE.lower().startswith("osm:"):
     # An exact OpenStreetMap object, such as "osm:R123456", chosen on the website
     hits = nominatim("lookup", dict(COMMON, osm_ids=PLACE[4:].split("||")[0].strip()))
-else:
+    PLACE = PLACE.split("||", 1)[1] if (not hits and "||" in PLACE) else PLACE
+if not hits and not PLACE.lower().startswith("osm:"):
     # PLACE may list fallbacks, best first: "City of Cape Town, South Africa || Cape Town, South Africa"
     hits = []
     for q in [x.strip() for x in PLACE.split("||") if x.strip()]:
