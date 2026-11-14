@@ -156,7 +156,7 @@
   function nice(iso) { var d = String(iso).split('-'); return MONTHS[Number(d[1]) - 1] + ' ' + Number(d[2]); }
   fetch('data/now/index.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (ix) {
     var cutoff = Date.now() - 45 * 864e5;
-    var rows = (ix.places || []).filter(function (r) { return r.land_anom != null && Date.parse(r.date) >= cutoff; });
+    var rows = (ix.places || []).filter(function (r) { return r.land_anom != null && !r.uncertain && Date.parse(r.date) >= cutoff; });
     if (rows.length < 4) return;
     var val = function (r) { return r.built_anom != null ? r.built_anom : r.land_anom; };
     rows.sort(function (a, b) { return val(b) - val(a); });

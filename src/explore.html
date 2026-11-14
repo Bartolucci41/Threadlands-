@@ -608,7 +608,7 @@
       if (NOW_FOR !== slug || !P || !d || d.status !== 'ok' || !d.cells || d.cells.anom.length !== P.N) return;
       var a = new Float64Array(P.N);
       for (var i = 0; i < P.N; i++) { var v = d.cells.anom[i]; a[i] = v == null ? NaN : Number(v); }
-      NOWD = { date: d.date, anom: a, land: d.land_anom, built: d.built_anom, usual: d.usual_scenes };
+      NOWD = { date: d.date, anom: a, land: d.land_anom, built: d.built_anom, usual: d.usual_scenes, uncertain: !!d.uncertain };
       $('#now-chip').hidden = false;
       renderGlance();
       if (layer === 'now') { renderLegend(); scheduleDraw(); }
@@ -1108,7 +1108,7 @@
     }
     if (NOWD && NOWD.land != null) {
       var nv = NOWD.built != null ? NOWD.built : NOWD.land;
-      cards.push(['This week', (nv >= 0 ? '+' : '\u2212') + Math.abs(nv).toFixed(1) + ' \u00b0C', (nv >= 0 ? 'warmer' : 'cooler') + ' than usual for this time of year' + (NOWD.built != null ? ' across its built-up land' : '') + ', from the Landsat pass on ' + niceDate(NOWD.date)]);
+      cards.push(['This week', (nv >= 0 ? '+' : '\u2212') + Math.abs(nv).toFixed(1) + ' \u00b0C', (nv >= 0 ? 'warmer' : 'cooler') + ' than usual for this time of year' + (NOWD.built != null ? ' across its built-up land' : '') + ', from the Landsat pass on ' + niceDate(NOWD.date) + (NOWD.uncertain ? '. Treat with caution: thin cloud, fog or few past passes can skew this reading' : '')]);
     }
     if (land > 0) cards.push(['Flooding', Math.round(100 * flood / land) + '%', 'of its land sits low beside rivers, lakes or the sea, where floods reach first']);
     var reg = P.place.regional;

@@ -107,7 +107,7 @@ def build_one(slug, cat):
     today = utcnow().date()
     land_n = max(1, int(g.land.sum()))
     # 1. The latest pass that saw enough of the place through the clouds
-    recent = search(cat, g.bbox, today - datetime.timedelta(days=RECENT_DAYS), today, 70)
+    recent = search(cat, g.bbox, today - datetime.timedelta(days=RECENT_DAYS), today, 40)
     recent = [it for it in recent if overlap(it, g.bbox) > 0.3]
     recent.sort(key=lambda it: it.datetime, reverse=True)
     now, when, scene = None, None, None
@@ -125,7 +125,7 @@ def build_one(slug, cat):
             mid = when.date().replace(year=when.year - k)
         except ValueError:   # 29 February
             mid = when.date().replace(year=when.year - k, day=28)
-        cands = [it for it in search(cat, g.bbox, mid - datetime.timedelta(days=WINDOW_DAYS), mid + datetime.timedelta(days=WINDOW_DAYS), 40)
+        cands = [it for it in search(cat, g.bbox, mid - datetime.timedelta(days=WINDOW_DAYS), mid + datetime.timedelta(days=WINDOW_DAYS), 25)
                  if overlap(it, g.bbox) > 0.3]
         cands.sort(key=lambda it: it.properties.get("eo:cloud_cover", 100))
         for it in cands[:2]:
@@ -157,6 +157,8 @@ def build_one(slug, cat):
         "usual_dates": used, "usual_scenes": len(used),
         "land_anom": med(land_ok), "built_anom": med(land_ok & built), "land_now": round(float(np.nanmedian(now[land_ok])), 1),
         "clear_share": round(float(land_ok.sum()) / land_n, 2),
+        # Thin cloud, fog or haze that slips past the cloud mask reads as cold ground, so flag readings that look off
+        "uncertain": bool(med(land_ok) is None or abs(med(land_ok)) > 10 or float(land_ok.sum()) / land_n < 0.5 or len(used) < 4),
         "cells": {"now": rnd(now, 1), "anom": rnd(anom, 1)},
         "source": "Landsat 8-9 Collection 2 surface temperature (USGS/NASA), via Microsoft Planetary Computer",
     }
@@ -201,7 +203,8 @@ def publish():
         if not e or r.get("status") != "ok":
             continue
         rows.append({"slug": r["slug"], "name": e["name"], "country": e["country"], "date": r["date"],
-                     "land_anom": r.get("land_anom"), "built_anom": r.get("built_anom"), "land_now": r.get("land_now")})
+                     "land_anom": r.get("land_anom"), "built_anom": r.get("built_anom"), "land_now": r.get("land_now"),
+                     "uncertain": bool(r.get("uncertain"))})
     json.dump({"format": "threadlands-now", "updated": utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"), "places": rows},
               open(os.path.join(NOW, "index.json"), "w"), separators=(",", ":"))
     print(f"now index has {len(rows)} places")
