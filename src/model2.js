@@ -16,8 +16,8 @@ const ThreadModel = (function () {
   const NEED_KM2 = 0.0019;     // cropland per person for full self-sufficiency (0.19 ha, about the world average)
   const RETIRED_CROP = 0.5;    // share of a retired sprawl hex that returns to cropland
   const URBAN = { core: 1, mid: 1, suburb: 1, greenway: 1 };
-  const COOL = { forest: 1, wetland: 1, water: 0.9, park: 1, corridor: 0.8, greenway: 0.8, open: 0.7, regen: 0.4, farm: 0.25, barren: 0.05 };
-  const HAB = { water: 0.5, forest: 1, wetland: 1, open: 0.7, park: 0.8, corridor: 0.9, greenway: 0.55, regen: 0.55, farm: 0.12, barren: 0.1 };
+  const COOL = { forest: 1, wetland: 1, water: 0.9, pond: 0.9, park: 1, corridor: 0.8, greenway: 0.8, open: 0.7, regen: 0.4, farm: 0.25, barren: 0.05 };
+  const HAB = { water: 0.5, pond: 0.6, forest: 1, wetland: 1, open: 0.7, park: 0.8, corridor: 0.9, greenway: 0.55, regen: 0.55, farm: 0.12, barren: 0.1 };
   const MOVE = { forest: 0.3, wetland: 0.3, open: 0.6, park: 0.3, farm: 1, barren: 1.5, water: 3, suburb: 2.5, mid: 4, core: 6 };
   // Climate scenarios for about 2050 (IPCC AR6): extra warming over land since 2011-2020, rain intensity, sea level
   const CLIMATE = {
@@ -292,6 +292,7 @@ const ThreadModel = (function () {
     subs.sort((a, b) => sd(b) - sd(a));
     const subP = new Float64Array(N).fill(2);
     subs.forEach((i, k) => { subP[i] = (k + 1) / subs.length; });
+    const subOrder = subs.slice();
 
     // Fixed quantities
     const rnd3 = new Float64Array(N);
@@ -365,7 +366,21 @@ const ThreadModel = (function () {
 
     function evaluate(L) {
       const cv = 1 - Math.pow(1 - clamp(L.canopy, 0, 100) / 100, 1.8);
-      const co = L.corridors / 100, we = L.wetlands / 100, rg = L.regen / 100, cp = L.compact / 100;
+      const co = L.corridors / 100, we = L.wetlands / 100, rg = L.regen / 100;
+      let cp = L.compact / 100;
+      // Studio: designed elements, each with a maturity m from 0 (just built) to 1 (fully grown)
+      const studio = out.studio;
+      const SD = studio && studio.size ? studio : null;
+      if (SD) {
+        // Infill housing makes room for people, so the farthest sprawl can be left unbuilt
+        let cap = 0;
+        for (const [i, it] of SD) if (it.kind === 'housing' && isUrb(base[i])) cap += 0.3 * pop[i] * it.m;
+        if (cap > 0) {
+          let cum = 0, t = 0;
+          for (const k of subOrder) { cum += pop[k]; if (cum > cap) break; t = subP[k]; }
+          cp = Math.max(cp, t);
+        }
+      }
       const cover = new Array(N), ucls = new Array(N).fill(null), retired = new Uint8Array(N);
       let nWet = 0, wetW = 0, nGreen = 0, nSub = 0, nSubActive = 0;
 
@@ -408,6 +423,41 @@ const ThreadModel = (function () {
         }
       }
 
+      // Studio conversions and local effects
+      const lc = new Float64Array(N), lflood = new Float64Array(N).fill(1);
+      let urbFarm = 0, energy = 0, nTransit = 0, nRain = 0;
+      if (SD) {
+        for (const [i, it] of SD) {
+          const m = clamp(it.m, 0, 1), c0 = cover[i], urb = !!ucls[i];
+          switch (it.kind) {
+            case 'trees': if (urb) { lc[i] = 1 - (1 - lc[i]) * (1 - 0.6 * m); lflood[i] *= 1 - 0.05 * m; } break;
+            case 'roof': if (urb) { lc[i] = 1 - (1 - lc[i]) * (1 - 0.25 * m); lflood[i] *= 1 - 0.1 * m; } break;
+            case 'raingarden': if (urb) { lc[i] = 1 - (1 - lc[i]) * (1 - 0.05 * m); lflood[i] *= 1 - 0.25 * m; nRain += m; } break;
+            case 'urbanfarm': if (urb) { lc[i] = 1 - (1 - lc[i]) * (1 - 0.1 * m); urbFarm += 0.02 * area[i] * m; } break;
+            case 'solar': if (urb) energy += it.mwh || 0; break;
+            case 'transit': if (urb) nTransit += m; break;
+            case 'pond':
+              if (m >= 0.5 && c0 !== 'water' && c0 !== 'pond') { cover[i] = 'pond'; ucls[i] = null; wetW += 1 + flood[i]; }
+              break;
+            case 'wetland':
+              if (m >= 0.5 && !ucls[i] && c0 !== 'water' && c0 !== 'wetland' && c0 !== 'pond') { cover[i] = 'wetland'; nWet++; wetW += 0.5 + flood[i]; }
+              break;
+            case 'forest':
+              if (m >= 0.5 && !ucls[i] && c0 !== 'water' && c0 !== 'wetland' && c0 !== 'pond' && c0 !== 'forest') cover[i] = 'forest';
+              break;
+            case 'corridor':
+              if (m >= 0.5 && c0 !== 'water' && c0 !== 'forest' && c0 !== 'wetland' && c0 !== 'park' && c0 !== 'corridor' && c0 !== 'greenway' && c0 !== 'pond') {
+                if (ucls[i]) { cover[i] = 'greenway'; nGreen++; } else cover[i] = 'corridor';
+              }
+              break;
+            case 'regen': if (m >= 0.5 && c0 === 'farm') cover[i] = 'regen'; break;
+          }
+        }
+      }
+      let lcSum = 0, lcN = 0;
+      for (let i = 0; i < N; i++) if (ucls[i]) { lcSum += lc[i]; lcN++; }
+      const cvAll = 1 - (1 - cv) * (1 - (lcN ? lcSum / lcN : 0));   // city-wide greening, for storage and habitat
+
       // People stay in the region: sprawl that is pulled back moves into the remaining city
       let popAct = 0;
       for (let i = 0; i < N; i++) if (ucls[i]) popAct += pop[i];
@@ -423,7 +473,8 @@ const ThreadModel = (function () {
         let cs = 0;
         for (const j of NB[i]) cs += COOL[cover[j]] || 0;
         const coolN = Math.min(1, cs / 3);
-        const hv = (0.4 + 0.6 * dn) * (1 - 0.55 * cv) * (1 - 0.5 * coolN) * (1 - BREEZE * breeze[i]) * CAL[i] * (1 + 0.1 * climate.dT);
+        const cvi = 1 - (1 - cv) * (1 - lc[i]);
+        const hv = (0.4 + 0.6 * dn) * (1 - 0.55 * cvi) * (1 - 0.5 * coolN) * (1 - BREEZE * breeze[i]) * CAL[i] * (1 + 0.1 * climate.dT);
         heat[i] = hv;
         const w = usePop ? pop[i] * scale + 1e-9 : area[i];
         sw += w; sh += w * hv;
@@ -439,13 +490,14 @@ const ThreadModel = (function () {
       }
       const wetFrac = restorableW > 0 ? Math.min(1, wetW / restorableW) : (wetW > 0 ? Math.min(1, wetW / Math.max(1, 0.05 * N)) : 0);
       const regenShare = farmA + regenA > 0 ? regenA / (farmA + regenA) : 0;
-      const retention = clamp(0.6 * wetFrac + 0.18 * cv + 0.14 * regenShare, 0, 0.92);
+      const rainBonus = nUrban0 > 0 ? 0.08 * Math.min(1, nRain / Math.max(3, 0.05 * nUrban0)) : 0;
+      const retention = clamp(0.6 * wetFrac + 0.18 * cvAll + 0.14 * regenShare + rainBonus, 0, 0.92);
       const floodExp = new Float64Array(N);
       let E = 0;
       for (let i = 0; i < N; i++) {
         if (!URBAN[cover[i]] || floodEff[i] <= 0) continue;
         const p = usePop ? pop[i] * scale : area[i] * fr.built[i];
-        floodExp[i] = p * floodEff[i] * (cover[i] === 'greenway' ? 0.8 : 1);
+        floodExp[i] = p * floodEff[i] * (cover[i] === 'greenway' ? 0.8 : 1) * lflood[i];
         E += floodExp[i];
       }
       const risk = E0 > 0 ? (E / E0) * (1 - retention) : 0;
@@ -463,6 +515,8 @@ const ThreadModel = (function () {
         for (const j of near2[i]) if (cover[j] === 'wetland') { wetNear = true; break; }
         supplyDry += a * ((isRegen ? 0.9 * (1 - 0.04 * climate.dT) : 0.58 * (1 - 0.08 * climate.dT)) + (wetNear ? 0.14 : 0));
       }
+      supply += 0.6 * urbFarm * (1 - 0.04 * climate.dT);          // urban farms yield about 60% of field crops per area, all year
+      supplyDry += 0.5 * urbFarm;
       const food = DEMAND > 0 ? Math.min(100, 100 * supply / DEMAND) : 100;
       const foodDry = DEMAND > 0 ? Math.min(100, 100 * supplyDry / DEMAND) : 100;
 
@@ -471,7 +525,7 @@ const ThreadModel = (function () {
       let sumW = 0;
       for (let i = 0; i < N; i++) {
         const cvr = cover[i];
-        hw[i] = (cvr === 'core' || cvr === 'mid' || cvr === 'suburb') ? 0.06 + 0.25 * cv : (HAB[cvr] || 0);
+        hw[i] = (cvr === 'core' || cvr === 'mid' || cvr === 'suburb') ? 0.06 + 0.25 * (1 - (1 - cv) * (1 - lc[i])) : (HAB[cvr] || 0);
         sumW += hw[i];
       }
       const comp = new Int32Array(N).fill(-1);
@@ -498,7 +552,9 @@ const ThreadModel = (function () {
 
       // Travel
       const greenRef = Math.max(4, 0.02 * nUrban0);
-      const mobility = 100 * clamp(0.22 + 0.62 * (1 - Math.pow(1 - cp, 1.8)) * (nSub > 0 ? 1 : 0.5) + 0.1 * Math.min(1, nGreen / greenRef) + 0.04 * cv, 0, 1);
+      const transitRef = Math.max(3, 0.03 * nUrban0);
+      const mobility = 100 * clamp(0.22 + 0.62 * (1 - Math.pow(1 - cp, 1.8)) * (nSub > 0 ? 1 : 0.5) + 0.1 * Math.min(1, nGreen / greenRef) + 0.04 * cvAll
+        + 0.2 * Math.min(1, nTransit / transitRef), 0, 1);
 
       const tests = {
         heatwave: 0.5 * heatScore + 0.25 * habitat + 0.25 * food,
@@ -507,13 +563,14 @@ const ThreadModel = (function () {
       };
       const index = 0.8 * (tests.heatwave + tests.flood + tests.drought) / 3 + 0.2 * mobility;
       return {
-        cover, ucls, heat, floodExp, comp, lcc, retention, scale, E,
+        cover, ucls, heat, floodExp, comp, lcc, retention, scale, E, energy, lc, compactUsed: cp,
         metrics: { heat: heatScore, flood: floodScore, habitat, food, foodDry, storage, mobility },
         tests, index
       };
     }
 
     out.paint = new Map();
+    out.studio = new Map();
     out.evaluate = evaluate;
     const bau = evaluate(ZERO);
     E0 = bau.E;
@@ -547,6 +604,12 @@ const ThreadModel = (function () {
     out.BAU = evaluate(ZERO);
     out.BAU_TODAY = out.BAU;
     out.lowCoastCount = lowCoast.reduce((a, b) => a + b, 0);
+    out.setClimateRaw = function (dT, slr) {
+      climate = { key: 'custom', name: 'Custom', dT: dT, slr: slr };
+      setFloodClimate();
+      out.climate = climate;
+      out.BAU = evaluate(ZERO);
+    };
     out.setClimate = function (key) {
       climate = CLIMATE[key] || CLIMATE.today;
       setFloodClimate();

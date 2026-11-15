@@ -57,6 +57,62 @@ css += """
   .live-ctl input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; }
   .live figcaption { font-size: 0.875rem; color: var(--ink2); }
   .live figcaption a { color: var(--accent); font-weight: 600; white-space: nowrap; }
+  .studio-cta { margin-top: 26px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px 24px; padding: 18px 20px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); }
+  .studio-cta h3 { margin: 2px 0 4px; font-size: 1.25rem; }
+  .studio-cta p { margin: 0; max-width: 44rem; color: var(--ink2); font-size: 0.9375rem; }
+  /* Studio */
+  .studio-wrap { max-width: 1400px; }
+  .st-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 12px 24px; }
+  .st-place { display: grid; gap: 4px; margin-bottom: 14px; }
+  .st-select { min-height: 42px; padding: 0 12px; border-radius: 10px; border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink); font: 500 0.9375rem var(--font-body); max-width: 20rem; }
+  .st-select.small { min-height: 34px; font-size: 0.875rem; }
+  .st-app { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .st-app { grid-template-columns: minmax(0, 1fr); } }
+  .st-left { display: grid; gap: 10px; min-width: 0; }
+  .st-bar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+  .st-layers, .st-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .st-bar .chip { min-height: 36px; }
+  .st-bar .chip:disabled { opacity: 0.45; cursor: default; }
+  .st-map { position: relative; background: var(--surface); border-radius: 14px; overflow: hidden; min-height: 380px; }
+  .st-map canvas { display: block; width: 100%; touch-action: none; cursor: crosshair; }
+  .st-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--ink2); }
+  .st-tip { position: absolute; pointer-events: none; padding: 6px 9px; border-radius: 8px; background: var(--ink); color: var(--bg); font-size: 0.8125rem; max-width: 260px; z-index: 2; }
+  .st-time { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+  .st-time input { width: 100%; accent-color: var(--accent); min-height: 32px; }
+  .st-time .btn { min-height: 40px; }
+  .st-yr { font: 800 1.6rem/1 var(--font-display); color: var(--ink); min-width: 3.2em; text-align: right; }
+  .st-panel { display: grid; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .st-h { font: 600 1rem var(--font-body); margin: 10px 0 2px; }
+  .st-h:first-child { margin-top: 0; }
+  .st-palette { display: grid; gap: 8px; }
+  .st-group { display: grid; gap: 4px; }
+  .st-tools { display: flex; flex-wrap: wrap; gap: 6px; }
+  .st-tool { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 500 0.8125rem var(--font-body); cursor: pointer; }
+  .st-tool i { width: 12px; height: 12px; border-radius: 3px; border: 1px solid var(--ink); }
+  .st-tool i.erase { background: repeating-linear-gradient(45deg, var(--surface), var(--surface) 2px, var(--ink2) 2px, var(--ink2) 3px); }
+  .st-tool[aria-checked="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); font-weight: 700; }
+  .st-tooldesc { margin: 4px 0 0; font-size: 0.8125rem; color: var(--ink2); min-height: 3.2em; }
+  .st-budget { display: grid; gap: 6px; }
+  .st-bud-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.875rem; color: var(--ink2); }
+  .st-bud-row b { font: 800 1.3rem var(--font-display); color: var(--ink); }
+  .st-bud-row.small { font-size: 0.8125rem; }
+  .st-bud-bar { height: 8px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+  .st-bud-bar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width .2s; }
+  .st-bud-bar i.over { background: var(--neg); }
+  .st-bud-bar i.done { background: var(--pos); }
+  .st-score { display: grid; }
+  .st-big { font: 800 2.4rem/1 var(--font-display); color: var(--ink); }
+  .st-delta { font-size: 0.8125rem; color: var(--ink2); }
+  .st-metrics { display: grid; gap: 6px; }
+  .st-met { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) 3.4em; gap: 8px; align-items: center; font-size: 0.8125rem; color: var(--ink2); }
+  .st-met .st-bar { position: relative; height: 8px; background: var(--surface2); border-radius: 99px; display: block; }
+  .st-met .st-bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink); border-radius: 99px; }
+  .st-met .st-bar b { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--accent); }
+  .st-num { text-align: right; color: var(--ink); font-family: var(--font-mono); }
+  .st-num em { font-style: normal; font-size: 0.75rem; }
+  .st-num em.up { color: var(--pos); } .st-num em.down { color: var(--neg); }
+  .st-extra p { margin: 4px 0 0; font-size: 0.8125rem; color: var(--ink2); }
+  .st-chal-t { margin: 0 0 6px; font-size: 0.875rem; color: var(--ink); font-weight: 600; }
   .now { margin: 0 0 40px; }
   .now-sub { margin: -6px 0 16px; max-width: 44rem; color: var(--ink2); font-size: 0.9375rem; }
   .now-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
@@ -94,7 +150,7 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
 # Cloudflare Web Analytics: private visit counts for Robert, no cookies and no personal data
 ANALYTICS = ("<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' "
              "data-cf-beacon='{\"token\": \"a92b6704e81e4aaba11a9f8a11832ae1\"}'></script><!-- End Cloudflare Web Analytics -->\n")
-PAGES = [("", "Home"), ("explore/", "Explore"), ("library/", "Library"), ("how-it-works/", "How it works"), ("about/", "About")]
+PAGES = [("", "Home"), ("explore/", "Explore"), ("studio/", "Studio"), ("library/", "Library"), ("how-it-works/", "How it works"), ("about/", "About")]
 
 
 def head(base, title, desc):
@@ -142,7 +198,7 @@ for i, sc in enumerate(re.findall(r"<script>(.*?)</script>", doc, re.S)):
     write(f"src/.check/explore{i}.js", sc)
 
 # ---- The other pages
-for name in ("home", "library", "how-it-works", "about"):
+for name in ("home", "studio", "library", "how-it-works", "about"):
     spec = read(SRC, "pages", name + ".html")
     meta = dict(re.findall(r"<!--\s*(\w+):\s*(.*?)\s*-->", spec.split("\n\n", 1)[0]))
     content = spec.split("\n\n", 1)[1]

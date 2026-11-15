@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Studio | Threadlands</title>
+<meta name="description" content="Design living systems for a real city: trees, farms, ponds, wetlands, corridors, transit and housing, with real costs, and watch them grow to 2050.">
+<meta property="og:title" content="Studio | Threadlands">
+<meta property="og:description" content="Design living systems for a real city: trees, farms, ponds, wetlands, corridors, transit and housing, with real costs, and watch them grow to 2050.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a92b6704e81e4aaba11a9f8a11832ae1"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+<header class="wrap site-head" id="top">
+  <div class="topbar">
+    <a class="wordmark" href="../">Threadlands</a>
+    <nav class="topnav" aria-label="Site"><a href="../explore/">Explore</a><a href="../studio/" aria-current="page">Studio</a><a href="../library/">Library</a><a href="../how-it-works/">How it works</a><a href="../about/">About</a></nav>
+  </div>
+</header>
+<main class="wrap studio-wrap">
+<script src="../assets/model.js"></script>
+  <div class="st-head">
+    <div>
+      <h1 class="page-h" style="margin-bottom:6px">Studio</h1>
+      <p class="page-lede" style="margin-bottom:12px">Design living systems for a real place. Plant trees, dig ponds, restore wetlands, link habitat, grow food, run transit and build homes. Every element costs what it would in that country, and grows on the map from 2026 to 2050.</p>
+    </div>
+    <div class="st-place">
+      <label for="st-pick" class="eyebrow">Place</label>
+      <select id="st-pick" class="st-select"><option value="milan">Milan</option></select>
+    </div>
+  </div>
+
+  <div class="st-app">
+    <div class="st-left">
+      <div class="st-bar">
+        <div class="st-layers" role="group" aria-label="Map layer">
+          <button type="button" class="chip" data-show="land" aria-pressed="true">Land</button>
+          <button type="button" class="chip" data-show="heat" aria-pressed="false">Heat</button>
+          <button type="button" class="chip" data-show="flood" aria-pressed="false">Flooding</button>
+          <button type="button" class="chip" data-show="habitat" aria-pressed="false">Habitat</button>
+        </div>
+        <div class="st-actions">
+          <button type="button" class="chip" id="st-zin" aria-label="Zoom in">+</button>
+          <button type="button" class="chip" id="st-zout" aria-label="Zoom out">&minus;</button>
+          <button type="button" class="chip" id="st-pan" aria-pressed="false">Move map</button>
+          <button type="button" class="chip" id="st-undo" disabled>Undo</button>
+          <button type="button" class="chip" id="st-clear">Clear</button>
+        </div>
+      </div>
+      <div class="st-map" id="st-map">
+        <canvas id="st-canvas" role="img" aria-label="Map for designing; click hexes to place the selected element"></canvas>
+        <p class="st-loading" id="st-loading">Loading&hellip;</p>
+        <div class="st-tip" id="st-tip" hidden></div>
+      </div>
+      <div class="st-time">
+        <button type="button" class="btn ghost" id="st-play" aria-label="Play from 2026 to 2050">&#9654; Play</button>
+        <label for="st-year" class="sr-only">Year</label>
+        <input type="range" id="st-year" min="2026" max="2050" step="1" value="2026">
+        <span class="st-yr" id="st-yr">2026</span>
+      </div>
+      <p class="hint" id="st-hint">Pick an element, then click or drag across the map to place it. Zoom with the + and &minus; buttons or your scroll wheel, and use Move map to pan.</p>
+    </div>
+
+    <aside class="st-panel">
+      <h2 class="st-h">Elements</h2>
+      <div class="st-palette" id="st-palette" role="radiogroup" aria-label="Elements"></div>
+      <p class="st-tooldesc" id="st-tooldesc"></p>
+
+      <h2 class="st-h">Budget</h2>
+      <div class="st-budget">
+        <div class="st-bud-row"><span>Spent</span><b id="st-spent">$0</b></div>
+        <div class="st-bud-bar"><i id="st-bud-fill"></i></div>
+        <div class="st-bud-row"><label for="st-cap">Budget</label><select id="st-cap" class="st-select small"></select></div>
+        <div class="st-bud-row small"><span>Upkeep each year</span><span id="st-upkeep">$0</span></div>
+        <p class="hint" id="st-price"></p>
+      </div>
+
+      <h2 class="st-h">In <span id="st-yr2">2026</span></h2>
+      <div class="st-score"><span class="eyebrow">Resilience index</span><span class="st-big" id="st-index">&ndash;</span><span class="st-delta" id="st-idelta"></span></div>
+      <div id="st-metrics" class="st-metrics"></div>
+      <div id="st-extra" class="st-extra"></div>
+
+      <h2 class="st-h">Challenge</h2>
+      <div class="st-chal" id="st-chal"></div>
+
+      <details class="cost-src"><summary>Sources and assumptions</summary>
+        <ul id="st-sources"></ul>
+      </details>
+    </aside>
+  </div>
+</main>
+<footer class="wrap site-foot">
+  <nav aria-label="Footer"><a href="../">Home</a><a href="../explore/">Explore</a><a href="../studio/">Studio</a><a href="../library/">Library</a><a href="../how-it-works/">How it works</a><a href="../about/">About</a></nav>
+  <p style="margin:0">&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>
+  <p style="margin:0">Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS and Landsat (USGS and NASA).</p>
+</footer>
+<script>
+
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function css(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function rgb(h) { h = h.replace('#', ''); var n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  function mixc(a, b, t) { return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ',' + Math.round(a[1] + (b[1] - a[1]) * t) + ',' + Math.round(a[2] + (b[2] - a[2]) * t) + ')'; }
+  function ramp(st, t) { t = Math.max(0, Math.min(1, t)); return t < 0.5 ? mixc(st[0], st[1], t * 2) : mixc(st[1], st[2], (t - 0.5) * 2); }
+  function money(v) { var a = Math.abs(v); return a >= 1e9 ? '$' + (v / 1e9).toFixed(a >= 1e10 ? 0 : 1) + 'B' : a >= 1e6 ? '$' + (v / 1e6).toFixed(a >= 1e7 ? 0 : 1) + 'M' : a >= 1e3 ? '$' + Math.round(v / 1e3) + 'K' : '$' + Math.round(v); }
+  function num(v) { return Math.round(v).toLocaleString('en-US'); }
+  var URB = { core: 1, mid: 1, suburb: 1, greenway: 1 };
+
+  // ---- The catalog. Sizes are per hex; costs are US prices (midpoints of published ranges), scaled to each country.
+  // where: 'urban' = built-up hexes only, 'land' = farmland, grassland or bare land, 'farm' = cropland only, 'any' = any land
+  var CAT = [
+    { k: 'trees', name: 'Street trees', group: 'Green', color: '--m-canopy', where: 'urban', grow: 15, start: 0.15,
+      size: function (h) { return { n: 0.6 * 850 * h.area * h.built, unit: 'trees' }; }, cost: function (q) { return q.n * 2050; }, upkeep: function (q) { return q.n * 39; },
+      desc: 'Shade cools streets and soaks up rain. Trees take about 15 years to reach full canopy.' },
+    { k: 'roof', name: 'Green roofs', group: 'Green', color: '--m-park', where: 'urban', grow: 2, start: 0.5,
+      size: function (h) { return { n: 0.1 * h.built * h.area * 1e6, unit: 'm² of roof' }; }, cost: function (q) { return q.n * 123; }, upkeep: function (q) { return q.n * 1.5; },
+      desc: 'Planted roofs on a tenth of the buildings: cooler roofs and less runoff.' },
+    { k: 'urbanfarm', name: 'Urban farms', group: 'Green', color: '--m-farm', where: 'urban', grow: 1, start: 0.6,
+      size: function (h) { return { n: 0.02 * h.area * 1e6, unit: 'm² farmed' }; }, cost: function (q) { return q.n * 32; }, upkeep: function () { return 0; },
+      desc: 'Rooftop and vacant-lot farms on 2% of the land. Fresh food close to people, a little cooling.' },
+    { k: 'raingarden', name: 'Rain gardens', group: 'Water', color: '--f1', where: 'urban', grow: 2, start: 0.5,
+      size: function (h) { return { n: 0.01 * h.area * 1e6, unit: 'm² of gardens' }; }, cost: function (q) { return q.n * 38; }, upkeep: function (q) { return q.n * 1; },
+      desc: 'Planted dips along streets that catch storm runoff before it floods homes.' },
+    { k: 'pond', name: 'Pond or lake', group: 'Water', color: '--m-water', where: 'any', grow: 1, start: 0.5,
+      size: function (h) { return { n: 0.1 * h.area * 1e6 * 2, unit: 'm³ of storage' }; },
+      cost: function (q) { var ft3 = q.n * 35.31; return 12.4 * Math.pow(ft3, 0.76) * 1.95; }, upkeep: function () { return 0; },
+      desc: 'A lake park that holds floodwater, cools the air around it and draws wildlife. Replaces what was on the hex.' },
+    { k: 'wetland', name: 'Wetland', group: 'Water', color: '--m-wet', where: 'land', grow: 8, start: 0.2,
+      size: function (h) { return { n: h.area * 100, unit: 'ha' }; }, cost: function (q) { return q.n * 52000; }, upkeep: function () { return 0; },
+      desc: 'Restored marsh on farmland or open land. Stores floodwater and shelters wildlife. Matures in about 8 years.' },
+    { k: 'forest', name: 'Forest', group: 'Wild', color: '--m-forest', where: 'land', grow: 20, start: 0.1,
+      size: function (h) { return { n: h.area * 100, unit: 'ha' }; }, cost: function (q) { return q.n * 1600; }, upkeep: function () { return 0; },
+      desc: 'Native forest planted on open or farmed land. Cools, stores carbon and gives wildlife a home. About 20 years to mature.' },
+    { k: 'corridor', name: 'Wildlife corridor', group: 'Wild', color: '--m-corr', where: 'any', grow: 10, start: 0.2,
+      size: function (h) { return { n: h.area * 100, unit: 'ha' }; }, cost: function (q) { return q.n * 1600; }, upkeep: function () { return 0; },
+      desc: 'A green link so animals can move between parks and wild land. Draw it as a line.' },
+    { k: 'regen', name: 'Regenerative farm', group: 'Wild', color: '--m-regen', where: 'farm', grow: 4, start: 0.3,
+      size: function (h) { return { n: h.area * 100 * h.crop, unit: 'ha' }; }, cost: function () { return 0; }, upkeep: function (q) { return q.n * 90; },
+      desc: 'Cover crops and living soil on existing farms. Holds water, survives drought better, pays back in 2 to 3 years.' },
+    { k: 'transit', name: 'Transit line', group: 'City', color: '--accent', where: 'urban', grow: 5, start: 0,
+      size: function (h) { return { n: 1.07 * Math.sqrt(h.area), unit: 'km of line' }; }, cost: function (q) { return q.n * 12.95e6; }, upkeep: function (q) { return q.n * 0.4e6; },
+      desc: 'Bus rapid transit. Draw it as a line through the city. Takes about 5 years to build.' },
+    { k: 'housing', name: 'Infill housing', group: 'City', color: '--m-mid', where: 'urban', grow: 10, start: 0.1,
+      size: function (h) { return { n: 0.3 * h.pop, unit: 'more residents' }; }, cost: function () { return 0; }, upkeep: function () { return 0; },
+      desc: 'More homes in existing neighborhoods, so the farthest sprawl never needs to be built. Mostly a zoning change; private builders pay.' },
+    { k: 'solar', name: 'Solar roofs', group: 'City', color: '--h1', where: 'urban', grow: 0, start: 1,
+      size: function (h) { var kw = 0.1 * h.built * h.area * 1e6 * 0.18; return { n: kw, unit: 'kW', mwh: kw * h.yield / 1000 }; },
+      cost: function (q) { return q.n * 1000 * 2.95; }, upkeep: function (q) { return q.n * 20; },
+      desc: 'Panels on a tenth of the roofs. Clean power at home; no direct effect on heat or floods.' }
+  ];
+  var BYK = {}; CAT.forEach(function (c) { BYK[c.k] = c; });
+  var SOURCES = [
+    'Street trees: US$1,400 to $2,700 each to plant, US$13 to $65 a year to care for (amNY on New York City, 2019; McPherson and others, 2005). Full canopy in about 15 years.',
+    'Green roofs: US$10.30 to $12.50 per square foot more than a conventional roof, about US$111 to $135 per m² (US General Services Administration, 2011).',
+    'Urban farms: about US$64,000 to set up a half-acre urban farm, about US$32 per m² (San Francisco Department of the Environment feasibility study). Yields assumed at 60% of field crops per area.',
+    'Rain gardens: about US$3 to $4 per square foot, about US$32 to $43 per m² (Vineyard and others, 2015, a rain-garden case study in Cincinnati).',
+    'Ponds: cost = 12.4 × storage in cubic feet^0.76 in 1997 dollars, about US$42,000 for one acre-foot (Center for Watershed Protection, Brown and Schueler 1997), raised for inflation to today.',
+    'Wetlands: US$47,000 to $57,000 per hectare to restore (2022 review of Environmental Law Institute data).',
+    'Forests and corridors: median restoration costs of US$185 to $3,012 per hectare depending on method (One Earth, on a study in Land Degradation & Development).',
+    'Regenerative farming: cover crops about US$90 per hectare per year (USDA SARE).',
+    'Transit: bus rapid transit averages US$9.6 million to $16.3 million per km (ITDP BRT Planning Guide).',
+    'Solar roofs: US$1.80 to $4.10 per watt installed in 2023 (Lawrence Berkeley National Laboratory, Tracking the Sun). Yearly output estimated from latitude.',
+    'Every cost is scaled to the place: about 70% follows the country’s price level from World Bank data, and 30% stays at world prices for materials.',
+    'Effects run through the same Threadlands model as the Explore page. Climate warms gradually from today to the middle-path 2050 scenario as the year moves forward.'
+  ];
+  $('#st-sources').innerHTML = SOURCES.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('');
+
+  var S = { P: null, slug: null, tool: 'trees', show: 'land', items: new Map(), history: [], year: 2026, budget: 0, F: 1, pl: null, PRICES: null, base: null, hexes: null };
+  var cv = $('#st-canvas'), ctx = cv.getContext('2d'), view = null;
+
+  // ---- Palette
+  var groups = {};
+  CAT.forEach(function (c) { (groups[c.group] = groups[c.group] || []).push(c); });
+  $('#st-palette').innerHTML = Object.keys(groups).map(function (g) {
+    return '<div class="st-group"><span class="eyebrow">' + g + '</span><div class="st-tools">' + groups[g].map(function (c) {
+      return '<button type="button" class="st-tool" role="radio" data-tool="' + c.k + '" aria-checked="' + (c.k === S.tool) + '"><i style="background:var(' + c.color + ')"></i>' + c.name + '</button>';
+    }).join('') + '</div></div>';
+  }).join('') + '<div class="st-group"><div class="st-tools"><button type="button" class="st-tool" role="radio" data-tool="erase" aria-checked="false"><i class="erase"></i>Remove</button></div></div>';
+  function setTool(k) {
+    S.tool = k;
+    document.querySelectorAll('[data-tool]').forEach(function (b) { b.setAttribute('aria-checked', b.dataset.tool === k ? 'true' : 'false'); });
+    var c = BYK[k];
+    $('#st-tooldesc').textContent = c ? c.desc + (c.where === 'urban' ? ' Place on built-up land.' : c.where === 'farm' ? ' Place on farmland.' : c.where === 'land' ? ' Place on farmland, grassland or bare land.' : '') : 'Click any placed element to remove it.';
+  }
+  $('#st-palette').addEventListener('click', function (e) { var b = e.target.closest('[data-tool]'); if (b) setTool(b.dataset.tool); });
+  setTool('trees');
+
+  // ---- Place data
+  function hexInfo(i) {
+    var c = S.P.place.cells, lat = Number(c.lat[i]) || 0;
+    return { area: Number(c.area[i]) || 0, built: Number(c.built[i]) || 0, pop: Number(c.pop[i]) || 0, crop: Number(c.crop[i]) || 0,
+      yield: Math.max(900, 1700 - 20 * Math.max(0, Math.abs(lat) - 20)) };
+  }
+  function allowed(kind, i) {
+    var cov = S.base.cover[i], c = BYK[kind];
+    if (!c || cov === 'water') return false;
+    if (c.where === 'urban') return !!URB[cov];
+    if (c.where === 'farm') return cov === 'farm';
+    if (c.where === 'land') return cov === 'farm' || cov === 'open' || cov === 'barren' || cov === 'regen';
+    return true;
+  }
+  function itemCost(kind, i) {
+    var q = BYK[kind].size(hexInfo(i));
+    return { q: q, cost: BYK[kind].cost(q) * S.F, upkeep: BYK[kind].upkeep(q) * S.F };
+  }
+  function maturity(kind, year) {
+    var c = BYK[kind], t = year - 2026;
+    if (c.grow <= 0) return 1;
+    return Math.max(0, Math.min(1, c.start + (1 - c.start) * t / c.grow));
+  }
+
+  // ---- Evaluate the design in the chosen year, against doing nothing in the same year
+  function evaluate() {
+    var P = S.P, y = S.year, f = (y - 2026) / 24;
+    P.setClimateRaw(1.3 * f, 0.2 * f);
+    P.studio.clear();
+    S.items.forEach(function (k, i) {
+      var it = { kind: k, m: maturity(k, y) };
+      if (k === 'solar') it.mwh = BYK.solar.size(hexInfo(i)).mwh;
+      P.studio.set(i, it);
+    });
+    var res = P.evaluate(P.ZERO_L || { canopy: 0, corridors: 0, wetlands: 0, regen: 0, compact: 0 });
+    P.studio.clear();
+    var bau = P.evaluate({ canopy: 0, corridors: 0, wetlands: 0, regen: 0, compact: 0 });
+    var today = S.todayIndex;
+    S.res = res;
+    return { res: res, bau: bau, today: today };
+  }
+
+  // ---- Map
+  function layout() {
+    var P = S.P, W = cv.parentNode.clientWidth;
+    var minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+    P.POLY.forEach(function (p) { for (var j = 0; j + 1 < p.length; j += 2) { minx = Math.min(minx, p[j]); maxx = Math.max(maxx, p[j]); miny = Math.min(miny, p[j + 1]); maxy = Math.max(maxy, p[j + 1]); } });
+    var H = Math.round(Math.min(W * 0.9, Math.max(380, window.innerHeight * 0.7)));
+    var sc = Math.min((W - 16) / (maxx - minx), (H - 16) / (maxy - miny));
+    var fit = { S: sc, OX: (W - (maxx - minx) * sc) / 2 - minx * sc, OY: (H - (maxy - miny) * sc) / 2 - miny * sc };
+    if (!view || view.slug !== S.slug) view = { slug: S.slug, z: 1, px: 0, py: 0 };
+    view.W = W; view.H = H; view.fit = fit;
+    applyZoom();
+  }
+  function applyZoom() {
+    var f = view.fit;
+    view.S = f.S * view.z;
+    view.OX = view.W / 2 + (f.OX - view.W / 2) * view.z + view.px;
+    view.OY = view.H / 2 + (f.OY - view.H / 2) * view.z + view.py;
+  }
+  function zoomAt(factor, sx, sy) {
+    var z = Math.max(1, Math.min(12, view.z * factor)), k = z / view.z;
+    if (sx == null) { sx = view.W / 2; sy = view.H / 2; }
+    // keep the point under the cursor fixed
+    view.px = (view.px - (sx - view.W / 2)) * k + (sx - view.W / 2) + (view.W / 2 - view.W / 2);
+    view.py = (view.py - (sy - view.H / 2)) * k + (sy - view.H / 2);
+    view.z = z;
+    if (z === 1) { view.px = 0; view.py = 0; }
+    applyZoom(); draw();
+  }
+  $('#st-zin').addEventListener('click', function () { if (view) zoomAt(1.6); });
+  $('#st-zout').addEventListener('click', function () { if (view) zoomAt(1 / 1.6); });
+  cv.addEventListener('wheel', function (ev) {
+    if (!view) return;
+    ev.preventDefault();
+    var b = cv.getBoundingClientRect();
+    zoomAt(ev.deltaY < 0 ? 1.25 : 0.8, ev.clientX - b.left, ev.clientY - b.top);
+  }, { passive: false });
+  var panning = false;
+  $('#st-pan').addEventListener('click', function () { panning = !panning; this.setAttribute('aria-pressed', panning ? 'true' : 'false'); cv.style.cursor = panning ? 'grab' : 'crosshair'; });
+  function draw() {
+    var P = S.P, res = S.res;
+    if (!P || !res || !view) return;
+    var W = view.W, H = view.H, dpr = window.devicePixelRatio || 1;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    var C = { core: css('--m-core'), mid: css('--m-mid'), suburb: css('--m-sub'), farm: css('--m-farm'), regen: css('--m-regen'), forest: css('--m-forest'),
+      wetland: css('--m-wet'), water: css('--m-water'), pond: css('--m-water'), park: css('--m-park'), open: css('--m-open'), barren: css('--m-barren'),
+      corridor: css('--m-corr'), greenway: css('--m-corr'), canopy: css('--m-canopy'), dim: css('--m-dim'), surface: css('--surface'), ink: css('--ink') };
+    var heat = [css('--h0'), css('--h1'), css('--h2')].map(rgb), flood = [css('--f0'), css('--f1'), css('--f2')].map(rgb);
+    var keep = 1 - res.retention, maxF = P.maxFloodExp || 1;
+    function path(i, shrink) {
+      var p = P.POLY[i], cx = P.X[i], cy = P.Y[i];
+      ctx.beginPath();
+      for (var j = 0; j + 1 < p.length; j += 2) {
+        var x = (cx + (p[j] - cx) * shrink) * view.S + view.OX, y = (cy + (p[j + 1] - cy) * shrink) * view.S + view.OY;
+        if (j) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+      }
+      ctx.closePath();
+    }
+    for (var i = 0; i < P.N; i++) {
+      var p = P.POLY[i];
+      if (!p || p.length < 6) continue;
+      var cov = res.cover[i], fill = C[cov] || C.open, alpha = 1;
+      if (S.show === 'heat') { if (URB[cov]) fill = ramp(heat, res.heat[i] / 1.4); else if (cov === 'water' || cov === 'pond') fill = C.water; else { fill = C.dim; alpha = 0.55; } }
+      else if (S.show === 'flood') {
+        if (URB[cov]) { if (res.floodExp[i] > 0) fill = ramp(flood, Math.sqrt(res.floodExp[i] * keep / maxF)); else { fill = C.dim; alpha = 0.45; } }
+        else if (cov !== 'wetland' && cov !== 'water' && cov !== 'pond') { fill = C.dim; alpha = 0.45; }
+      } else if (S.show === 'habitat') {
+        if (res.comp[i] === res.lcc) fill = C.forest; else if (res.comp[i] >= 0) fill = C.regen; else { fill = C.dim; alpha = 0.5; }
+      }
+      path(i, 1);
+      ctx.globalAlpha = alpha; ctx.fillStyle = fill; ctx.fill();
+      if (S.show === 'land' && res.lc && res.lc[i] > 0 && URB[cov]) { ctx.globalAlpha = 0.55 * res.lc[i]; ctx.fillStyle = C.canopy; ctx.fill(); }
+      if (!P.inside[i]) { ctx.globalAlpha = 0.35; ctx.fillStyle = C.surface; ctx.fill(); }
+    }
+    ctx.globalAlpha = 1;
+    // Placed elements: a colored core, dashed while still growing or being built
+    S.items.forEach(function (k, i) {
+      var m = maturity(k, S.year);
+      path(i, 0.62);
+      ctx.fillStyle = css(BYK[k].color); ctx.globalAlpha = 0.35 + 0.65 * m; ctx.fill();
+      ctx.globalAlpha = 1; ctx.lineWidth = 1.3; ctx.strokeStyle = C.ink;
+      ctx.setLineDash(m < 1 ? [3, 3] : []); ctx.stroke(); ctx.setLineDash([]);
+    });
+  }
+  function hexAt(ev) {
+    var b = cv.getBoundingClientRect(), x = (ev.clientX - b.left - view.OX) / view.S, y = (ev.clientY - b.top - view.OY) / view.S;
+    var best = -1, bd = Infinity, P = S.P;
+    for (var i = 0; i < P.N; i++) { var d = (P.X[i] - x) * (P.X[i] - x) + (P.Y[i] - y) * (P.Y[i] - y); if (d < bd) { bd = d; best = i; } }
+    return bd < (P.spacingKm || 1) * (P.spacingKm || 1) ? best : -1;
+  }
+
+  // ---- Editing
+  var dragging = false, dragMode = null, stroke = null;
+  function apply(i) {
+    if (i < 0) return;
+    var cur = S.items.get(i);
+    if (S.tool === 'erase' || dragMode === 'remove') { if (cur) { stroke.push([i, cur]); S.items.delete(i); } return; }
+    if (cur === S.tool) return;
+    if (!allowed(S.tool, i)) { flash(i); return; }
+    stroke.push([i, cur || null]); S.items.set(i, S.tool);
+  }
+  var flashT = null;
+  function flash(i) {
+    var c = BYK[S.tool], where = c.where === 'urban' ? 'built-up land' : c.where === 'farm' ? 'farmland' : 'farmland, grassland or bare land';
+    var kindName = { core: 'dense city', mid: 'city', suburb: 'suburb', farm: 'farmland', open: 'grassland', forest: 'forest', wetland: 'wetland', water: 'water', park: 'park', barren: 'bare land', regen: 'farmland' }[S.base.cover[i]] || 'something else';
+    $('#st-hint').textContent = c.name + ': place on ' + where + '. That hex is ' + kindName + '.';
+    clearTimeout(flashT); flashT = setTimeout(function () { $('#st-hint').textContent = 'Click or drag across the map to place the selected element.'; }, 3200);
+  }
+  var panFrom = null;
+  cv.addEventListener('pointerdown', function (ev) {
+    if (!S.P) return;
+    if (panning || ev.button === 1) { panFrom = { x: ev.clientX, y: ev.clientY, px: view.px, py: view.py }; cv.setPointerCapture(ev.pointerId); return; }
+    var i = hexAt(ev); if (i < 0) return;
+    dragging = true; stroke = [];
+    dragMode = S.items.get(i) === S.tool ? 'remove' : 'add';
+    cv.setPointerCapture(ev.pointerId);
+    apply(i); refresh();
+  });
+  cv.addEventListener('pointermove', function (ev) {
+    if (!S.P) return;
+    if (panFrom) { view.px = panFrom.px + ev.clientX - panFrom.x; view.py = panFrom.py + ev.clientY - panFrom.y; applyZoom(); draw(); return; }
+    var i = hexAt(ev);
+    if (dragging) { var n = stroke.length; apply(i); if (stroke.length !== n) refresh(); return; }
+    tip(ev, i);
+  });
+  function end() {
+    panFrom = null;
+    if (!dragging) return;
+    dragging = false;
+    if (stroke && stroke.length) { S.history.push(stroke); $('#st-undo').disabled = false; save(); }
+    stroke = null; dragMode = null;
+  }
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  cv.addEventListener('pointerleave', function () { $('#st-tip').hidden = true; });
+  function tip(ev, i) {
+    var t = $('#st-tip');
+    if (i < 0) { t.hidden = true; return; }
+    var k = S.items.get(i), cov = S.res.cover[i];
+    var lines = [cov.charAt(0).toUpperCase() + cov.slice(1)];
+    if (k) { var ic = itemCost(k, i); lines.push(BYK[k].name + ': ' + num(ic.q.n) + ' ' + ic.q.unit + (ic.cost ? ', ' + money(ic.cost) : '')); }
+    else if (BYK[S.tool] && allowed(S.tool, i)) { var ic2 = itemCost(S.tool, i); lines.push('Add ' + BYK[S.tool].name.toLowerCase() + ': ' + num(ic2.q.n) + ' ' + ic2.q.unit + (ic2.cost ? ', ' + money(ic2.cost) : '')); }
+    var b = cv.getBoundingClientRect();
+    t.innerHTML = lines.map(esc).join('<br>'); t.hidden = false;
+    t.style.left = Math.min(b.width - 10, ev.clientX - b.left + 14) + 'px'; t.style.top = (ev.clientY - b.top + 14) + 'px';
+  }
+  $('#st-undo').addEventListener('click', function () {
+    var st = S.history.pop(); if (!st) return;
+    for (var k = st.length - 1; k >= 0; k--) { var i = st[k][0], prev = st[k][1]; if (prev) S.items.set(i, prev); else S.items.delete(i); }
+    $('#st-undo').disabled = !S.history.length; save(); refresh();
+  });
+  $('#st-clear').addEventListener('click', function () {
+    if (!S.items.size) return;
+    var st = []; S.items.forEach(function (k, i) { st.push([i, k]); }); S.history.push(st);
+    S.items.clear(); $('#st-undo').disabled = false; save(); refresh();
+  });
+  function save() { try { localStorage.setItem('threadlands:studio:' + S.slug + ':' + S.P.N, JSON.stringify(Array.from(S.items.entries()))); } catch (e) { /* storage unavailable */ } }
+  function restore() {
+    S.items = new Map(); S.history = []; $('#st-undo').disabled = true;
+    try { var a = JSON.parse(localStorage.getItem('threadlands:studio:' + S.slug + ':' + S.P.N) || '[]'); a.forEach(function (e) { if (BYK[e[1]] && e[0] < S.P.N) S.items.set(e[0], e[1]); }); } catch (e) { /* none */ }
+  }
+
+  // ---- Panel
+  var MET = [['heat', 'Heat relief'], ['flood', 'Flood safety'], ['food', 'Local food'], ['habitat', 'Habitat'], ['storage', 'Water storage'], ['mobility', 'Low-carbon travel']];
+  function totals() {
+    var spent = 0, up = 0, by = {}, mwh = 0;
+    S.items.forEach(function (k, i) {
+      var ic = itemCost(k, i); spent += ic.cost; up += ic.upkeep;
+      var b = by[k] = by[k] || { n: 0, q: 0, unit: ic.q.unit, cost: 0 }; b.n++; b.q += ic.q.n; b.cost += ic.cost;
+      if (k === 'solar') mwh += ic.q.mwh;
+    });
+    return { spent: spent, upkeep: up, by: by, mwh: mwh };
+  }
+  function refresh() {
+    if (!S.P) return;
+    var ev = evaluate(), r = ev.res, b = ev.bau, T = totals();
+    $('#st-yr').textContent = S.year; $('#st-yr2').textContent = S.year;
+    var idx = Math.round(r.index), bi = Math.round(b.index), d = idx - bi;
+    $('#st-index').textContent = idx;
+    $('#st-idelta').textContent = S.items.size ? (d >= 0 ? '+' : '−') + Math.abs(d) + ' compared with doing nothing (' + bi + ')' : 'Doing nothing scores ' + bi + ' in ' + S.year;
+    $('#st-metrics').innerHTML = MET.map(function (m) {
+      var v = r.metrics[m[0]], bv = b.metrics[m[0]], dd = v - bv;
+      return '<div class="st-met"><span>' + m[1] + '</span><span class="st-bar"><i style="width:' + Math.max(0, Math.min(100, v)).toFixed(1) + '%"></i><b style="left:' + Math.max(0, Math.min(100, bv)).toFixed(1) + '%"></b></span><span class="st-num">' + Math.round(v) +
+        (Math.abs(dd) >= 0.5 ? ' <em class="' + (dd > 0 ? 'up' : 'down') + '">' + (dd > 0 ? '+' : '−') + Math.abs(dd).toFixed(0) + '</em>' : '') + '</span></div>';
+    }).join('');
+    var extra = [];
+    if (T.by.solar) extra.push('<b>' + num(T.mwh) + ' MWh</b> of solar power a year');
+    if (T.by.housing && r.compactUsed > 0) extra.push('Room for <b>' + num(T.by.housing.q) + '</b> more residents, so the farthest ' + Math.round(100 * r.compactUsed) + '% of sprawl can stay unbuilt');
+    if (T.by.trees) extra.push('<b>' + num(T.by.trees.q) + '</b> street trees');
+    $('#st-extra').innerHTML = extra.map(function (e) { return '<p>' + e + '</p>'; }).join('');
+    $('#st-spent').textContent = money(T.spent);
+    var pct = S.budget > 0 ? T.spent / S.budget : 0;
+    $('#st-bud-fill').style.width = Math.min(100, 100 * pct).toFixed(1) + '%';
+    $('#st-bud-fill').className = pct > 1 ? 'over' : '';
+    $('#st-upkeep').textContent = money(T.upkeep);
+    renderChallenge(ev, T);
+    draw();
+  }
+
+  // ---- Challenges: one per place, aimed at its weakest score
+  function renderChallenge(ev, T) {
+    var ch = S.challenge, r = ev.res, b = ev.bau;
+    if (!ch) { $('#st-chal').innerHTML = ''; return; }
+    var gain = r.metrics[ch.metric] - b.metrics[ch.metric], within = T.spent <= S.budget, done = S.year === 2050 && gain >= ch.target && within;
+    var prog = Math.max(0, Math.min(1, gain / ch.target));
+    $('#st-chal').innerHTML = '<p class="st-chal-t">' + esc(ch.text) + '</p><div class="st-bud-bar"><i style="width:' + (100 * prog).toFixed(0) + '%"' + (done ? ' class="done"' : '') + '></i></div>' +
+      '<p class="hint">' + (done ? 'Challenge complete. ' : '') + MET.filter(function (m) { return m[0] === ch.metric; })[0][1] + ': +' + Math.max(0, gain).toFixed(0) + ' of +' + ch.target + ' in ' + S.year + (within ? '' : ', but over budget') + '.' +
+      (S.year !== 2050 ? ' Move the year to 2050 to check it.' : '') + '</p>';
+  }
+  function makeChallenge() {
+    var b = S.P.BAU_TODAY.metrics, name = S.P.place.name || 'this place';
+    var opts = [['flood', 'Keep floodwater out of ' + name + '’s homes', 15], ['heat', 'Cool ' + name + '’s hottest neighborhoods', 10], ['habitat', 'Reconnect ' + name + '’s wild places', 12], ['storage', 'Store more rain across the region', 20]];
+    opts.sort(function (a, c) { return b[a[0]] - b[c[0]]; });
+    var o = opts[0];
+    S.challenge = { metric: o[0], target: o[2], text: o[1] + ': raise ' + MET.filter(function (m) { return m[0] === o[0]; })[0][1].toLowerCase() + ' by ' + o[2] + ' points by 2050, within the budget.' };
+  }
+
+  // ---- Budget options scale with the place and its prices
+  function setBudgets() {
+    var urbKm2 = 0, c = S.P.place.cells;
+    for (var i = 0; i < S.P.N; i++) if (URB[S.base.cover[i]]) urbKm2 += Number(c.area[i]) || 0;
+    var unit = Math.max(1e7, urbKm2 * 4e5 * S.F), opts = [0.5, 1, 2, 5, 10].map(function (x) { var v = unit * x, p = Math.pow(10, Math.floor(Math.log10(v))); return Math.round(v / p) * p; });
+    $('#st-cap').innerHTML = opts.map(function (v, k) { return '<option value="' + v + '"' + (k === 1 ? ' selected' : '') + '>' + money(v) + '</option>'; }).join('');
+    S.budget = opts[1];
+  }
+  $('#st-cap').addEventListener('change', function () { S.budget = Number(this.value); refresh(); });
+
+  // ---- Time
+  var playT = null;
+  $('#st-year').addEventListener('input', function () { S.year = Number(this.value); refresh(); });
+  $('#st-play').addEventListener('click', function () {
+    if (playT) { clearInterval(playT); playT = null; this.innerHTML = '&#9654; Play'; return; }
+    if (S.year >= 2050) S.year = 2026;
+    this.innerHTML = '&#10074;&#10074; Pause';
+    var btn = this;
+    playT = setInterval(function () {
+      S.year++; $('#st-year').value = S.year; refresh();
+      if (S.year >= 2050) { clearInterval(playT); playT = null; btn.innerHTML = '&#9654; Play'; }
+    }, 280);
+  });
+
+  // ---- Layers
+  document.querySelector('.st-layers').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-show]'); if (!b) return;
+    S.show = b.dataset.show;
+    document.querySelectorAll('[data-show]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    draw();
+  });
+
+  // ---- Loading places
+  function priceFor(cc) {
+    var x = cc && S.PRICES && S.PRICES[cc];
+    S.pl = x && x.factor > 0 ? x : null;
+    S.F = S.pl ? 0.7 * S.pl.factor + 0.3 : 1;
+    $('#st-price').textContent = S.pl && cc !== 'US' ? 'Costs adjusted to ' + S.pl.name + ', about ' + Math.round(S.F * 100) + '% of US levels, in US dollars.' : 'Costs at US prices, in US dollars.';
+  }
+  function load(slug) {
+    $('#st-loading').hidden = false; $('#st-loading').textContent = 'Loading…';
+    fetch('../data/places/' + slug + '.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
+      var P = ThreadModel.prepare(d);
+      S.P = P; S.slug = slug;
+      S.base = P.evaluate({ canopy: 0, corridors: 0, wetlands: 0, regen: 0, compact: 0 });
+      S.todayIndex = P.BAU_TODAY.index;
+      priceFor(d.country_code);
+      setBudgets(); makeChallenge(); restore();
+      S.year = 2026; $('#st-year').value = 2026;
+      layout(); $('#st-loading').hidden = true;
+      try { history.replaceState(null, '', '#' + slug); } catch (e) { /* ignore */ }
+      refresh();
+    }).catch(function () { $('#st-loading').textContent = 'This place could not be loaded.'; });
+  }
+  $('#st-pick').addEventListener('change', function () { load(this.value); });
+  window.addEventListener('resize', function () { if (S.P) { layout(); draw(); } });
+  if (window.matchMedia) { var mq = window.matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', draw); }
+
+  Promise.all([
+    fetch('../data/index.json').then(function (r) { return r.json(); }).catch(function () { return { places: [] }; }),
+    fetch('../data/price-levels.json').then(function (r) { return r.json(); }).catch(function () { return {}; })
+  ]).then(function (a) {
+    S.PRICES = a[1].countries || null;
+    var lib = (a[0].places || []).slice().sort(function (x, y) { return x.name.localeCompare(y.name); });
+    if (lib.length) $('#st-pick').innerHTML = lib.map(function (e) { return '<option value="' + e.slug + '">' + esc(e.name) + ', ' + esc(e.country) + '</option>'; }).join('');
+    var h = location.hash.replace('#', ''), start = lib.some(function (e) { return e.slug === h; }) ? h : 'milan';
+    $('#st-pick').value = start;
+    load(start);
+  });
+})();
+
+</script>
+</body>
+</html>
