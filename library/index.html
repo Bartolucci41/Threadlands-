@@ -23,8 +23,9 @@
 <main class="wrap">
   <h1 class="page-h">The library</h1>
   <p class="page-lede" id="lib-lede">Every place that opens instantly in Threadlands. Each one has measured satellite heat, the river basin it drinks from and the farmland around it. Don&rsquo;t see yours? <a href="../explore/">Search for it on the Explore page</a> and build it in about ten minutes.</p>
-  <div class="lib-map" id="lib-map"><canvas id="lib-canvas" role="img" aria-label="World map with a dot for every place in the library"></canvas><span class="lib-tip" id="lib-tip" hidden></span></div>
-  <p class="hint" style="margin:-16px 0 20px">Map outlines from Natural Earth, public domain. Dot size shows population.</p>
+  <div class="lib-map" id="lib-map"><canvas id="lib-canvas" role="img" aria-label="World map with a dot for every place in the library"></canvas><span class="lib-tip" id="lib-tip" hidden></span>
+    <div class="lib-zoom"><button type="button" class="chip" id="lz-in" aria-label="Zoom in">+</button><button type="button" class="chip" id="lz-out" aria-label="Zoom out">&minus;</button><button type="button" class="chip" id="lz-fit" aria-label="Show the whole world" title="Show the whole world">&#8634;</button></div></div>
+  <p class="hint" style="margin:-16px 0 20px">Zoom with + and &minus;, your scroll wheel or a double-click, and drag to move. Names appear as you zoom in. Dot size shows population. Map outlines from Natural Earth, public domain.</p>
   <div class="lib-tools">
     <label class="sr-only" for="lib-q">Filter places</label>
     <input id="lib-q" type="search" placeholder="Filter by city or country" autocomplete="off">
@@ -44,26 +45,28 @@
   function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function norm(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
   var LIB = [], shown = [], dots = [], LAND = null, cv = $('#lib-canvas'), tip = $('#lib-tip');
+  var V = { z: 1, lng: 0, lat: 7.5 }, W = 0, H = 0;   // zoom, and the center of the view
   fetch('../assets/land.json').then(function (r) { return r.json(); }).then(function (l) { LAND = l; drawMap(); }).catch(function () { /* map without coastlines */ });
   function color(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
   function drawMap() {
-    var W = cv.parentNode.clientWidth;
+    W = cv.parentNode.clientWidth;
     if (!W) return;
-    var H = Math.round(W * 0.42), dpr = window.devicePixelRatio || 1;
+    H = Math.round(W * (W < 600 ? 0.7 : 0.42)); var dpr = window.devicePixelRatio || 1;
     cv.width = W * dpr; cv.height = H * dpr; cv.style.height = H + 'px';
     var ctx = cv.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = color('--surface'); ctx.fillRect(0, 0, W, H);
     // Equirectangular view from 60 S to 75 N, where nearly all cities are
-    var X = function (lng) { return (lng + 180) / 360 * W; }, Y = function (lat) { return (75 - lat) / 135 * H; };
+    var X = px, Y = py;
     if (LAND) {
       ctx.beginPath();
       LAND.forEach(function (r) { for (var k = 0; k + 1 < r.length; k += 2) { var lx = X(r[k]), ly = Y(r[k + 1]); if (k) ctx.lineTo(lx, ly); else ctx.moveTo(lx, ly); } ctx.closePath(); });
-      ctx.fillStyle = color('--surface2'); ctx.fill('evenodd');
+      ctx.fillStyle = color('--surface2'); ctx.fill('nonzero');
     }
     ctx.strokeStyle = color('--line'); ctx.lineWidth = 1; ctx.globalAlpha = 0.6;
-    for (var g = -150; g <= 180; g += 30) { ctx.beginPath(); ctx.moveTo(X(g), 0); ctx.lineTo(X(g), H); ctx.stroke(); }
-    for (var t = -60; t <= 75; t += 15) { ctx.beginPath(); ctx.moveTo(0, Y(t)); ctx.lineTo(W, Y(t)); ctx.stroke(); }
+    var step = V.z >= 6 ? 5 : V.z >= 3 ? 10 : 30;
+    for (var g = -180; g <= 180; g += step) { ctx.beginPath(); ctx.moveTo(X(g), 0); ctx.lineTo(X(g), H); ctx.stroke(); }
+    for (var t = -60; t <= 75; t += step / 2) { ctx.beginPath(); ctx.moveTo(0, Y(t)); ctx.lineTo(W, Y(t)); ctx.stroke(); }
     ctx.globalAlpha = 1;
     ctx.strokeStyle = color('--ink2'); ctx.setLineDash([3, 4]);
     ctx.beginPath(); ctx.moveTo(0, Y(0)); ctx.lineTo(W, Y(0)); ctx.stroke(); ctx.setLineDash([]);
@@ -77,6 +80,67 @@
       ctx.globalAlpha = 1;
       if (on) dots.push({ x: x, y: y, r: r, e: e });
     });
+    // Names, biggest places first, wherever they fit without overlapping
+    if (V.z >= 2.5) {
+      var boxes = [];
+      ctx.font = '600 12px ' + (color('--font-body') || 'system-ui'); ctx.textBaseline = 'middle';
+      dots.forEach(function (d) {
+        if (d.x < -20 || d.x > W + 20 || d.y < -10 || d.y > H + 10) return;
+        var t = d.e.name, w = ctx.measureText(t).width, bx = d.x + d.r + 4, by = d.y - 8, bw = w + 6, bh = 16;
+        if (boxes.some(function (o) { return bx < o[0] + o[2] && bx + bw > o[0] && by < o[1] + o[3] && by + bh > o[1]; })) return;
+        boxes.push([bx, by, bw, bh]);
+        ctx.globalAlpha = 0.85; ctx.fillStyle = color('--surface'); ctx.fillRect(bx - 2, by, bw, bh);
+        ctx.globalAlpha = 1; ctx.fillStyle = color('--ink'); ctx.fillText(t, bx + 1, d.y);
+      });
+    }
+    $('#lz-out').disabled = V.z <= 1.001;
+    cv.style.cursor = V.z > 1.001 ? 'grab' : 'default';
+    cv.style.touchAction = V.z > 1.001 ? 'none' : 'pan-y';
+  }
+  // Equirectangular view from 60 S to 75 N at zoom 1, centered on V
+  function px(lng) { return W / 2 + (lng - V.lng) / 360 * W * V.z; }
+  function py(lat) { return H / 2 + (V.lat - lat) / 135 * H * V.z; }
+  function clampV() {
+    V.z = Math.max(1, Math.min(60, V.z));
+    var hw = 180 / V.z, hh = 67.5 / V.z;
+    V.lng = Math.max(-180 + hw, Math.min(180 - hw, V.lng)); V.lat = Math.max(-60 + hh, Math.min(75 - hh, V.lat));
+  }
+  function zoomAt(f, x, y) {
+    if (x == null) { x = W / 2; y = H / 2; }
+    var lng = V.lng + (x - W / 2) / (W * V.z) * 360, lat = V.lat - (y - H / 2) / (H * V.z) * 135;
+    V.z *= f; clampV();
+    V.lng = lng - (x - W / 2) / (W * V.z) * 360; V.lat = lat + (y - H / 2) / (H * V.z) * 135; clampV();
+    tip.hidden = true; drawMap();
+  }
+  function fitTo(list) {
+    if (!list.length || list.length === LIB.length) { V = { z: 1, lng: 0, lat: 7.5 }; drawMap(); return; }
+    var a = Math.min.apply(null, list.map(function (e) { return e.lng; })), b = Math.max.apply(null, list.map(function (e) { return e.lng; }));
+    var c = Math.min.apply(null, list.map(function (e) { return e.lat; })), d = Math.max.apply(null, list.map(function (e) { return e.lat; }));
+    V.z = Math.min(360 / Math.max(8, (b - a) * 1.4), 135 / Math.max(5, (d - c) * 1.6), 12); V.lng = (a + b) / 2; V.lat = (c + d) / 2; clampV(); drawMap();
+  }
+  $('#lz-in').addEventListener('click', function () { zoomAt(2); });
+  $('#lz-out').addEventListener('click', function () { zoomAt(0.5); });
+  $('#lz-fit').addEventListener('click', function () { V = { z: 1, lng: 0, lat: 7.5 }; tip.hidden = true; drawMap(); });
+  cv.addEventListener('wheel', function (ev) { ev.preventDefault(); var b = cv.getBoundingClientRect(); zoomAt(Math.pow(2, -ev.deltaY / 300), ev.clientX - b.left, ev.clientY - b.top); }, { passive: false });
+  cv.addEventListener('dblclick', function (ev) { ev.preventDefault(); var b = cv.getBoundingClientRect(); zoomAt(2.5, ev.clientX - b.left, ev.clientY - b.top); });
+  var drag = null;
+  cv.addEventListener('pointerdown', function (ev) { drag = { x: ev.clientX, y: ev.clientY, lng: V.lng, lat: V.lat, moved: false }; try { cv.setPointerCapture(ev.pointerId); } catch (e) { /* ignore */ } });
+  cv.addEventListener('pointermove', function (ev) {
+    if (!drag) return;
+    var dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) > 5 && V.z > 1.001) drag.moved = true;
+    if (drag.moved) { V.lng = drag.lng - dx / (W * V.z) * 360; V.lat = drag.lat + dy / (H * V.z) * 135; clampV(); tip.hidden = true; drawMap(); }
+  });
+  cv.addEventListener('pointerup', function (ev) {
+    var dr = drag; drag = null;
+    if (dr && !dr.moved) { var d = hit(ev); if (d) { if (ev.pointerType === 'mouse') location.href = '../explore/#' + d.e.slug; else showTip(d, true); } }
+  });
+  function showTip(d, tap) {
+    tip.hidden = false; tip.innerHTML = '';
+    tip.style.pointerEvents = tap ? 'auto' : 'none';
+    if (tap) { var a = document.createElement('a'); a.href = '../explore/#' + d.e.slug; a.textContent = d.e.name + ', ' + d.e.country + ' \u2192'; tip.appendChild(a); }
+    else tip.textContent = d.e.name + ', ' + d.e.country;
+    tip.style.left = d.x + 'px'; tip.style.top = d.y + 'px';
   }
   function hit(ev) {
     var b = cv.getBoundingClientRect(), x = ev.clientX - b.left, y = ev.clientY - b.top, best = null, bd = 14;
@@ -84,12 +148,12 @@
     return best;
   }
   cv.addEventListener('mousemove', function (ev) {
+    if (drag && drag.moved) return;
     var d = hit(ev);
-    if (!d) { tip.hidden = true; return; }
-    tip.hidden = false; tip.textContent = d.e.name + ', ' + d.e.country; tip.style.left = d.x + 'px'; tip.style.top = d.y + 'px';
+    if (!d) { tip.hidden = true; cv.style.cursor = V.z > 1.001 ? 'grab' : 'default'; return; }
+    cv.style.cursor = 'pointer'; showTip(d, false);
   });
   cv.addEventListener('mouseleave', function () { tip.hidden = true; });
-  cv.addEventListener('click', function (ev) { var d = hit(ev); if (d) location.href = '../explore/#' + d.e.slug; });
   function render() {
     var q = norm($('#lib-q').value.trim());
     shown = LIB.filter(function (e) { return !q || norm(e.name + ' ' + e.country + ' ' + e.display).indexOf(q) >= 0; });
@@ -102,7 +166,7 @@
         return '<li><a href="../explore/#' + e.slug + '">' + esc(e.name) + (e.requested ? ' <span>added by a visitor</span>' : '') + '</a></li>';
       }).join('') + '</ul></div>';
     }).join('') : '<p class="lib-empty">No place in the library matches that. <a href="../explore/?q=' + encodeURIComponent($('#lib-q').value.trim()) + '">Search everywhere for it</a> and build it.</p>';
-    drawMap();
+    fitTo(shown);
   }
   fetch('../data/index.json').then(function (r) { return r.json(); }).then(function (ix) {
     LIB = (ix.places || []).filter(function (e) { return e && e.slug && isFinite(e.lat) && isFinite(e.lng); });
