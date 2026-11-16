@@ -52,3 +52,24 @@ jobs:
           name: fine-${{ matrix.slug }}
           path: out/
           retention-days: 14
+  save:
+    # Keep the trial files on a side branch (the site is published from main only)
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: fine-*
+          path: trial
+      - run: |
+          mkdir -p fine
+          for d in trial/fine-*; do cp "$d"/*.json fine/ 2>/dev/null || true; mkdir -p fine/logs; cp "$d"/logs/*.txt fine/logs/ 2>/dev/null || true; done
+          git config user.name "threadlands-robot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan trial-fine-hexes
+          git rm -rq --cached . && git clean -fdq -e fine
+          git add fine && git commit -qm "Finer hexes trial ${{ github.run_id }}" && git push -f origin trial-fine-hexes
