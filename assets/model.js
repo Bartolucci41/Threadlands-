@@ -440,6 +440,8 @@ const ThreadModel = (function () {
             case 'trees': if (urb) { g(0.6 * m * sh); lflood[i] *= 1 - Math.min(0.5, 0.05 * m * sh); } break;
             case 'roof': if (urb) { g(0.25 * m * sh); lflood[i] *= 1 - Math.min(0.5, 0.1 * m * sh); } break;
             case 'raingarden': if (urb) { g(0.05 * m * sh); lflood[i] *= 1 - Math.min(0.6, 0.25 * m * sh); nRain += m * sh; } break;
+            // A sea wall or levee shields the land behind it: protection (0 to 0.85) set by its height
+            case 'levee': lflood[i] *= 1 - Math.min(0.85, (it.protect || 0.5) * m * Math.min(1, sh)); break;
             case 'urbanfarm': if (urb) { g(0.1 * m * sh); urbFarm += 0.02 * area[i] * m * sh / 0.6; } break;
             case 'farmblock': {
               // A block cleared and farmed: share is the fraction of the hex farmed; yields about equal to field crops

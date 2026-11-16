@@ -412,6 +412,11 @@
   .st-map canvas { display: block; width: 100%; touch-action: none; cursor: crosshair; }
   .st-shape:not([hidden]) { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
   .st-shape .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  .st-opts:not([hidden]) { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: -4px 0 12px; }
+  .st-opts input { width: 5rem; min-height: 36px; padding: 0 8px; border-radius: 8px; border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink); font: 500 0.9375rem var(--font-body); }
+  .st-opts [hidden] { display: none; }
+  .st-zoom .st-3d { font-size: 0.875rem; font-weight: 700; }
+  .st-zoom .st-3d[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
   .st-zoom { position: absolute; top: 10px; right: 10px; display: grid; gap: 6px; z-index: 2; }
   .st-zoom .chip { width: 40px; min-height: 40px; padding: 0; font-size: 1.25rem; background: var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
   .st-mode { position: absolute; left: 10px; top: 10px; z-index: 2; padding: 5px 10px; border-radius: 99px; background: var(--ink); color: var(--bg); font-size: 0.8125rem; font-weight: 600; }

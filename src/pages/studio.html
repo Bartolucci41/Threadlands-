@@ -55,6 +55,7 @@
         <div class="st-zoom">
           <button type="button" class="chip" id="st-zin" aria-label="Zoom in">+</button>
           <button type="button" class="chip" id="st-zout" aria-label="Zoom out">&minus;</button>
+          <button type="button" class="chip st-3d" id="st-3d" aria-pressed="false" title="Show buildings, walls and trees in 3D">3D</button>
         </div>
         <span class="st-mode" id="st-mode">Region view</span>
         <span class="st-attr" id="st-attr">&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</span>
@@ -75,6 +76,10 @@
       <h2 class="st-h">Elements</h2>
       <div class="st-palette" id="st-palette" role="radiogroup" aria-label="Elements"></div>
       <p class="st-tooldesc" id="st-tooldesc"></p>
+      <div class="st-opts" id="st-opts" hidden>
+        <label for="st-floors" id="st-floors-l">Floors</label><input id="st-floors" type="number" min="1" max="80" step="1" value="6">
+        <label for="st-wallh" id="st-wallh-l">Height (m)</label><input id="st-wallh" type="number" min="0.5" max="12" step="0.5" value="2">
+      </div>
 
       <h2 class="st-h">Budget</h2>
       <div class="st-budget">
@@ -140,6 +145,8 @@
       desc: 'Planted dips that catch storm runoff before it floods homes.' },
     { k: 'pond', name: 'Pond or lake', group: 'Water', color: '--m-water', draw: 'area', where: 'any', grow: 1, start: 0.5,
       desc: 'Holds floodwater and cools the air. At region level it turns a whole hex into a lake park; at street level, draw a pond 2 m deep.' },
+    { k: 'seawall', name: 'Sea wall or levee', group: 'Water', color: '--ink2', draw: 'line', where: 'any', grow: 5, start: 0, anyZoom: true, noPick: true,
+      desc: 'A wall along a coast or river, built to the height you set. It shields flood-prone land behind it, up to about 3 km inland. Draw it at any zoom. About 5 years to build.' },
     { k: 'wetland', name: 'Wetland', group: 'Water', color: '--m-wet', draw: 'hex', where: 'land', grow: 8, start: 0.2,
       desc: 'Restored marsh on farmland or open land. Stores floodwater and shelters wildlife. Matures in about 8 years.' },
     { k: 'forest', name: 'Forest', group: 'Wild', color: '--m-forest', draw: 'hex', where: 'land', grow: 20, start: 0.1,
@@ -150,6 +157,8 @@
       desc: 'Bus rapid transit. Draw the route through the city. About 5 years to build.' },
     { k: 'housing', name: 'Infill housing', group: 'City', color: '--m-mid', draw: 'area', where: 'urban', grow: 10, start: 0.1,
       desc: 'More homes in existing neighborhoods, so the farthest sprawl never needs building. At street level, outline the sites: about 20,000 residents per km².' },
+    { k: 'build', name: 'New building', group: 'City', color: '--m-core', draw: 'area', where: 'urban', grow: 3, start: 0, streetOnly: true,
+      desc: 'Design a new building at street level: pick a parking lot, vacant lot or old building, or draw a footprint, then set its floors. About one resident per 35 m\u00b2 of floor space, so the farthest sprawl never needs building. Turn on 3D to see it rise.' },
     { k: 'solar', name: 'Solar roofs', group: 'City', color: '--h1', draw: 'area', where: 'urban', grow: 0, start: 1,
       desc: 'Panels on roofs. Clean power; no direct effect on heat or floods.' }
   ];
@@ -164,13 +173,15 @@
     'Wetlands: US$47,000 to $57,000 per hectare (2022 review of Environmental Law Institute data). Forests and corridors: US$185 to $3,012 per hectare (One Earth, on Land Degradation & Development).',
     'Regenerative farming: cover crops about US$90 per hectare per year (USDA SARE).',
     'Transit: bus rapid transit averages US$9.6 million to $16.3 million per km (ITDP BRT Planning Guide).',
+    'New buildings: about US$2,500 per m\u00b2 of floor space for mid-rise housing, plus clearing the site; about 35 m\u00b2 of floor space per resident. Heights of existing buildings come from OpenStreetMap where mapped (height or floors), otherwise they are estimated from the building type and how dense the area is.',
+    'Sea walls and levees: about US$15 million per km for each meter of height, the middle of published ranges for building and raising flood defenses (Jonkman and others, Ocean & Coastal Management, 2013); upkeep about 1% of the cost a year. Protection grows with height, up to 85% of the flood risk behind the wall.',
     'Solar roofs: US$1.80 to $4.10 per watt installed in 2023 (Lawrence Berkeley National Laboratory). About 0.18 kW per m² of panels; yearly output estimated from latitude.',
     'Every cost is scaled to the place: about 70% follows the country’s price level (World Bank), 30% stays at world prices for materials.',
     'Buildings, lots, parks and streets at street level, and the streets background: © OpenStreetMap contributors, through the Overpass API; satellite imagery from Esri World Imagery (Maxar, Earthstar Geographics) through ArcGIS Location Platform, with Sentinel-2 cloudless by EOX as a backup. Effects run through the same Threadlands model as the Explore page, and the climate warms step by step toward the middle-path 2050 scenario.'
   ];
   $('#st-sources').innerHTML = SOURCES.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('');
 
-  var S = { P: null, slug: null, tool: 'farmblock', shape: 'pick', show: 'land', items: new Map(), feats: [], history: [], year: 2026, budget: 0, F: 1,
+  var S = { P: null, slug: null, tool: 'farmblock', shape: 'pick', floors: 6, wallH: 2, view3d: false, show: 'land', items: new Map(), feats: [], history: [], year: 2026, budget: 0, F: 1,
     pl: null, PRICES: null, base: null, basemap: 'streets', nextId: 1 };
   var cv = $('#st-canvas'), ctx = cv.getContext('2d'), view = null;
 
@@ -333,6 +344,19 @@
       }
     }
     f.alloc = Object.keys(out).map(function (h) { return [Number(h), out[h]]; });
+    if (f.kind === 'seawall') {
+      // Flood-prone hexes within reach of the wall: about 0.8 km plus 0.4 km per meter of height, up to 3 km
+      var D = Math.min(3, 0.8 + 0.4 * (f.height || 2)) / (40075.017 * Math.cos(f.pts[0][0] * Math.PI / 180)), c = S.P.place.cells;
+      f.prot = [];
+      for (var hi = 0; hi < S.P.N; hi++) {
+        if (!(Number(c.flood[hi]) > 0.05)) continue;
+        for (var q = 1; q < m.length; q++) {
+          var ax = m[q - 1][0], ay = m[q - 1][1], bx = m[q][0], by = m[q][1], L = (bx - ax) * (bx - ax) + (by - ay) * (by - ay);
+          var t2 = L ? Math.max(0, Math.min(1, ((HCX[hi] - ax) * (bx - ax) + (HCY[hi] - ay) * (by - ay)) / L)) : 0;
+          if (Math.hypot(HCX[hi] - (ax + t2 * (bx - ax)), HCY[hi] - (ay + t2 * (by - ay))) <= D) { f.prot.push(hi); break; }
+        }
+      }
+    }
   }
   // Size and US cost of a drawn feature
   function featQty(f) {
@@ -351,6 +375,10 @@
       case 'trees': { var n = A / 10; return { label: num(n) + ' trees', cost: n * 2050, up: n * 39, trees: n }; }
       case 'transit': return { label: (A / 1000).toFixed(1) + ' km of line', cost: A / 1000 * 12.95e6, up: A / 1000 * 0.4e6 };
       case 'corridor': return { label: area(A * 30) + ' of corridor', cost: A * 30 / 1e4 * 1600, up: 0 };
+      case 'build': { var fl = f.floors || 6, gfa = A * fl, rs = gfa / 35;
+        return { label: fl + '-story building, ' + area(gfa) + ' of floor space, homes for about ' + num(rs) + ' people', cost: gfa * 2500 + A * CLEAR * built, up: 0, residents: rs }; }
+      case 'seawall': { var hh = f.height || 2, km = A / 1000;
+        return { label: (km >= 1 ? km.toFixed(1) + ' km' : num(A) + ' m') + ' of wall, ' + hh + ' m high', cost: km * hh * 15e6, up: km * hh * 15e6 * 0.01 }; }
     }
     return { label: '', cost: 0, up: 0 };
   }
@@ -372,9 +400,14 @@
     });
     S.feats.forEach(function (f) {
       var m = maturity(f.kind, year), q = featQty(f);
-      if (f.kind === 'solar' || f.kind === 'housing') {
+      if (f.kind === 'solar' || f.kind === 'housing' || f.kind === 'build') {
         var i0 = f.alloc.length ? f.alloc[0][0] : -1; if (i0 < 0) return;
         add(i0, f.kind === 'solar' ? { kind: 'solar', m: m, mwh: q.mwh, share: 1 } : { kind: 'housing', m: m, residents: q.residents, share: 1 });
+        return;
+      }
+      if (f.kind === 'seawall') {
+        var pr = Math.min(0.85, 0.3 * (f.height || 2));
+        (f.prot || []).forEach(function (i) { add(i, { kind: 'levee', m: m, share: 1, protect: pr }); });
         return;
       }
       f.alloc.forEach(function (e) {
@@ -457,8 +490,10 @@
       ctx.fillStyle = css(BYK[kind].color); ctx.globalAlpha = 0.35 + 0.65 * m; ctx.fill();
       ctx.globalAlpha = 1; ctx.lineWidth = 1.3; ctx.strokeStyle = C.ink; ctx.setLineDash(m < 1 ? [3, 3] : []); ctx.stroke(); ctx.setLineDash([]);
     });
-    drawOSM();
-    S.feats.forEach(function (f) { drawFeat(f, false); });
+    var in3d = S.view3d && view.z >= OSM_Z;
+    drawOSM(in3d);
+    S.feats.forEach(function (f) { if (!in3d || !SOLID[f.kind]) drawFeat(f, false); });
+    if (in3d) draw3D();
     if (snapPt) { ctx.save(); ctx.beginPath(); ctx.arc(snapPt.x, snapPt.y, 6, 0, 7); ctx.lineWidth = 2; ctx.strokeStyle = css('--accent'); ctx.stroke(); ctx.restore(); }
     if (draft) drawDraft();
   }
@@ -489,7 +524,7 @@
   var PICK = {
     farmblock: ['parking', 'lot', 'grass', 'pitch', 'building'], park: ['parking', 'lot', 'grass', 'pitch', 'building'],
     pond: ['parking', 'lot', 'grass', 'park', 'pitch'], raingarden: ['parking', 'lot', 'grass', 'park'],
-    housing: ['parking', 'lot', 'building'], roof: ['building'], solar: ['building', 'parking'],
+    housing: ['parking', 'lot', 'building'], build: ['parking', 'lot', 'building', 'grass'], roof: ['building'], solar: ['building', 'parking'],
     trees: ['street'], transit: ['street'], corridor: ['street']
   };
   function PICK_NAMES(tool) {
@@ -506,6 +541,20 @@
     if (t.highway) return 'street';
     return null;
   }
+  // Building height: OpenStreetMap height or floors where mapped, otherwise estimated from type and how built-up the hex is
+  function bHeight(t, m) {
+    var h = parseFloat(t.height);
+    if (h > 0) return { h: h, est: false };
+    var lv = parseFloat(t['building:levels']);
+    if (lv > 0) return { h: lv * 3.2 + 1, est: false };
+    var b = t.building;
+    if (/^(garage|garages|shed|hut|carport|kiosk|roof)$/.test(b)) return { h: 3, est: true };
+    if (/^(house|detached|semidetached_house|bungalow|terrace|farm|cabin)$/.test(b)) return { h: 7, est: true };
+    if (/^(industrial|warehouse|retail|supermarket)$/.test(b)) return { h: 9, est: true };
+    if (/^(church|cathedral)$/.test(b)) return { h: 20, est: true };
+    var hi = nearestHex(m[0][0], m[0][1]), cov = hi >= 0 ? S.base.cover[hi] : '';
+    return { h: cov === 'core' ? 20 : cov === 'mid' ? 13 : 8, est: true };
+  }
   function addOSM(els) {
     els.forEach(function (e) {
       if (!e.geometry || OSM.seen[e.id]) return;
@@ -516,6 +565,7 @@
       var m = pts.map(function (p) { return [mx(p[1]), my(p[0])]; }), x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
       m.forEach(function (q) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); });
       var f = { id: e.id, kind: kind, line: line, pts: pts, m: m, bb: [x0, y0, x1, y1], name: (e.tags && e.tags.name) || '', label: LABELS[kind] };
+      if (kind === 'building') { var hh = bHeight(e.tags || {}, m); f.h = hh.h; f.hEst = hh.est; }
       f.size = line ? lineLength(pts) : polyArea(pts);
       if (!line && f.size < 15) return;
       OSM.seen[e.id] = 1; OSM.list.push(f);
@@ -550,12 +600,12 @@
     f.m.forEach(function (q, j) { var x = sx(q[0]), y = sy(q[1]); if (j) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
     if (!f.line) ctx.closePath();
   }
-  function drawOSM() {
+  function drawOSM(skipBuildings) {
     if (!view || view.z < OSM_Z || !OSM.list.length) return;
     var want = drawsShapes(S.tool) ? (PICK[S.tool] || []) : [], col = BYK[S.tool] ? css(BYK[S.tool].color) : css('--accent'), ink = css('--ink');
     ctx.save(); ctx.lineJoin = 'round';
     OSM.list.forEach(function (f) {
-      if (!inView(f)) return;
+      if (!inView(f) || (skipBuildings && f.kind === 'building')) return;
       var cand = want.indexOf(f.kind) >= 0;
       if (f.line) {
         if (!cand) return;
@@ -566,7 +616,7 @@
       if (cand) { ctx.globalAlpha = f.kind === 'building' ? 0.12 : 0.22; ctx.fillStyle = col; ctx.fill(); ctx.globalAlpha = 0.7; ctx.strokeStyle = ink; ctx.lineWidth = f.kind === 'building' ? 0.8 : 1.4; ctx.setLineDash(f.kind === 'building' ? [] : [4, 3]); ctx.stroke(); ctx.setLineDash([]); }
       else if (view.z >= 17) { ctx.globalAlpha = 0.25; ctx.strokeStyle = ink; ctx.lineWidth = 0.6; ctx.stroke(); }
     });
-    if (hoverOSM && S.shape === 'pick' && drawsShapes(S.tool)) {
+    if (hoverOSM && S.shape === 'pick' && drawsShapes(S.tool) && !(skipBuildings && hoverOSM.kind === 'building')) {
       osmPath(hoverOSM); ctx.globalAlpha = 1;
       if (hoverOSM.line) { ctx.strokeStyle = ink; ctx.lineWidth = 9; ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = 6; ctx.stroke(); }
       else { ctx.globalAlpha = 0.6; ctx.fillStyle = col; ctx.fill(); ctx.globalAlpha = 1; ctx.strokeStyle = ink; ctx.lineWidth = 2.5; ctx.stroke(); }
@@ -587,7 +637,7 @@
       var b = f.bb; if (X < b[0] - pad || X > b[2] + pad || Y < b[1] - pad || Y > b[3] + pad) continue;
       if (f.line) {
         for (var i = 1; i < f.m.length; i++) if (distSeg(pt.x, pt.y, sx(f.m[i - 1][0]), sy(f.m[i - 1][1]), sx(f.m[i][0]), sy(f.m[i][1])).d < 8) { if (!best) best = f; break; }
-      } else if (pip(X, Y, f.m)) { if (!best || best.line || f.size < best.size) best = f; }
+      } else if (pip(X, Y, f.m) || (S.view3d && f.h && pip(X, Y + lift(f.h) / k(), f.m))) { if (!best || best.line || f.size < best.size) best = f; }
     }
     return best;
   }
@@ -625,16 +675,108 @@
     el.textContent = parts.length ? 'In view: ' + parts.join(', ') + '. Parking and vacant lots are often the easiest places to start.' : '';
   }
 
+  // ---- 3D view: buildings, new buildings, sea walls and trees rise from the map (an oblique view, seen from the south)
+  var SOLID = { build: 1, seawall: 1, trees: 1 };
+  var REPLACES = { farmblock: 1, park: 1, pond: 1, raingarden: 1, build: 1, housing: 1 };
+  function ppm() { return k() / (40075016.7 * Math.cos(uny(view.cy) * Math.PI / 180)); }   // screen px per meter
+  function lift(h) { return h * ppm() * 0.8; }
+  function shade(rgbA, f) { return 'rgb(' + Math.round(rgbA[0] * f) + ',' + Math.round(rgbA[1] * f) + ',' + Math.round(rgbA[2] * f) + ')'; }
+  function hashf(n) { var x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x); }
+  function draw3D() {
+    var want = drawsShapes(S.tool) && S.shape === 'pick' ? (PICK[S.tool] || []) : [];
+    var tcol = BYK[S.tool] ? rgb(css(BYK[S.tool].color)) : [0, 0, 0], ink = css('--ink');
+    var replaced = {}, roofs = {};
+    S.feats.forEach(function (f) { if (f.osm) { if (REPLACES[f.kind]) replaced[f.osm.id] = 1; if (f.kind === 'roof' || f.kind === 'solar') roofs[f.osm.id] = f.kind; } });
+    var solids = [];
+    OSM.list.forEach(function (b) {
+      if (b.kind !== 'building' || replaced[b.id] || !inView(b)) return;
+      var pts = b.m.map(function (q) { return [sx(q[0]), sy(q[1])]; });
+      solids.push({ t: 'box', pts: pts, h: b.h, base: Math.max.apply(null, pts.map(function (q) { return q[1]; })), roof: roofs[b.id], osm: b, cand: want.indexOf('building') >= 0 });
+    });
+    S.feats.forEach(function (f) {
+      var m = maturity(f.kind, S.year);
+      if (f.kind === 'build') {
+        var pts = f.pts.map(function (p) { return [sx(mx(p[1])), sy(my(p[0]))]; });
+        solids.push({ t: 'box', pts: pts, h: Math.max(1.5, (f.floors || 6) * 3.2 * m), base: Math.max.apply(null, pts.map(function (q) { return q[1]; })), mine: true, done: m >= 1 });
+      } else if (f.kind === 'seawall') {
+        for (var i = 1; i < f.pts.length; i++) {
+          var a = [sx(mx(f.pts[i - 1][1])), sy(my(f.pts[i - 1][0]))], c = [sx(mx(f.pts[i][1])), sy(my(f.pts[i][0]))];
+          solids.push({ t: 'wall', a: a, b: c, h: Math.max(0.3, (f.height || 2) * m), base: Math.max(a[1], c[1]) });
+        }
+      } else if (f.kind === 'trees') {
+        var n = 0;
+        for (var j = 1; j < f.pts.length && n < 600; j++) {
+          var seg = lineLength([f.pts[j - 1], f.pts[j]]), steps = Math.max(1, Math.floor(seg / 10));
+          for (var s2 = 0; s2 < steps && n < 600; s2++, n++) {
+            var t = (s2 + 0.5) / steps, x = sx(mx(f.pts[j - 1][1] + (f.pts[j][1] - f.pts[j - 1][1]) * t)), y = sy(my(f.pts[j - 1][0] + (f.pts[j][0] - f.pts[j - 1][0]) * t));
+            solids.push({ t: 'tree', x: x, y: y, m: m, r: hashf(f.id * 1000 + n), base: y });
+          }
+        }
+      }
+    });
+    // Trees in parks and urban farms' edges: one about every 12 m inside new parks
+    S.feats.forEach(function (f) {
+      if (f.kind !== 'park' || f.type !== 'area') return;
+      var m = maturity('park', S.year), mm = f.pts.map(function (p) { return [mx(p[1]), my(p[0])]; }), x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      mm.forEach(function (q) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); });
+      var step = 12 / (40075016.7 * Math.cos(f.pts[0][0] * Math.PI / 180)), cnt = 0;
+      for (var gx = x0 + step / 2; gx < x1 && cnt < 500; gx += step) for (var gy = y0 + step / 2; gy < y1 && cnt < 500; gy += step) {
+        var jx = gx + (hashf(gx * 1e7) - 0.5) * step * 0.6, jy = gy + (hashf(gy * 1e7 + 3) - 0.5) * step * 0.6;
+        if (!pip(jx, jy, mm)) continue;
+        cnt++; solids.push({ t: 'tree', x: sx(jx), y: sy(jy), m: m, r: hashf(cnt + f.id * 77), base: sy(jy) });
+      }
+    });
+    solids.sort(function (p, q) { return p.base - q.base; });
+    var stone = [216, 211, 200], mine = rgb(css('--accent')), wallC = [150, 146, 138], green = rgb(css('--m-forest')), solar = [40, 62, 96];
+    ctx.save(); ctx.lineJoin = 'round';
+    solids.forEach(function (o) {
+      if (o.t === 'box') {
+        var H = lift(o.h), P2 = o.pts, n = P2.length, sa = 0;
+        for (var i = 0; i < n; i++) { var j = (i + 1) % n; sa += P2[i][0] * P2[j][1] - P2[j][0] * P2[i][1]; }
+        var col = o.mine ? mine : stone, hov = hoverOSM && o.osm === hoverOSM;
+        if (o.cand) col = [Math.round(col[0] * 0.75 + tcol[0] * 0.25), Math.round(col[1] * 0.75 + tcol[1] * 0.25), Math.round(col[2] * 0.75 + tcol[2] * 0.25)];
+        if (hov) col = tcol;
+        for (var e = 0; e < n; e++) {
+          var a = P2[e], b = P2[(e + 1) % n], nx = (b[1] - a[1]) * (sa > 0 ? 1 : -1), ny = -(b[0] - a[0]) * (sa > 0 ? 1 : -1);
+          if (ny <= 0) continue;   // faces away from the viewer
+          var L = Math.hypot(nx, ny) || 1, lit = 0.8 + 0.14 * ((-nx / L) * 0.6 + (ny / L) * 0.4);
+          ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(b[0], b[1] - H); ctx.lineTo(a[0], a[1] - H); ctx.closePath();
+          ctx.globalAlpha = 1; ctx.fillStyle = shade(col, lit); ctx.fill();
+          ctx.globalAlpha = 0.25; ctx.strokeStyle = ink; ctx.lineWidth = 0.5; ctx.stroke();
+        }
+        ctx.beginPath(); P2.forEach(function (q, i2) { if (i2) ctx.lineTo(q[0], q[1] - H); else ctx.moveTo(q[0], q[1] - H); }); ctx.closePath();
+        ctx.globalAlpha = 1; ctx.fillStyle = o.roof === 'roof' ? shade(green, 1.15) : o.roof === 'solar' ? shade(solar, 1) : shade(col, 1.08); ctx.fill();
+        ctx.globalAlpha = hov ? 1 : 0.35; ctx.strokeStyle = ink; ctx.lineWidth = hov ? 2 : 0.6; ctx.stroke();
+        if (o.mine && !o.done) { ctx.globalAlpha = 0.6; ctx.setLineDash([3, 3]); ctx.stroke(); ctx.setLineDash([]); }
+      } else if (o.t === 'wall') {
+        var Hw = lift(o.h);
+        ctx.beginPath(); ctx.moveTo(o.a[0], o.a[1]); ctx.lineTo(o.b[0], o.b[1]); ctx.lineTo(o.b[0], o.b[1] - Hw); ctx.lineTo(o.a[0], o.a[1] - Hw); ctx.closePath();
+        ctx.globalAlpha = 1; ctx.fillStyle = shade(wallC, 1); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(o.a[0], o.a[1] - Hw); ctx.lineTo(o.b[0], o.b[1] - Hw); ctx.lineWidth = Math.max(2, ppm() * 1.2); ctx.strokeStyle = shade(wallC, 0.75); ctx.lineCap = 'round'; ctx.stroke();
+      } else {
+        // A tree: grows from a sapling (about 4 m) to full size (about 12 m) over 15 years
+        var th = Math.max(5, lift(4 + 8 * o.m) * (0.85 + 0.3 * o.r)), cr = Math.max(2.6, ppm() * (1.2 + 2.6 * o.m) * (0.85 + 0.3 * o.r));
+        ctx.globalAlpha = 0.25; ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(o.x + cr * 0.4, o.y, cr, cr * 0.45, 0, 0, 7); ctx.fill();
+        ctx.globalAlpha = 1; ctx.strokeStyle = '#6b4f36'; ctx.lineWidth = Math.max(1, cr * 0.18); ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(o.x, o.y - th * 0.7); ctx.stroke();
+        ctx.fillStyle = shade(green, 0.95 + 0.2 * o.r); ctx.beginPath(); ctx.arc(o.x, o.y - th, cr, 0, 7); ctx.fill();
+        ctx.fillStyle = shade(green, 1.35); ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.arc(o.x - cr * 0.3, o.y - th - cr * 0.3, cr * 0.45, 0, 7); ctx.fill();
+      }
+    });
+    ctx.restore();
+  }
+
   // ---- Modes and hints
   function streetMode() { return view && view.z >= STREET_Z; }
-  function drawsShapes(kind) { return streetMode() && BYK[kind] && BYK[kind].draw !== 'hex'; }
+  function drawsShapes(kind) { var c = BYK[kind]; return !!c && c.draw !== 'hex' && (streetMode() || !!c.anyZoom); }
   function modeChanged() {
     var sm = streetMode(), c = BYK[S.tool];
     $('#st-mode').textContent = !sm ? 'Region view: zoom in to reach street level' : view.z < OSM_Z ? 'Street level: zoom in once more to load buildings' : OSM.loading ? 'Street level: loading buildings and streets\u2026' : 'Street level';
-    var show = sm && c && c.draw !== 'hex';
+    var show = !!c && drawsShapes(S.tool);
     $('#st-shape').hidden = !show;
     if (show) {
       var line = c.draw === 'line';
+      $('[data-shape="pick"]').hidden = !!c.noPick;
+      if (c.noPick && S.shape === 'pick') setShape('poly');
       $('[data-shape="pick"]').textContent = line ? 'Pick a real street' : 'Pick a real place';
       $('[data-shape="rect"]').hidden = line;
       $('[data-shape="poly"]').textContent = line ? 'Draw a route' : 'Outline';
@@ -671,7 +813,9 @@
     }).join('') + '</div></div>';
   }).join('') + '<div class="st-group"><div class="st-tools"><button type="button" class="st-tool" role="radio" data-tool="erase" aria-checked="false"><i class="erase"></i>Remove</button></div></div>';
   function setTool(t) {
-    S.tool = t; draft = null; hoverOSM = null;
+    var wasNoPick = BYK[S.tool] && BYK[S.tool].noPick;
+    S.tool = t; draft = null; hoverOSM = null; snapPt = null; if (typeof showOpts === 'function') showOpts();
+    if (wasNoPick && BYK[t] && !BYK[t].noPick && S.shape === 'poly') setShape('pick');
     document.querySelectorAll('[data-tool]').forEach(function (b) { b.setAttribute('aria-checked', b.dataset.tool === t ? 'true' : 'false'); });
     var c = BYK[t];
     $('#st-tooldesc').textContent = c ? c.desc : 'Click any placed element or shape to remove it.';
@@ -679,6 +823,19 @@
     if (S.P) draw();
   }
   $('#st-palette').addEventListener('click', function (e) { var b = e.target.closest('[data-tool]'); if (b) setTool(b.dataset.tool); });
+  function showOpts() {
+    var bld = S.tool === 'build', wall = S.tool === 'seawall';
+    $('#st-opts').hidden = !(bld || wall);
+    ['#st-floors', '#st-floors-l'].forEach(function (q) { $(q).hidden = !bld; });
+    ['#st-wallh', '#st-wallh-l'].forEach(function (q) { $(q).hidden = !wall; });
+  }
+  $('#st-floors').addEventListener('change', function () { S.floors = Math.max(1, Math.min(80, Math.round(Number(this.value) || 6))); this.value = S.floors; });
+  $('#st-wallh').addEventListener('change', function () { S.wallH = Math.max(0.5, Math.min(12, Math.round((Number(this.value) || 2) * 2) / 2)); this.value = S.wallH; });
+  $('#st-3d').addEventListener('click', function () {
+    S.view3d = !S.view3d; this.setAttribute('aria-pressed', S.view3d ? 'true' : 'false');
+    if (S.view3d && view && view.z < OSM_Z) { zoomBy(Math.pow(2, OSM_Z + 1.4 - view.z)); hint('3D shows at street level, so the map zoomed in. Drag to move around.'); }
+    draw();
+  });
   $('#st-shape').addEventListener('click', function (e) {
     var b = e.target.closest('[data-shape]'); if (!b) return;
     setShape(b.dataset.shape);
@@ -717,6 +874,7 @@
   }
   function paintHex(i) {
     if (i < 0) return;
+    if (BYK[S.tool] && BYK[S.tool].streetOnly && S.tool !== 'erase' && dragMode !== 'remove') { hint(BYK[S.tool].name + ' is designed at street level: zoom in until the label says Street level.'); clearTimeout(refuseT); refuseT = setTimeout(function () { hint(); }, 3500); return; }
     var cur = S.items.get(i);
     if (S.tool === 'erase' || dragMode === 'remove') { if (cur) { stroke.push({ hex: i, prev: cur }); S.items.delete(i); } return; }
     if (cur === S.tool) return;
@@ -813,6 +971,8 @@
     if ((isLine && d.pts.length < 2) || (!isLine && d.pts.length < 3)) { draw(); return; }
     var f = { id: S.nextId++, kind: d.kind, type: isLine ? 'line' : 'area', pts: d.pts };
     if (d.osm) { f.osm = d.osm; f.clear = d.clear; }
+    if (f.kind === 'build') f.floors = S.floors;
+    if (f.kind === 'seawall') f.height = S.wallH;
     f.size = isLine ? lineLength(f.pts) : polyArea(f.pts);
     allocate(f);
     if (!f.alloc.length) { hint('That shape is outside this place’s map. Draw inside the hexes.'); setTimeout(function () { hint(); }, 3000); draw(); return; }
@@ -856,7 +1016,7 @@
     if (draft) { t.hidden = true; return; }
     var lines = [];
     if (hoverOSM && drawsShapes(S.tool) && S.shape === 'pick') {
-      var q0 = featQty({ kind: S.tool, type: hoverOSM.line ? 'line' : 'area', size: hoverOSM.size, alloc: [], clear: CLEARS[hoverOSM.kind] });
+      var q0 = featQty({ kind: S.tool, type: hoverOSM.line ? 'line' : 'area', size: hoverOSM.size, alloc: [], clear: CLEARS[hoverOSM.kind], floors: S.floors, height: S.wallH });
       lines.push(hoverOSM.label + (hoverOSM.name ? ': ' + hoverOSM.name : '') + ', ' + (hoverOSM.line ? (hoverOSM.size >= 1000 ? (hoverOSM.size / 1000).toFixed(1) + ' km' : num(hoverOSM.size) + ' m') : area(hoverOSM.size)));
       lines.push('Click to add ' + BYK[S.tool].name.toLowerCase() + ': ' + q0.label + (q0.cost ? ', ' + money(q0.cost * S.F) : ''));
       t.innerHTML = lines.map(esc).join('<br>'); t.hidden = false;
@@ -907,7 +1067,7 @@
 
   // ---- Storage
   function key() { return 'threadlands:studio2:' + S.slug + ':' + S.P.N; }
-  function save() { try { localStorage.setItem(key(), JSON.stringify({ items: Array.from(S.items.entries()), feats: S.feats.map(function (f) { return { kind: f.kind, type: f.type, pts: f.pts, osm: f.osm, clear: f.clear }; }) })); } catch (e) { /* storage unavailable */ } }
+  function save() { try { localStorage.setItem(key(), JSON.stringify({ items: Array.from(S.items.entries()), feats: S.feats.map(function (f) { return { kind: f.kind, type: f.type, pts: f.pts, osm: f.osm, clear: f.clear, floors: f.floors, height: f.height }; }) })); } catch (e) { /* storage unavailable */ } }
   function restore() {
     S.items = new Map(); S.feats = []; S.history = [];
     try {
@@ -916,7 +1076,7 @@
         (o.items || []).forEach(function (e) { if (BYK[e[1]] && e[0] < S.P.N) S.items.set(e[0], e[1]); });
         (o.feats || []).forEach(function (g) {
           if (!BYK[g.kind]) return;
-          var f = { id: S.nextId++, kind: g.kind, type: g.type, pts: g.pts, osm: g.osm, clear: g.clear };
+          var f = { id: S.nextId++, kind: g.kind, type: g.type, pts: g.pts, osm: g.osm, clear: g.clear, floors: g.floors, height: g.height };
           f.size = f.type === 'line' ? lineLength(f.pts) : polyArea(f.pts); allocate(f);
           if (f.alloc.length) S.feats.push(f);
         });
