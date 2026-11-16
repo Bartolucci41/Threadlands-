@@ -6,7 +6,7 @@
   <p class="page-lede" id="lib-lede">Every place that opens instantly in Threadlands. Each one has measured satellite heat, the river basin it drinks from and the farmland around it. Don&rsquo;t see yours? <a href="{B}explore/">Search for it on the Explore page</a> and build it in about ten minutes.</p>
   <div class="lib-map" id="lib-map"><canvas id="lib-canvas" role="img" aria-label="World map with a dot for every place in the library"></canvas><span class="lib-tip" id="lib-tip" hidden></span>
     <div class="lib-zoom"><button type="button" class="chip" id="lz-in" aria-label="Zoom in">+</button><button type="button" class="chip" id="lz-out" aria-label="Zoom out">&minus;</button><button type="button" class="chip" id="lz-fit" aria-label="Show the whole world" title="Show the whole world">&#8634;</button></div></div>
-  <p class="hint" style="margin:-16px 0 20px">Zoom with + and &minus;, your scroll wheel or a double-click, and drag to move. Names appear as you zoom in. Dot size shows population. Map outlines from Natural Earth, public domain.</p>
+  <p class="hint" style="margin:-16px 0 20px">Zoom with + and &minus;, your scroll wheel or a double-click, and drag to move. Names and smaller places appear as you zoom in. Dot size shows population. Map outlines from Natural Earth, public domain.</p>
   <div class="lib-tools">
     <label class="sr-only" for="lib-q">Filter places</label>
     <input id="lib-q" type="search" placeholder="Filter by city or country" autocomplete="off">
@@ -47,7 +47,10 @@
     ctx.beginPath(); ctx.moveTo(0, Y(0)); ctx.lineTo(W, Y(0)); ctx.stroke(); ctx.setLineDash([]);
     var ids = {}; shown.forEach(function (e) { ids[e.slug] = 1; });
     dots = [];
+    // Smaller places appear as you zoom in, so the world view stays readable however many towns are added
+    var filtering = shown.length < LIB.length, minPop = filtering ? 0 : 1e6 / (V.z * V.z);
     LIB.slice().sort(function (a, b) { return b.pop - a.pop; }).forEach(function (e) {
+      if ((e.pop || 0) < minPop) return;
       var x = X(e.lng), y = Y(e.lat), r = Math.max(3, Math.min(11, Math.sqrt(e.pop / 1e6) * 2.4 + 2.5)), on = ids[e.slug];
       ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.globalAlpha = on ? 0.85 : 0.18; ctx.fillStyle = color('--accent'); ctx.fill();
