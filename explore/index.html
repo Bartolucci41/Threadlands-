@@ -2775,11 +2775,11 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
         if (world.loading) html += '<li class="s-none">Searching everywhere…</li>';
         else if (!world.hits.length) html += '<li class="s-none">Nothing was found for “' + esc(q) + '”. Try adding the country or state.</li>';
         else html += '<li class="s-head">Anywhere on Earth</li>' + world.hits.map(function (h, k) {
-          return '<li role="option" data-world="' + k + '"><span class="s-name">' + esc(h.title) + '</span><span class="s-sub">' + esc(h.kind) + '</span></li>';
+          return '<li role="option" data-world="' + k + '"><span class="s-name">' + esc(h.title) + '</span><span class="s-sub">' + esc(h.kind) + ' · <b>Build it →</b></span></li>';
         }).join('');
       } else {
         if (!items.length) html += '<li class="s-none">Not in the library yet.</li>';
-        html += '<li role="option" data-worldsearch="1"><span class="s-world">Search everywhere for “' + esc(q) + '”</span></li>';
+        html += '<li role="option" data-worldsearch="1"><span class="s-world">Find “' + esc(q) + '” anywhere and build it</span></li>';
       }
       list.innerHTML = html;
       list.hidden = false; input.setAttribute('aria-expanded', 'true');
@@ -2804,7 +2804,13 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
       showRequest(reqId, h);
     }
     function pick(slug) { input.value = ''; close(); input.blur(); openLibrary(slug, false, scroll); }
-    input.addEventListener('input', function () { active = -1; show(); });
+    var autoT = null;
+    input.addEventListener('input', function () {
+      active = -1; show();
+      clearTimeout(autoT);
+      var q = input.value.trim();
+      if (q.length >= 3 && !libMatches(q).length) autoT = setTimeout(function () { if (input.value.trim() === q) searchWorld(); }, 800);
+    });
     input.addEventListener('keydown', function (ev) {
       if (ev.key === 'ArrowDown' && items.length) { active = Math.min(items.length - 1, active + 1); show(); ev.preventDefault(); }
       else if (ev.key === 'ArrowUp' && items.length) { active = Math.max(0, active - 1); show(); ev.preventDefault(); }
@@ -2813,6 +2819,8 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
       if (!items.length) items = libMatches(input.value);
+      var wq = world && world.q === input.value.trim() && !world.loading ? world : null;
+      if (!items.length && wq && wq.hits.length) { chooseWorld(wq.hits[0]); return; }
       if (items.length && active >= 0) pick(items[active].slug);
       else if (items.length && !(world && world.q === input.value.trim())) pick(items[0].slug);
       else searchWorld();
