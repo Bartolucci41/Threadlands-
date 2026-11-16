@@ -250,7 +250,7 @@ const ThreadModel = (function () {
     }
     const n = c.lat.length;
     if (n < 20) throw new Error('The place has only ' + n + ' hexes. Make the region larger and try again.');
-    if (n > 6000) throw new Error('The place has ' + n + ' hexes. Rebuild it with MAX_HEXES at 6000 or fewer.');
+    if (n > 20000) throw new Error('The place has ' + n + ' hexes. Rebuild it with MAX_HEXES at 20000 or fewer.');
     for (const k of REQUIRED) {
       if (c[k].length !== n) throw new Error('The "' + k + '" column has ' + c[k].length + ' rows, but the place has ' + n + ' hexes.');
     }

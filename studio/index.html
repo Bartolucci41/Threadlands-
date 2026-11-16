@@ -1514,13 +1514,16 @@
   function key() { return 'threadlands:studio2:' + S.slug + ':' + S.P.N; }
   function serialize() {
     var r6 = function (v) { return Math.round(v * 1e6) / 1e6; };
-    return { v: 2, items: Array.from(S.items.entries()).map(function (e) { var t = S.itemTeam.get(e[0]), mx = S.itemMix.get(e[0]), sp = S.itemSp.get(e[0]); return sp ? [e[0], e[1], t != null ? t : null, mx || null, sp] : mx ? [e[0], e[1], t != null ? t : null, mx] : t != null ? [e[0], e[1], t] : e; }),
+    return { v: 2, n: S.P ? S.P.N : undefined, items: Array.from(S.items.entries()).map(function (e) { var t = S.itemTeam.get(e[0]), mx = S.itemMix.get(e[0]), sp = S.itemSp.get(e[0]); return sp ? [e[0], e[1], t != null ? t : null, mx || null, sp] : mx ? [e[0], e[1], t != null ? t : null, mx] : t != null ? [e[0], e[1], t] : e; }),
       feats: S.feats.map(function (f) { return { kind: f.kind, type: f.type, pts: f.pts.map(function (p) { return [r6(p[0]), r6(p[1])]; }), osm: f.osm, clear: f.clear, floors: f.floors, height: f.height, team: f.team, mix: f.mix, sp: f.sp }; }),
       teams: S.teams.length ? S.teams : undefined, budget: S.budget };
   }
   function deserialize(o) {
     S.items = new Map(); S.itemTeam = new Map(); S.itemMix = new Map(); S.itemSp = new Map(); S.feats = []; S.history = [];
     if (!o) return;
+    // Region-level elements are stored by hex number; if the place was rebuilt with different hexes, they no longer line up
+    var sameHexes = o.n ? o.n === S.P.N : S.P.N <= 6000;
+    if (!sameHexes && (o.items || []).length) { o.items = []; setTimeout(function () { hint('This place now has finer detail, so region-level elements from your earlier design were cleared. Street-level shapes are kept.'); setTimeout(function () { hint(); }, 6000); }, 500); }
     (o.items || []).forEach(function (e) { if (BYK[e[1]] && e[0] < S.P.N) { S.items.set(e[0], e[1]); if (e[2] != null) S.itemTeam.set(e[0], e[2]); if (e[3]) S.itemMix.set(e[0], e[3]); if (e[4]) S.itemSp.set(e[0], e[4]); } });
     (o.feats || []).forEach(function (g) {
       if (!BYK[g.kind]) return;
