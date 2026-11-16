@@ -674,6 +674,7 @@ const ThreadModel = (function () {
               break;
             case 'wetland':
               if (m >= 0.5 && sh >= 0.5 && !ucls[i] && c0 !== 'water' && c0 !== 'wetland' && c0 !== 'pond') { cover[i] = 'wetland'; nWet++; wetW += 0.5 + flood[i]; }
+              else if (sh < 0.5) wetW += m * sh * (0.5 + flood[i]);   // a smaller marsh still stores some floodwater
               break;
             case 'forest':
               if (m >= 0.5 && sh >= 0.5 && !ucls[i] && c0 !== 'water' && c0 !== 'wetland' && c0 !== 'pond' && c0 !== 'forest') cover[i] = 'forest';

@@ -105,11 +105,12 @@
         <button type="button" class="chip" data-shape="poly" aria-pressed="false">Outline</button>
       </div>
       <div class="st-map" id="st-map">
-        <canvas id="st-canvas" role="img" aria-label="Map for designing. In region view, click hexes to place elements. At street level, draw shapes."></canvas>
+        <canvas id="st-canvas" role="img" aria-label="Map for designing. Draw shapes to place elements; zoom in close to pick real lots, blocks and streets."></canvas>
         <div class="st-zoom">
           <button type="button" class="chip" id="st-zin" aria-label="Zoom in">+</button>
           <button type="button" class="chip" id="st-zout" aria-label="Zoom out">&minus;</button>
           <button type="button" class="chip st-3d" id="st-3d" aria-pressed="false" title="Show buildings, walls and trees in 3D">3D</button>
+          <button type="button" class="chip st-3d" id="st-grid" aria-pressed="false" title="Show the analysis grid the scores are worked out on">Grid</button>
         </div>
         <span class="st-mode" id="st-mode">Region view</span>
         <div class="st-guide3d" id="st-guide3d" hidden role="note">
@@ -221,10 +222,10 @@
   // where (for hexes): 'urban' built-up only, 'land' farmland, grassland or bare land, 'farm' cropland only, 'any' any land
   var CAT = [
     { k: 'farmblock', name: 'Urban farm', group: 'Food', color: '--m-farm', draw: 'area', where: 'urban', grow: 2, start: 0.5,
-      desc: 'Redevelop land into a working farm: clear it, build soil and beds, and grow. Urban farms yield about as much per square meter as field crops, often more. At region level it farms a whole hex.' },
-    { k: 'urbanfarm', name: 'Farm plots', group: 'Food', color: '--m-regen', draw: 'hex', where: 'urban', grow: 1, start: 0.6,
+      desc: 'Redevelop land into a working farm: clear it, build soil and beds, and grow. Urban farms yield about as much per square meter as field crops, often more.' },
+    { k: 'urbanfarm', name: 'Farm plots', group: 'Food', color: '--m-regen', draw: 'area', where: 'urban', grow: 1, start: 0.6,
       desc: 'Rooftop and vacant-lot plots on 2% of a neighborhood, without clearing anything.' },
-    { k: 'regen', name: 'Regenerative farm', group: 'Food', color: '--m-regen', draw: 'hex', where: 'farm', grow: 4, start: 0.3,
+    { k: 'regen', name: 'Regenerative farm', group: 'Food', color: '--m-regen', draw: 'area', where: 'farm', grow: 4, start: 0.3,
       desc: 'Cover crops and living soil on existing farms. Holds water, survives drought better, pays back in 2 to 3 years.' },
     { k: 'trees', name: 'Street trees', group: 'Green', color: '--m-canopy', draw: 'line', where: 'urban', grow: 15, start: 0.15,
       desc: 'Shade cools streets and soaks up rain. At street level, draw along a street: one tree every 10 m. About 15 years to full canopy.' },
@@ -235,12 +236,12 @@
     { k: 'raingarden', name: 'Rain gardens', group: 'Water', color: '--f1', draw: 'area', where: 'urban', grow: 2, start: 0.5,
       desc: 'Planted dips that catch storm runoff before it floods homes.' },
     { k: 'pond', name: 'Pond or lake', group: 'Water', color: '--m-water', draw: 'area', where: 'any', grow: 1, start: 0.5,
-      desc: 'Holds floodwater and cools the air. At region level it turns a whole hex into a lake park; at street level, draw a pond 2 m deep.' },
+      desc: 'Holds floodwater and cools the air. Draw it at any size, from a pond to a lake; about 2 m deep.' },
     { k: 'seawall', name: 'Sea wall or levee', group: 'Water', color: '--ink2', draw: 'line', where: 'any', grow: 5, start: 0, anyZoom: true, noPick: true,
       desc: 'A wall along a coast or river, built to the height you set. It shields flood-prone land behind it, up to about 3 km inland. Draw it at any zoom. About 5 years to build.' },
-    { k: 'wetland', name: 'Wetland', group: 'Water', color: '--m-wet', draw: 'hex', where: 'land', grow: 8, start: 0.2,
+    { k: 'wetland', name: 'Wetland', group: 'Water', color: '--m-wet', draw: 'area', where: 'land', grow: 8, start: 0.2,
       desc: 'Restored marsh on farmland or open land. Stores floodwater and shelters wildlife. Matures in about 8 years.' },
-    { k: 'forest', name: 'Forest', group: 'Wild', color: '--m-forest', draw: 'hex', where: 'land', grow: 20, start: 0.1,
+    { k: 'forest', name: 'Forest', group: 'Wild', color: '--m-forest', draw: 'area', where: 'land', grow: 20, start: 0.1,
       desc: 'Native forest on open or farmed land. Cools, stores carbon and shelters wildlife. About 20 years to mature.' },
     { k: 'corridor', name: 'Wildlife corridor', group: 'Wild', color: '--m-corr', draw: 'line', where: 'any', grow: 10, start: 0.2,
       desc: 'A green link, 30 m wide, so animals can move between parks and wild land.' },
@@ -274,9 +275,9 @@
   ];
   $('#st-sources').innerHTML = SOURCES.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('');
 
-  var S = { sp: null, zone: null, itemSp: new Map(), mix: {}, itemMix: new Map(), teams: [], team: null, itemTeam: new Map(), P: null, slug: null, tool: 'farmblock', shape: 'pick', floors: 6, wallH: 2, view3d: false, show: 'land', items: new Map(), feats: [], history: [], year: 2026, budget: 0, F: 1,
+  var S = { grid: false, sp: null, zone: null, itemSp: new Map(), mix: {}, itemMix: new Map(), teams: [], team: null, itemTeam: new Map(), P: null, slug: null, tool: 'farmblock', shape: 'pick', floors: 6, wallH: 2, view3d: false, show: 'land', items: new Map(), feats: [], history: [], year: 2026, budget: 0, F: 1,
     pl: null, PRICES: null, base: null, basemap: 'streets', nextId: 1 };
-  var cv = $('#st-canvas'), ctx = cv.getContext('2d'), view = null;
+  var cv = $('#st-canvas'), ctx = cv.getContext('2d'), view = null, WASH = null;
 
   // ---- Web Mercator: x, y in 0..1 across the world
   function mx(lng) { return (lng + 180) / 360; }
@@ -460,6 +461,10 @@
     if (f.clear != null) built = f.clear;   // picked from a real building, parking lot or vacant lot
     switch (f.kind) {
       case 'farmblock': return { label: area(A) + ' farmed', cost: A * (32 + CLEAR * built), up: 0, farmM2: A };
+      case 'urbanfarm': return { label: area(A) + ' of plots', cost: A * 32, up: 0, farmM2: A };
+      case 'regen': return { label: area(A) + ' of farms', cost: 0, up: A / 1e4 * 90 };
+      case 'wetland': return { label: area(A) + ' of wetland', cost: A / 1e4 * 52000, up: 0 };
+      case 'forest': return { label: area(A) + ' of forest', cost: A / 1e4 * 1600, up: 0 };
       case 'park': return { label: area(A) + ' of park', cost: A * (38 + CLEAR * built), up: 0 };
       case 'roof': return { label: area(A) + ' of green roof', cost: A * 123, up: A * 1.5 };
       case 'raingarden': return { label: area(A) + ' of rain gardens', cost: A * 38, up: A };
@@ -521,7 +526,8 @@
     var q = featQty0(f); if (!recipe(f.kind)) return q;
     var A = f.size, fl = f.floors || 6, u, clr = 0;
     switch (f.kind) {
-      case 'farmblock': case 'park': case 'roof': case 'raingarden': case 'pond': u = A; break;
+      case 'farmblock': case 'park': case 'roof': case 'raingarden': case 'pond': case 'urbanfarm': u = A; break;
+      case 'wetland': case 'forest': u = A / 1e4; break;
       case 'trees': u = A / 10; break;
       case 'corridor': u = A * 30 / 1e4; break;
       case 'build': u = A * fl; break;
@@ -633,7 +639,8 @@
       f.alloc.forEach(function (e) {
         var i = e[0], amt = e[1], h = hexInfo(i), A = h.area * 1e6, sh;
         switch (f.kind) {
-          case 'farmblock': case 'park': sh = amt / A; break;
+          case 'farmblock': case 'park': case 'regen': case 'wetland': case 'forest': sh = amt / A; break;
+          case 'urbanfarm': sh = amt / (0.02 * A); break;
           case 'roof': sh = amt / Math.max(1, 0.1 * h.built * A); break;
           case 'raingarden': sh = amt / (0.01 * A); break;
           case 'pond': sh = Math.min(0.99, amt / (0.1 * A)); break;
@@ -684,6 +691,16 @@
     var fade = S.basemap === 'none' ? 1 : view.z < 11 ? 0.9 : view.z < 13 ? 0.6 : view.z < STREET_Z ? 0.4 : 0.22;
     // At street level the real buildings and lots take over: the model's hexes step back (and vanish in 3D)
     var hideHex = S.basemap !== 'none' && view.z >= OSM_Z && (S.view3d || S.show === 'land');
+    // The scores are worked out on a hex grid, but the map shows them as a smooth wash: the hexes are drawn
+    // into a smaller canvas and blurred, so you see where it is hot or wet rather than a honeycomb.
+    // The Grid button shows the hexes themselves.
+    var mainCtx = ctx, wash = !S.grid && !hideHex;
+    if (wash) {
+      if (!WASH) WASH = document.createElement('canvas');
+      var q = 0.5, ww = Math.max(1, Math.round(W * q)), wh = Math.max(1, Math.round(H * q));
+      if (WASH.width !== ww || WASH.height !== wh) { WASH.width = ww; WASH.height = wh; }
+      ctx = WASH.getContext('2d'); ctx.setTransform(q, 0, 0, q, 0, 0); ctx.clearRect(0, 0, W, H);
+    }
     for (var i = 0; i < P.N && !hideHex; i++) {
       var a = HX[i];
       if (!a || a.length < 6) continue;
@@ -701,11 +718,19 @@
       // In the Land view, built-up hexes go almost clear over a background map so the streets and buildings show through
       if (S.show === 'land' && URB[cov] && S.basemap !== 'none' && view.z >= 12) alpha = 0.35;
       ctx.globalAlpha = alpha * fade; ctx.fillStyle = fill; ctx.fill();
+      if (wash) { ctx.strokeStyle = fill; ctx.lineWidth = 1.2; ctx.stroke(); }   // close the hairline seams between hexes
       if (S.show === 'land' && res.lc && res.lc[i] > 0 && URB[cov]) { ctx.globalAlpha = 0.55 * res.lc[i] * fade; ctx.fillStyle = C.canopy; ctx.fill(); }
       if (!P.inside[i]) { ctx.globalAlpha = 0.3 * fade; ctx.fillStyle = C.surface; ctx.fill(); }
-      if (view.z >= 13) { ctx.globalAlpha = 0.25; ctx.strokeStyle = C.ink; ctx.lineWidth = 0.6; ctx.stroke(); }
+      if (S.grid && view.z >= 11) { ctx.globalAlpha = 0.3; ctx.strokeStyle = C.ink; ctx.lineWidth = 0.6; ctx.stroke(); }
     }
     ctx.globalAlpha = 1;
+    if (wash) {
+      ctx = mainCtx;
+      // blur by about half a hex on screen, so neighbours melt together but a river or a park still reads
+      var e = HX[0] ? Math.hypot(sx(HX[0][0]) - sx(HX[0][2]), sy(HX[0][1]) - sy(HX[0][3])) : 10;
+      ctx.save(); ctx.filter = 'blur(' + Math.max(2.5, Math.min(40, e * 0.8)).toFixed(1) + 'px)';
+      ctx.drawImage(WASH, 0, 0, W, H); ctx.restore();
+    }
     S.items.forEach(function (kind, i) {
       var m = maturity(kind, S.year, S.itemSp.get(i));
       polyPath(HX[i], 0.62, HCX[i], HCY[i]);
@@ -767,7 +792,8 @@
     farmblock: ['parking', 'lot', 'grass', 'pitch', 'building'], park: ['parking', 'lot', 'grass', 'pitch', 'building'],
     pond: ['parking', 'lot', 'grass', 'park', 'pitch'], raingarden: ['parking', 'lot', 'grass', 'park'],
     __building__: ['building'], housing: ['parking', 'lot', 'building'], build: ['parking', 'lot', 'building', 'grass'], roof: ['building'], solar: ['building', 'parking'],
-    trees: ['street'], transit: ['street'], corridor: ['street']
+    trees: ['street'], transit: ['street'], corridor: ['street'],
+    urbanfarm: ['building', 'lot', 'grass'], regen: ['grass', 'lot'], wetland: ['grass', 'lot', 'park', 'parking'], forest: ['grass', 'lot', 'park', 'parking']
   };
   function PICK_NAMES(tool) {
     var a = (PICK[tool] || []).map(function (x) { return PLURAL[x]; });
@@ -1033,7 +1059,8 @@
 
   // ---- Modes and hints
   function streetMode() { return view && view.z >= STREET_Z; }
-  function drawsShapes(kind) { var c = BYK[kind]; return !!c && c.draw !== 'hex' && (streetMode() || !!c.anyZoom); }
+  function drawsShapes(kind) { var c = BYK[kind]; return !!c && !!view && (streetMode() || !c.streetOnly); }
+  function canPick() { return view && view.z >= OSM_Z; }
   function modeChanged() {
     var sm = streetMode(), c = BYK[S.tool];
     $('#st-mode').textContent = !sm ? 'Region view: zoom in to reach street level' : view.z < OSM_Z ? 'Street level: zoom in once more to load buildings' : OSM.loading ? 'Street level: loading buildings and streets\u2026' : S.view3d ? '3D, street level' : 'Street level';
@@ -1041,12 +1068,14 @@
     $('#st-shape').hidden = !show;
     if (show) {
       var line = c.draw === 'line';
-      $('[data-shape="pick"]').hidden = !!c.noPick;
+      $('[data-shape="pick"]').hidden = !!c.noPick || !canPick();
       if (c.noPick && S.shape === 'pick') setShape('poly');
+      if (!canPick() && S.shape === 'pick') { S.wantPick = true; setShape(line ? 'poly' : 'rect'); }
+      else if (canPick() && S.wantPick && !c.noPick) { S.wantPick = false; setShape('pick'); }
       $('[data-shape="pick"]').textContent = line ? 'Pick a real street' : 'Pick a real place';
       $('[data-shape="rect"]').hidden = line;
       $('[data-shape="poly"]').textContent = line ? 'Draw a route' : 'Outline';
-      if (line && S.shape === 'rect') setShape('pick');
+      if (line && S.shape === 'rect') setShape(canPick() ? 'pick' : 'poly');
     }
     hint();
   }
@@ -1064,7 +1093,7 @@
         ? (view.z < OSM_Z ? 'Zoom in once more and the real ' + what + ' appear. Then click one to turn it into ' + c.name.toLowerCase() + '. Drag to move the map.'
           : 'Highlighted ' + what + ' can become ' + c.name.toLowerCase() + '. Hover to see its size and cost, click to place it. Drag to move the map.')
         : (c.draw === 'line' ? 'Click along the route; points snap to real street corners. Double-click or press Enter to finish; Esc cancels. Hold Shift for straight lines.'
-        : S.shape === 'rect' ? 'Drag a rectangle; corners snap to real buildings and lots. The size and cost show as you go.' : 'Click around the site; points snap to real corners and edges. Click the first point, double-click or press Enter to finish; Esc cancels. Hold Shift for straight lines.');
+        : S.shape === 'rect' ? (canPick() ? 'Drag a rectangle; corners snap to real buildings and lots. The size and cost show as you go.' : 'Drag a rectangle over the area. The size and cost show as you go. Zoom in close to pick real lots and blocks instead.') : 'Click around the site; points snap to real corners and edges. Click the first point, double-click or press Enter to finish; Esc cancels. Hold Shift for straight lines.');
     } else {
       $('#st-hint').textContent = 'Click or drag across hexes to place ' + (c ? c.name.toLowerCase() : 'elements') + '.' + (c && c.draw !== 'hex' ? ' Zoom in to street level to draw real shapes instead.' : '') + ' Zoom with + and − or your scroll wheel. To slide the map around, press Move the map.';
     }
@@ -1231,6 +1260,7 @@
     modeChanged(); draw();
   }
   $('#st-3d').addEventListener('click', function () { set3d(!S.view3d); });
+  $('#st-grid').addEventListener('click', function () { S.grid = !S.grid; this.setAttribute('aria-pressed', S.grid ? 'true' : 'false'); draw(); });
   $('#st-g3-ok').addEventListener('click', function () { $('#st-guide3d').hidden = true; try { localStorage.setItem('threadlands:3d-guide', '1'); } catch (e) { /* ignore */ } });
   $('#st-g3-flat').addEventListener('click', function () { set3d(false); });
   $('#st-shape').addEventListener('click', function (e) {
