@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="Illustration of the Two Towers of Bologna above its porticoes">
+<defs><clipPath id="c"><rect width="320" height="200" rx="18"/></clipPath></defs>
+<g clip-path="url(#c)"><rect width="320" height="200" fill="#eef2e8"/>
+<path d="M0 140 Q80 112 160 128 T320 118 V200 H0Z" fill="#b9cfac"/>
+<rect x="132" y="22" width="26" height="160" fill="#c9775a"/>
+<rect x="128" y="18" width="34" height="8" fill="#a9583d"/>
+<g fill="#7a3b28"><rect x="141" y="40" width="8" height="10"/><rect x="141" y="64" width="8" height="10"/><rect x="141" y="88" width="8" height="10"/><rect x="141" y="112" width="8" height="10"/><rect x="141" y="136" width="8" height="10"/></g>
+<g transform="rotate(4 186 182)"><rect x="174" y="78" width="26" height="104" fill="#d58a68"/><rect x="171" y="74" width="32" height="7" fill="#a9583d"/>
+<g fill="#7a3b28"><rect x="183" y="94" width="8" height="10"/><rect x="183" y="118" width="8" height="10"/><rect x="183" y="142" width="8" height="10"/></g></g>
+<rect y="150" width="320" height="50" fill="#c9775a"/>
+<rect y="146" width="320" height="8" fill="#a9583d"/>
+<path d="M4 200 V164 Q15 150 26 164 V200" fill="#f0d9c4"/><path d="M32 200 V164 Q43 150 54 164 V200" fill="#f0d9c4"/><path d="M60 200 V164 Q71 150 82 164 V200" fill="#f0d9c4"/><path d="M88 200 V164 Q99 150 110 164 V200" fill="#f0d9c4"/><path d="M116 200 V164 Q127 150 138 164 V200" fill="#f0d9c4"/><path d="M144 200 V164 Q155 150 166 164 V200" fill="#f0d9c4"/><path d="M172 200 V164 Q183 150 194 164 V200" fill="#f0d9c4"/><path d="M200 200 V164 Q211 150 222 164 V200" fill="#f0d9c4"/><path d="M228 200 V164 Q239 150 250 164 V200" fill="#f0d9c4"/><path d="M256 200 V164 Q267 150 278 164 V200" fill="#f0d9c4"/><path d="M284 200 V164 Q295 150 306 164 V200" fill="#f0d9c4"/><path d="M312 200 V164 Q323 150 334 164 V200" fill="#f0d9c4"/></g>
+<rect x="0.75" y="0.75" width="318.5" height="198.5" rx="18" fill="none" stroke="#1d2b25" stroke-opacity="0.12" stroke-width="1.5"/></svg>

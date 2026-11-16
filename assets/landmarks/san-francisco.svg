@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="Illustration of a San Francisco cable car with the Golden Gate Bridge">
+<defs><clipPath id="c"><rect width="320" height="200" rx="18"/></clipPath></defs>
+<g clip-path="url(#c)"><rect width="320" height="200" fill="#eef2e8"/><circle cx="262" cy="46" r="18" fill="#f3d58a" opacity="0.9"/>
+<rect y="118" width="320" height="82" fill="#8fbcd4"/>
+<path d="M0 132 Q70 118 140 130 T320 124 V200 H0Z" fill="#8fbcd4" opacity="0.6"/>
+<g stroke="#c9775a" stroke-width="5" fill="none"><path d="M30 120 V48 M70 120 V48"/><path d="M30 60 H70 M30 84 H70"/></g>
+<path d="M0 104 Q16 70 30 48 Q50 80 70 48 Q96 82 128 116" stroke="#c9775a" stroke-width="2" fill="none"/>
+<path d="M6 116 H140" stroke="#c9775a" stroke-width="4"/>
+<path d="M120 200 L320 96 V200Z" fill="#b9cfac"/>
+<path d="M120 200 L320 96" stroke="#1d2b25" stroke-opacity="0.25" stroke-width="2"/>
+<g transform="translate(8 14) rotate(-27 225 140)">
+ <rect x="168" y="118" width="116" height="44" rx="5" fill="#8f2f2a"/>
+ <rect x="172" y="104" width="108" height="20" rx="4" fill="#f2ece1"/>
+ <rect x="164" y="98" width="124" height="8" rx="3" fill="#6b2420"/>
+ <g fill="#a8c6d4"><rect x="178" y="108" width="14" height="12" rx="2"/><rect x="198" y="108" width="14" height="12" rx="2"/><rect x="218" y="108" width="14" height="12" rx="2"/><rect x="238" y="108" width="14" height="12" rx="2"/><rect x="258" y="108" width="14" height="12" rx="2"/></g>
+ <rect x="174" y="128" width="104" height="5" fill="#d9b24a"/>
+ <circle cx="186" cy="166" r="7" fill="#1d2b25"/><circle cx="266" cy="166" r="7" fill="#1d2b25"/>
+</g></g>
+<rect x="0.75" y="0.75" width="318.5" height="198.5" rx="18" fill="none" stroke="#1d2b25" stroke-opacity="0.12" stroke-width="1.5"/></svg>

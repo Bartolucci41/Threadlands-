@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="Illustration of the Angel of Independence in Mexico City with volcanoes behind">
+<defs><clipPath id="c"><rect width="320" height="200" rx="18"/></clipPath></defs>
+<g clip-path="url(#c)"><rect width="320" height="200" fill="#eef2e8"/>
+<path d="M0 150 L70 86 L104 108 L140 70 L196 118 L320 128 V200 H0Z" fill="#c9d6c4"/>
+<path d="M128 80 L140 70 L152 80 L146 84 L140 78 L134 84Z" fill="#fff"/>
+<rect y="150" width="320" height="50" fill="#cfe0c3"/>
+<ellipse cx="160" cy="166" rx="70" ry="10" fill="#e8dcc8"/>
+<rect x="130" y="138" width="60" height="22" rx="2" fill="#f2ece1" stroke="#1d2b25" stroke-opacity="0.2"/>
+<rect x="144" y="128" width="32" height="12" fill="#f2ece1" stroke="#1d2b25" stroke-opacity="0.2"/>
+<rect x="152" y="52" width="16" height="78" fill="#f2ece1" stroke="#1d2b25" stroke-opacity="0.2"/>
+<g stroke="#1d2b25" stroke-opacity="0.15"><path d="M152 60 H168"/><path d="M152 72 H168"/><path d="M152 84 H168"/><path d="M152 96 H168"/><path d="M152 108 H168"/><path d="M152 120 H168"/></g>
+<rect x="149" y="46" width="22" height="8" rx="2" fill="#d9b24a"/>
+<path d="M160 18 C150 22 146 30 148 40 L160 46 L172 40 C174 30 170 22 160 18Z" fill="#d9b24a"/>
+<path d="M156 30 C138 18 128 22 124 30 C136 30 146 34 154 38Z" fill="#d9b24a"/><path d="M164 30 C182 18 192 22 196 30 C184 30 174 34 166 38Z" fill="#d9b24a"/>
+<circle cx="160" cy="16" r="4" fill="#d9b24a"/>
+<g fill="#4f8a5b"><circle cx="36" cy="146" r="11"/><circle cx="62" cy="146" r="11"/><circle cx="258" cy="146" r="11"/><circle cx="284" cy="146" r="11"/></g></g>
+<rect x="0.75" y="0.75" width="318.5" height="198.5" rx="18" fill="none" stroke="#1d2b25" stroke-opacity="0.12" stroke-width="1.5"/></svg>

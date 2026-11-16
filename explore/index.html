@@ -25,11 +25,12 @@
 <main class="wrap">
   <h1 class="sect-h page-h" id="explore">Explore a place</h1>
   <div class="placebar" id="placebar">
+    <div class="place-head"><canvas class="emblem" id="place-emblem" width="72" height="72" aria-hidden="true"></canvas>
     <div class="place-id">
       <span class="eyebrow">Place</span>
       <span class="place-name"><span id="place-name">Fictional river city</span><span class="tag" id="place-tag">Demo</span></span>
       <span class="place-meta" id="place-meta"></span>
-    </div>
+    </div></div>
     <div class="place-actions">
       <form class="search compact" id="search-bar" role="search" hidden>
         <label class="sr-only" for="q-bar">Search for another city</label>
@@ -45,6 +46,7 @@
   </div>
   <p class="alert" id="alert" role="alert" hidden></p>
   <section class="glance" id="glance" aria-labelledby="glance-h" hidden>
+    <img class="place-art" id="place-art" alt="" hidden>
     <h3 class="glance-h" id="glance-h"></h3>
     <p class="glance-sub" id="glance-sub"></p>
     <div class="glance-grid" id="glance-grid"></div>
@@ -1104,6 +1106,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     }).catch(function () { /* no reading for this place yet */ });
   }
   function markExamples() {
+    try { if (P) renderEmblem(); } catch (err) { /* decoration */ }
     if (current !== NOW_FOR) loadNow(current);
     document.querySelectorAll('[data-example]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.example === current ? 'true' : 'false'); });
     document.querySelectorAll('[data-regcity]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.regcity === current ? 'true' : 'false'); });
@@ -1737,9 +1740,42 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     }, 500);
   }
 
+
+  // ---- The place's emblem, drawn from its own data: outline, rivers, farmland, forest and water, in the house palette
+  var LANDMARKS = { 'san-francisco': 1, 'mexico-city': 1, 'montreal': 1, 'bologna': 1, 'bangkok': 1 };
+  function renderEmblem() {
+    var c = $('#place-emblem'); if (!c || !P) return;
+    var d = window.devicePixelRatio || 1, S2 = 72; c.width = S2 * d; c.height = S2 * d;
+    var g = c.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); g.clearRect(0, 0, S2, S2);
+    g.save(); g.beginPath(); g.arc(S2 / 2, S2 / 2, S2 / 2 - 1, 0, 7); g.clip();
+    g.fillStyle = '#d6e7ef'; g.fillRect(0, 0, S2, S2);
+    // Frame the place itself, with a little of the land around it
+    var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (var q = 0; q < P.N; q++) if (P.inside[q]) { x0 = Math.min(x0, P.X[q]); x1 = Math.max(x1, P.X[q]); y0 = Math.min(y0, P.Y[q]); y1 = Math.max(y1, P.Y[q]); }
+    if (!isFinite(x0)) { x0 = bbox.minx; x1 = bbox.maxx; y0 = bbox.miny; y1 = bbox.maxy; }
+    var bw = (x1 - x0) * 1.35 + 1, bh = (y1 - y0) * 1.35 + 1, k = (S2 - 4) / Math.max(bw, bh), ox = S2 / 2 - ((x0 + x1) / 2) * k, oy = S2 / 2 - ((y0 + y1) / 2) * k;
+    var col = { core: '#c9775a', mid: '#d58a68', suburb: '#e2b49a', greenway: '#d58a68', farm: '#e8dcc8', regen: '#d9cfa0', forest: '#4f8a5b', wetland: '#7fae8c', water: '#8fbcd4', park: '#7fae6c', open: '#cfe0c3', barren: '#e9e3d6', corridor: '#7fae6c' };
+    var cov = P.BAU_TODAY.cover;
+    for (var i = 0; i < P.N; i++) {
+      var p = P.POLY[i]; if (!p || p.length < 6) continue;
+      g.beginPath(); for (var j = 0; j + 1 < p.length; j += 2) { var x = p[j] * k + ox, y = p[j + 1] * k + oy; if (j) g.lineTo(x, y); else g.moveTo(x, y); }
+      g.closePath(); g.globalAlpha = P.inside[i] ? 1 : 0.55; g.fillStyle = col[cov[i]] || '#cfe0c3'; g.fill();
+    }
+    g.globalAlpha = 1;
+    if (P.hasRivers && P.rivNet) {
+      g.strokeStyle = '#4f86a8'; g.lineWidth = 1.6; g.lineCap = 'round'; g.beginPath();
+      var segs = P.rivNet.major.segs; for (var s2 = 0; s2 < segs.length; s2 += 2) { g.moveTo(P.X[segs[s2]] * k + ox, P.Y[segs[s2]] * k + oy); g.lineTo(P.X[segs[s2 + 1]] * k + ox, P.Y[segs[s2 + 1]] * k + oy); }
+      g.stroke();
+    }
+    g.restore();
+    g.beginPath(); g.arc(S2 / 2, S2 / 2, S2 / 2 - 1, 0, 7); g.lineWidth = 2; g.strokeStyle = '#1d2b25'; g.globalAlpha = 0.85; g.stroke(); g.globalAlpha = 1;
+    var art = $('#place-art'), slug = current || '';
+    if (LANDMARKS[slug]) { art.src = BASE + 'assets/landmarks/' + slug + '.svg'; art.alt = ''; art.hidden = false; } else { art.hidden = true; art.removeAttribute('src'); }
+  }
   function renderPlaceInfo() {
     var pl = P.place;
     $('#place-name').textContent = pl.name || 'Unnamed place';
+    try { renderEmblem(); } catch (err) { /* the emblem is decoration */ }
     $('#place-tag').textContent = kind === 'demo' ? 'Demo' : 'Real data';
     var hexKm2 = pl.hex_km2 || (P.hexKm * P.hexKm * 2.598);
     var meta = [P.N.toLocaleString('en-US') + ' hexes', 'about ' + (hexKm2 >= 10 ? Math.round(hexKm2) : hexKm2.toFixed(2)) + ' km² each', fmtPop(P.totalPop) + ' people'];
