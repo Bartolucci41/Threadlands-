@@ -8,7 +8,7 @@
     ['fr', 'Français'], ['bn', 'বাংলা'], ['pt', 'Português'], ['ru', 'Русский'], ['ur', 'اردو']
   ];
   // Languages appear in the menu once their translation file is in data/i18n
-  var READY = ['en', 'zh', 'es', 'fr', 'pt', 'ru'];
+  var READY = ['en', 'zh', 'hi', 'es', 'ar', 'fr', 'bn', 'pt', 'ru', 'ur'];
   LANGS = LANGS.filter(function (l) { return READY.indexOf(l[0]) >= 0; });
   var RTL = { ar: 1, ur: 1 };
   var FONTS = { zh: 'Noto+Sans+SC:wght@400;600;800', hi: 'Noto+Sans+Devanagari:wght@400;600;800', bn: 'Noto+Sans+Bengali:wght@400;600;800',
