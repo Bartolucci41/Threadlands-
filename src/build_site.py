@@ -248,12 +248,24 @@ ANALYTICS = ("<!-- Cloudflare Web Analytics --><script type='module' src='https:
 PAGES = [("", "Home"), ("explore/", "Explore"), ("studio/", "Studio"), ("library/", "Library"), ("how-it-works/", "How it works"), ("about/", "About")]
 
 
+def APP(base):
+    # Installable app: icon, manifest and offline support
+    return (f'<link rel="manifest" href="{base}manifest.webmanifest">\n'
+            '<meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">\n'
+            '<meta name="theme-color" content="#0D1613" media="(prefers-color-scheme: dark)">\n'
+            f'<link rel="icon" type="image/png" sizes="32x32" href="{base}assets/icons/favicon-32.png">\n'
+            f'<link rel="apple-touch-icon" href="{base}assets/icons/apple-touch-icon.png">\n'
+            '<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="mobile-web-app-capable" content="yes">\n'
+            '<meta name="apple-mobile-web-app-title" content="Threadlands">\n<meta name="apple-mobile-web-app-status-bar-style" content="default">\n'
+            "<script>if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });</script>\n")
+
+
 def head(base, title, desc):
     return ('<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css">\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css">\n' + APP(base) + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

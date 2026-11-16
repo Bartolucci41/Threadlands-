@@ -1,0 +1,22 @@
+{
+  "name": "Threadlands",
+  "short_name": "Threadlands",
+  "description": "Plan a city together with the water, farms and wild places it depends on, and test the plan against 2050.",
+  "id": "/",
+  "start_url": "/?source=app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#E8EDE6",
+  "theme_color": "#E8EDE6",
+  "categories": ["education", "productivity", "utilities"],
+  "icons": [
+    { "src": "/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/assets/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Studio", "url": "/studio/", "icons": [{ "src": "/assets/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Explore a place", "url": "/explore/", "icons": [{ "src": "/assets/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
