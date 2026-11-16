@@ -553,7 +553,9 @@ const ThreadModel = (function () {
       if (SD) {
         // Infill housing makes room for people, so the farthest sprawl can be left unbuilt
         let cap = 0;
-        for (const [i, it] of SD) if (it.kind === 'housing' && isUrb(base[i])) cap += 0.3 * pop[i] * it.m;
+        for (const [i, v] of SD) for (const it of (Array.isArray(v) ? v : [v])) {
+          if (it.kind === 'housing' && isUrb(base[i])) cap += (it.residents != null ? it.residents : 0.3 * pop[i] * (it.share == null ? 1 : it.share)) * it.m;
+        }
         if (cap > 0) {
           let cum = 0, t = 0;
           for (const k of subOrder) { cum += pop[k]; if (cum > cap) break; t = subP[k]; }
@@ -606,30 +608,43 @@ const ThreadModel = (function () {
       const lc = new Float64Array(N), lflood = new Float64Array(N).fill(1);
       let urbFarm = 0, energy = 0, nTransit = 0, nRain = 0;
       if (SD) {
-        for (const [i, it] of SD) {
-          const m = clamp(it.m, 0, 1), c0 = cover[i], urb = !!ucls[i];
+        for (const [i, v] of SD) for (const it of (Array.isArray(v) ? v : [v])) {
+          const m = clamp(it.m, 0, 1), sh = it.share == null ? 1 : Math.max(0, it.share), c0 = cover[i], urb = !!ucls[i];
+          const g = (k) => { lc[i] = 1 - (1 - lc[i]) * (1 - Math.min(0.95, k)); };
           switch (it.kind) {
-            case 'trees': if (urb) { lc[i] = 1 - (1 - lc[i]) * (1 - 0.6 * m); lflood[i] *= 1 - 0.05 * m; } break;
-            case 'roof': if (urb) { lc[i] = 1 - (1 - lc[i]) * (1 - 0.25 * m); lflood[i] *= 1 - 0.1 * m; } break;
-            case 'raingarden': if (urb) { lc[i] = 1 - (1 - lc[i]) * (1 - 0.05 * m); lflood[i] *= 1 - 0.25 * m; nRain += m; } break;
-            case 'urbanfarm': if (urb) { lc[i] = 1 - (1 - lc[i]) * (1 - 0.1 * m); urbFarm += 0.02 * area[i] * m; } break;
+            case 'trees': if (urb) { g(0.6 * m * sh); lflood[i] *= 1 - Math.min(0.5, 0.05 * m * sh); } break;
+            case 'roof': if (urb) { g(0.25 * m * sh); lflood[i] *= 1 - Math.min(0.5, 0.1 * m * sh); } break;
+            case 'raingarden': if (urb) { g(0.05 * m * sh); lflood[i] *= 1 - Math.min(0.6, 0.25 * m * sh); nRain += m * sh; } break;
+            case 'urbanfarm': if (urb) { g(0.1 * m * sh); urbFarm += 0.02 * area[i] * m * sh / 0.6; } break;
+            case 'farmblock': {
+              // A block cleared and farmed: share is the fraction of the hex farmed; yields about equal to field crops
+              urbFarm += area[i] * Math.min(1, sh) * m / 0.6;
+              if (urb) g(0.3 * Math.min(1, sh) * m);
+              if (urb && sh >= 0.6 && m >= 0.5) { cover[i] = 'farm'; ucls[i] = null; }
+              break;
+            }
+            case 'park': {
+              if (urb) { g(0.8 * Math.min(1, sh) * m); if (sh >= 0.6 && m >= 0.5) { cover[i] = 'park'; ucls[i] = null; } }
+              break;
+            }
             case 'solar': if (urb) energy += it.mwh || 0; break;
-            case 'transit': if (urb) nTransit += m; break;
+            case 'transit': if (urb || it.share != null) nTransit += m * sh; break;
             case 'pond':
-              if (m >= 0.5 && c0 !== 'water' && c0 !== 'pond') { cover[i] = 'pond'; ucls[i] = null; wetW += 1 + flood[i]; }
+              if (sh >= 1 && m >= 0.5 && c0 !== 'water' && c0 !== 'pond') { cover[i] = 'pond'; ucls[i] = null; wetW += 1 + flood[i]; }
+              else if (sh < 1) { wetW += m * sh * (1 + flood[i]); if (urb) g(0.2 * sh * m); }
               break;
             case 'wetland':
-              if (m >= 0.5 && !ucls[i] && c0 !== 'water' && c0 !== 'wetland' && c0 !== 'pond') { cover[i] = 'wetland'; nWet++; wetW += 0.5 + flood[i]; }
+              if (m >= 0.5 && sh >= 0.5 && !ucls[i] && c0 !== 'water' && c0 !== 'wetland' && c0 !== 'pond') { cover[i] = 'wetland'; nWet++; wetW += 0.5 + flood[i]; }
               break;
             case 'forest':
-              if (m >= 0.5 && !ucls[i] && c0 !== 'water' && c0 !== 'wetland' && c0 !== 'pond' && c0 !== 'forest') cover[i] = 'forest';
+              if (m >= 0.5 && sh >= 0.5 && !ucls[i] && c0 !== 'water' && c0 !== 'wetland' && c0 !== 'pond' && c0 !== 'forest') cover[i] = 'forest';
               break;
             case 'corridor':
-              if (m >= 0.5 && c0 !== 'water' && c0 !== 'forest' && c0 !== 'wetland' && c0 !== 'park' && c0 !== 'corridor' && c0 !== 'greenway' && c0 !== 'pond') {
+              if (m >= 0.5 && sh >= 0.3 && c0 !== 'water' && c0 !== 'forest' && c0 !== 'wetland' && c0 !== 'park' && c0 !== 'corridor' && c0 !== 'greenway' && c0 !== 'pond') {
                 if (ucls[i]) { cover[i] = 'greenway'; nGreen++; } else cover[i] = 'corridor';
               }
               break;
-            case 'regen': if (m >= 0.5 && c0 === 'farm') cover[i] = 'regen'; break;
+            case 'regen': if (m >= 0.5 && sh >= 0.5 && c0 === 'farm') cover[i] = 'regen'; break;
           }
         }
       }
@@ -694,7 +709,7 @@ const ThreadModel = (function () {
         for (const j of near2[i]) if (cover[j] === 'wetland') { wetNear = true; break; }
         supplyDry += a * ((isRegen ? 0.9 * (1 - 0.04 * climate.dT) : 0.58 * (1 - 0.08 * climate.dT)) + (wetNear ? 0.14 : 0));
       }
-      supply += 0.6 * urbFarm * (1 - 0.04 * climate.dT);          // urban farms yield about 60% of field crops per area, all year
+      supply += 0.6 * urbFarm * (1 - 0.04 * climate.dT);          // urbFarm is stored as field-crop-equivalent area / 0.6
       supplyDry += 0.5 * urbFarm;
       const food = DEMAND > 0 ? Math.min(100, 100 * supply / DEMAND) : 100;
       const foodDry = DEMAND > 0 ? Math.min(100, 100 * supplyDry / DEMAND) : 100;
@@ -742,7 +757,7 @@ const ThreadModel = (function () {
       };
       const index = 0.8 * (tests.heatwave + tests.flood + tests.drought) / 3 + 0.2 * mobility;
       return {
-        cover, ucls, heat, floodExp, comp, lcc, retention, scale, E, energy, lc, compactUsed: cp,
+        cover, ucls, heat, floodExp, comp, lcc, retention, scale, E, energy, lc, compactUsed: cp, urbanFarmKm2: 0.6 * urbFarm,
         metrics: { heat: heatScore, flood: floodScore, habitat, food, foodDry, storage, mobility },
         tests, index
       };
