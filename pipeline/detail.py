@@ -224,5 +224,18 @@ def build(slug):
 
 
 if __name__ == '__main__':
-    for s in sys.argv[1:]:
-        build(s)
+    args = sys.argv[1:]
+    if args == ['all']:
+        idx = json.load(open(os.path.join(ROOT, 'data', 'index.json')))
+        args = [p['slug'] for p in sorted(idx['places'], key=lambda p: -(p.get('pop') or 0))
+                if not os.path.exists(os.path.join(ROOT, 'data', 'detail', p['slug'], 'index.json'))]
+        log(f'{len(args)} places without detail yet.')
+    failed = []
+    for s in args:
+        try:
+            build(s)
+        except Exception as e:   # one bad place should not stop the rest
+            log(f'{s}: FAILED: {e}')
+            failed.append(s)
+    if failed:
+        log('Failed: ' + ', '.join(failed))
