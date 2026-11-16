@@ -152,7 +152,16 @@ css += """
   .st-current i.erase { background: repeating-linear-gradient(45deg, var(--surface), var(--surface) 2px, var(--ink2) 2px, var(--ink2) 3px); }
   .st-item-t { display: grid; gap: 2px; } .st-item-t span { color: var(--ink2); font-size: 0.8125rem; }
   .st-carb { font-size: 0.75rem !important; color: var(--accent) !important; }
-  .st-carbon { display: block; padding: 8px 10px; border-radius: 10px; background: var(--bg); }
+  .st-bom { margin: 10px 0 4px; border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; background: var(--surface); }
+.st-bom summary { cursor: pointer; font-weight: 600; font-size: 0.95rem; }
+.st-bom-opts { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+.st-bom-opts [aria-checked="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.st-bom-note { font-size: 0.85rem; color: var(--ink2); margin: 6px 0; }
+.st-bom table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.st-bom th, .st-bom td { text-align: left; padding: 3px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.st-bom th:nth-child(n+2), .st-bom td:nth-child(n+2) { text-align: right; white-space: nowrap; }
+.st-bom tfoot td { font-weight: 700; border-bottom: 0; }
+.st-carbon { display: block; padding: 8px 10px; border-radius: 10px; background: var(--bg); }
   .st-price { font: 500 0.75rem var(--font-mono); color: var(--ink2); white-space: nowrap; }
   .st-current { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
   .st-current b { font-size: 1.0625rem; }

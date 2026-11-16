@@ -1,0 +1,1442 @@
+{
+ "version": 1,
+ "updated": "2026-11-15",
+ "about": "Installed US prices (2024–25 midpoints) and embodied carbon (A1–A5, kg CO2e) per unit. Labor and local materials follow the country price level; the rest is priced at world level. Carbon factors are typical values from the ICE database v3 (University of Bath and Circular Ecology), the EPA and published LCAs; costs from RSMeans-style unit rates and the studies listed in Studio.",
+ "materials": {
+  "demo": {
+   "name": "Demolition and haul-away",
+   "unit": "m² of footprint",
+   "usd": 65,
+   "kg": 60,
+   "local": 0.85
+  },
+  "excav": {
+   "name": "Excavation and grading",
+   "unit": "m³",
+   "usd": 15,
+   "kg": 5,
+   "local": 0.9
+  },
+  "haul": {
+   "name": "Hauling away spoil",
+   "unit": "m³",
+   "usd": 12,
+   "kg": 6,
+   "local": 0.9
+  },
+  "fill": {
+   "name": "Compacted clay fill",
+   "unit": "m³",
+   "usd": 35,
+   "kg": 8,
+   "local": 0.9
+  },
+  "sand": {
+   "name": "Sand fill",
+   "unit": "m³",
+   "usd": 30,
+   "kg": 7,
+   "local": 0.85
+  },
+  "topsoil": {
+   "name": "Topsoil and compost",
+   "unit": "m³",
+   "usd": 45,
+   "kg": 15,
+   "local": 0.8
+  },
+  "biosoil": {
+   "name": "Engineered bioretention soil",
+   "unit": "m³",
+   "usd": 80,
+   "kg": 12,
+   "local": 0.8
+  },
+  "concrete": {
+   "name": "Ready-mix concrete (C30/37)",
+   "unit": "m³",
+   "usd": 250,
+   "kg": 300,
+   "local": 0.6
+  },
+  "lcconc": {
+   "name": "Low-carbon concrete (50% slag or fly ash)",
+   "unit": "m³",
+   "usd": 265,
+   "kg": 180,
+   "local": 0.6
+  },
+  "rebar": {
+   "name": "Reinforcing steel",
+   "unit": "kg",
+   "usd": 2.2,
+   "kg": 1.99,
+   "local": 0.4
+  },
+  "steel": {
+   "name": "Structural steel",
+   "unit": "kg",
+   "usd": 3.5,
+   "kg": 1.55,
+   "local": 0.3
+  },
+  "sheetpile": {
+   "name": "Steel sheet piles",
+   "unit": "kg",
+   "usd": 3.2,
+   "kg": 1.55,
+   "local": 0.3
+  },
+  "deck": {
+   "name": "Steel floor decking",
+   "unit": "kg",
+   "usd": 3.0,
+   "kg": 2.4,
+   "local": 0.3
+  },
+  "formwork": {
+   "name": "Formwork",
+   "unit": "m²",
+   "usd": 45,
+   "kg": 3,
+   "local": 0.85
+  },
+  "clt": {
+   "name": "Cross-laminated timber (CLT)",
+   "unit": "m³",
+   "usd": 1100,
+   "kg": 150,
+   "local": 0.3
+  },
+  "timber": {
+   "name": "Sawn timber",
+   "unit": "m³",
+   "usd": 900,
+   "kg": 130,
+   "local": 0.4
+  },
+  "rock": {
+   "name": "Rock armor (quarried stone)",
+   "unit": "t",
+   "usd": 70,
+   "kg": 10,
+   "local": 0.7
+  },
+  "geotex": {
+   "name": "Geotextile",
+   "unit": "m²",
+   "usd": 4,
+   "kg": 1.5,
+   "local": 0.3
+  },
+  "liner": {
+   "name": "HDPE liner",
+   "unit": "m²",
+   "usd": 12,
+   "kg": 3,
+   "local": 0.3
+  },
+  "clayliner": {
+   "name": "Compacted clay liner",
+   "unit": "m³",
+   "usd": 35,
+   "kg": 8,
+   "local": 0.9
+  },
+  "pipe": {
+   "name": "Perforated underdrain pipe",
+   "unit": "m",
+   "usd": 30,
+   "kg": 3,
+   "local": 0.5
+  },
+  "outlet": {
+   "name": "Outlet and overflow structure (concrete)",
+   "unit": "each",
+   "usd": 15000,
+   "kg": 3000,
+   "local": 0.6
+  },
+  "paving": {
+   "name": "Concrete paving, 10 cm on gravel",
+   "unit": "m²",
+   "usd": 90,
+   "kg": 35,
+   "local": 0.6
+  },
+  "pavers": {
+   "name": "Permeable pavers on open-graded base",
+   "unit": "m²",
+   "usd": 110,
+   "kg": 30,
+   "local": 0.5
+  },
+  "gravel": {
+   "name": "Gravel path",
+   "unit": "m²",
+   "usd": 30,
+   "kg": 4,
+   "local": 0.8
+  },
+  "busway": {
+   "name": "Busway pavement, 25 cm concrete",
+   "unit": "m²",
+   "usd": 180,
+   "kg": 90,
+   "local": 0.6
+  },
+  "turf": {
+   "name": "Turf or lawn",
+   "unit": "m²",
+   "usd": 8,
+   "kg": 1,
+   "local": 0.7
+  },
+  "seed": {
+   "name": "Native seed mix, sown",
+   "unit": "m²",
+   "usd": 0.5,
+   "kg": 0.1,
+   "local": 0.7
+  },
+  "plugs": {
+   "name": "Perennials and grasses, plugs",
+   "unit": "plant",
+   "usd": 6,
+   "kg": 0.3,
+   "local": 0.7
+  },
+  "shrubs": {
+   "name": "Shrubs",
+   "unit": "plant",
+   "usd": 25,
+   "kg": 1.5,
+   "local": 0.7
+  },
+  "seedling": {
+   "name": "Native tree seedlings, planted",
+   "unit": "seedling",
+   "usd": 1.2,
+   "kg": 0.3,
+   "local": 0.8
+  },
+  "sapling": {
+   "name": "Young native trees, dense planting (3 per m²)",
+   "unit": "plant",
+   "usd": 9,
+   "kg": 0.5,
+   "local": 0.8
+  },
+  "marsh": {
+   "name": "Marsh plant plugs",
+   "unit": "plant",
+   "usd": 2,
+   "kg": 0.1,
+   "local": 0.7
+  },
+  "tree": {
+   "name": "Nursery tree, 5–8 cm trunk",
+   "unit": "tree",
+   "usd": 450,
+   "kg": 20,
+   "local": 0.6
+  },
+  "treepit": {
+   "name": "Tree pit, soil and planting labor",
+   "unit": "tree",
+   "usd": 1100,
+   "kg": 80,
+   "local": 0.85
+  },
+  "soilcell": {
+   "name": "Structural soil cells under paving",
+   "unit": "tree",
+   "usd": 2500,
+   "kg": 160,
+   "local": 0.5
+  },
+  "treecare": {
+   "name": "Stakes, guard and 3 years of watering",
+   "unit": "tree",
+   "usd": 500,
+   "kg": 15,
+   "local": 0.9
+  },
+  "irrig": {
+   "name": "Drip irrigation",
+   "unit": "m²",
+   "usd": 4,
+   "kg": 2,
+   "local": 0.5
+  },
+  "fence": {
+   "name": "Fencing",
+   "unit": "m",
+   "usd": 60,
+   "kg": 8,
+   "local": 0.6
+  },
+  "poly": {
+   "name": "Polycarbonate glazing",
+   "unit": "m²",
+   "usd": 30,
+   "kg": 11,
+   "local": 0.2
+  },
+  "membrane": {
+   "name": "Waterproof and root-barrier membrane",
+   "unit": "m²",
+   "usd": 30,
+   "kg": 6,
+   "local": 0.3
+  },
+  "drainmat": {
+   "name": "Drainage board",
+   "unit": "m²",
+   "usd": 12,
+   "kg": 3,
+   "local": 0.3
+  },
+  "substrate": {
+   "name": "Green-roof growing medium",
+   "unit": "m³",
+   "usd": 300,
+   "kg": 80,
+   "local": 0.5
+  },
+  "sedum": {
+   "name": "Sedum mats",
+   "unit": "m²",
+   "usd": 30,
+   "kg": 1,
+   "local": 0.6
+  },
+  "furnish": {
+   "name": "Benches, lights and bins",
+   "unit": "set",
+   "usd": 6000,
+   "kg": 400,
+   "local": 0.4
+  },
+  "facade": {
+   "name": "Facade: insulated walls and windows",
+   "unit": "m² of wall",
+   "usd": 550,
+   "kg": 90,
+   "local": 0.5
+  },
+  "roofing": {
+   "name": "Roof assembly",
+   "unit": "m²",
+   "usd": 250,
+   "kg": 50,
+   "local": 0.6
+  },
+  "mep": {
+   "name": "Mechanical, electrical and plumbing",
+   "unit": "m² of floor",
+   "usd": 650,
+   "kg": 70,
+   "local": 0.5
+  },
+  "fitout": {
+   "name": "Interior finishes",
+   "unit": "m² of floor",
+   "usd": 350,
+   "kg": 60,
+   "local": 0.7
+  },
+  "pv": {
+   "name": "Solar modules",
+   "unit": "kW",
+   "usd": 300,
+   "kg": 900,
+   "local": 0.1
+  },
+  "inverter": {
+   "name": "Inverters and wiring",
+   "unit": "kW",
+   "usd": 400,
+   "kg": 150,
+   "local": 0.3
+  },
+  "racking": {
+   "name": "Aluminum mounting racks",
+   "unit": "kW",
+   "usd": 250,
+   "kg": 120,
+   "local": 0.3
+  },
+  "ebus": {
+   "name": "Electric articulated bus",
+   "unit": "bus",
+   "usd": 1200000.0,
+   "kg": 120000,
+   "local": 0.2
+  },
+  "dbus": {
+   "name": "Diesel articulated bus",
+   "unit": "bus",
+   "usd": 750000.0,
+   "kg": 60000,
+   "local": 0.2
+  },
+  "station": {
+   "name": "Station: platforms, shelters, ramps",
+   "unit": "station",
+   "usd": 1500000.0,
+   "kg": 300000,
+   "local": 0.6
+  },
+  "signals": {
+   "name": "Signals, fare and information systems",
+   "unit": "km",
+   "usd": 1000000.0,
+   "kg": 50000,
+   "local": 0.4
+  },
+  "utilities": {
+   "name": "Moving utilities and rebuilding the street",
+   "unit": "km",
+   "usd": 2500000.0,
+   "kg": 400000,
+   "local": 0.8
+  },
+  "control": {
+   "name": "Water-control structures",
+   "unit": "each",
+   "usd": 5000,
+   "kg": 1000,
+   "local": 0.6
+  },
+  "labor": {
+   "name": "Skilled labor",
+   "unit": "hour",
+   "usd": 55,
+   "kg": 0,
+   "local": 1.0
+  },
+  "soft": {
+   "name": "Design, permits and contractor overheads",
+   "unit": "US$ of work",
+   "usd": 1,
+   "kg": 0.02,
+   "local": 0.9
+  },
+  "sitework": {
+   "name": "Site works: utilities, dewatering, access, permits and design",
+   "unit": "US$ of work",
+   "usd": 1,
+   "kg": 0.05,
+   "local": 0.9
+  }
+ },
+ "recipes": {
+  "farmblock": {
+   "unit": "m²",
+   "show": 1000,
+   "opts": [
+    {
+     "id": "raised",
+     "name": "Raised beds",
+     "note": "Imported soil in timber beds. Works on any ground, including old parking lots.",
+     "lines": [
+      {
+       "m": "topsoil",
+       "q": 0.3
+      },
+      {
+       "m": "timber",
+       "q": 0.01
+      },
+      {
+       "m": "irrig",
+       "q": 1
+      },
+      {
+       "m": "fence",
+       "q": 0.1
+      }
+     ]
+    },
+    {
+     "id": "inground",
+     "name": "In-ground beds",
+     "note": "Cheaper, where the soil underneath is clean and tested.",
+     "lines": [
+      {
+       "m": "topsoil",
+       "q": 0.05
+      },
+      {
+       "m": "irrig",
+       "q": 1
+      },
+      {
+       "m": "fence",
+       "q": 0.1
+      },
+      {
+       "m": "labor",
+       "q": 0.05
+      }
+     ]
+    },
+    {
+     "id": "greenhouse",
+     "name": "Greenhouse",
+     "note": "Year-round growing: more food per m², more cost and more carbon to build.",
+     "lines": [
+      {
+       "m": "topsoil",
+       "q": 0.3
+      },
+      {
+       "m": "timber",
+       "q": 0.01
+      },
+      {
+       "m": "irrig",
+       "q": 1
+      },
+      {
+       "m": "fence",
+       "q": 0.1
+      },
+      {
+       "m": "steel",
+       "q": 4
+      },
+      {
+       "m": "poly",
+       "q": 1.3
+      },
+      {
+       "m": "concrete",
+       "q": 0.02
+      },
+      {
+       "m": "labor",
+       "q": 0.3
+      }
+     ]
+    }
+   ]
+  },
+  "urbanfarm": {
+   "unit": "m²",
+   "show": 1000,
+   "opts": [
+    {
+     "id": "raised",
+     "name": "Raised beds",
+     "note": "Plots on roofs and vacant corners.",
+     "lines": [
+      {
+       "m": "topsoil",
+       "q": 0.3
+      },
+      {
+       "m": "timber",
+       "q": 0.01
+      },
+      {
+       "m": "irrig",
+       "q": 1
+      },
+      {
+       "m": "fence",
+       "q": 0.1
+      }
+     ]
+    }
+   ]
+  },
+  "park": {
+   "unit": "m²",
+   "show": 1000,
+   "opts": [
+    {
+     "id": "standard",
+     "name": "Standard park",
+     "note": "Lawn, shrubs, a tree every 150 m², paths and benches.",
+     "lines": [
+      {
+       "m": "topsoil",
+       "q": 0.15
+      },
+      {
+       "m": "turf",
+       "q": 0.5
+      },
+      {
+       "m": "shrubs",
+       "q": 0.1
+      },
+      {
+       "m": "tree",
+       "q": 0.006666666666666667
+      },
+      {
+       "m": "treepit",
+       "q": 0.006666666666666667
+      },
+      {
+       "m": "paving",
+       "q": 0.12
+      },
+      {
+       "m": "irrig",
+       "q": 0.6
+      },
+      {
+       "m": "furnish",
+       "q": 0.001
+      }
+     ]
+    },
+    {
+     "id": "meadow",
+     "name": "Meadow park",
+     "note": "Native meadow and gravel paths: cheap, little watering or mowing, good for pollinators.",
+     "lines": [
+      {
+       "m": "topsoil",
+       "q": 0.05
+      },
+      {
+       "m": "seed",
+       "q": 0.8
+      },
+      {
+       "m": "tree",
+       "q": 0.005
+      },
+      {
+       "m": "treepit",
+       "q": 0.005
+      },
+      {
+       "m": "gravel",
+       "q": 0.08
+      },
+      {
+       "m": "furnish",
+       "q": 0.0005
+      }
+     ]
+    },
+    {
+     "id": "plaza",
+     "name": "Tree plaza",
+     "note": "Paved square with dense trees in soil cells: lots of shade, more concrete.",
+     "lines": [
+      {
+       "m": "pavers",
+       "q": 0.5
+      },
+      {
+       "m": "tree",
+       "q": 0.0125
+      },
+      {
+       "m": "soilcell",
+       "q": 0.0125
+      },
+      {
+       "m": "treecare",
+       "q": 0.0125
+      },
+      {
+       "m": "furnish",
+       "q": 0.002
+      }
+     ]
+    }
+   ]
+  },
+  "trees": {
+   "unit": "tree",
+   "show": 10,
+   "opts": [
+    {
+     "id": "pit",
+     "name": "Standard tree pit",
+     "note": "One tree every 10 m in an open pit.",
+     "lines": [
+      {
+       "m": "tree",
+       "q": 1
+      },
+      {
+       "m": "treepit",
+       "q": 1
+      },
+      {
+       "m": "treecare",
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": "cells",
+     "name": "Soil cells under the sidewalk",
+     "note": "Roots get room under the paving, so trees grow bigger and live longer.",
+     "lines": [
+      {
+       "m": "tree",
+       "q": 1
+      },
+      {
+       "m": "soilcell",
+       "q": 1
+      },
+      {
+       "m": "treecare",
+       "q": 1
+      }
+     ]
+    }
+   ]
+  },
+  "roof": {
+   "unit": "m²",
+   "show": 1000,
+   "opts": [
+    {
+     "id": "extensive",
+     "name": "Sedum roof (light)",
+     "note": "Thin, light and low-care. Fits most existing roofs.",
+     "lines": [
+      {
+       "m": "membrane",
+       "q": 1
+      },
+      {
+       "m": "drainmat",
+       "q": 1
+      },
+      {
+       "m": "substrate",
+       "q": 0.1
+      },
+      {
+       "m": "sedum",
+       "q": 1
+      },
+      {
+       "m": "labor",
+       "q": 0.38
+      }
+     ]
+    },
+    {
+     "id": "intensive",
+     "name": "Roof garden (deep)",
+     "note": "Deep soil, shrubs and paths. Needs a stronger roof.",
+     "lines": [
+      {
+       "m": "membrane",
+       "q": 1
+      },
+      {
+       "m": "drainmat",
+       "q": 1
+      },
+      {
+       "m": "substrate",
+       "q": 0.3
+      },
+      {
+       "m": "shrubs",
+       "q": 1.5
+      },
+      {
+       "m": "irrig",
+       "q": 1
+      },
+      {
+       "m": "steel",
+       "q": 10
+      },
+      {
+       "m": "labor",
+       "q": 0.8
+      }
+     ]
+    }
+   ]
+  },
+  "raingarden": {
+   "unit": "m²",
+   "show": 100,
+   "opts": [
+    {
+     "id": "standard",
+     "name": "Rain garden",
+     "note": "A planted dip with fast-draining soil.",
+     "lines": [
+      {
+       "m": "excav",
+       "q": 0.5
+      },
+      {
+       "m": "biosoil",
+       "q": 0.25
+      },
+      {
+       "m": "plugs",
+       "q": 2
+      },
+      {
+       "m": "pipe",
+       "q": 0.1
+      }
+     ]
+    },
+    {
+     "id": "bioswale",
+     "name": "Street bioswale with curb cuts",
+     "note": "Along a curb, taking runoff straight off the street.",
+     "lines": [
+      {
+       "m": "excav",
+       "q": 0.7
+      },
+      {
+       "m": "biosoil",
+       "q": 0.4
+      },
+      {
+       "m": "plugs",
+       "q": 2.5
+      },
+      {
+       "m": "pipe",
+       "q": 0.3
+      },
+      {
+       "m": "concrete",
+       "q": 0.03
+      },
+      {
+       "m": "labor",
+       "q": 0.2
+      }
+     ]
+    }
+   ]
+  },
+  "pond": {
+   "unit": "m²",
+   "show": 1000,
+   "opts": [
+    {
+     "id": "clay",
+     "name": "Clay-lined pond, 2 m deep",
+     "note": "Dug out and sealed with local clay.",
+     "lines": [
+      {
+       "m": "excav",
+       "q": 2
+      },
+      {
+       "m": "haul",
+       "q": 2
+      },
+      {
+       "m": "clayliner",
+       "q": 0.3
+      },
+      {
+       "m": "marsh",
+       "q": 0.5
+      },
+      {
+       "m": "outlet",
+       "q": 0.0005
+      },
+      {
+       "m": "soft",
+       "q": 25
+      }
+     ]
+    },
+    {
+     "id": "liner",
+     "name": "Lined pond, 2 m deep",
+     "note": "Plastic liner where the ground leaks.",
+     "lines": [
+      {
+       "m": "excav",
+       "q": 2
+      },
+      {
+       "m": "haul",
+       "q": 2
+      },
+      {
+       "m": "liner",
+       "q": 1.2
+      },
+      {
+       "m": "geotex",
+       "q": 1.2
+      },
+      {
+       "m": "marsh",
+       "q": 0.5
+      },
+      {
+       "m": "outlet",
+       "q": 0.0005
+      },
+      {
+       "m": "soft",
+       "q": 25
+      }
+     ]
+    }
+   ]
+  },
+  "wetland": {
+   "unit": "ha",
+   "show": 1,
+   "opts": [
+    {
+     "id": "restored",
+     "name": "Restored marsh",
+     "note": "Regrade, block drains and plant.",
+     "lines": [
+      {
+       "m": "excav",
+       "q": 2000
+      },
+      {
+       "m": "marsh",
+       "q": 5000
+      },
+      {
+       "m": "control",
+       "q": 1
+      },
+      {
+       "m": "labor",
+       "q": 130
+      }
+     ]
+    },
+    {
+     "id": "treatment",
+     "name": "Constructed treatment wetland",
+     "note": "Cleans runoff or wastewater: lined cells, pipes and control structures.",
+     "lines": [
+      {
+       "m": "excav",
+       "q": 6000
+      },
+      {
+       "m": "clayliner",
+       "q": 1500
+      },
+      {
+       "m": "marsh",
+       "q": 20000
+      },
+      {
+       "m": "control",
+       "q": 4
+      },
+      {
+       "m": "pipe",
+       "q": 400
+      },
+      {
+       "m": "labor",
+       "q": 400
+      }
+     ]
+    }
+   ]
+  },
+  "forest": {
+   "unit": "ha",
+   "show": 1,
+   "opts": [
+    {
+     "id": "seedlings",
+     "name": "Native seedlings",
+     "note": "About 1,100 seedlings a hectare.",
+     "lines": [
+      {
+       "m": "seedling",
+       "q": 1100
+      },
+      {
+       "m": "excav",
+       "q": 20
+      },
+      {
+       "m": "labor",
+       "q": 4
+      }
+     ]
+    },
+    {
+     "id": "tiny",
+     "name": "Dense \"tiny forest\" planting",
+     "note": "Three young trees per m² in enriched soil (the Miyawaki method). Grows fast, costs far more.",
+     "lines": [
+      {
+       "m": "sapling",
+       "q": 30000
+      },
+      {
+       "m": "topsoil",
+       "q": 1500
+      },
+      {
+       "m": "labor",
+       "q": 1200
+      }
+     ]
+    }
+   ]
+  },
+  "corridor": {
+   "unit": "ha",
+   "show": 1,
+   "opts": [
+    {
+     "id": "seedlings",
+     "name": "Native seedlings",
+     "note": "A 30 m strip of native planting.",
+     "lines": [
+      {
+       "m": "seedling",
+       "q": 1100
+      },
+      {
+       "m": "excav",
+       "q": 20
+      },
+      {
+       "m": "labor",
+       "q": 4
+      }
+     ]
+    }
+   ]
+  },
+  "seawall": {
+   "unit": "m",
+   "show": 100,
+   "heightDriven": true,
+   "opts": [
+    {
+     "id": "wall",
+     "name": "Concrete flood wall",
+     "note": "Narrow, so it fits along streets and waterfronts. On steel sheet piles.",
+     "protect": 1,
+     "lines": [
+      {
+       "m": "concrete",
+       "q1": 0.4,
+       "q2": 0.15
+      },
+      {
+       "m": "rebar",
+       "q1": 48,
+       "q2": 18
+      },
+      {
+       "m": "formwork",
+       "q1": 2.2
+      },
+      {
+       "m": "sheetpile",
+       "q": 720,
+       "q1": 120
+      },
+      {
+       "m": "excav",
+       "q": 1,
+       "q1": 0.8
+      },
+      {
+       "m": "sitework",
+       "q1": 12900
+      }
+     ]
+    },
+    {
+     "id": "levee",
+     "name": "Earth levee with rock armor",
+     "note": "Cheaper and lower-carbon, but wide: about 4 m plus 6 m for every meter of height.",
+     "protect": 1,
+     "lines": [
+      {
+       "m": "fill",
+       "q1": 4,
+       "q2": 3
+      },
+      {
+       "m": "rock",
+       "q1": 5
+      },
+      {
+       "m": "geotex",
+       "q1": 6.3
+      },
+      {
+       "m": "topsoil",
+       "q1": 0.5
+      },
+      {
+       "m": "seed",
+       "q1": 3.2
+      },
+      {
+       "m": "sitework",
+       "q1": 3500
+      }
+     ]
+    },
+    {
+     "id": "living",
+     "name": "Living shoreline (marsh and rock sill)",
+     "note": "A low rock sill with marsh behind it. Calms waves and grows with the sea, but protects less in big storms.",
+     "protect": 0.6,
+     "lines": [
+      {
+       "m": "rock",
+       "q": 2,
+       "q1": 1
+      },
+      {
+       "m": "sand",
+       "q1": 3
+      },
+      {
+       "m": "marsh",
+       "q1": 20
+      },
+      {
+       "m": "geotex",
+       "q1": 4
+      },
+      {
+       "m": "sitework",
+       "q1": 2000
+      }
+     ]
+    }
+   ]
+  },
+  "build": {
+   "unit": "m² of floor",
+   "show": 1000,
+   "floorsDriven": true,
+   "opts": [
+    {
+     "id": "concrete",
+     "name": "Concrete frame",
+     "note": "The usual mid-rise build.",
+     "lines": [
+      {
+       "m": "concrete",
+       "q": 0.4,
+       "fp": 0.6
+      },
+      {
+       "m": "rebar",
+       "q": 40,
+       "fp": 60
+      },
+      {
+       "m": "formwork",
+       "q": 1.8
+      },
+      {
+       "m": "facade",
+       "q": 0.45
+      },
+      {
+       "m": "mep",
+       "q": 1
+      },
+      {
+       "m": "fitout",
+       "q": 1
+      },
+      {
+       "m": "roofing",
+       "fp": 1
+      },
+      {
+       "m": "soft",
+       "q": 820
+      }
+     ]
+    },
+    {
+     "id": "lowcarbon",
+     "name": "Low-carbon concrete frame",
+     "note": "Same frame with half the cement swapped for slag or fly ash.",
+     "lines": [
+      {
+       "m": "lcconc",
+       "q": 0.4,
+       "fp": 0.6
+      },
+      {
+       "m": "rebar",
+       "q": 40,
+       "fp": 60
+      },
+      {
+       "m": "formwork",
+       "q": 1.8
+      },
+      {
+       "m": "facade",
+       "q": 0.45
+      },
+      {
+       "m": "mep",
+       "q": 1
+      },
+      {
+       "m": "fitout",
+       "q": 1
+      },
+      {
+       "m": "roofing",
+       "fp": 1
+      },
+      {
+       "m": "soft",
+       "q": 820
+      }
+     ]
+    },
+    {
+     "id": "timber",
+     "name": "Mass timber",
+     "note": "CLT floors and walls on a concrete base. Lighter and lower-carbon; the wood also stores carbon, not counted here.",
+     "lines": [
+      {
+       "m": "clt",
+       "q": 0.25
+      },
+      {
+       "m": "concrete",
+       "q": 0.08,
+       "fp": 0.6
+      },
+      {
+       "m": "rebar",
+       "q": 8,
+       "fp": 60
+      },
+      {
+       "m": "steel",
+       "q": 5
+      },
+      {
+       "m": "facade",
+       "q": 0.45
+      },
+      {
+       "m": "mep",
+       "q": 1
+      },
+      {
+       "m": "fitout",
+       "q": 1
+      },
+      {
+       "m": "roofing",
+       "fp": 1
+      },
+      {
+       "m": "soft",
+       "q": 780
+      }
+     ]
+    },
+    {
+     "id": "steel",
+     "name": "Steel frame",
+     "note": "Steel beams and columns with concrete on steel decking.",
+     "lines": [
+      {
+       "m": "steel",
+       "q": 45
+      },
+      {
+       "m": "deck",
+       "q": 12
+      },
+      {
+       "m": "concrete",
+       "q": 0.12,
+       "fp": 0.6
+      },
+      {
+       "m": "rebar",
+       "q": 8,
+       "fp": 60
+      },
+      {
+       "m": "facade",
+       "q": 0.45
+      },
+      {
+       "m": "mep",
+       "q": 1
+      },
+      {
+       "m": "fitout",
+       "q": 1
+      },
+      {
+       "m": "roofing",
+       "fp": 1
+      },
+      {
+       "m": "soft",
+       "q": 800
+      }
+     ]
+    }
+   ]
+  },
+  "solar": {
+   "unit": "kW",
+   "show": 100,
+   "opts": [
+    {
+     "id": "roof",
+     "name": "Rooftop panels",
+     "note": "About 0.18 kW per m² of roof.",
+     "lines": [
+      {
+       "m": "pv",
+       "q": 1
+      },
+      {
+       "m": "inverter",
+       "q": 1
+      },
+      {
+       "m": "racking",
+       "q": 1
+      },
+      {
+       "m": "labor",
+       "q": 36
+      }
+     ]
+    },
+    {
+     "id": "canopy",
+     "name": "Solar canopy over parking",
+     "note": "Shades cars too; needs steel frames and footings.",
+     "lines": [
+      {
+       "m": "pv",
+       "q": 1
+      },
+      {
+       "m": "inverter",
+       "q": 1
+      },
+      {
+       "m": "steel",
+       "q": 60
+      },
+      {
+       "m": "concrete",
+       "q": 0.15
+      },
+      {
+       "m": "labor",
+       "q": 45
+      }
+     ]
+    }
+   ]
+  },
+  "transit": {
+   "unit": "km",
+   "show": 1,
+   "opts": [
+    {
+     "id": "electric",
+     "name": "Bus rapid transit, electric buses",
+     "note": "Two dedicated lanes, a station every 500 m, three buses per km.",
+     "yr": 1,
+     "lines": [
+      {
+       "m": "busway",
+       "q": 7000
+      },
+      {
+       "m": "station",
+       "q": 2
+      },
+      {
+       "m": "ebus",
+       "q": 3
+      },
+      {
+       "m": "signals",
+       "q": 1
+      },
+      {
+       "m": "utilities",
+       "q": 1
+      },
+      {
+       "m": "soft",
+       "q": 1500000.0
+      }
+     ]
+    },
+    {
+     "id": "diesel",
+     "name": "Bus rapid transit, diesel buses",
+     "note": "Cheaper buses; saves less carbon each year.",
+     "yr": 0.6,
+     "lines": [
+      {
+       "m": "busway",
+       "q": 7000
+      },
+      {
+       "m": "station",
+       "q": 2
+      },
+      {
+       "m": "dbus",
+       "q": 3
+      },
+      {
+       "m": "signals",
+       "q": 1
+      },
+      {
+       "m": "utilities",
+       "q": 1
+      },
+      {
+       "m": "soft",
+       "q": 1500000.0
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

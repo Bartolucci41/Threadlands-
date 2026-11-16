@@ -120,6 +120,12 @@
         <label for="st-floors" id="st-floors-l">Floors</label><input id="st-floors" type="number" min="1" max="80" step="1" value="6">
         <label for="st-wallh" id="st-wallh-l">Height (m)</label><input id="st-wallh" type="number" min="0.5" max="12" step="0.5" value="2">
       </div>
+      <details class="st-bom" id="st-bom" hidden>
+        <summary>What goes into it</summary>
+        <div class="st-bom-opts" id="st-bom-opts" role="radiogroup" aria-label="How it is built"></div>
+        <p class="st-bom-note" id="st-bom-note"></p>
+        <div class="st-bom-tbl" id="st-bom-tbl"></div>
+      </details>
 
       <h2 class="st-h">Budget</h2>
       <div class="st-budget">
@@ -138,7 +144,7 @@
       <h2 class="st-h">Your design</h2>
       <div id="st-design" class="st-extra"></div>
 
-      <p style="margin:0 0 6px"><button type="button" class="chip" id="st-gis">Download design for GIS</button></p>
+      <p style="margin:0 0 6px"><button type="button" class="chip" id="st-gis">Download design for GIS</button> <button type="button" class="chip" id="st-bomdl">Download bill of materials</button></p>
       <p class="hint" style="margin:0 0 14px">A GeoJSON file of every element you placed, with its size, cost and settings, ready for QGIS or ArcGIS.</p>
 
       <div id="st-board" hidden>
@@ -225,12 +231,12 @@
     'Sea walls and levees: about US$15 million per km for each meter of height, the middle of published ranges for building and raising flood defenses (Jonkman and others, Ocean & Coastal Management, 2013); upkeep about 1% of the cost a year. Protection grows with height, up to 85% of the flood risk behind the wall.',
     'Solar roofs: US$1.80 to $4.10 per watt installed in 2023 (Lawrence Berkeley National Laboratory). About 0.18 kW per m² of panels; yearly output estimated from latitude.',
     'Carbon: trees store about 0.75 kg of CO\u2082 per m\u00b2 of canopy a year, net of losses (Nowak and others, i-Tree, 2013), about 37 kg for a grown street tree. Upfront carbon of new buildings about 600 kg per m\u00b2 of floor, between the LETI 2020 target and typical practice. Reinforced concrete about 300 kg per m\u00b3, a typical value in embodied-carbon inventories such as the ICE database. Rooftop solar about 41 g per kWh over its life (IPCC AR5 median), set against the country\u2019s electricity mix from Ember via Our World in Data, refreshed monthly (world average 458 g per kWh in 2025). Young forest about 7 t of CO\u2082 per hectare a year (IPCC default growth rates), restored wetlands about 1.5 t net of methane, regenerative farms about 0.5 t in soil. Transit assumes a conservative 1,000 t a year saved per km of bus rapid transit. These are screening estimates; live product data (EC3) is planned.',
-    'Every cost is scaled to the place: about 70% follows the country’s price level (World Bank), 30% stays at world prices for materials.',
+    'What goes into it: every element is priced from a list of materials and work (data/materials.json), with installed US unit prices and embodied carbon per unit, cradle to construction (A1 to A5), from the ICE database v3 (University of Bath and Circular Ecology), EPA and published life-cycle studies. Labor and local materials such as soil, gravel and concrete follow the country’s price level (World Bank); imported items such as steel, solar panels and buses stay near world prices. So a building in Bangkok costs less than one in San Francisco, but not in proportion to wages. Other costs: about 70% follows the country’s price level, 30% stays at world prices.',
     'Buildings, lots, parks and streets at street level, and the streets background: © OpenStreetMap contributors, through the Overpass API; satellite imagery from Esri World Imagery (Maxar, Earthstar Geographics) through ArcGIS Location Platform, with Sentinel-2 cloudless by EOX as a backup. Effects run through the same Threadlands model as the Explore page, and the climate warms step by step toward the middle-path 2050 scenario.'
   ];
   $('#st-sources').innerHTML = SOURCES.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('');
 
-  var S = { teams: [], team: null, itemTeam: new Map(), P: null, slug: null, tool: 'farmblock', shape: 'pick', floors: 6, wallH: 2, view3d: false, show: 'land', items: new Map(), feats: [], history: [], year: 2026, budget: 0, F: 1,
+  var S = { mix: {}, itemMix: new Map(), teams: [], team: null, itemTeam: new Map(), P: null, slug: null, tool: 'farmblock', shape: 'pick', floors: 6, wallH: 2, view3d: false, show: 'land', items: new Map(), feats: [], history: [], year: 2026, budget: 0, F: 1,
     pl: null, PRICES: null, base: null, basemap: 'streets', nextId: 1 };
   var cv = $('#st-canvas'), ctx = cv.getContext('2d'), view = null;
 
@@ -329,7 +335,7 @@
     return true;
   }
   // Size and US cost of one whole-hex placement
-  function hexQty(kind, i) {
+  function hexQty0(kind, i) {
     var h = hexInfo(i), A = h.area * 1e6;
     switch (kind) {
       case 'farmblock': return { label: area(A) + ' farmed', cost: A * (32 + CLEAR * h.built), up: 0, farmM2: A };
@@ -409,7 +415,7 @@
     }
   }
   // Size and US cost of a drawn feature
-  function featQty(f) {
+  function featQty0(f) {
     var A = f.size, h = f.alloc.length ? hexInfo(f.alloc[0][0]) : { built: 0.5, yield: 1300 }, built = 0;
     f.alloc.forEach(function (e) { built += hexInfo(e[0]).built * e[1]; });
     built = f.size ? built / f.size : h.built;
@@ -431,6 +437,66 @@
         return { label: (km >= 1 ? km.toFixed(1) + ' km' : num(A) + ' m') + ' of wall, ' + hh + ' m high', cost: km * hh * 15e6, up: km * hh * 15e6 * 0.01 }; }
     }
     return { label: '', cost: 0, up: 0 };
+  }
+
+
+  // ---- What goes into each element: materials, quantities, cost and carbon (data/materials.json)
+  var MAT = null;
+  function recipe(kind) { return MAT && MAT.recipes[kind]; }
+  function optOf(kind, id) { var r = recipe(kind); if (!r) return null; for (var n = 0; n < r.opts.length; n++) if (r.opts[n].id === id) return r.opts[n]; return r.opts[0]; }
+  function lineQty(l, h, fl) { return (l.q || 0) + (l.q1 || 0) * h + (l.q2 || 0) * h * h + (l.fp || 0) / Math.max(1, fl); }
+  function unitPrice(m) { var pl = S.pl ? S.pl.factor : 1; return m.usd * (m.local * pl + 1 - m.local); }
+  // Local cost and carbon of `units` of an element, plus clearing `clearM2` of existing buildings
+  function bom(kind, mix, units, h, fl, clearM2) {
+    var o = optOf(kind, mix); if (!o) return null;
+    var out = { opt: o, usd: 0, kg: 0, lines: [] };
+    function push(id, q) { var m = MAT.materials[id]; if (!m || !(q > 0)) return; var u = q * unitPrice(m), k = q * m.kg; out.lines.push({ id: id, name: m.name, unit: m.unit, qty: q, usd: u, kg: k }); out.usd += u; out.kg += k; }
+    if (clearM2 > 0) push('demo', clearM2);
+    o.lines.forEach(function (l) { push(l.m, lineQty(l, h || 2, fl || 6) * units); });
+    return out;
+  }
+  function withBom(q, kind, mix, units, h, fl, clearM2) {
+    var b = recipe(kind) ? bom(kind, mix, units, h, fl, clearM2) : null;
+    if (b) { q.bom = b; q.cost = b.usd / (S.F || 1); }   // stored before the S.F display scaling, so the rest of Studio stays unchanged
+    return q;
+  }
+  function hexQty(kind, i) {
+    var q = hexQty0(kind, i); if (!recipe(kind)) return q;
+    var h = hexInfo(i), A = h.area * 1e6, mix = S.itemMix.get(i), u;
+    switch (kind) {
+      case 'farmblock': case 'park': u = A; break;
+      case 'urbanfarm': u = 0.02 * A; break;
+      case 'trees': u = q.trees; break;
+      case 'roof': u = 0.1 * h.built * A; break;
+      case 'raingarden': u = 0.01 * A; break;
+      case 'pond': u = 0.1 * A; break;
+      case 'wetland': case 'forest': case 'corridor': u = A / 1e4; break;
+      case 'transit': u = 1.07 * Math.sqrt(h.area); break;
+      case 'solar': u = 0.1 * h.built * A * 0.18; break;
+      default: return q;
+    }
+    return withBom(q, kind, mix, u, 2, 6, (kind === 'farmblock' || kind === 'park') ? A * h.built : 0);
+  }
+  function featQty(f) {
+    var q = featQty0(f); if (!recipe(f.kind)) return q;
+    var A = f.size, fl = f.floors || 6, u, clr = 0;
+    switch (f.kind) {
+      case 'farmblock': case 'park': case 'roof': case 'raingarden': case 'pond': u = A; break;
+      case 'trees': u = A / 10; break;
+      case 'corridor': u = A * 30 / 1e4; break;
+      case 'build': u = A * fl; break;
+      case 'seawall': u = A; break;
+      case 'solar': u = A * 0.18; break;
+      case 'transit': u = A / 1000; break;
+      default: return q;
+    }
+    if (f.kind === 'farmblock' || f.kind === 'park' || f.kind === 'build') {
+      // the share of the site covered by buildings today, as featQty0 worked it out
+      var b0 = 0; f.alloc && f.alloc.forEach(function (e) { b0 += hexInfo(e[0]).built * e[1]; });
+      b0 = f.size && f.alloc && f.alloc.length ? b0 / f.size : 0.5; if (f.clear != null) b0 = f.clear;
+      clr = A * b0;
+    }
+    return withBom(q, f.kind, f.mix, u, f.height || 2, fl, clr);
   }
 
   // ---- Carbon over the life of each element (kg CO2e). Building it costs carbon once; growing or generating saves some every year.
@@ -499,7 +565,7 @@
         return;
       }
       if (f.kind === 'seawall') {
-        var pr = Math.min(0.85, 0.3 * (f.height || 2));
+        var po = optOf('seawall', f.mix), pr = Math.min(0.85, 0.3 * (f.height || 2)) * (po && po.protect != null ? po.protect : 1);
         (f.prot || []).forEach(function (i) { add(i, { kind: 'levee', m: m, share: 1, protect: pr }); });
         return;
       }
@@ -977,6 +1043,12 @@
   };
   function priceHint(k) {
     var f = S.F || 1, d = function (v) { return money(v * f); };
+    var r = recipe(k);
+    if (r) {
+      var o = optOf(k, S.mix[k]), b = bom(k, o.id, 1, S.wallH, S.floors, 0), c = exact(b.usd);
+      return ({ seawall: c + '/m at ' + S.wallH + ' m high', build: c + '/m² of floor', trees: c + ' a tree', solar: '$' + (b.usd / 1000).toFixed(2) + '/W', transit: c + '/km',
+        wetland: c + '/ha', forest: c + '/ha', corridor: c + '/ha' })[k] || c + '/m²' + ((k === 'farmblock' || k === 'park') ? ' + clearing' : '');
+    }
     return ({ farmblock: d(32) + '/m² + clearing', urbanfarm: d(32) + '/m²', regen: d(90) + '/ha a year', trees: d(2050) + ' a tree',
       park: d(38) + '/m² + clearing', roof: d(123) + '/m²', raingarden: d(38) + '/m²', pond: 'by volume', wetland: d(52000) + '/ha',
       seawall: d(15e6) + '/km per m high', forest: d(1600) + '/ha', corridor: d(1600) + '/ha', build: d(2500) + '/m² of floor',
@@ -1020,18 +1092,63 @@
     $('#st-cur-dot').style.background = c ? 'var(' + c.color + ')' : '';
     $('#st-cur-dot').className = c ? '' : 'erase';
     $('#st-cur-price').textContent = c ? priceHint(t) : '';
+    if (MAT) renderBom();
     $('#st-tooldesc').textContent = c ? c.desc : 'Click any placed element or shape to remove it.';
     if (view) modeChanged(); else hint();
     if (S.P) draw();
   }
+
+  // ---- "What goes into it" for the element being placed
+  function fmtQty(q) { return q >= 100 ? num(q) : q >= 10 ? q.toFixed(0) : q >= 1 ? q.toFixed(1) : q.toFixed(2); }
+  function tco2(kg) { return kg < 1000 ? num(kg) + ' kg' : kg < 10000 ? (kg / 1000).toFixed(1) + ' t' : num(kg / 1000) + ' t'; }
+  function exact(v) { return v < 10 ? '$' + v.toFixed(2) : v < 1e5 ? '$' + Math.round(v).toLocaleString('en-US') : money(v); }
+  function renderBom() {
+    var box = $('#st-bom'), r = recipe(S.tool);
+    if (!r) { box.hidden = true; return; }
+    box.hidden = false;
+    var cur = optOf(S.tool, S.mix[S.tool]);
+    $('#st-bom-opts').innerHTML = r.opts.length > 1 ? r.opts.map(function (o) { return '<button type="button" class="chip" role="radio" aria-checked="' + (o === cur) + '" data-mix="' + o.id + '">' + esc(o.name) + '</button>'; }).join('') : '';
+    var u = r.show, fl = S.floors, h = S.wallH, what;
+    switch (S.tool) {
+      case 'seawall': what = '100 m of wall, ' + h + ' m high'; break;
+      case 'build': what = '1,000 m² of floor space (' + fl + ' floors)'; break;
+      case 'trees': what = '10 trees'; break;
+      case 'solar': what = '100 kW'; break;
+      case 'transit': what = '1 km of line'; break;
+      default: what = r.unit === 'ha' ? '1 hectare' : num(u) + ' m²';
+    }
+    var b = bom(S.tool, cur.id, u, h, fl, 0);
+    $('#st-bom-note').textContent = cur.note + ' For ' + what + ' at ' + (S.pl ? S.pl.name : 'US') + ' prices:';
+    $('#st-bom-tbl').innerHTML = '<table><thead><tr><th>Material or work</th><th>Amount</th><th>Cost</th><th>CO₂</th></tr></thead><tbody>' +
+      b.lines.map(function (l) { return '<tr><td>' + esc(l.name) + '</td><td>' + (l.unit.indexOf('US$') === 0 ? '' : fmtQty(l.qty) + ' ' + esc(l.unit)) + '</td><td>' + money(l.usd) + '</td><td>' + tco2(l.kg) + '</td></tr>'; }).join('') +
+      '</tbody><tfoot><tr><td>Total</td><td></td><td>' + money(b.usd) + '</td><td>' + tco2(b.kg) + '</td></tr></tfoot></table>' +
+      ((S.tool === 'farmblock' || S.tool === 'park' || S.tool === 'build') ? '<p class="st-bom-note">Plus clearing whatever stands on the site now, about ' + money(unitPrice(MAT.materials.demo)) + ' per m² of building.</p>' : '');
+  }
+  $('#st-bom-opts').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-mix]'); if (!b) return;
+    S.mix[S.tool] = b.dataset.mix; renderBom(); $('#st-cur-price').textContent = priceHint(S.tool); draw();
+  });
+  function downloadBom() {
+    var T = totals(), ids = Object.keys(T.bom);
+    if (!ids.length) { hint('Add some elements first, then download what they are made of.'); setTimeout(function () { hint(); }, 3000); return; }
+    var q = function (v) { v = String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    var rows = [['material_or_work', 'amount', 'unit', 'cost_usd', 'kg_co2e']];
+    ids.sort(function (a, b) { return T.bom[b].usd - T.bom[a].usd; }).forEach(function (id) { var x = T.bom[id]; rows.push([x.name, x.unit.indexOf('US$') === 0 ? '' : Math.round(x.qty * 100) / 100, x.unit.indexOf('US$') === 0 ? '' : x.unit, Math.round(x.usd), Math.round(x.kg)]); });
+    rows.push(['Total', '', '', Math.round(T.spent), Math.round(T.bomEmb)]);
+    rows.push([]); rows.push(['Prices: ' + (S.pl ? S.pl.name : 'United States') + ', US dollars. Carbon: embodied, cradle to construction (A1 to A5), typical values. Threadlands, threadlands.org']);
+    var blob = new Blob([rows.map(function (r) { return r.map(q).join(','); }).join('\n')], { type: 'text/csv' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'threadlands-' + (S.slug || 'design') + '-materials.csv';
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  $('#st-bomdl').addEventListener('click', downloadBom);
   function showOpts() {
     var bld = S.tool === 'build', wall = S.tool === 'seawall';
     $('#st-opts').hidden = !(bld || wall);
     ['#st-floors', '#st-floors-l'].forEach(function (q) { $(q).hidden = !bld; });
     ['#st-wallh', '#st-wallh-l'].forEach(function (q) { $(q).hidden = !wall; });
   }
-  $('#st-floors').addEventListener('change', function () { S.floors = Math.max(1, Math.min(80, Math.round(Number(this.value) || 6))); this.value = S.floors; });
-  $('#st-wallh').addEventListener('change', function () { S.wallH = Math.max(0.5, Math.min(12, Math.round((Number(this.value) || 2) * 2) / 2)); this.value = S.wallH; });
+  $('#st-floors').addEventListener('change', function () { S.floors = Math.max(1, Math.min(80, Math.round(Number(this.value) || 6))); this.value = S.floors; if (MAT) renderBom(); });
+  $('#st-wallh').addEventListener('change', function () { S.wallH = Math.max(0.5, Math.min(12, Math.round((Number(this.value) || 2) * 2) / 2)); this.value = S.wallH; if (MAT) renderBom(); $('#st-cur-price').textContent = priceHint(S.tool); });
   function set3d(on) {
     S.view3d = on; $('#st-3d').setAttribute('aria-pressed', on ? 'true' : 'false');
     $('#st-legend3d').hidden = !on;
@@ -1086,7 +1203,7 @@
     if (S.tool === 'erase' || dragMode === 'remove') { if (cur) { stroke.push({ hex: i, prev: cur }); S.items.delete(i); } return; }
     if (cur === S.tool) return;
     if (!allowedHex(S.tool, i)) { refuse(i); return; }
-    stroke.push({ hex: i, prev: cur || null }); S.items.set(i, S.tool); if (S.team != null) S.itemTeam.set(i, S.team); else S.itemTeam.delete(i);
+    stroke.push({ hex: i, prev: cur || null }); S.items.set(i, S.tool); if (recipe(S.tool)) S.itemMix.set(i, S.mix[S.tool] || optOf(S.tool).id); else S.itemMix.delete(i); if (S.team != null) S.itemTeam.set(i, S.team); else S.itemTeam.delete(i);
   }
   var NAMES = { core: 'dense city', mid: 'city', suburb: 'suburb', farm: 'farmland', open: 'grassland', forest: 'forest', wetland: 'wetland', water: 'water', park: 'park', barren: 'bare land', regen: 'farmland' };
   var refuseT = null;
@@ -1178,6 +1295,7 @@
     if ((isLine && d.pts.length < 2) || (!isLine && d.pts.length < 3)) { draw(); return; }
     var f = { id: S.nextId++, kind: d.kind, type: isLine ? 'line' : 'area', pts: d.pts };
     if (d.osm) { f.osm = d.osm; f.clear = d.clear; }
+    if (recipe(f.kind)) f.mix = S.mix[f.kind] || optOf(f.kind).id;
     if (f.kind === 'build') f.floors = S.floors;
     if (f.kind === 'seawall') f.height = S.wallH;
     f.size = isLine ? lineLength(f.pts) : polyArea(f.pts);
@@ -1224,7 +1342,7 @@
     if (draft) { t.hidden = true; return; }
     var lines = [];
     if (hoverOSM && drawsShapes(S.tool) && S.shape === 'pick') {
-      var q0 = featQty({ kind: S.tool, type: hoverOSM.line ? 'line' : 'area', size: hoverOSM.size, alloc: [], clear: CLEARS[hoverOSM.kind], floors: S.floors, height: S.wallH });
+      var q0 = featQty({ kind: S.tool, type: hoverOSM.line ? 'line' : 'area', size: hoverOSM.size, alloc: [], clear: CLEARS[hoverOSM.kind], floors: S.floors, height: S.wallH, mix: S.mix[S.tool] });
       lines.push(hoverOSM.label + (hoverOSM.name ? ': ' + hoverOSM.name : '') + ', ' + (hoverOSM.line ? (hoverOSM.size >= 1000 ? (hoverOSM.size / 1000).toFixed(1) + ' km' : num(hoverOSM.size) + ' m') : area(hoverOSM.size)));
       lines.push('Click to add ' + BYK[S.tool].name.toLowerCase() + ': ' + q0.label + (q0.cost ? ', ' + money(q0.cost * S.F) : ''));
       t.innerHTML = lines.map(esc).join('<br>'); t.hidden = false;
@@ -1323,17 +1441,17 @@
   function key() { return 'threadlands:studio2:' + S.slug + ':' + S.P.N; }
   function serialize() {
     var r6 = function (v) { return Math.round(v * 1e6) / 1e6; };
-    return { v: 2, items: Array.from(S.items.entries()).map(function (e) { var t = S.itemTeam.get(e[0]); return t != null ? [e[0], e[1], t] : e; }),
-      feats: S.feats.map(function (f) { return { kind: f.kind, type: f.type, pts: f.pts.map(function (p) { return [r6(p[0]), r6(p[1])]; }), osm: f.osm, clear: f.clear, floors: f.floors, height: f.height, team: f.team }; }),
+    return { v: 2, items: Array.from(S.items.entries()).map(function (e) { var t = S.itemTeam.get(e[0]), mx = S.itemMix.get(e[0]); return mx ? [e[0], e[1], t != null ? t : null, mx] : t != null ? [e[0], e[1], t] : e; }),
+      feats: S.feats.map(function (f) { return { kind: f.kind, type: f.type, pts: f.pts.map(function (p) { return [r6(p[0]), r6(p[1])]; }), osm: f.osm, clear: f.clear, floors: f.floors, height: f.height, team: f.team, mix: f.mix }; }),
       teams: S.teams.length ? S.teams : undefined, budget: S.budget };
   }
   function deserialize(o) {
-    S.items = new Map(); S.itemTeam = new Map(); S.feats = []; S.history = [];
+    S.items = new Map(); S.itemTeam = new Map(); S.itemMix = new Map(); S.feats = []; S.history = [];
     if (!o) return;
-    (o.items || []).forEach(function (e) { if (BYK[e[1]] && e[0] < S.P.N) { S.items.set(e[0], e[1]); if (e[2] != null) S.itemTeam.set(e[0], e[2]); } });
+    (o.items || []).forEach(function (e) { if (BYK[e[1]] && e[0] < S.P.N) { S.items.set(e[0], e[1]); if (e[2] != null) S.itemTeam.set(e[0], e[2]); if (e[3]) S.itemMix.set(e[0], e[3]); } });
     (o.feats || []).forEach(function (g) {
       if (!BYK[g.kind]) return;
-      var f = { id: S.nextId++, kind: g.kind, type: g.type, pts: g.pts, osm: g.osm, clear: g.clear, floors: g.floors, height: g.height, team: g.team };
+      var f = { id: S.nextId++, kind: g.kind, type: g.type, pts: g.pts, osm: g.osm, clear: g.clear, floors: g.floors, height: g.height, team: g.team, mix: g.mix };
       f.size = f.type === 'line' ? lineLength(f.pts) : polyArea(f.pts); allocate(f);
       if (f.alloc.length) S.feats.push(f);
     });
@@ -1429,9 +1547,11 @@
   // ---- Totals, scores and challenges
   var MET = [['heat', 'Heat relief'], ['flood', 'Flood safety'], ['food', 'Local food'], ['habitat', 'Habitat'], ['storage', 'Water storage'], ['mobility', 'Low-carbon travel']];
   function totals() {
-    var T = { spent: 0, up: 0, by: {}, farmM2: 0, mwh: 0, trees: 0, residents: 0, emb: 0, yr: 0, net: 0 };
-    function addc(kind, a) {
-      var c = carbonOf(kind, a); T.emb += c.emb; T.yr += c.yr;
+    var T = { bom: {}, bomEmb: 0, spent: 0, up: 0, by: {}, farmM2: 0, mwh: 0, trees: 0, residents: 0, emb: 0, yr: 0, net: 0 };
+    function addc(kind, a, q, mix) {
+      var c = carbonOf(kind, a), o = q && q.bom ? q.bom.opt : null;
+      if (q && q.bom) c = { emb: q.bom.kg, yr: c.yr * (o && o.yr != null ? o.yr : 1) };
+      T.emb += c.emb; T.yr += c.yr;
       var gained = 0; for (var y = 2026; y <= 2050; y++) gained += c.yr * maturity(kind, y);
       T.net += gained - c.emb;
     }
@@ -1440,8 +1560,9 @@
       var b = T.by[kind] = T.by[kind] || { n: 0, cost: 0 }; b.n++; b.cost += q.cost * S.F;
       T.farmM2 += q.farmM2 || 0; T.mwh += q.mwh || 0; T.trees += q.trees || 0; T.residents += q.residents || 0;
     }
-    S.items.forEach(function (kind, i) { addq(kind, hexQty(kind, i)); addc(kind, hexAmounts(kind, i)); });
-    S.feats.forEach(function (f) { addq(f.kind, featQty(f)); addc(f.kind, featAmounts(f)); });
+    function addb(q, mix, kind) { if (q.bom) { T.bomEmb += q.bom.kg; q.bom.lines.forEach(function (l) { var x = T.bom[l.id] = T.bom[l.id] || { name: l.name, unit: l.unit, qty: 0, usd: 0, kg: 0 }; x.qty += l.qty; x.usd += l.usd; x.kg += l.kg; }); } }
+    S.items.forEach(function (kind, i) { var q = hexQty(kind, i); addq(kind, q); addc(kind, hexAmounts(kind, i), q, S.itemMix.get(i)); addb(q); });
+    S.feats.forEach(function (f) { var q = featQty(f); addq(f.kind, q); addc(f.kind, featAmounts(f), q, f.mix); addb(q); });
     return T;
   }
   var last2050 = null;
@@ -1562,6 +1683,8 @@
     var x = cc && S.PRICES && S.PRICES[cc];
     S.pl = x && x.factor > 0 ? x : null;
     S.F = S.pl ? 0.7 * S.pl.factor + 0.3 : 1;
+    $('#st-cur-price').textContent = BYK[S.tool] ? priceHint(S.tool) : '';
+    if (MAT) renderBom();
     $('#st-price').textContent = S.pl && cc !== 'US' ? 'Costs adjusted to ' + S.pl.name + ', about ' + Math.round(S.F * 100) + '% of US levels, in US dollars.' : 'Costs at US prices, in US dollars.';
   }
   function load(slug) {
@@ -1614,8 +1737,11 @@
   Promise.all([
     fetch('{B}data/index.json').then(function (r) { return r.json(); }).catch(function () { return { places: [] }; }),
     fetch('{B}data/price-levels.json').then(function (r) { return r.json(); }).catch(function () { return {}; }),
-    fetch('{B}data/grid-intensity.json').then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })
+    fetch('{B}data/grid-intensity.json').then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }),
+    fetch('{B}data/materials.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
   ]).then(function (a) {
+    MAT = a[3] && a[3].recipes ? a[3] : null;
+    if (MAT) { renderBom(); $('#st-cur-price').textContent = priceHint(S.tool); }
     S.PRICES = a[1].countries || null;
     if (a[2] && a[2].countries) { var w = a[2].countries.WORLD; GRID = a[2].countries; GRID.world = w ? w.g_per_kwh : 458; }
     var lib = (a[0].places || []).slice().sort(function (x, y) { return x.name.localeCompare(y.name); });
