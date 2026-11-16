@@ -27,21 +27,17 @@ jobs:
           cache: pip
           cache-dependency-path: pipeline/requirements.txt
       - run: pip install -r pipeline/requirements.txt
-      - env:
-          SLUGS: ${{ inputs.slugs }}
-        run: python3 pipeline/detail.py $(echo "$SLUGS" | tr ',' ' ')
-      - name: Upload to the data store (Cloudflare R2)
+      - name: Build and upload each place
         env:
+          SLUGS: ${{ inputs.slugs }}
+          TL_DATA: https://pub-5cc2f5116c6c462596fbf16596585b83.r2.dev
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-        run: pipeline/r2_sync.sh detail
-      - name: Publish
         run: |
-          git config user.name "threadlands-robot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/detail
-          git diff --cached --quiet && exit 0
-          git commit -qm "Block-level detail: ${{ inputs.slugs }}"
-          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD && exit 0; sleep 10; done
-          exit 1
+          if [ "$SLUGS" = "missing" ]; then LIST=$(python3 pipeline/detail.py --missing); else LIST=$(echo "$SLUGS" | tr ',' ' '); fi
+          echo "Places: $(echo $LIST | wc -w)"
+          for s in $LIST; do
+            python3 pipeline/detail.py "$s" && pipeline/r2_sync.sh "detail/$s" || echo "::warning::$s failed"
+            rm -rf "data/detail/$s"
+          done

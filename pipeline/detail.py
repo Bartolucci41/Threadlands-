@@ -25,6 +25,7 @@ import pystac_client, planetary_computer
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = 10            # about 0.015 km2 per cell
+MAX_CELLS = 400_000 # bigger places use resolution 9 (about 0.1 km2) so a run stays within memory
 TILE_RES = 6        # tiles of about 36 km2
 MAX_PX = 60_000_000 # cap on the 10 m grid; coarser pixels above this
 WC_GROUPS = {10: 'tree', 20: 'shrub', 30: 'grass', 40: 'crop', 50: 'built', 60: 'bare',
@@ -57,15 +58,18 @@ def build(slug):
     inside = [i for i, v in enumerate(C['inside']) if int(v)]
     parents = [C['id'][i] for i in inside]
     base_pop = {C['id'][i]: float(C['pop'][i] or 0) for i in inside}
+    res = RES
+    while len(parents) * 7 ** (res - base_res) > MAX_CELLS and res > base_res + 1:
+        res -= 1
     cells, parent_of = [], []
     for p in parents:
-        for c in h3.cell_to_children(p, RES):
+        for c in h3.cell_to_children(p, res):
             cells.append(c); parent_of.append(p)
     n = len(cells)
     lat = np.zeros(n); lng = np.zeros(n)
     for i, c in enumerate(cells):
         lat[i], lng[i] = h3.cell_to_latlng(c)
-    log(f'{slug}: {len(parents):,} hexes inside the place -> {n:,} detail cells at resolution {RES}.')
+    log(f'{slug}: {len(parents):,} hexes inside the place -> {n:,} detail cells at resolution {res}.')
 
     # A pixel grid over the place, each pixel labelled with its cell
     pad = 0.002
@@ -213,7 +217,7 @@ def build(slug):
             json.dump(tile, f, separators=(',', ':'))
         index.append({'id': t, 'n': int(len(idx)), 'bbox': [round(float(lng[idx].min()), 5), round(float(lat[idx].min()), 5),
                                                          round(float(lng[idx].max()), 5), round(float(lat[idx].max()), 5)]})
-    meta = {'slug': slug, 'res': RES, 'cell_km2': round(h3.average_hexagon_area(RES, unit='km^2'), 4), 'cells': n,
+    meta = {'slug': slug, 'res': res, 'cell_km2': round(h3.average_hexagon_area(res, unit='km^2'), 4), 'cells': n,
             'heat_scenes': len(stack), 'built': datetime.date.today().isoformat(), 'tiles': index,
             'sources': ['Land cover: ESA WorldCover 2021 v200 10 m (CC BY 4.0), via Microsoft Planetary Computer',
                         'Surface temperature: Landsat 8-9 Collection 2 (USGS/NASA), via Microsoft Planetary Computer',
@@ -225,6 +229,16 @@ def build(slug):
 
 if __name__ == '__main__':
     args = sys.argv[1:]
+    if args == ['--missing']:
+        import urllib.request
+        store = os.environ.get('TL_DATA', '').rstrip('/')
+        idx = json.load(open(os.path.join(ROOT, 'data', 'index.json')))
+        for p in sorted(idx['places'], key=lambda p: -(p.get('pop') or 0)):
+            try:
+                urllib.request.urlopen(f"{store}/detail/{p['slug']}/index.json", timeout=20).close()
+            except Exception:
+                print(p['slug'])
+        sys.exit(0)
     if args == ['all']:
         idx = json.load(open(os.path.join(ROOT, 'data', 'index.json')))
         args = [p['slug'] for p in sorted(idx['places'], key=lambda p: -(p.get('pop') or 0))

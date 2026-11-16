@@ -284,7 +284,7 @@ def APP(base):
 
 
 # Where the heavy map data lives (Cloudflare R2). Empty: served from this site's own data/ folder.
-DATA_URL = ""
+DATA_URL = "https://pub-5cc2f5116c6c462596fbf16596585b83.r2.dev"
 
 
 def head(base, title, desc):

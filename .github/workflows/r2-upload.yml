@@ -21,4 +21,6 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
         run: pipeline/r2_sync.sh ${{ inputs.paths }}
       - name: Check the public address serves a file
-        run: curl -sf -o /dev/null -w "%{http_code}\n" https://pub-5cc2f5116c6c462596fbf16596585b83.r2.dev/detail/bologna/index.json
+        run: |
+          curl -sf -o /dev/null -w "%{http_code}\n" https://pub-5cc2f5116c6c462596fbf16596585b83.r2.dev/detail/bologna/index.json
+          curl -s -D - -o /dev/null -H 'Origin: https://threadlands.org' https://pub-5cc2f5116c6c462596fbf16596585b83.r2.dev/detail/bologna/index.json | grep -i 'access-control-allow-origin' || echo 'NO CORS HEADER'
