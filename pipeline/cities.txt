@@ -128,3 +128,4 @@ melbourne | Melbourne, Victoria, Australia
 brisbane | Brisbane, Queensland, Australia
 perth | City of Perth, Western Australia, Australia || Perth, Western Australia, Australia
 auckland | Auckland, New Zealand
+bologna | Bologna, Emilia-Romagna, Italy || Bologna, Italy
