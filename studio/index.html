@@ -22,6 +22,7 @@
 <meta name="apple-mobile-web-app-title" content="Threadlands">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <script>if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });</script>
+<script>window.TL_DATA = "";</script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a92b6704e81e4aaba11a9f8a11832ae1"}'></script><!-- End Cloudflare Web Analytics -->
 </head>
 <body>
@@ -683,6 +684,14 @@
   }
 
 
+
+  // Map data: from the data store (Cloudflare R2) when one is set, otherwise, or if it fails, from this site
+  function dataGet(path) {
+    var site = '../' + 'data/' + path;
+    var get = function (u) { return fetch(u).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); };
+    return window.TL_DATA ? get(window.TL_DATA.replace(/\/$/, '') + '/' + path).catch(function () { return get(site); }) : get(site);
+  }
+
   // ---- Block-level detail (data/detail/<slug>/): small cells measured from satellite data, loaded for the
   // part of the map in view once you zoom in. Scores still come from the place's hexes.
   var DET = { slug: null, idx: null, tiles: {}, pend: {}, psum: {}, pn: {} }, DCV = null;
@@ -690,12 +699,12 @@
     if (DET.slug === slug) return;
     DET = { slug: slug, idx: null, tiles: {}, pend: {}, psum: {}, pn: {} };
     if (!slug || !window.fetch) return;
-    fetch('../data/detail/' + slug + '/index.json').then(function (r) { return r.ok ? r.json() : null; })
+    dataGet('detail/' + slug + '/index.json').catch(function () { return null; })
       .then(function (j) { if (j && DET.slug === slug) { DET.idx = j; scheduleDraw(); } }).catch(function () {});
   }
   function detailTile(id) {
     var slug = DET.slug; DET.pend[id] = 1;
-    fetch('../data/detail/' + slug + '/' + id + '.json').then(function (r) { return r.ok ? r.json() : null; }).then(function (t) {
+    dataGet('detail/' + slug + '/' + id + '.json').catch(function () { return null; }).then(function (t) {
       if (!t || DET.slug !== slug) return;
       DET.tiles[id] = t;
       t.parent.forEach(function (p, q) { var h = t.heat[q]; if (h != null) { DET.psum[p] = (DET.psum[p] || 0) + h; DET.pn[p] = (DET.pn[p] || 0) + 1; } });

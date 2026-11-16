@@ -30,6 +30,12 @@ jobs:
       - env:
           SLUGS: ${{ inputs.slugs }}
         run: python3 pipeline/detail.py $(echo "$SLUGS" | tr ',' ' ')
+      - name: Upload to the data store (Cloudflare R2)
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: pipeline/r2_sync.sh detail
       - name: Publish
         run: |
           git config user.name "threadlands-robot"

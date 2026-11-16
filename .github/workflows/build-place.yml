@@ -60,6 +60,7 @@ jobs:
         continue-on-error: true
         run: |
           python3 pipeline/detail.py "$SLUG"
+          R2_ENDPOINT='${{ secrets.R2_ENDPOINT }}' R2_ACCESS_KEY_ID='${{ secrets.R2_ACCESS_KEY_ID }}' R2_SECRET_ACCESS_KEY='${{ secrets.R2_SECRET_ACCESS_KEY }}' pipeline/r2_sync.sh "detail/$SLUG"
           git config user.name "threadlands-robot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/detail && (git diff --cached --quiet || (git commit -qm "Block-level detail: $SLUG" && for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD && break; sleep 10; done))
