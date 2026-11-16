@@ -81,6 +81,22 @@
           <button type="button" class="chip st-3d" id="st-3d" aria-pressed="false" title="Show buildings, walls and trees in 3D">3D</button>
         </div>
         <span class="st-mode" id="st-mode">Region view</span>
+        <div class="st-guide3d" id="st-guide3d" hidden role="note">
+          <p><b>You&rsquo;re in 3D.</b> Buildings stand at their real heights, from OpenStreetMap, or estimated where they aren&rsquo;t mapped.</p>
+          <ul>
+            <li><b>Look around:</b> drag to move, scroll or + and &minus; to zoom.</li>
+            <li><b>Build:</b> pick something from the menu above, then click a building, lot or street.</li>
+            <li><b>Watch it grow:</b> press Play; trees grow and new buildings rise toward 2050.</li>
+          </ul>
+          <p class="st-g3-row"><button type="button" class="chip" id="st-g3-ok">Got it</button><button type="button" class="chip" id="st-g3-flat">Back to flat map</button></p>
+        </div>
+        <div class="st-legend3d" id="st-legend3d" hidden aria-label="3D legend">
+          <span><i style="background:#d8d3c8"></i>Today&rsquo;s buildings</span>
+          <span><i style="background:var(--accent)"></i>Your buildings (faded while being built)</span>
+          <span><i style="background:var(--m-forest)"></i>Trees, green roofs</span>
+          <span><i style="background:#283e60"></i>Solar</span>
+          <span><i style="background:#96928a"></i>Sea walls</span>
+        </div>
         <span class="st-attr" id="st-attr">&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</span>
         <p class="st-loading" id="st-loading">Loading&hellip;</p>
         <div class="st-tip" id="st-tip" hidden></div>
@@ -564,7 +580,7 @@
   var PICK = {
     farmblock: ['parking', 'lot', 'grass', 'pitch', 'building'], park: ['parking', 'lot', 'grass', 'pitch', 'building'],
     pond: ['parking', 'lot', 'grass', 'park', 'pitch'], raingarden: ['parking', 'lot', 'grass', 'park'],
-    housing: ['parking', 'lot', 'building'], build: ['parking', 'lot', 'building', 'grass'], roof: ['building'], solar: ['building', 'parking'],
+    __building__: ['building'], housing: ['parking', 'lot', 'building'], build: ['parking', 'lot', 'building', 'grass'], roof: ['building'], solar: ['building', 'parking'],
     trees: ['street'], transit: ['street'], corridor: ['street']
   };
   function PICK_NAMES(tool) {
@@ -736,7 +752,7 @@
       var m = maturity(f.kind, S.year);
       if (f.kind === 'build') {
         var pts = f.pts.map(function (p) { return [sx(mx(p[1])), sy(my(p[0]))]; });
-        solids.push({ t: 'box', pts: pts, h: Math.max(1.5, (f.floors || 6) * 3.2 * m), base: Math.max.apply(null, pts.map(function (q) { return q[1]; })), mine: true, done: m >= 1 });
+        solids.push({ t: 'box', pts: pts, h: (f.floors || 6) * 3.2 + 1, base: Math.max.apply(null, pts.map(function (q) { return q[1]; })), mine: true, done: m >= 1, built: m });
       } else if (f.kind === 'seawall') {
         for (var i = 1; i < f.pts.length; i++) {
           var a = [sx(mx(f.pts[i - 1][1])), sy(my(f.pts[i - 1][0]))], c = [sx(mx(f.pts[i][1])), sy(my(f.pts[i][0]))];
@@ -766,6 +782,16 @@
       }
     });
     solids.sort(function (p, q) { return p.base - q.base; });
+    // Soft shadows to the east give the buildings depth
+    ctx.save(); ctx.fillStyle = '#1b2a24'; ctx.globalAlpha = 0.13;
+    solids.forEach(function (o) {
+      if (o.t !== 'box') return;
+      var sh = lift(o.h) * 0.55; ctx.beginPath();
+      o.pts.forEach(function (q, i) { if (i) ctx.lineTo(q[0] + sh, q[1] - sh * 0.25); else ctx.moveTo(q[0] + sh, q[1] - sh * 0.25); });
+      o.pts.slice().reverse().forEach(function (q) { ctx.lineTo(q[0], q[1]); });
+      ctx.closePath(); ctx.fill();
+    });
+    ctx.restore();
     var stone = [216, 211, 200], mine = rgb(css('--accent')), wallC = [150, 146, 138], green = rgb(css('--m-forest')), solar = [40, 62, 96];
     ctx.save(); ctx.lineJoin = 'round';
     solids.forEach(function (o) {
@@ -780,13 +806,13 @@
           if (ny <= 0) continue;   // faces away from the viewer
           var L = Math.hypot(nx, ny) || 1, lit = 0.8 + 0.14 * ((-nx / L) * 0.6 + (ny / L) * 0.4);
           ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(b[0], b[1] - H); ctx.lineTo(a[0], a[1] - H); ctx.closePath();
-          ctx.globalAlpha = 1; ctx.fillStyle = shade(col, lit); ctx.fill();
+          ctx.globalAlpha = o.mine && !o.done ? 0.35 + 0.5 * o.built : 1; ctx.fillStyle = shade(col, lit); ctx.fill();
           ctx.globalAlpha = 0.25; ctx.strokeStyle = ink; ctx.lineWidth = 0.5; ctx.stroke();
         }
         ctx.beginPath(); P2.forEach(function (q, i2) { if (i2) ctx.lineTo(q[0], q[1] - H); else ctx.moveTo(q[0], q[1] - H); }); ctx.closePath();
-        ctx.globalAlpha = 1; ctx.fillStyle = o.roof === 'roof' ? shade(green, 1.15) : o.roof === 'solar' ? shade(solar, 1) : shade(col, 1.08); ctx.fill();
+        ctx.globalAlpha = o.mine && !o.done ? 0.35 + 0.5 * o.built : 1; ctx.fillStyle = o.roof === 'roof' ? shade(green, 1.15) : o.roof === 'solar' ? shade(solar, 1) : shade(col, 1.08); ctx.fill();
         ctx.globalAlpha = hov ? 1 : 0.35; ctx.strokeStyle = ink; ctx.lineWidth = hov ? 2 : 0.6; ctx.stroke();
-        if (o.mine && !o.done) { ctx.globalAlpha = 0.6; ctx.setLineDash([3, 3]); ctx.stroke(); ctx.setLineDash([]); }
+        if (o.mine && !o.done) { ctx.globalAlpha = 0.9; ctx.lineWidth = 1.4; ctx.setLineDash([4, 3]); ctx.stroke(); ctx.setLineDash([]); }
       } else if (o.t === 'wall') {
         var Hw = lift(o.h);
         ctx.beginPath(); ctx.moveTo(o.a[0], o.a[1]); ctx.lineTo(o.b[0], o.b[1]); ctx.lineTo(o.b[0], o.b[1] - Hw); ctx.lineTo(o.a[0], o.a[1] - Hw); ctx.closePath();
@@ -809,7 +835,7 @@
   function drawsShapes(kind) { var c = BYK[kind]; return !!c && c.draw !== 'hex' && (streetMode() || !!c.anyZoom); }
   function modeChanged() {
     var sm = streetMode(), c = BYK[S.tool];
-    $('#st-mode').textContent = !sm ? 'Region view: zoom in to reach street level' : view.z < OSM_Z ? 'Street level: zoom in once more to load buildings' : OSM.loading ? 'Street level: loading buildings and streets\u2026' : 'Street level';
+    $('#st-mode').textContent = !sm ? 'Region view: zoom in to reach street level' : view.z < OSM_Z ? 'Street level: zoom in once more to load buildings' : OSM.loading ? 'Street level: loading buildings and streets\u2026' : S.view3d ? '3D, street level' : 'Street level';
     var show = !!c && drawsShapes(S.tool);
     $('#st-shape').hidden = !show;
     if (show) {
@@ -932,11 +958,17 @@
   }
   $('#st-floors').addEventListener('change', function () { S.floors = Math.max(1, Math.min(80, Math.round(Number(this.value) || 6))); this.value = S.floors; });
   $('#st-wallh').addEventListener('change', function () { S.wallH = Math.max(0.5, Math.min(12, Math.round((Number(this.value) || 2) * 2) / 2)); this.value = S.wallH; });
-  $('#st-3d').addEventListener('click', function () {
-    S.view3d = !S.view3d; this.setAttribute('aria-pressed', S.view3d ? 'true' : 'false');
-    if (S.view3d && view && view.z < OSM_Z) { zoomBy(Math.pow(2, OSM_Z + 1.4 - view.z)); hint('3D shows at street level, so the map zoomed in. Drag to move around.'); }
-    draw();
-  });
+  function set3d(on) {
+    S.view3d = on; $('#st-3d').setAttribute('aria-pressed', on ? 'true' : 'false');
+    $('#st-legend3d').hidden = !on;
+    var seen = false; try { seen = localStorage.getItem('threadlands:3d-guide') === '1'; } catch (e) { /* ignore */ }
+    $('#st-guide3d').hidden = !on || seen;
+    if (on && view && view.z < OSM_Z) zoomBy(Math.pow(2, OSM_Z + 1.4 - view.z));
+    modeChanged(); draw();
+  }
+  $('#st-3d').addEventListener('click', function () { set3d(!S.view3d); });
+  $('#st-g3-ok').addEventListener('click', function () { $('#st-guide3d').hidden = true; try { localStorage.setItem('threadlands:3d-guide', '1'); } catch (e) { /* ignore */ } });
+  $('#st-g3-flat').addEventListener('click', function () { set3d(false); });
   $('#st-shape').addEventListener('click', function (e) {
     var b = e.target.closest('[data-shape]'); if (!b) return;
     setShape(b.dataset.shape);
@@ -1123,6 +1155,16 @@
       t.innerHTML = lines.map(esc).join('<br>'); t.hidden = false;
       t.style.left = Math.min(view.W - 220, pt.x + 14) + 'px'; t.style.top = (pt.y + 14) + 'px';
       return;
+    }
+    if (S.view3d && view.z >= OSM_Z && !(drawsShapes(S.tool) && S.shape === 'pick')) {
+      var bh = osmAt(pt, '__building__');
+      if (bh) {
+        lines.push((bh.name ? bh.name : 'Building') + ': about ' + Math.round(bh.h) + ' m tall (' + (bh.hEst ? 'estimated' : 'mapped') + '), about ' + Math.max(1, Math.round((bh.h - 1) / 3.2)) + ' floors');
+        lines.push(area(bh.size) + ' footprint');
+        t.innerHTML = lines.map(esc).join('<br>'); t.hidden = false;
+        t.style.left = Math.min(view.W - 220, pt.x + 14) + 'px'; t.style.top = (pt.y + 14) + 'px';
+        return;
+      }
     }
     var fi = streetMode() ? featAt(pt) : -1;
     if (fi >= 0) { var f = S.feats[fi], q = featQty(f); lines.push(BYK[f.kind].name + ': ' + q.label + (q.cost ? ', ' + money(q.cost * S.F) : '')); }
