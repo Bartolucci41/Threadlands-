@@ -237,7 +237,7 @@
     streets: { max: 19, url: function (z, x, y) { return 'https://tile.openstreetmap.org/' + z + '/' + x + '/' + y + '.png'; },
       attr: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors' },
     // Esri World Imagery through ArcGIS Location Platform: 512 px tiles. The key is limited to threadlands.org, so it is safe in the page.
-    satellite: { max: 18, size: 512, url: function (z, x, y) { return 'https://static-map-tiles-api.arcgis.com/arcgis/rest/services/static-basemap-tiles-service/v1/arcgis/imagery-labels/static/tile/' + z + '/' + y + '/' + x + '?token=' + ESRI_KEY; },
+    satellite: { max: 18, size: 512, url: function (z, x, y) { return 'https://static-map-tiles-api.arcgis.com/arcgis/rest/services/static-basemap-tiles-service/v1/arcgis/imagery/labels/static/tile/' + z + '/' + y + '/' + x + '?token=' + ESRI_KEY; },
       attr: 'Imagery: <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a>, Maxar, Earthstar Geographics and the GIS user community' },
     // Fallback if Esri tiles fail: Sentinel-2 cloudless, sharp to about 10 m
     sentinel: { max: 14, url: function (z, x, y) { return 'https://e.tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/GoogleMapsCompatible/' + z + '/' + y + '/' + x + '.jpg'; },
@@ -519,7 +519,15 @@
 
   // ---- Real places at street level: buildings, parking lots, vacant lots, parks and streets from OpenStreetMap
   var OSM = { cells: {}, list: [], seen: {}, loading: 0 }, OSM_Z = 16, CELL = 0.01;
-  var OVERPASS = 'https://overpass-api.de/api/interpreter';
+  // Public Overpass servers; if one is busy or slow, the next is tried
+  var OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
+  function overpass(q, n) {
+    n = n || 0;
+    var ctl = window.AbortController ? new AbortController() : null, t = ctl ? setTimeout(function () { ctl.abort(); }, 25000) : 0;
+    return fetch(OVERPASS[n], { method: 'POST', body: 'data=' + encodeURIComponent(q), headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { clearTimeout(t); if (!r.ok) throw new Error(r.status); return r.json(); })
+      .catch(function (e) { clearTimeout(t); if (n + 1 < OVERPASS.length) return overpass(q, n + 1); throw e; });
+  }
   var LABELS = { building: 'Building', parking: 'Parking lot', lot: 'Vacant or unused lot', grass: 'Grass lot', park: 'Park or garden', pitch: 'Sports field', street: 'Street' };
   var PLURAL = { building: 'buildings', parking: 'parking lots', lot: 'vacant lots', grass: 'grass lots', park: 'parks', pitch: 'sports fields', street: 'streets' };
   // Share of the site that has to be cleared first (building = all of it; parking = pavement only, cheaper)
@@ -590,8 +598,7 @@
       var bb = '(' + [c[0] * CELL, c[1] * CELL, (c[0] + 1) * CELL, (c[1] + 1) * CELL].map(function (v) { return v.toFixed(4); }).join(',') + ')';
       var q = '[out:json][timeout:25];(way["building"]' + bb + ';way["amenity"="parking"]' + bb + ';way["landuse"~"^(brownfield|greenfield|vacant|construction|grass)$"]' + bb +
         ';way["leisure"~"^(park|garden|playground|pitch)$"]' + bb + ';way["highway"~"^(primary|secondary|tertiary|residential|unclassified|living_street|pedestrian)$"]' + bb + ';);out geom;';
-      fetch(OVERPASS, { method: 'POST', body: 'data=' + encodeURIComponent(q), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
-        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      overpass(q)
         .then(function (j) { OSM.cells[key] = 'ok'; addOSM(j.elements || []); })
         .catch(function () { OSM.cells[key] = Date.now(); })
         .then(function () { OSM.loading--; modeChanged(); blockSummary(); scheduleDraw(); });
