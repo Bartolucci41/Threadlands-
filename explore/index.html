@@ -79,6 +79,7 @@
       </div>
       <div class="layers" role="group" aria-label="Map layer">
         <button class="chip" type="button" data-layer="land" aria-pressed="true">Land</button>
+        <button class="chip chip-threads" type="button" data-layer="threads" aria-pressed="false">Threads</button>
         <button class="chip" type="button" data-layer="heat" aria-pressed="false">Heat</button>
         <button class="chip" type="button" data-layer="flood" aria-pressed="false">Flood</button>
         <button class="chip" type="button" data-layer="habitat" aria-pressed="false">Habitat</button>
@@ -1174,6 +1175,10 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
       '<li>' + (NOWD ? 'Landsat pass on ' + niceDate(NOWD.date) + ', compared with the same weeks in earlier years' : 'No recent reading') + '</li>' + sw('Clouds or no reading', '--m-dim') + faded;
     if (layer === 'sat') return '<li class="grad"><span>6 \u00b0C cooler</span><i style="background:linear-gradient(90deg,var(--f2),var(--f0),var(--h0),var(--h2))"></i><span>6 \u00b0C hotter</span></li>' +
       '<li>Measured from space, compared with typical land nearby</li>' + sw('No clear reading', '--m-dim') + faded;
+    if (layer === 'threads') return '<li><i style="background:var(--f2);height:4px;width:18px;border:0"></i>Water: the river that feeds this spot, traced upstream</li>' +
+      '<li><i style="background:#a27a2c;height:4px;width:18px;border:0"></i>Food: the biggest farmland within reach</li>' +
+      '<li><i style="background:var(--m-forest);height:4px;width:18px;border:0"></i>Wild: the nearest connected forest or wetland</li>' +
+      '<li>Hover or tap any spot to see its threads</li>';
     if (layer === 'habitat') return sw('Connected network', '--m-corr') + sw('Isolated patch', '--h1') + sw('Not habitat', '--m-dim') + faded;
     return sw('Dense core', '--m-core') + sw('Mid-density', '--m-mid') + sw('Sprawl edge', '--m-sub') + sw('Farmland', '--m-farm') +
       sw('Regenerative farm', '--m-regen') + sw('Forest', '--m-forest') + sw('Grassland and scrub', '--m-open') + sw('Bare ground', '--m-barren') +
@@ -1352,6 +1357,8 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
       } else if (layer === 'habitat') {
         if (res.comp[i] >= 0) fill = res.comp[i] === res.lcc ? C.corridor : C.iso;
         else { fill = C.dim; alpha = 0.55; }
+      } else if (layer === 'threads') {
+        alpha = 0.42;
       } else if (cov === 'greenway') {
         inner = C.corridor;
       }
@@ -1431,7 +1438,81 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
         ctx.fillStyle = on ? C.accentInk : C.ink; ctx.fillText(String(n + 1), x, y + 0.5);
       });
     }
+    if (layer === 'threads') drawThreads(C);
     if (sel >= 0) { pathFor(sel, 1.0); ctx.lineWidth = 2.5; ctx.strokeStyle = C.ink; ctx.stroke(); }
+  }
+  // ---- Threads: what one spot depends on, drawn as living lines
+  var THR = { cache: {}, t: 0, anim: 0 };
+  function threadOrigin() {
+    if (sel >= 0) return sel;
+    if (THR.def == null) { var best = -1, bp = -1; for (var i = 0; i < P.N; i++) { var pp = Number(P.place.cells.pop[i]) || 0; if (P.inside[i] && pp > bp) { bp = pp; best = i; } } THR.def = best; }
+    return THR.def;
+  }
+  function hexDist(a, b) { return Math.hypot(P.X[a] - P.X[b], P.Y[a] - P.Y[b]); }
+  function threadsFor(o) {
+    if (THR.cache[o]) return THR.cache[o];
+    var c = P.place.cells, N = P.N, out = { water: [], food: [], wild: [] };
+    var wet = function (i) { return (P.hasRivers && P.river[i] > 0) || Number(c.water[i]) > 0.3; };
+    // Water: nearest river or water by walking neighbors, then upstream along the river toward higher ground
+    var seen = new Uint8Array(N), q = [o], prev = new Int32Array(N).fill(-1), hit = -1; seen[o] = 1;
+    for (var h = 0; h < q.length && hit < 0; h++) { var a = q[h]; if (wet(a)) { hit = a; break; } P.NB[a].forEach(function (j) { if (!seen[j]) { seen[j] = 1; prev[j] = a; q.push(j); } }); }
+    if (hit >= 0) {
+      var back = []; for (var x = hit; x >= 0 && x !== o; x = prev[x]) back.push(x); back.push(o);
+      var path = back.reverse(), cur = hit, used = {}; used[cur] = 1;
+      for (var st = 0; st < 80; st++) {
+        var nx = -1, ne = -Infinity, e0 = Number(c.elev[cur]) || 0;
+        P.NB[cur].forEach(function (j) { if (used[j] || !wet(j)) return; var e = Number(c.elev[j]) || 0; if (e >= e0 - 1 && e > ne) { ne = e; nx = j; } });
+        if (nx < 0) break; used[nx] = 1; path.push(nx); cur = nx;
+      }
+      out.water = path;
+    }
+    // Food: the largest cropland nearby, weighted by distance, spread out
+    var cand = [];
+    for (var i = 0; i < N; i++) { var cr = (Number(c.crop[i]) || 0) * (Number(c.area[i]) || 0); if (cr > 0.15) cand.push([cr / (1 + hexDist(o, i) / 12), i, cr]); }
+    cand.sort(function (p1, p2) { return p2[0] - p1[0]; });
+    for (var k2 = 0; k2 < cand.length && out.food.length < 6; k2++) { var ci = cand[k2][1]; if (out.food.every(function (f) { return hexDist(f.i, ci) > 4; })) out.food.push({ i: ci, w: cand[k2][2] }); }
+    // Wild: the nearest forest or wetland in the main habitat network
+    var wl = [];
+    for (var j2 = 0; j2 < N; j2++) { var cv2 = res.cover[j2]; if ((cv2 === 'forest' || cv2 === 'wetland') && (res.comp[j2] === res.lcc || res.comp[j2] >= 0)) wl.push([hexDist(o, j2) - (res.comp[j2] === res.lcc ? 0 : 3), j2]); }
+    wl.sort(function (p1, p2) { return p1[0] - p2[0]; });
+    for (var k3 = 0; k3 < wl.length && out.wild.length < 3; k3++) { var wi = wl[k3][1]; if (out.wild.every(function (w) { return hexDist(w, wi) > 3; })) out.wild.push(wi); }
+    THR.cache[o] = out; return out;
+  }
+  function drawThreads(C) {
+    var o = threadOrigin(); if (o < 0) return;
+    var T = threadsFor(o), ox = P.X[o] * S + OX, oy = P.Y[o] * S + OY, t = THR.t;
+    function curve(i, col, w, bend) {
+      var x = P.X[i] * S + OX, y = P.Y[i] * S + OY, mx2 = (ox + x) / 2, my2 = (oy + y) / 2, dx = x - ox, dy = y - oy;
+      ctx.beginPath(); ctx.moveTo(ox, oy); ctx.quadraticCurveTo(mx2 - dy * bend, my2 + dx * bend, x, y);
+      ctx.strokeStyle = col; ctx.lineWidth = w; ctx.globalAlpha = 0.9; ctx.stroke();
+      ctx.beginPath(); ctx.arc(x, y, Math.max(3, w * 1.2), 0, 7); ctx.fillStyle = col; ctx.fill();
+    }
+    ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.setLineDash([10, 8]); ctx.lineDashOffset = -t;
+    var maxw = Math.max.apply(null, T.food.map(function (f) { return f.w; }).concat([0.001]));
+    T.food.forEach(function (f, n) { curve(f.i, '#a27a2c', 2 + 4 * f.w / maxw, n % 2 ? 0.18 : -0.18); });
+    T.wild.forEach(function (i, n) { curve(i, C.forest, 3.5, n % 2 ? -0.22 : 0.22); });
+    if (T.water.length > 1) {
+      ctx.beginPath(); T.water.forEach(function (i, n) { var x = P.X[i] * S + OX, y = P.Y[i] * S + OY; if (n) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--f2').trim(); ctx.lineWidth = 4.5; ctx.globalAlpha = 0.95; ctx.lineDashOffset = t; ctx.stroke();
+    }
+    ctx.setLineDash([]); ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.arc(ox, oy, 8, 0, 7); ctx.fillStyle = C.surface; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = C.ink; ctx.stroke();
+    ctx.restore();
+  }
+  function threadsLoop() {
+    if (layer !== 'threads' || !P) { THR.anim = 0; return; }
+    THR.t = (THR.t + 0.6) % 1000; draw();
+    THR.anim = requestAnimationFrame(threadsLoop);
+  }
+  function threadsText() {
+    var o = threadOrigin(); if (o < 0 || !res) return '';
+    var T = threadsFor(o), c = P.place.cells, R = P.place.regional || {}, bits = [];
+    if (T.water.length > 1) { var up = T.water[T.water.length - 1]; bits.push('<b>Water:</b> its river runs past about ' + Math.round(hexDist(o, T.water[Math.min(T.water.length - 1, 1)]) * 10) / 10 + ' km away and climbs to ' + Math.round(Number(c.elev[up]) || 0) + ' m upstream' + (R.basin && R.basin.area_km2 ? ', inside a basin of ' + Math.round(R.basin.area_km2).toLocaleString('en-US') + ' km\u00b2 that is ' + Math.round(100 * (R.basin.shares.forest || 0)) + '% forest' : '') + '.'); }
+    else bits.push('<b>Water:</b> no river within this map; its water comes from farther away.');
+    if (T.food.length) bits.push('<b>Food:</b> the nearest big farmland is ' + Math.round(hexDist(o, T.food[0].i)) + ' km away' + (R.foodshed && R.foodshed[0] ? '; within 50 km there are ' + Math.round(R.foodshed[0].crop_km2).toLocaleString('en-US') + ' km\u00b2 of cropland' : '') + '.');
+    if (T.wild.length) bits.push('<b>Wild:</b> the nearest connected forest or wetland is ' + (Math.round(hexDist(o, T.wild[0]) * 10) / 10) + ' km away.');
+    return bits.join(' ');
   }
   function hexAt(e) {
     var rect = cv.getBoundingClientRect();
@@ -1445,6 +1526,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
   }
   function describe() {
     var el = $('#readout');
+    if (layer === 'threads' && res && P) { el.innerHTML = (sel < 0 ? 'Showing the busiest spot. Hover or tap anywhere to see its threads. ' : '') + threadsText(); return; }
     if (sel < 0 || !res || !P) { el.textContent = 'Tap or hover a hex to inspect it.'; return; }
     var c = P.place.cells, cov = res.cover[sel], txt = BLURB[cov] || '';
     if (cov === 'park') txt = res.comp[sel] === res.lcc ? 'Joined to the main habitat network.' : 'A habitat island until a corridor reaches it.';
@@ -1555,7 +1637,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
   // ---- Updates
   var announceTimer = 0;
   function render() {
-    res = P.evaluate(state);
+    res = P.evaluate(state); THR.cache = {};
     var bau = P.BAU;
     METRICS.forEach(function (m) {
       var v = Math.round(res.metrics[m.k]), b = Math.round(bau.metrics[m.k]);
@@ -1652,7 +1734,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     $('#best-msg').textContent = 'Tries about 4,000 lever settings within the effort cap and applies the highest-scoring one.';
     renderPresets();
     computeBBox();
-    VIEW = null;
+    VIEW = null; THR.cache = {}; THR.def = null;
     loadSketch();
     PRI = P.priorities(8);
     WTS.sel = -1; WTS.show = false;
@@ -1949,7 +2031,9 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
   function setLayer(l) {
     layer = l;
     document.querySelectorAll('.layers .chip').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.layer === l ? 'true' : 'false'); });
-    renderLegend(); scheduleDraw();
+    renderLegend(); scheduleDraw(); describe();
+    var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (l === 'threads' && !THR.anim && !still) THR.anim = requestAnimationFrame(threadsLoop);
   }
   window.addEventListener('resize', function () { drawRegional(); });
   $('#reg-body').addEventListener('click', function (e) {
