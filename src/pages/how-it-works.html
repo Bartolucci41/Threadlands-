@@ -3,10 +3,19 @@
 
 <main class="wrap">
   <h1 class="page-h">How it works</h1>
-  <p class="page-lede">Threadlands turns open global data into a map of any place and the land it depends on, then scores plans against heat, flooding, drought and the climate of 2050. Everything here is a screening view for comparing options, not a site survey.</p>
+  <p class="page-lede">The short version, then the detail for anyone who wants it.</p>
+  <ul class="short-list">
+    <li><b>Open data, whole planet.</b> Satellite land cover, elevation, population, rivers and heat, free for anywhere on Earth.</li>
+    <li><b>The city and its land as one system.</b> Every place comes with the river basin it drinks from, the farmland around it and its wild places.</li>
+    <li><b>Simple, published formulas.</b> Heat, flooding, food, habitat and travel scores, checked against satellite heat readings.</li>
+    <li><b>Real prices.</b> Costs from published studies, adjusted to each country&rsquo;s price level.</li>
+    <li><b>A screening tool.</b> Built for comparing options and starting conversations, not for engineering a site.</li>
+  </ul>
+  <p class="hint">Open any section below for the full method and sources.</p>
 
   <section class="story" aria-labelledby="data-h" style="margin-top:24px">
-    <h2 id="data-h">Where the data comes from</h2>
+    <details class="how-sec">
+      <summary><h2 id="data-h">Where the data comes from</h2><span>Open satellite and map data, free for the whole planet.</span></summary>
     <dl class="defs">
       <div><dt>Place outlines</dt><dd>OpenStreetMap, through its Nominatim search service. Rivers and streams also come from OpenStreetMap, because satellites miss narrow ones.</dd></div>
       <div><dt>Land cover</dt><dd>ESA WorldCover 2021, a 10-meter map of trees, shrubs, grass, cropland, built-up land, bare ground, water and wetland for the whole planet.</dd></div>
@@ -18,10 +27,12 @@
       <div><dt>Climate</dt><dd>The IPCC Sixth Assessment Report for warming, heavy rain and sea level; Zhao and others, 2017, for crop yields under heat.</dd></div>
     </dl>
     <p class="hint" style="margin-top:10px">Satellite and map data are reached through Microsoft Planetary Computer.</p>
+    </details>
   </section>
 
   <section class="story" aria-labelledby="studio-h">
-    <h2 id="studio-h">How Studio works</h2>
+    <details class="how-sec">
+      <summary><h2 id="studio-h">How Studio works</h2><span>Real streets, real prices, growing year by year to 2050.</span></summary>
     <div class="prose">
       <p>Studio lets you design a place element by element. From above, you paint whole hexes; zoom in to street level, over an OpenStreetMap street map, and you draw real shapes instead: a rectangle or outline for an urban farm, park, pond, rain garden, green roof, solar array or housing site, and a line for street trees, a transit route or a wildlife corridor. Each shape is measured in square meters or meters, priced from those quantities, and spread across the hexes it touches. Every element changes the same Threadlands model the Explore page uses:</p>
       <ul>
@@ -36,10 +47,12 @@
       <p>Everything exports for GIS. On Explore, <b>Download GIS layers</b> saves every hex of a place, with its land cover, people, elevation, heat, flooding and habitat, as one GeoJSON file that opens in QGIS or ArcGIS. In Studio, <b>Download design for GIS</b> saves every element you placed, with its size, cost and settings.</p>
       <p>Things take time. Trees reach full canopy in about 15 years, wetlands mature in about 8, forests in about 20, and transit takes about 5 years to build. The year slider grows each element and warms the climate step by step toward the middle-path 2050 scenario, and every score is compared with doing nothing in the same year. Costs come from published US studies, adjusted to each country, and are listed with sources on the Studio page.</p>
     </div>
+    </details>
   </section>
 
   <section class="story" aria-labelledby="build-h">
-    <h2 id="build-h">How a place gets built</h2>
+    <details class="how-sec">
+      <summary><h2 id="build-h">How a place gets built</h2><span>Any place builds itself automatically in about ten minutes.</span></summary>
     <ol class="steps">
       <li><span><b>Find the outline.</b> The place is looked up in OpenStreetMap. Small places get a ring of surrounding land, so a town brings its farms, rivers and forests with it.</span></li>
       <li><span><b>Lay a grid of hexes.</b> The hex size adapts to the area, from about half a square kilometer for a city to much larger for a country.</span></li>
@@ -49,10 +62,12 @@
       <li><span><b>Save it to the library.</b> A robot on GitHub does all of this in a few minutes, and the place then opens instantly for everyone.</span></li>
     </ol>
     <p class="hint" style="margin-top:10px">The same steps also run as free Google Colab notebooks, for anyone who wants to build a place by hand or check the work. They are in the <a href="https://github.com/Bartolucci41/Threadlands-">project on GitHub</a>.</p>
+    </details>
   </section>
 
   <section class="story" aria-labelledby="method-h" style="margin-top:40px">
-    <h2 id="method-h">How the model works</h2>
+    <details class="how-sec">
+      <summary><h2 id="method-h">How the model works</h2><span>The formulas behind every score, and how they were checked.</span></summary>
     <div class="prose">
       <p>Every place is a set of hexes. Each hex carries its share of built-up land, trees, shrubs, grass, cropland, bare ground, water and wetland, plus its population, elevation and a flood screening value. The levers change the cover of specific hexes, and five scores are computed from the new map. Scores run from 0 to 100 and compare scenarios within one place. The weights are modelling choices made so that the levers trade off against each other. They are not forecasts.</p>
     </div>
@@ -82,5 +97,6 @@
     <div class="prose">
       <p>Levers cost different amounts per point: shade 0.9, corridors 0.6, wetlands 0.85, regenerative farming 0.8 and compact growth 1.6, against a cap of 240. The best-mix search tries every combination in steps of 20 that fits the cap. Several quite different mixes often score within a point or two of the best, so there is usually more than one good route.</p>
     </div>
+    </details>
   </section>
 </main>

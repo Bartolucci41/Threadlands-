@@ -1562,10 +1562,12 @@
     $('#st-names').innerHTML = lib.map(function (e) { return '<option value="' + esc(e.name) + ', ' + esc(e.country) + '"></option>'; }).join('');
     if (lib.length) $('#st-pick').innerHTML = lib.map(function (e) { return '<option value="' + e.slug + '">' + esc(e.name) + ', ' + esc(e.country) + '</option>'; }).join('');
     var h = location.hash.replace('#', ''), dm = h.match(/^([^/]+)\/d=(.+)$/);
+    var openWs = h === 'workshop'; if (openWs) h = 'milan';
     if (dm) { h = dm[1]; SHARED = dm[2]; }
     var start = lib.some(function (e) { return e.slug === h; }) ? h : 'milan';
     $('#st-pick').value = start;
     load(start);
+    if (openWs) setTimeout(function () { $('#st-wsbtn').click(); }, 1200);
   });
 })();
 

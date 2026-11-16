@@ -102,6 +102,23 @@ css += """
   .st-wsrow { display: flex; gap: 8px; align-items: center; margin: 6px 0; } .st-wsrow label { min-width: 4.5rem; color: var(--ink); }
   .st-tdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
   .studio-wrap:fullscreen { background: var(--bg); overflow: auto; padding: 16px; max-width: none; }
+  .do-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 12px; }
+  @media (max-width: 800px) { .do-grid { grid-template-columns: minmax(0, 1fr); } }
+  .do-card { display: grid; gap: 8px; align-content: start; padding: 20px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); text-decoration: none; transition: border-color .15s, transform .15s; }
+  .do-card:hover, .do-card:focus-visible { border-color: var(--ink); transform: translateY(-2px); }
+  .do-card b { font: 700 1.25rem/1.2 var(--font-display); } .do-card > span { color: var(--ink2); }
+  .do-card .do-go { color: var(--accent); font-weight: 600; margin-top: 4px; }
+  .do-ico { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; background: var(--bg); color: var(--accent); }
+  .short-list { display: grid; gap: 8px; max-width: 46rem; padding-left: 1.2rem; color: var(--ink2); } .short-list b { color: var(--ink); }
+  section.story:has(> .how-sec) { margin-top: 0; padding-top: 0; border-top: 0; }
+  .how-sec { border-top: 1px solid var(--line); padding: 6px 0; }
+  .how-sec[open] { padding-bottom: 28px; }
+  #do-h { max-width: none; }
+  .how-sec > summary { cursor: pointer; list-style: none; display: grid; gap: 2px; padding: 10px 0; }
+  .how-sec > summary::-webkit-details-marker { display: none; }
+  .how-sec > summary h2 { display: inline; margin: 0; } .how-sec > summary h2::after { content: " +"; color: var(--accent); }
+  .how-sec[open] > summary h2::after { content: " −"; }
+  .how-sec > summary span { color: var(--ink2); }
   .st-zoom { position: absolute; top: 10px; right: 10px; display: grid; gap: 6px; z-index: 2; }
   .st-zoom .chip { width: 40px; min-height: 40px; padding: 0; font-size: 1.25rem; background: var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
   .st-mode { position: absolute; left: 10px; top: 10px; z-index: 2; padding: 5px 10px; border-radius: 99px; background: var(--ink); color: var(--bg); font-size: 0.8125rem; font-weight: 600; }
