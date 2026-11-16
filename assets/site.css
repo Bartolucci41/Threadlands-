@@ -405,6 +405,14 @@
   .st-bar .chip:disabled { opacity: 0.45; cursor: default; }
   .st-map { position: relative; background: var(--surface); border-radius: 14px; overflow: hidden; min-height: 380px; }
   .st-map canvas { display: block; width: 100%; touch-action: none; cursor: crosshair; }
+  .st-zoom { position: absolute; top: 10px; right: 10px; display: grid; gap: 6px; z-index: 2; }
+  .st-zoom .chip { width: 40px; min-height: 40px; padding: 0; font-size: 1.25rem; background: var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+  .st-mode { position: absolute; left: 10px; top: 10px; z-index: 2; padding: 5px 10px; border-radius: 99px; background: var(--ink); color: var(--bg); font-size: 0.8125rem; font-weight: 600; }
+  .st-attr { position: absolute; right: 0; bottom: 0; z-index: 2; padding: 2px 6px; background: var(--surface); opacity: 0.9; font-size: 0.6875rem; color: var(--ink2); border-top-left-radius: 6px; }
+  .st-attr a { color: inherit; }
+  .st-steps { margin: 0 0 14px; padding-left: 1.3rem; display: grid; gap: 4px; color: var(--ink2); max-width: 46rem; }
+  .st-steps b { color: var(--ink); }
+  .st-search { min-height: 42px; padding: 0 12px; border-radius: 10px; border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink); font: 500 0.9375rem var(--font-body); width: 20rem; max-width: 100%; box-sizing: border-box; }
   .st-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--ink2); }
   .st-tip { position: absolute; pointer-events: none; padding: 6px 9px; border-radius: 8px; background: var(--ink); color: var(--bg); font-size: 0.8125rem; max-width: 260px; z-index: 2; }
   .st-time { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; }

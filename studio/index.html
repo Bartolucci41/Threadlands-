@@ -25,10 +25,18 @@
   <div class="st-head">
     <div>
       <h1 class="page-h" style="margin-bottom:6px">Studio</h1>
-      <p class="page-lede" style="margin-bottom:12px">Design living systems for a real place. Paint whole districts from above, then zoom to street level to redevelop a block into an urban farm, carve out a pocket park, dig a pond or line a street with trees. Every element costs what it would in that country, and grows from 2026 to 2050.</p>
+      <p class="page-lede" style="margin-bottom:8px">Redesign a real place, and see what it does by 2050.</p>
+      <ol class="st-steps">
+        <li><b>Pick a place.</b></li>
+        <li><b>Choose an element</b> (an urban farm, trees, a pond) and click the map. Zoom in close to draw exact shapes on real streets.</li>
+        <li><b>Press Play</b> to watch it grow to 2050, and try the challenges.</li>
+      </ol>
     </div>
     <div class="st-place">
-      <label for="st-pick" class="eyebrow">Place</label>
+      <label for="st-find" class="eyebrow">Place</label>
+      <input id="st-find" class="st-search" type="search" list="st-names" placeholder="Type a place, or pick below" autocomplete="off">
+      <datalist id="st-names"></datalist>
+      <label for="st-pick" class="sr-only">Choose a place from the list</label>
       <select id="st-pick" class="st-select"><option value="milan">Milan</option></select>
     </div>
   </div>
@@ -36,25 +44,33 @@
   <div class="st-app">
     <div class="st-left">
       <div class="st-bar">
-        <div class="st-layers" role="group" aria-label="Map layer">
+        <div class="st-layers" role="group" aria-label="Map controls">
+          <button type="button" class="chip" id="st-pan" aria-pressed="false" title="Drag to move around the map instead of drawing">Move the map</button>
+          <span aria-hidden="true" style="width:6px"></span>
           <button type="button" class="chip" data-show="land" aria-pressed="true">Land</button>
           <button type="button" class="chip" data-show="heat" aria-pressed="false">Heat</button>
           <button type="button" class="chip" data-show="flood" aria-pressed="false">Flooding</button>
           <button type="button" class="chip" data-show="habitat" aria-pressed="false">Habitat</button>
         </div>
         <div class="st-actions">
-          <button type="button" class="chip" id="st-zin" aria-label="Zoom in">+</button>
-          <button type="button" class="chip" id="st-zout" aria-label="Zoom out">&minus;</button>
-          <button type="button" class="chip" id="st-pan" aria-pressed="false">Move map</button>
-          <button type="button" class="chip" id="st-base" aria-pressed="true">Street map</button>
+          <label for="st-base" class="sr-only">Background map</label>
+          <select id="st-base" class="st-select small" title="What shows under the model">
+            <option value="streets">Background: streets</option>
+            <option value="satellite">Background: satellite</option>
+            <option value="none">Background: none</option>
+          </select>
           <button type="button" class="chip" id="st-undo" disabled>Undo</button>
           <button type="button" class="chip" id="st-clear">Clear</button>
         </div>
       </div>
       <div class="st-map" id="st-map">
         <canvas id="st-canvas" role="img" aria-label="Map for designing. In region view, click hexes to place elements. At street level, draw shapes."></canvas>
+        <div class="st-zoom">
+          <button type="button" class="chip" id="st-zin" aria-label="Zoom in">+</button>
+          <button type="button" class="chip" id="st-zout" aria-label="Zoom out">&minus;</button>
+        </div>
         <span class="st-mode" id="st-mode">Region view</span>
-        <span class="st-attr">&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</span>
+        <span class="st-attr" id="st-attr">&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</span>
         <p class="st-loading" id="st-loading">Loading&hellip;</p>
         <div class="st-tip" id="st-tip" hidden></div>
       </div>
@@ -81,7 +97,8 @@
       <div class="st-budget">
         <div class="st-bud-row"><span>Spent</span><b id="st-spent">$0</b></div>
         <div class="st-bud-bar"><i id="st-bud-fill"></i></div>
-        <div class="st-bud-row"><label for="st-cap">Budget</label><select id="st-cap" class="st-select small"></select></div>
+        <div class="st-bud-row"><label for="st-cap">Budget (US$)</label><input id="st-cap" class="st-select small" style="width:9rem;text-align:right" inputmode="decimal" list="st-caps" placeholder="e.g. 50K or 2M" autocomplete="off"><datalist id="st-caps"></datalist></div>
+        <p class="hint" style="margin:0">Type any amount, from a $50K grant up: 50K, 2.5M, 1B.</p>
         <div class="st-bud-row small"><span>Upkeep each year</span><span id="st-upkeep">$0</span></div>
         <p class="hint" id="st-price"></p>
       </div>
@@ -117,7 +134,8 @@
   function rgb(h) { h = h.replace('#', ''); var n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
   function mixc(a, b, t) { return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ',' + Math.round(a[1] + (b[1] - a[1]) * t) + ',' + Math.round(a[2] + (b[2] - a[2]) * t) + ')'; }
   function ramp(st, t) { t = Math.max(0, Math.min(1, t)); return t < 0.5 ? mixc(st[0], st[1], t * 2) : mixc(st[1], st[2], (t - 0.5) * 2); }
-  function money(v) { var a = Math.abs(v); return a >= 1e9 ? '$' + (v / 1e9).toFixed(a >= 1e10 ? 0 : 1) + 'B' : a >= 1e6 ? '$' + (v / 1e6).toFixed(a >= 1e7 ? 0 : 1) + 'M' : a >= 1e3 ? '$' + Math.round(v / 1e3) + 'K' : '$' + Math.round(v); }
+  function money(v) { return money0(v).replace(/\.0(?=[KMB])/, ''); }
+  function money0(v) { var a = Math.abs(v); return a >= 1e9 ? '$' + (v / 1e9).toFixed(a >= 1e10 ? 0 : 1) + 'B' : a >= 1e6 ? '$' + (v / 1e6).toFixed(a >= 1e7 ? 0 : 1) + 'M' : a >= 1e3 ? '$' + Math.round(v / 1e3) + 'K' : '$' + Math.round(v); }
   function num(v) { return Math.round(v).toLocaleString('en-US'); }
   function area(m2) { return m2 >= 1e4 ? (m2 / 1e4).toFixed(m2 >= 1e5 ? 0 : 1) + ' ha' : num(m2) + ' m²'; }
   var URB = { core: 1, mid: 1, suburb: 1, greenway: 1 };
@@ -171,12 +189,12 @@
     'Transit: bus rapid transit averages US$9.6 million to $16.3 million per km (ITDP BRT Planning Guide).',
     'Solar roofs: US$1.80 to $4.10 per watt installed in 2023 (Lawrence Berkeley National Laboratory). About 0.18 kW per m² of panels; yearly output estimated from latitude.',
     'Every cost is scaled to the place: about 70% follows the country’s price level (World Bank), 30% stays at world prices for materials.',
-    'Street map © OpenStreetMap contributors. Effects run through the same Threadlands model as the Explore page, and the climate warms step by step toward the middle-path 2050 scenario.'
+    'Background maps: streets © OpenStreetMap contributors; satellite from Sentinel-2 cloudless by EOX IT Services (contains modified Copernicus Sentinel data 2016 & 2017), sharp to about 10 m. Effects run through the same Threadlands model as the Explore page, and the climate warms step by step toward the middle-path 2050 scenario.'
   ];
   $('#st-sources').innerHTML = SOURCES.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('');
 
   var S = { P: null, slug: null, tool: 'farmblock', shape: 'rect', show: 'land', items: new Map(), feats: [], history: [], year: 2026, budget: 0, F: 1,
-    pl: null, PRICES: null, base: null, basemap: true, nextId: 1 };
+    pl: null, PRICES: null, base: null, basemap: 'streets', nextId: 1 };
   var cv = $('#st-canvas'), ctx = cv.getContext('2d'), view = null;
 
   // ---- Web Mercator: x, y in 0..1 across the world
@@ -222,18 +240,23 @@
 
   // ---- OpenStreetMap tiles
   var TILES = {}, tileCount = 0;
+  var BASES = {
+    streets: { max: 19, url: function (z, x, y) { return 'https://tile.openstreetmap.org/' + z + '/' + x + '/' + y + '.png'; },
+      attr: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors' },
+    satellite: { max: 14, url: function (z, x, y) { return 'https://e.tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/GoogleMapsCompatible/' + z + '/' + y + '/' + x + '.jpg'; },
+      attr: '<a href="https://s2maps.eu" target="_blank" rel="noopener">Sentinel-2 cloudless</a> by EOX IT Services GmbH (contains modified Copernicus Sentinel data 2016 &amp; 2017)' }
+  };
   function tile(z, x, y) {
-    var key = z + '/' + x + '/' + y, t = TILES[key];
+    var key = S.basemap + '/' + z + '/' + x + '/' + y, t = TILES[key];
     if (t) return t;
     if (tileCount > 600) { TILES = {}; tileCount = 0; }
     t = TILES[key] = new Image(); tileCount++;
-    t.crossOrigin = 'anonymous';
     t.onload = function () { t.ok = true; scheduleDraw(); };
-    t.src = 'https://tile.openstreetmap.org/' + key + '.png';
+    t.src = BASES[S.basemap].url(z, x, y);
     return t;
   }
   function drawTiles() {
-    var zi = Math.max(0, Math.min(19, Math.round(view.z))), n = Math.pow(2, zi), size = 256 * Math.pow(2, view.z - zi);
+    var zi = Math.max(0, Math.min(BASES[S.basemap].max, Math.round(view.z))), n = Math.pow(2, zi), size = 256 * Math.pow(2, view.z - zi);
     var x0 = Math.floor(wx(0) * n), x1 = Math.floor(wx(view.W) * n), y0 = Math.max(0, Math.floor(wy(0) * n)), y1 = Math.min(n - 1, Math.floor(wy(view.H) * n));
     if ((x1 - x0 + 1) * (y1 - y0 + 1) > 120) return;
     for (var tx = x0; tx <= x1; tx++) for (var ty = y0; ty <= y1; ty++) {
@@ -410,13 +433,13 @@
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.height = H + 'px'; }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = css('--surface'); ctx.fillRect(0, 0, W, H);
-    if (S.basemap) drawTiles();
+    if (S.basemap !== 'none') drawTiles();
     var C = { core: css('--m-core'), mid: css('--m-mid'), suburb: css('--m-sub'), farm: css('--m-farm'), regen: css('--m-regen'), forest: css('--m-forest'),
       wetland: css('--m-wet'), water: css('--m-water'), pond: css('--m-water'), park: css('--m-park'), open: css('--m-open'), barren: css('--m-barren'),
       corridor: css('--m-corr'), greenway: css('--m-corr'), canopy: css('--m-canopy'), dim: css('--m-dim'), surface: css('--surface'), ink: css('--ink') };
     var heat = [css('--h0'), css('--h1'), css('--h2')].map(rgb), flood = [css('--f0'), css('--f1'), css('--f2')].map(rgb);
     var keep = 1 - res.retention, maxF = P.maxFloodExp || 1;
-    var fade = !S.basemap ? 1 : view.z < 11 ? 0.92 : view.z < 13 ? 0.7 : view.z < STREET_Z ? 0.45 : 0.22;
+    var fade = S.basemap === 'none' ? 1 : view.z < 11 ? 0.9 : view.z < 13 ? 0.6 : view.z < STREET_Z ? 0.4 : 0.22;
     for (var i = 0; i < P.N; i++) {
       var a = HX[i];
       if (!a || a.length < 6) continue;
@@ -431,6 +454,8 @@
         if (res.comp[i] === res.lcc) fill = C.forest; else if (res.comp[i] >= 0) fill = C.regen; else { fill = C.dim; alpha = 0.5; }
       }
       polyPath(a);
+      // In the Land view, built-up hexes go almost clear over a background map so the streets and buildings show through
+      if (S.show === 'land' && URB[cov] && S.basemap !== 'none' && view.z >= 12) alpha = 0.35;
       ctx.globalAlpha = alpha * fade; ctx.fillStyle = fill; ctx.fill();
       if (S.show === 'land' && res.lc && res.lc[i] > 0 && URB[cov]) { ctx.globalAlpha = 0.55 * res.lc[i] * fade; ctx.fillStyle = C.canopy; ctx.fill(); }
       if (!P.inside[i]) { ctx.globalAlpha = 0.3 * fade; ctx.fillStyle = C.surface; ctx.fill(); }
@@ -467,7 +492,7 @@
   function drawsShapes(kind) { return streetMode() && BYK[kind] && BYK[kind].draw !== 'hex'; }
   function modeChanged() {
     var sm = streetMode();
-    $('#st-mode').textContent = sm ? 'Street level: draw shapes' : 'Region view: paint hexes';
+    $('#st-mode').textContent = sm ? 'Street level: draw exact shapes' : 'Region view: zoom in to reach street level';
     $('#st-shape').hidden = !(sm && BYK[S.tool] && BYK[S.tool].draw === 'area');
     hint();
   }
@@ -479,7 +504,7 @@
       $('#st-hint').textContent = c.draw === 'line' ? 'Click along the route to draw ' + c.name.toLowerCase() + '. Double-click or press Enter to finish; Esc cancels.'
         : S.shape === 'rect' ? 'Drag a rectangle over the block to turn it into ' + c.name.toLowerCase() + '.' : 'Click around the site to outline it. Double-click, press Enter or click the first point to finish; Esc cancels.';
     } else {
-      $('#st-hint').textContent = 'Click or drag across hexes to place ' + (c ? c.name.toLowerCase() : 'elements') + '.' + (c && c.draw !== 'hex' ? ' Zoom in to street level to draw real shapes instead.' : '') + ' Scroll or use + and − to zoom.';
+      $('#st-hint').textContent = 'Click or drag across hexes to place ' + (c ? c.name.toLowerCase() : 'elements') + '.' + (c && c.draw !== 'hex' ? ' Zoom in to street level to draw real shapes instead.' : '') + ' Zoom with + and − or your scroll wheel. To slide the map around, press Move the map.';
     }
   }
 
@@ -679,7 +704,12 @@
   $('#st-zout').addEventListener('click', function () { if (view) zoomBy(0.5); });
   cv.addEventListener('wheel', function (ev) { if (!view) return; ev.preventDefault(); var pt = evPos(ev); zoomBy(Math.pow(2, -ev.deltaY / 300), pt.x, pt.y); }, { passive: false });
   $('#st-pan').addEventListener('click', function () { panning = !panning; this.setAttribute('aria-pressed', panning ? 'true' : 'false'); cv.style.cursor = panning ? 'grab' : 'crosshair'; });
-  $('#st-base').addEventListener('click', function () { S.basemap = !S.basemap; this.setAttribute('aria-pressed', S.basemap ? 'true' : 'false'); draw(); });
+  $('#st-base').addEventListener('change', function () {
+    S.basemap = this.value;
+    $('#st-attr').innerHTML = S.basemap === 'none' ? '' : BASES[S.basemap].attr;
+    $('#st-attr').hidden = S.basemap === 'none';
+    draw();
+  });
 
   // ---- Storage
   function key() { return 'threadlands:studio2:' + S.slug + ':' + S.P.N; }
@@ -771,14 +801,27 @@
   }
 
   // ---- Budget options scale with the place and its prices
+  // Budget: type any amount (50K, 2.5M, 1B) or pick a suggestion scaled to the place
+  function parseMoney(t) {
+    var m = String(t || '').replace(/[$,\s]/g, '').toUpperCase().match(/^(\d*\.?\d+)(K|M|B)?$/);
+    if (!m) return null;
+    var v = parseFloat(m[1]) * (m[2] === 'K' ? 1e3 : m[2] === 'M' ? 1e6 : m[2] === 'B' ? 1e9 : 1);
+    return v > 0 ? v : null;
+  }
   function setBudgets() {
     var urbKm2 = 0, c = S.P.place.cells;
     for (var i = 0; i < S.P.N; i++) if (URB[S.base.cover[i]]) urbKm2 += Number(c.area[i]) || 0;
-    var unit = Math.max(1e7, urbKm2 * 4e5 * S.F), opts = [0.5, 1, 2, 5, 10].map(function (x) { var v = unit * x, p = Math.pow(10, Math.floor(Math.log10(v))); return Math.round(v / p) * p; });
-    $('#st-cap').innerHTML = opts.map(function (v, n) { return '<option value="' + v + '"' + (n === 2 ? ' selected' : '') + '>' + money(v) + '</option>'; }).join('');
-    S.budget = opts[2];
+    var unit = Math.max(1e7, urbKm2 * 4e5 * S.F), big = [0.5, 1, 2, 5, 10].map(function (x) { var v = unit * x, p = Math.pow(10, Math.floor(Math.log10(v))); return Math.round(v / p) * p; });
+    var opts = [5e4, 25e4, 1e6, 1e7].concat(big).filter(function (v, n, a) { return a.indexOf(v) === n; }).sort(function (a, b) { return a - b; });
+    $('#st-caps').innerHTML = opts.map(function (v) { return '<option value="' + money(v).replace('$', '') + '"></option>'; }).join('');
+    S.budget = big[2];
+    $('#st-cap').value = money(S.budget).replace('$', '');
   }
-  $('#st-cap').addEventListener('change', function () { S.budget = Number(this.value); refresh(); });
+  $('#st-cap').addEventListener('change', function () {
+    var v = parseMoney(this.value);
+    if (v == null) { this.value = money(S.budget).replace('$', ''); return; }
+    S.budget = v; this.value = money(v).replace('$', ''); refresh();
+  });
 
   // ---- Time
   var playT = null;
@@ -824,7 +867,24 @@
       modeChanged(); refresh();
     }).catch(function () { $('#st-loading').textContent = 'This place could not be loaded.'; });
   }
-  $('#st-pick').addEventListener('change', function () { load(this.value); });
+  $('#st-pick').addEventListener('change', function () { $('#st-find').value = ''; load(this.value); });
+  var LIB = [];
+  function norm(t) { return String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim(); }
+  function findPlace(q) {
+    q = norm(q); if (!q) return null;
+    var hit = null;
+    LIB.forEach(function (e) { var full = norm(e.name + ', ' + e.country), nm = norm(e.name); if (!hit && (full === q || nm === q)) hit = e; });
+    if (!hit) LIB.forEach(function (e) { if (!hit && norm(e.name).indexOf(q) === 0) hit = e; });
+    if (!hit) LIB.forEach(function (e) { if (!hit && norm(e.name + ' ' + e.country).indexOf(q) >= 0) hit = e; });
+    return hit;
+  }
+  function goFind() {
+    var q = $('#st-find').value, e = findPlace(q);
+    if (e) { $('#st-pick').value = e.slug; load(e.slug); }
+    else if (q.trim()) hint('\u201c' + q.trim() + '\u201d isn\u2019t in the library yet. Search for it on the Explore page to build it.');
+  }
+  $('#st-find').addEventListener('change', goFind);
+  $('#st-find').addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); goFind(); } });
   window.addEventListener('resize', function () { if (S.P) { resizeView(); draw(); } });
   if (window.matchMedia) { var mq = window.matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', draw); }
 
@@ -835,6 +895,8 @@
   ]).then(function (a) {
     S.PRICES = a[1].countries || null;
     var lib = (a[0].places || []).slice().sort(function (x, y) { return x.name.localeCompare(y.name); });
+    LIB = lib;
+    $('#st-names').innerHTML = lib.map(function (e) { return '<option value="' + esc(e.name) + ', ' + esc(e.country) + '"></option>'; }).join('');
     if (lib.length) $('#st-pick').innerHTML = lib.map(function (e) { return '<option value="' + e.slug + '">' + esc(e.name) + ', ' + esc(e.country) + '</option>'; }).join('');
     var h = location.hash.replace('#', ''), start = lib.some(function (e) { return e.slug === h; }) ? h : 'milan';
     $('#st-pick').value = start;
