@@ -175,6 +175,7 @@
   .glance::after { content: ""; display: block; clear: both; }
   .explore-main { position: relative; }
   .place-head { display: flex; gap: 14px; align-items: center; min-width: 0; }
+  .emblem[hidden] { display: none; }
   .emblem { width: 72px; height: 72px; flex: 0 0 auto; border-radius: 50%; }
   .glance-h { margin: 0 0 4px; font: 600 1.125rem var(--font-body); color: var(--ink); }
   .glance-sub { margin: 0 0 12px; font-size: 0.9375rem; color: var(--ink2); max-width: 46rem; }
@@ -393,7 +394,7 @@
 <main class="wrap explore-main">
   <h1 class="sect-h page-h" id="explore">Explore a place</h1>
   <div class="placebar" id="placebar">
-    <div class="place-head"><canvas class="emblem" id="place-emblem" width="72" height="72" aria-hidden="true"></canvas>
+    <div class="place-head"><canvas class="emblem" hidden id="place-emblem" width="72" height="72" aria-hidden="true"></canvas>
     <div class="place-id">
       <span class="eyebrow">Place</span>
       <span class="place-name"><span id="place-name">Fictional river city</span><span class="tag" id="place-tag">Demo</span></span>
