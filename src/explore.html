@@ -1328,25 +1328,57 @@
     var d = window.devicePixelRatio || 1, S2 = 72; c.width = S2 * d; c.height = S2 * d;
     var g = c.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); g.clearRect(0, 0, S2, S2);
     g.save(); g.beginPath(); g.arc(S2 / 2, S2 / 2, S2 / 2 - 1, 0, 7); g.clip();
-    g.fillStyle = '#d6e7ef'; g.fillRect(0, 0, S2, S2);
+    g.fillStyle = '#eef2e8'; g.fillRect(0, 0, S2, S2);
     // Frame the place itself, with a little of the land around it
     var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-    for (var q = 0; q < P.N; q++) if (P.inside[q]) { x0 = Math.min(x0, P.X[q]); x1 = Math.max(x1, P.X[q]); y0 = Math.min(y0, P.Y[q]); y1 = Math.max(y1, P.Y[q]); }
+    // Frame the largest connected piece of the place, so far-off islands do not shrink it
+    var comp = new Int32Array(P.N).fill(-1), best = -1, bestN = 0;
+    for (var q0 = 0; q0 < P.N; q0++) {
+      if (!P.inside[q0] || comp[q0] >= 0) continue;
+      var st = [q0], n0 = 0; comp[q0] = q0;
+      while (st.length) { var a0 = st.pop(); n0++; P.NB[a0].forEach(function (b0) { if (P.inside[b0] && comp[b0] < 0) { comp[b0] = q0; st.push(b0); } }); }
+      if (n0 > bestN) { bestN = n0; best = q0; }
+    }
+    for (var q = 0; q < P.N; q++) if (P.inside[q] && comp[q] === best) { x0 = Math.min(x0, P.X[q]); x1 = Math.max(x1, P.X[q]); y0 = Math.min(y0, P.Y[q]); y1 = Math.max(y1, P.Y[q]); }
     if (!isFinite(x0)) { x0 = bbox.minx; x1 = bbox.maxx; y0 = bbox.miny; y1 = bbox.maxy; }
-    var bw = (x1 - x0) * 1.35 + 1, bh = (y1 - y0) * 1.35 + 1, k = (S2 - 4) / Math.max(bw, bh), ox = S2 / 2 - ((x0 + x1) / 2) * k, oy = S2 / 2 - ((y0 + y1) / 2) * k;
-    var col = { core: '#c9775a', mid: '#d58a68', suburb: '#e2b49a', greenway: '#d58a68', farm: '#e8dcc8', regen: '#d9cfa0', forest: '#4f8a5b', wetland: '#7fae8c', water: '#8fbcd4', park: '#7fae6c', open: '#cfe0c3', barren: '#e9e3d6', corridor: '#7fae6c' };
-    var cov = P.BAU_TODAY.cover;
+    var bw = (x1 - x0) * 1.15 + 1, bh = (y1 - y0) * 1.15 + 1, k = (S2 - 4) / Math.max(bw, bh), ox = S2 / 2 - ((x0 + x1) / 2) * k, oy = S2 / 2 - ((y0 + y1) / 2) * k;
+    // The place's own outline, filled with a street-grid texture, and its main rivers: a shape locals recognize
+    var key = function (a, b) { return Math.round(a * 1000) + ',' + Math.round(b * 1000); }, edges = {};
     for (var i = 0; i < P.N; i++) {
+      if (!P.inside[i]) continue;
       var p = P.POLY[i]; if (!p || p.length < 6) continue;
-      g.beginPath(); for (var j = 0; j + 1 < p.length; j += 2) { var x = p[j] * k + ox, y = p[j + 1] * k + oy; if (j) g.lineTo(x, y); else g.moveTo(x, y); }
-      g.closePath(); g.globalAlpha = P.inside[i] ? 1 : 0.55; g.fillStyle = col[cov[i]] || '#cfe0c3'; g.fill();
+      for (var j = 0; j + 1 < p.length; j += 2) {
+        var j2 = (j + 2) % p.length, a1 = key(p[j], p[j + 1]), b1 = key(p[j2], p[j2 + 1]), ek = a1 < b1 ? a1 + '|' + b1 : b1 + '|' + a1;
+        if (edges[ek]) edges[ek].n++; else edges[ek] = { n: 1, x1: p[j], y1: p[j + 1], x2: p[j2], y2: p[j2 + 1] };
+      }
     }
-    g.globalAlpha = 1;
+    var shape = new Path2D();
+    for (var i2 = 0; i2 < P.N; i2++) {
+      if (!P.inside[i2]) continue;
+      var p2 = P.POLY[i2]; if (!p2 || p2.length < 6) continue;
+      for (var j3 = 0; j3 + 1 < p2.length; j3 += 2) { var xx = p2[j3] * k + ox, yy = p2[j3 + 1] * k + oy; if (j3) shape.lineTo(xx, yy); else shape.moveTo(xx, yy); }
+      shape.closePath();
+    }
+    g.fillStyle = '#efe6d6'; g.fill(shape);
+    g.save(); g.clip(shape);
+    // Street grid: two crossing sets of fine lines, a little turned, like a city plan
+    g.strokeStyle = '#c9775a'; g.globalAlpha = 0.55; g.lineWidth = 0.7; g.beginPath();
+    var ang = 0.35, ca = Math.cos(ang), sa = Math.sin(ang), step = 3.2;
+    for (var t = -S2; t <= 2 * S2; t += step) {
+      g.moveTo(t * ca - (-S2) * sa, t * sa + (-S2) * ca); g.lineTo(t * ca - (2 * S2) * sa, t * sa + (2 * S2) * ca);
+      g.moveTo((-S2) * ca - t * sa, (-S2) * sa + t * ca); g.lineTo((2 * S2) * ca - t * sa, (2 * S2) * sa + t * ca);
+    }
+    g.stroke(); g.globalAlpha = 1; g.restore();
     if (P.hasRivers && P.rivNet) {
-      g.strokeStyle = '#4f86a8'; g.lineWidth = 1.6; g.lineCap = 'round'; g.beginPath();
+      g.save(); g.clip(shape);
+      g.strokeStyle = '#4f86a8'; g.lineWidth = 1.8; g.lineCap = 'round'; g.beginPath();
       var segs = P.rivNet.major.segs; for (var s2 = 0; s2 < segs.length; s2 += 2) { g.moveTo(P.X[segs[s2]] * k + ox, P.Y[segs[s2]] * k + oy); g.lineTo(P.X[segs[s2 + 1]] * k + ox, P.Y[segs[s2 + 1]] * k + oy); }
-      g.stroke();
+      g.stroke(); g.restore();
     }
+    // The outline itself: only edges on the boundary of the place
+    g.strokeStyle = '#1d2b25'; g.lineWidth = 1.6; g.lineJoin = 'round'; g.beginPath();
+    Object.keys(edges).forEach(function (ek) { var e = edges[ek]; if (e.n === 1) { g.moveTo(e.x1 * k + ox, e.y1 * k + oy); g.lineTo(e.x2 * k + ox, e.y2 * k + oy); } });
+    g.stroke();
     g.restore();
     g.beginPath(); g.arc(S2 / 2, S2 / 2, S2 / 2 - 1, 0, 7); g.lineWidth = 2; g.strokeStyle = '#1d2b25'; g.globalAlpha = 0.85; g.stroke(); g.globalAlpha = 1;
     var art = $('#place-art'), slug = current || '';
