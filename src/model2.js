@@ -105,13 +105,17 @@ const ThreadModel = (function () {
     let lat0 = 0, lng0 = 0;
     for (let i = 0; i < N; i++) { lat0 += num('lat', i); lng0 += num('lng', i); }
     lat0 /= N; lng0 /= N;
-    const kx = 111.32 * Math.cos(lat0 * Math.PI / 180), ky = 110.57;
+    // Web Mercator scaled to km at the center, so maps line up exactly with street and satellite tiles
+    const mxf = (lng) => (lng + 180) / 360;
+    const myf = (lat) => { const s = Math.sin(Math.max(-85, Math.min(85, lat)) * Math.PI / 180); return 0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI); };
+    const MK = 40075.017 * Math.cos(lat0 * Math.PI / 180), mx0 = mxf(lng0), my0 = myf(lat0);
+    const MERC = { mx0, my0, K: MK };
     const X = new Float64Array(N), Y = new Float64Array(N);
-    for (let i = 0; i < N; i++) { X[i] = (num('lng', i) - lng0) * kx; Y[i] = -(num('lat', i) - lat0) * ky; }
+    for (let i = 0; i < N; i++) { X[i] = (mxf(num('lng', i)) - mx0) * MK; Y[i] = (myf(num('lat', i)) - my0) * MK; }
     const POLY = c.poly.map((p) => {
       const out = [];
       if (!Array.isArray(p)) return out;
-      for (let j = 0; j + 1 < p.length; j += 2) out.push((Number(p[j + 1]) - lng0) * kx, -(Number(p[j]) - lat0) * ky);
+      for (let j = 0; j + 1 < p.length; j += 2) out.push((mxf(Number(p[j + 1])) - mx0) * MK, (myf(Number(p[j])) - my0) * MK);
       return out;
     });
 
@@ -359,7 +363,7 @@ const ThreadModel = (function () {
     }
     let E0 = 0;
     const out = {
-      N, BUDGET, COST, LEVER_KEYS, ZERO, NB, X, Y, POLY, inside, base, PARKS, newParks, Lmax,
+      N, BUDGET, COST, LEVER_KEYS, ZERO, NB, X, Y, POLY, MERC, inside, base, PARKS, newParks, Lmax,
       restorableCount: restorable.length, subCount: subs.length, notes, totalPop, place: d,
       corridorCount: corr.size, river, hasRivers
     };

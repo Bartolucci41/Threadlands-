@@ -197,6 +197,11 @@
     font: 600 1rem var(--font-body); color: var(--ink);
   }
   canvas { display: block; touch-action: pan-y; cursor: crosshair; margin: 0 auto; }
+  .mapctl { position: absolute; top: 8px; right: 8px; display: grid; gap: 6px; z-index: 2; }
+  .mapbtn { width: 40px; padding: 0; font-size: 1.15rem; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+  .mapbase { position: absolute; bottom: 8px; left: 8px; z-index: 2; min-height: 34px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 0.8125rem var(--font-body); padding: 0 8px; }
+  .mapattr { position: absolute; right: 0; bottom: 0; z-index: 2; padding: 2px 6px; font-size: 0.6875rem; background: var(--surface); opacity: 0.9; border-top-left-radius: 6px; color: var(--ink2); }
+  .mapattr a { color: inherit; }
   .badge {
     position: absolute; top: 8px; left: 8px; display: grid; gap: 1px; padding: 6px 10px 7px;
     background: var(--surface); border: 1px solid var(--line); border-radius: 8px; opacity: 0.96;

@@ -201,6 +201,11 @@
     font: 600 1rem var(--font-body); color: var(--ink);
   }
   canvas { display: block; touch-action: pan-y; cursor: crosshair; margin: 0 auto; }
+  .mapctl { position: absolute; top: 8px; right: 8px; display: grid; gap: 6px; z-index: 2; }
+  .mapbtn { width: 40px; padding: 0; font-size: 1.15rem; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+  .mapbase { position: absolute; bottom: 8px; left: 8px; z-index: 2; min-height: 34px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 0.8125rem var(--font-body); padding: 0 8px; }
+  .mapattr { position: absolute; right: 0; bottom: 0; z-index: 2; padding: 2px 6px; font-size: 0.6875rem; background: var(--surface); opacity: 0.9; border-top-left-radius: 6px; color: var(--ink2); }
+  .mapattr a { color: inherit; }
   .badge {
     position: absolute; top: 8px; left: 8px; display: grid; gap: 1px; padding: 6px 10px 7px;
     background: var(--surface); border: 1px solid var(--line); border-radius: 8px; opacity: 0.96;
@@ -395,6 +400,18 @@
     <div class="stage">
       <div class="mapwrap" id="mapwrap">
         <canvas id="map" role="img" aria-label="Hex map of the loaded city-region. Colors show land cover, heat, flood exposure or habitat depending on the selected layer."></canvas>
+        <div class="mapctl">
+          <button class="chip mapbtn" type="button" id="z-in" aria-label="Zoom in">+</button>
+          <button class="chip mapbtn" type="button" id="z-out" aria-label="Zoom out">&minus;</button>
+          <button class="chip mapbtn" type="button" id="z-fit" aria-label="Show the whole region" title="Show the whole region">&#8634;</button>
+        </div>
+        <label class="sr-only" for="basemap">Background map</label>
+        <select id="basemap" class="mapbase" title="What shows under the model">
+          <option value="none">Background: none</option>
+          <option value="streets">Background: streets</option>
+          <option value="satellite">Background: satellite</option>
+        </select>
+        <span class="mapattr" id="mapattr" hidden></span>
         <div class="badge">
           <span class="eyebrow" id="badge-label">Resilience index</span>
           <span class="badge-row"><span class="badge-num" id="idx">0</span><span class="badge-d" id="idxd"></span></span>
@@ -725,7 +742,67 @@
 
   // ---- Canvas
   var cv = $('#map'), ctx = cv.getContext('2d');
-  var W = 0, H = 0, dpr = 1, S = 1, OX = 0, OY = 0, hexPx = 10, bbox = null;
+  var W = 0, H = 0, dpr = 1, S = 1, S0 = 1, OX = 0, OY = 0, hexPx = 10, bbox = null, VIEW = null;
+  // Zoom and pan: VIEW.z multiplies the fitted scale, VIEW.cx/cy is the center in map km
+  function applyView() {
+    S = S0 * VIEW.z; OX = W / 2 - VIEW.cx * S; OY = H / 2 - VIEW.cy * S;
+    hexPx = P.hexKm * S;
+    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) {
+      dpr = window.devicePixelRatio || 1;
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    }
+    var zb = $('#z-out'); if (zb) zb.disabled = VIEW.z <= 1.001;
+    cv.style.touchAction = VIEW.z > 1.001 ? 'none' : 'pan-y';
+    cv.style.cursor = VIEW.z > 1.001 ? 'grab' : 'crosshair';
+    scheduleDraw();
+  }
+  function zoomAt(f, px, py) {
+    if (!P || !VIEW) return;
+    if (px == null) { px = W / 2; py = H / 2; }
+    var ax = (px - OX) / S, ay = (py - OY) / S;
+    VIEW.z = Math.max(1, Math.min(20000, VIEW.z * f));
+    S = S0 * VIEW.z;
+    VIEW.cx = ax - (px - W / 2) / S; VIEW.cy = ay - (py - H / 2) / S;
+    if (VIEW.z <= 1.001) { VIEW.cx = (bbox.minx + bbox.maxx) / 2; VIEW.cy = (bbox.miny + bbox.maxy) / 2; }
+    applyView();
+  }
+  // Background map tiles in Web Mercator, lined up through P.MERC
+  var BASEMAP = 'none', ESRI_KEY = 'AAPTaocneTrJayeMxPQ9Sg5fUdw..O1VrUkUA0lfRD0N6gwf52PmxyLiPrNNyJ-5w5JgY1-4tQHO8XN13FgFY3diYhkzKcdfa76L6G6wzBN0EmY5e96evsF59JucvA6itv1Ny7COxNQ52H6h6WOrUi9LuwMYmGPKgT_PH4swdHd6p6uz0guauG5PnXtCa8ZXhPfYoUO1k54PKm1AKyu8J2itI1XcwLNZodHvK8owDAkhaEengrYO9Avn9RkDSRdHBEjEHkDnkYmgkbzCRbhdd3aRo5lA.AT1_ctVl1A3q', esriFails = 0;
+  var BASES = {
+    streets: { max: 19, url: function (z, x, y) { return 'https://tile.openstreetmap.org/' + z + '/' + x + '/' + y + '.png'; },
+      attr: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors' },
+    satellite: { max: 18, size: 512, url: function (z, x, y) { return 'https://static-map-tiles-api.arcgis.com/arcgis/rest/services/static-basemap-tiles-service/v1/arcgis/imagery-labels/static/tile/' + z + '/' + y + '/' + x + '?token=' + ESRI_KEY; },
+      attr: 'Imagery: <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a>, Maxar, Earthstar Geographics and the GIS user community' },
+    sentinel: { max: 14, url: function (z, x, y) { return 'https://e.tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/GoogleMapsCompatible/' + z + '/' + y + '/' + x + '.jpg'; },
+      attr: '<a href="https://s2maps.eu" target="_blank" rel="noopener">Sentinel-2 cloudless</a> by EOX IT Services GmbH (contains modified Copernicus Sentinel data 2016 &amp; 2017)' }
+  };
+  var TILES = {}, tileCount = 0;
+  function setBasemap(v) {
+    BASEMAP = v; var a = $('#mapattr');
+    a.hidden = v === 'none'; a.innerHTML = v === 'none' ? '' : BASES[v].attr;
+    $('#basemap').value = v === 'sentinel' ? 'satellite' : v;
+    scheduleDraw();
+  }
+  function drawTiles() {
+    if (BASEMAP === 'none' || !P || !P.MERC || kind === 'demo') return;
+    var B0 = BASES[BASEMAP], K = P.MERC.K, z = Math.log2(K * S / 256);
+    var zi = Math.max(0, Math.min(B0.max, Math.round(z - (B0.size === 512 ? 1 : 0)))), n = Math.pow(2, zi), size = K * S / n;
+    var u0 = P.MERC.mx0 + (0 - OX) / (K * S), u1 = P.MERC.mx0 + (W - OX) / (K * S), v0 = P.MERC.my0 + (0 - OY) / (K * S), v1 = P.MERC.my0 + (H - OY) / (K * S);
+    var x0 = Math.floor(u0 * n), x1 = Math.floor(u1 * n), y0 = Math.max(0, Math.floor(v0 * n)), y1 = Math.min(n - 1, Math.floor(v1 * n));
+    if ((x1 - x0 + 1) * (y1 - y0 + 1) > 150) return;
+    for (var tx = x0; tx <= x1; tx++) for (var ty = y0; ty <= y1; ty++) {
+      var key = BASEMAP + '/' + zi + '/' + tx + '/' + ty, t = TILES[key];
+      if (!t) {
+        if (tileCount > 600) { TILES = {}; tileCount = 0; }
+        t = TILES[key] = new Image(); tileCount++;
+        t.onload = function () { this.ok = true; scheduleDraw(); };
+        t.onerror = function () { if (BASEMAP === 'satellite' && ++esriFails >= 8) setBasemap('sentinel'); };
+        t.src = B0.url(zi, ((tx % n) + n) % n, ty);
+      }
+      if (t.ok) ctx.drawImage(t, (tx / n - P.MERC.mx0) * K * S + OX, (ty / n - P.MERC.my0) * K * S + OY, size + 0.5, size + 0.5);
+    }
+  }
   function computeBBox() {
     var minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
     P.POLY.forEach(function (p) {
@@ -749,16 +826,11 @@
     var maxH = Math.max(240, Math.min(window.innerHeight * (window.innerWidth >= 960 ? 0.72 : 0.5), 760));
     var bw = bbox.maxx - bbox.minx, bh = bbox.maxy - bbox.miny;
     var pad = 10;
-    S = Math.min((avail - 2 * pad) / bw, (maxH - 2 * pad) / bh);
+    S0 = Math.min((avail - 2 * pad) / bw, (maxH - 2 * pad) / bh);
     W = avail;
-    H = Math.ceil(bh * S + 2 * pad);
-    OX = (W - bw * S) / 2 - bbox.minx * S;
-    OY = pad - bbox.miny * S;
-    hexPx = P.hexKm * S;
-    dpr = window.devicePixelRatio || 1;
-    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-    cv.style.width = W + 'px'; cv.style.height = H + 'px';
-    scheduleDraw();
+    H = Math.max(320, Math.ceil(bh * S0 + 2 * pad));
+    if (!VIEW) VIEW = { z: 1, cx: (bbox.minx + bbox.maxx) / 2, cy: (bbox.miny + bbox.maxy) / 2 };
+    applyView();
   }
   function hex2rgb(h) {
     h = h.replace('#', '');
@@ -805,9 +877,12 @@
     var C = palette();
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
+    drawTiles();
+    var bgOn = BASEMAP !== 'none' && kind !== 'demo', zl = P.MERC ? Math.log2(P.MERC.K * S / 256) : 0;
+    var fade = !bgOn ? 1 : zl < 11 ? 0.88 : zl < 13 ? 0.6 : zl < 15 ? 0.4 : 0.25;
     var canopy = 1 - Math.pow(1 - state.canopy / 100, 1.8);
     var keep = 1 - res.retention;
-    var shrink = hexPx > 7 ? 0.93 : 1.0;
+    var shrink = hexPx > 7 ? (hexPx > 60 ? 0.985 : 0.93) : 1.0;
     var cells = P.place.cells;
     for (var i = 0; i < P.N; i++) {
       var cov = res.cover[i], fill = C[cov] || C.open, alpha = 1, inner = null;
@@ -838,7 +913,11 @@
       } else if (cov === 'greenway') {
         inner = C.corridor;
       }
+      var hx = P.X[i] * S + OX, hy = P.Y[i] * S + OY;
+      if (hx < -hexPx * 2 || hy < -hexPx * 2 || hx > W + hexPx * 2 || hy > H + hexPx * 2) continue;
       if (!pathFor(i, shrink)) continue;
+      if (bgOn && layer === 'land' && isUrban(cov) && zl >= 12) alpha *= 0.4;
+      alpha *= fade;
       ctx.globalAlpha = alpha; ctx.fillStyle = fill; ctx.fill();
       if (layer === 'land' && canopy > 0 && isUrban(cov)) {
         ctx.globalAlpha = 0.6 * canopy; ctx.fillStyle = C.canopy; ctx.fill();
@@ -939,8 +1018,20 @@
     el.innerHTML = '<b>' + (NAMES[cov] || cov) + '.</b> ' + txt + (bits.length ? ' ' + bits.join(' · ') + '.' : '');
   }
   var painting = false, lastPainted = -1;
+  var panStart = null;
+  cv.addEventListener('wheel', function (e) {
+    if (!P || !VIEW) return;
+    e.preventDefault();
+    var r = cv.getBoundingClientRect();
+    zoomAt(Math.pow(2, -e.deltaY / 300), e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
   cv.addEventListener('pointermove', function (e) {
     if (!P) return;
+    if (panStart) {
+      var dx = e.clientX - panStart.x, dy = e.clientY - panStart.y;
+      if (!panStart.moved && Math.hypot(dx, dy) > 5 && VIEW.z > 1.001) panStart.moved = true;
+      if (panStart.moved) { VIEW.cx = panStart.cx - dx / S; VIEW.cy = panStart.cy - dy / S; applyView(); return; }
+    }
     var h = hexAt(e);
     if (SK.on && painting) { if (h >= 0 && h !== lastPainted) { lastPainted = h; paintHex(h); } return; }
     if (e.pointerType === 'mouse' && h !== sel) { sel = h; describe(); scheduleDraw(); }
@@ -955,8 +1046,20 @@
       if (h >= 0) paintHex(h);
       return;
     }
+    if (VIEW && VIEW.z > 1.001) { panStart = { x: e.clientX, y: e.clientY, cx: VIEW.cx, cy: VIEW.cy, moved: false, h: h, type: e.pointerType }; try { cv.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ } return; }
     if (e.pointerType !== 'mouse') { sel = h === sel ? -1 : h; describe(); scheduleDraw(); }
   });
+  ['pointerup', 'pointercancel'].forEach(function (ev) {
+    cv.addEventListener(ev, function () {
+      if (!panStart) return;
+      var ps = panStart; panStart = null;
+      if (!ps.moved && ps.type !== 'mouse') { sel = ps.h === sel ? -1 : ps.h; describe(); scheduleDraw(); }
+    });
+  });
+  $('#z-in').addEventListener('click', function () { zoomAt(2); });
+  $('#z-out').addEventListener('click', function () { zoomAt(0.5); });
+  $('#z-fit').addEventListener('click', function () { if (!VIEW) return; VIEW.z = 1; VIEW.cx = (bbox.minx + bbox.maxx) / 2; VIEW.cy = (bbox.miny + bbox.maxy) / 2; applyView(); });
+  $('#basemap').addEventListener('change', function () { setBasemap(this.value); if (this.value !== 'none' && VIEW && VIEW.z < 2) zoomAt(1); });
   ['pointerup', 'pointercancel'].forEach(function (ev) {
     cv.addEventListener(ev, function () { if (painting) { painting = false; lastPainted = -1; saveSketch(); } });
   });
@@ -1061,6 +1164,7 @@
     $('#best-msg').textContent = 'Tries about 4,000 lever settings within the effort cap and applies the highest-scoring one.';
     renderPresets();
     computeBBox();
+    VIEW = null;
     loadSketch();
     PRI = P.priorities(8);
     WTS.sel = -1; WTS.show = false;
