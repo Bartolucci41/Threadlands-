@@ -491,7 +491,7 @@
         <div class="best-row">
           <button class="btn ghost" type="button" id="best-btn">Find the best mix for this place</button>
         </div>
-        <p class="best-msg" id="best-msg" aria-live="polite">Tries about 4,000 lever settings within the effort cap and applies the highest-scoring one.</p>
+        <p class="best-msg" id="best-msg" aria-live="polite">Tries thousands of lever settings within the effort cap, fine-tunes the best, and applies it.</p>
       </div>
       <div id="levers"></div>
 
@@ -1476,7 +1476,7 @@
     P.setClimate(CLIM);
     $('#best-btn').disabled = false;
     $('#best-btn').textContent = 'Find the best mix for this place';
-    $('#best-msg').textContent = 'Tries about 4,000 lever settings within the effort cap and applies the highest-scoring one.';
+    $('#best-msg').textContent = 'Tries thousands of lever settings within the effort cap, fine-tunes the best, and applies it.';
     renderPresets();
     computeBBox();
     VIEW = null; THR.cache = {}; THR.def = null;

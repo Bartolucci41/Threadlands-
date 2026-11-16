@@ -756,6 +756,9 @@ const ThreadModel = (function () {
 
   // Best mix within the effort cap, searched on a coarse grid in small batches so the page stays responsive
   function searchBest(P, step, onProgress, onDone) {
+    // A grid over the five levers within the effort cap, then a local polish around the best point.
+    // Places with many hexes use a coarser grid (fewer tries); the polish recovers the precision.
+    if (P.N > 4000 && step < 25) step = 25;
     const vals = [];
     for (let v = 0; v <= 100; v += step) vals.push(v);
     const combos = [];
@@ -763,17 +766,40 @@ const ThreadModel = (function () {
       const L = { canopy: a, corridors: b, wetlands: c, regen: d, compact: e };
       if (effort(L) <= BUDGET + 1e-9) combos.push(L);
     }
-    let i = 0, best = null, bestI = -1, cancelled = false;
+    const seen = new Set(), key = L => LEVER_KEYS.map(k => L[k]).join(',');
+    let i = 0, best = null, bestI = -1, cancelled = false, polishing = false, queue = [], rounds = 0, improved = false;
+    function tryL(L) {
+      const k = key(L); if (seen.has(k)) return; seen.add(k);
+      const r = P.evaluate(L);
+      if (r.index > bestI + 1e-9) { bestI = r.index; best = L; improved = true; }
+    }
+    function neighbors(B) {
+      const out = [], d = 5;
+      for (const k of LEVER_KEYS) for (const s of [-d, d, -2 * d, 2 * d]) {
+        const L = Object.assign({}, B); L[k] = Math.max(0, Math.min(100, L[k] + s)); out.push(L);
+      }
+      // move effort from one lever to another
+      for (const k1 of LEVER_KEYS) for (const k2 of LEVER_KEYS) if (k1 !== k2) {
+        const L = Object.assign({}, B); L[k1] = Math.max(0, L[k1] - 2 * d); L[k2] = Math.min(100, L[k2] + 2 * d); out.push(L);
+      }
+      return out.filter(L => effort(L) <= BUDGET + 1e-9);
+    }
     function chunk() {
       if (cancelled) return;
       const t0 = Date.now();
-      while (i < combos.length && Date.now() - t0 < 30) {
-        const r = P.evaluate(combos[i]);
-        if (r.index > bestI) { bestI = r.index; best = combos[i]; }
-        i++;
+      while (Date.now() - t0 < 30) {
+        if (!polishing) {
+          if (i < combos.length) { tryL(combos[i++]); continue; }
+          polishing = true; improved = false; queue = best ? neighbors(best) : [];
+        }
+        if (queue.length) { tryL(queue.pop()); continue; }
+        rounds++;
+        if (improved && rounds < 12 && best) { improved = false; queue = neighbors(best); continue; }
+        if (onProgress) onProgress(1);
+        return onDone(best, bestI);
       }
-      if (onProgress) onProgress(i / combos.length);
-      if (i < combos.length) setTimeout(chunk, 0); else onDone(best, bestI);
+      if (onProgress) onProgress(Math.min(0.97, i / combos.length * 0.9 + (polishing ? 0.07 : 0)));
+      setTimeout(chunk, 0);
     }
     setTimeout(chunk, 0);
     return { cancel: () => { cancelled = true; }, total: combos.length };
