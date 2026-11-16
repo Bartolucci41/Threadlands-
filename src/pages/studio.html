@@ -542,6 +542,7 @@
       ctx.globalAlpha = 1; ctx.lineWidth = 1.3; ctx.strokeStyle = C.ink; ctx.setLineDash(m < 1 ? [3, 3] : []); ctx.stroke(); ctx.setLineDash([]);
     });
     var in3d = S.view3d && view.z >= OSM_Z;
+    if (in3d && S.basemap !== 'none') { ctx.globalAlpha = S.basemap === 'satellite' ? 0.18 : 0.42; ctx.fillStyle = '#eef2e8'; ctx.fillRect(0, 0, view.W, view.H); ctx.globalAlpha = 1; }
     drawOSM(in3d);
     S.feats.forEach(function (f) { if (!in3d || !SOLID[f.kind]) drawFeat(f, false); });
     if (in3d) draw3D();
@@ -554,6 +555,17 @@
     f.pts.forEach(function (p, j) { var x = sx(mx(p[1])), y = sy(my(p[0])); if (j) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
     if (f.type === 'area') {
       ctx.closePath(); ctx.globalAlpha = 0.35 + 0.5 * m; ctx.fillStyle = col; ctx.fill();
+      if ((f.kind === 'farmblock' || f.kind === 'park') && view.z >= 16) {
+        // Crop rows on farms, a softer texture on parks
+        ctx.save(); ctx.clip(); ctx.globalAlpha = 0.35 + 0.4 * m; ctx.strokeStyle = f.kind === 'farmblock' ? '#6f9a4f' : '#5f9a66'; ctx.lineWidth = Math.max(1, ppm() * 0.8);
+        var gap = Math.max(4, ppm() * (f.kind === 'farmblock' ? 2.2 : 5)), bb = f.pts.map(function (p) { return [sx(mx(p[1])), sy(my(p[0]))]; });
+        var minX = Math.min.apply(null, bb.map(function (q) { return q[0]; })), maxX = Math.max.apply(null, bb.map(function (q) { return q[0]; }));
+        var minY = Math.min.apply(null, bb.map(function (q) { return q[1]; })), maxY = Math.max.apply(null, bb.map(function (q) { return q[1]; }));
+        ctx.beginPath();
+        for (var gx2 = minX - (maxY - minY); gx2 < maxX; gx2 += gap) { ctx.moveTo(gx2, maxY); ctx.lineTo(gx2 + (maxY - minY), minY); }
+        ctx.stroke(); ctx.restore();
+        ctx.beginPath(); f.pts.forEach(function (p, j) { var x = sx(mx(p[1])), y = sy(my(p[0])); if (j) ctx.lineTo(x, y); else ctx.moveTo(x, y); }); ctx.closePath();
+      }
       ctx.globalAlpha = 1; ctx.lineWidth = hover ? 3 : 1.6; ctx.strokeStyle = ink; ctx.setLineDash(m < 1 ? [4, 3] : []); ctx.stroke(); ctx.setLineDash([]);
     } else {
       var w = f.kind === 'corridor' ? Math.max(4, 30 * k() / (40075016 * Math.cos(f.pts[0][0] * Math.PI / 180))) : f.kind === 'transit' ? 5 : 4;
@@ -737,7 +749,7 @@
   var SOLID = { build: 1, seawall: 1, trees: 1 };
   var REPLACES = { farmblock: 1, park: 1, pond: 1, raingarden: 1, build: 1, housing: 1 };
   function ppm() { return k() / (40075016.7 * Math.cos(uny(view.cy) * Math.PI / 180)); }   // screen px per meter
-  function lift(h) { return h * ppm() * 0.8; }
+  function lift(h) { return h * ppm() * 0.95; }
   function shade(rgbA, f) { return 'rgb(' + Math.round(rgbA[0] * f) + ',' + Math.round(rgbA[1] * f) + ',' + Math.round(rgbA[2] * f) + ')'; }
   function hashf(n) { var x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x); }
   function draw3D() {
@@ -795,13 +807,16 @@
       ctx.closePath(); ctx.fill();
     });
     ctx.restore();
+    var WALLS = [[239, 230, 214], [232, 220, 200], [242, 236, 225], [226, 213, 194], [236, 226, 208]];
+    var ROOFS = [[201, 119, 90], [182, 104, 78], [143, 154, 140], [215, 198, 168], [167, 181, 160], [190, 176, 150]];
+    var px = ppm(), winOn = px > 0.9;
     var stone = [216, 211, 200], mine = rgb(css('--accent')), wallC = [150, 146, 138], green = rgb(css('--m-forest')), solar = [40, 62, 96];
     ctx.save(); ctx.lineJoin = 'round';
     solids.forEach(function (o) {
       if (o.t === 'box') {
         var H = lift(o.h), P2 = o.pts, n = P2.length, sa = 0;
         for (var i = 0; i < n; i++) { var j = (i + 1) % n; sa += P2[i][0] * P2[j][1] - P2[j][0] * P2[i][1]; }
-        var col = o.mine ? mine : stone, hov = hoverOSM && o.osm === hoverOSM;
+        var hid = o.osm ? o.osm.id : 7, col = o.mine ? mine : WALLS[hid % WALLS.length], roofC = o.mine ? shade(mine, 1.2) : ROOFS[(hid >> 3) % ROOFS.length], hov = hoverOSM && o.osm === hoverOSM;
         if (o.cand) col = [Math.round(col[0] * 0.75 + tcol[0] * 0.25), Math.round(col[1] * 0.75 + tcol[1] * 0.25), Math.round(col[2] * 0.75 + tcol[2] * 0.25)];
         if (hov) col = tcol;
         for (var e = 0; e < n; e++) {
@@ -810,11 +825,23 @@
           var L = Math.hypot(nx, ny) || 1, lit = 0.8 + 0.14 * ((-nx / L) * 0.6 + (ny / L) * 0.4);
           ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(b[0], b[1] - H); ctx.lineTo(a[0], a[1] - H); ctx.closePath();
           ctx.globalAlpha = o.mine && !o.done ? 0.35 + 0.5 * o.built : 1; ctx.fillStyle = shade(col, lit); ctx.fill();
-          ctx.globalAlpha = 0.25; ctx.strokeStyle = ink; ctx.lineWidth = 0.5; ctx.stroke();
+          ctx.globalAlpha = 0.18; ctx.strokeStyle = ink; ctx.lineWidth = 0.5; ctx.stroke();
+          // Windows: one row per floor, one every 4 m along the wall
+          if (winOn && !hov && (o.done !== false)) {
+            var wl = Math.hypot(b[0] - a[0], b[1] - a[1]) / px, cols2 = Math.floor(wl / 5), floors = Math.floor(o.h / 3.2);
+            if (cols2 >= 1 && floors >= 1 && cols2 * floors < 400) {
+              ctx.globalAlpha = 0.75; ctx.fillStyle = o.mine ? '#d9f2ea' : '#f6e7b8';
+              var fw = 1.4 * px, fh = 1.5 * px * 0.95;
+              for (var fl2 = 0; fl2 < floors; fl2++) for (var cw = 0; cw < cols2; cw++) {
+                var t3 = (cw + 0.5) / cols2, bx2 = a[0] + (b[0] - a[0]) * t3, by2 = a[1] + (b[1] - a[1]) * t3 - lift(1 + fl2 * 3.2);
+                ctx.fillRect(bx2 - fw / 2, by2 - fh, fw, fh);
+              }
+            }
+          }
         }
         ctx.beginPath(); P2.forEach(function (q, i2) { if (i2) ctx.lineTo(q[0], q[1] - H); else ctx.moveTo(q[0], q[1] - H); }); ctx.closePath();
-        ctx.globalAlpha = o.mine && !o.done ? 0.35 + 0.5 * o.built : 1; ctx.fillStyle = o.roof === 'roof' ? shade(green, 1.15) : o.roof === 'solar' ? shade(solar, 1) : shade(col, 1.08); ctx.fill();
-        ctx.globalAlpha = hov ? 1 : 0.35; ctx.strokeStyle = ink; ctx.lineWidth = hov ? 2 : 0.6; ctx.stroke();
+        ctx.globalAlpha = o.mine && !o.done ? 0.35 + 0.5 * o.built : 1; ctx.fillStyle = o.roof === 'roof' ? shade(green, 1.15) : o.roof === 'solar' ? shade(solar, 1) : hov || o.cand ? shade(col, 1.08) : (typeof roofC === 'string' ? roofC : shade(roofC, 1)); ctx.fill();
+        ctx.globalAlpha = hov ? 1 : 0.25; ctx.strokeStyle = ink; ctx.lineWidth = hov ? 2 : 0.5; ctx.stroke();
         if (o.mine && !o.done) { ctx.globalAlpha = 0.9; ctx.lineWidth = 1.4; ctx.setLineDash([4, 3]); ctx.stroke(); ctx.setLineDash([]); }
       } else if (o.t === 'wall') {
         var Hw = lift(o.h);
