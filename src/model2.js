@@ -13,6 +13,7 @@ const ThreadModel = (function () {
   let SURF_W = 0.75;
   let USE_CAL = true;            // share of heat intensity set by built surface rather than population density
   const KH = 1.6;              // heat load that scores 0 on heat relief
+  const HEAT_AMP = 0.2;        // extra heat harm per degree of warming, beyond the rise in heat load itself
   const NEED_KM2 = 0.0019;     // cropland per person for full self-sufficiency (0.19 ha, about the world average)
   const RETIRED_CROP = 0.5;    // share of a retired sprawl hex that returns to cropland
   const URBAN = { core: 1, mid: 1, suburb: 1, greenway: 1 };
@@ -359,7 +360,8 @@ const ThreadModel = (function () {
       if (climate.dT === 0 && climate.slr === 0) { floodEff = flood; return; }
       const rainX = 1 + 0.07 * climate.dT;
       floodEff = new Float64Array(N);
-      for (let i = 0; i < N; i++) floodEff[i] = Math.min(1.5, flood[i] * rainX + (lowCoast[i] ? 2 * climate.slr : 0));
+      // Low coastal land: once-a-century sea floods become yearly at many coasts by 2050 (IPCC SROCC), so sea-level rise weighs heavily there
+      for (let i = 0; i < N; i++) floodEff[i] = Math.min(1.5, flood[i] * rainX + (lowCoast[i] ? 4 * climate.slr : 0));
     }
     let E0 = 0;
     const out = {
@@ -501,7 +503,9 @@ const ThreadModel = (function () {
         sw += w; sh += w * hv;
       }
       const avgHeat = sw > 0 ? sh / sw : 0;
-      const heatScore = sw > 0 ? 100 * clamp(1 - avgHeat / KH, 0, 1) : 100;
+      // Dangerous heat grows faster than average warming: hot days above 35 C and heat deaths climb steeply with each degree
+      // (WRI on CMIP6: about 29 more such days in the average city at 3 C than at 1.5 C; Lancet Countdown 2023: heat deaths up 370% by 2050 at 2 C)
+      const heatScore = sw > 0 ? 100 * clamp(1 - (avgHeat / KH) * (1 + HEAT_AMP * climate.dT), 0, 1) : 100;
 
       // Floods
       let farmA = 0, regenA = 0;
@@ -521,7 +525,8 @@ const ThreadModel = (function () {
         floodExp[i] = p * floodEff[i] * (cover[i] === 'greenway' ? 0.8 : 1) * lflood[i];
         E += floodExp[i];
       }
-      const risk = E0 > 0 ? (E / E0) * (1 - retention) : 0;
+      // Storms 7% heavier per degree (IPCC AR6) overflow drains built for today's storms, so damage rises faster than the rain itself
+      const risk = E0 > 0 ? (E / E0) * (1 - retention) * (1 + 0.07 * climate.dT) : 0;
       const floodScore = 100 * clamp(1 - 0.7 * risk, 0, 1);
       const storage = 100 * retention;
 

@@ -214,6 +214,18 @@
   .jump span { font: 500 0.75rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink2); }
   .jump a { color: var(--ink); text-decoration: none; } .jump a:hover { color: var(--accent); text-decoration: underline; }
   #mapwrap, #lab-h, #scores-h, #costs-h, #start-h, #reg-h { scroll-margin-top: 52px; }
+  .dir { margin-top: 14px; padding: 16px 18px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); display: grid; gap: 12px; }
+  .dir h3 { margin: 0; font: 700 1.15rem/1.2 var(--font-display); }
+  .dir-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+  .dir-fact { padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+  .dir-fact b { display: block; font: 700 1.35rem/1.1 var(--font-display); }
+  .dir-fact span { font-size: 0.8125rem; color: var(--ink2); }
+  .dir-moves { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; counter-reset: mv; }
+  .dir-moves li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); counter-increment: mv; }
+  .dir-moves li::before { content: counter(mv); width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--accent-ink, #fff); display: grid; place-items: center; font-weight: 700; font-size: 0.875rem; }
+  .dir-moves b { display: block; } .dir-moves p { margin: 2px 0 0; font-size: 0.875rem; color: var(--ink2); }
+  .dir-acts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .dir-src { font-size: 0.75rem; color: var(--ink2); margin: 0; }
   .gis-row { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; padding-top: 10px; }
   .gis-note { font-size: 0.8125rem; color: var(--ink2); max-width: 40rem; }
   .chip {

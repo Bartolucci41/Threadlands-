@@ -87,6 +87,7 @@
         <button class="chip" type="button" data-layer="sat" aria-pressed="false" id="sat-chip" hidden>Measured heat</button>
         <button class="chip" type="button" data-layer="now" aria-pressed="false" id="now-chip" hidden>This week</button>
       </div>
+      <section class="dir" id="dir" aria-labelledby="dir-h" hidden></section>
       <div class="gis-row">
         <button class="chip" type="button" id="gis-dl">Download GIS layers</button>
         <span class="gis-note">One GeoJSON file for QGIS or ArcGIS: every hex with its land cover, people, elevation, heat, flooding and habitat, for the current plan and climate.</span>
@@ -210,6 +211,7 @@ const ThreadModel = (function () {
   let SURF_W = 0.75;
   let USE_CAL = true;            // share of heat intensity set by built surface rather than population density
   const KH = 1.6;              // heat load that scores 0 on heat relief
+  const HEAT_AMP = 0.2;        // extra heat harm per degree of warming, beyond the rise in heat load itself
   const NEED_KM2 = 0.0019;     // cropland per person for full self-sufficiency (0.19 ha, about the world average)
   const RETIRED_CROP = 0.5;    // share of a retired sprawl hex that returns to cropland
   const URBAN = { core: 1, mid: 1, suburb: 1, greenway: 1 };
@@ -556,7 +558,8 @@ const ThreadModel = (function () {
       if (climate.dT === 0 && climate.slr === 0) { floodEff = flood; return; }
       const rainX = 1 + 0.07 * climate.dT;
       floodEff = new Float64Array(N);
-      for (let i = 0; i < N; i++) floodEff[i] = Math.min(1.5, flood[i] * rainX + (lowCoast[i] ? 2 * climate.slr : 0));
+      // Low coastal land: once-a-century sea floods become yearly at many coasts by 2050 (IPCC SROCC), so sea-level rise weighs heavily there
+      for (let i = 0; i < N; i++) floodEff[i] = Math.min(1.5, flood[i] * rainX + (lowCoast[i] ? 4 * climate.slr : 0));
     }
     let E0 = 0;
     const out = {
@@ -698,7 +701,9 @@ const ThreadModel = (function () {
         sw += w; sh += w * hv;
       }
       const avgHeat = sw > 0 ? sh / sw : 0;
-      const heatScore = sw > 0 ? 100 * clamp(1 - avgHeat / KH, 0, 1) : 100;
+      // Dangerous heat grows faster than average warming: hot days above 35 C and heat deaths climb steeply with each degree
+      // (WRI on CMIP6: about 29 more such days in the average city at 3 C than at 1.5 C; Lancet Countdown 2023: heat deaths up 370% by 2050 at 2 C)
+      const heatScore = sw > 0 ? 100 * clamp(1 - (avgHeat / KH) * (1 + HEAT_AMP * climate.dT), 0, 1) : 100;
 
       // Floods
       let farmA = 0, regenA = 0;
@@ -718,7 +723,8 @@ const ThreadModel = (function () {
         floodExp[i] = p * floodEff[i] * (cover[i] === 'greenway' ? 0.8 : 1) * lflood[i];
         E += floodExp[i];
       }
-      const risk = E0 > 0 ? (E / E0) * (1 - retention) : 0;
+      // Storms 7% heavier per degree (IPCC AR6) overflow drains built for today's storms, so damage rises faster than the rain itself
+      const risk = E0 > 0 ? (E / E0) * (1 - retention) * (1 + 0.07 * climate.dT) : 0;
       const floodScore = 100 * clamp(1 - 0.7 * risk, 0, 1);
       const storage = 100 * retention;
 
@@ -1442,6 +1448,61 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     if (layer === 'threads') drawThreads(C);
     if (sel >= 0) { pathFor(sel, 1.0); ctx.lineWidth = 2.5; ctx.strokeStyle = C.ink; ctx.stroke(); }
   }
+
+  // ---- Direction: what 2050 changes here, and the three moves that protect the most
+  var MOVES = {
+    canopy: { t: 'Shade the hottest streets', d: 'Street trees and shade where the most people face the worst heat.' },
+    wetlands: { t: 'Give floods somewhere to go', d: 'Restore wetlands on the floodplain upstream of homes.' },
+    corridors: { t: 'Reconnect parks to wild land', d: 'Green corridors so wildlife and cool air can move.' },
+    regen: { t: 'Build drought-proof farms', d: 'Living soils that hold water through dry years.' },
+    compact: { t: 'Grow inward, not outward', d: 'New homes inside the city instead of on its edge.' }
+  };
+  function fmtK(n) { n = Math.round(n); return n >= 1e6 ? (n / 1e6).toFixed(1) + ' million' : n >= 1e4 ? Math.round(n / 1000) + ',000' : n.toLocaleString('en-US'); }
+  function renderDirection() {
+    var box = $('#dir');
+    if (!P || !res || kind === 'demo' || !P.evaluateIn) { box.hidden = true; return; }
+    var c = P.place.cells, ZEROL = TM.ZERO, t0 = P.evaluateIn('today', ZEROL), t1 = P.evaluateIn('mid', ZEROL);
+    var hotPeople = function (r, dT) { var n = 0; for (var i = 0; i < P.N; i++) if (isUrban(r.cover[i]) && r.heat[i] / 1.4 >= 0.75) n += Number(c.pop[i]) || 0; return n; };
+    var h0 = hotPeople(t0), h1 = hotPeople(t1);
+    var e0 = 0, e1 = 0; for (var i = 0; i < P.N; i++) { e0 += t0.floodExp[i]; e1 += t1.floodExp[i]; }
+    var fl = e0 > 0 ? Math.round(100 * (e1 / e0 - 1)) : 0;
+    var coastKm2 = (P.lowCoastCount || 0) * (P.hexKm ? 2.598 * P.hexKm * P.hexKm : 0.7);
+    var name = esc(P.place.name || 'this place');
+    var facts = '<div class="dir-fact"><b>' + fmtK(h0) + ' → ' + fmtK(h1) + '</b><span>people living in the hottest neighborhoods, today and by 2050 if nothing changes</span></div>' +
+      '<div class="dir-fact"><b>+9%</b><span>heavier downpours by 2050; flood exposure of homes up about ' + Math.max(0, fl) + '%</span></div>' +
+      (coastKm2 > 0 ? '<div class="dir-fact"><b>' + Math.round(coastKm2) + ' km²</b><span>of low coastal land, where once-a-century sea floods may come every year by 2050</span></div>' :
+        '<div class="dir-fact"><b>' + Math.round(t0.index) + ' → ' + Math.round(t1.index) + '</b><span>resilience index if nothing changes, today and in 2050</span></div>');
+    // Rank each lever by how much 2050 resilience one more step buys, within the effort cap
+    var cur = P.evaluateIn('mid', state).index, used = TM.effort(state), moves = [];
+    TM.LEVER_KEYS.forEach(function (k) {
+      if (state[k] >= 100) return;
+      var step = Math.min(20, 100 - state[k]), cost = step * TM.COST[k];
+      if (used + cost > TM.BUDGET + 1e-9) return;
+      var L = Object.assign({}, state); L[k] += step;
+      var gain = P.evaluateIn('mid', L).index - cur;
+      if (gain > 0.15) moves.push({ k: k, step: step, gain: gain, per: gain / cost });
+    });
+    moves.sort(function (a, b) { return b.per - a.per; });
+    moves = moves.slice(0, 3);
+    var list = moves.map(function (m) {
+      var site = (PRI && PRI[m.k] && PRI[m.k][0]) ? ' First place: ' + esc(PRI[m.k][0].why) : '';
+      return '<li><div><b>' + MOVES[m.k].t + '</b><p>' + MOVES[m.k].d + site + ' Adds about ' + m.gain.toFixed(1) + ' points to 2050 resilience.</p></div>' +
+        '<div class="dir-acts"><button type="button" class="chip" data-dir-show="' + m.k + '">Show where</button><button type="button" class="btn" data-dir-add="' + m.k + '" data-step="' + m.step + '">Add to plan</button></div></li>';
+    }).join('');
+    box.innerHTML = '<h3 id="dir-h">By 2050 in ' + name + '</h3><div class="dir-facts">' + facts + '</div>' +
+      (list ? '<h3>Do these first</h3><ol class="dir-moves">' + list + '</ol>' : '<p class="dir-src">Your plan already uses the effort available. Open Scores and Where to start for more detail.</p>') +
+      '<p class="dir-src">2050 assumes the middle emissions path: about 1.3 °C warmer, storms about 7% heavier per degree and seas about 20 cm higher (IPCC AR6, SROCC). Hottest neighborhoods means a heat load of 75 or more out of 100.</p>';
+    box.hidden = false;
+  }
+  $('#dir').addEventListener('click', function (e) {
+    var a = e.target.closest('[data-dir-add]'), w = e.target.closest('[data-dir-show]');
+    if (a) { var k = a.dataset.dirAdd; state[k] = Math.min(100, state[k] + Number(a.dataset.step)); render(); }
+    if (w) {
+      WTS.action = w.dataset.dirShow; WTS.show = true; WTS.sel = -1; sel = -1; renderWTS(); describe(); scheduleDraw();
+      try { $('#mapwrap').scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) { /* ignore */ }
+    }
+  });
+
   // ---- Threads: what one spot depends on, drawn as living lines
   var THR = { cache: {}, t: 0, anim: 0 };
   function threadOrigin() {
@@ -1639,6 +1700,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
   var announceTimer = 0;
   function render() {
     res = P.evaluate(state); THR.cache = {};
+    try { renderDirection(); } catch (err) { $('#dir').hidden = true; }
     var bau = P.BAU;
     METRICS.forEach(function (m) {
       var v = Math.round(res.metrics[m.k]), b = Math.round(bau.metrics[m.k]);
@@ -2262,7 +2324,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
   // ---- 2050 stress test
   var CLIM = 'today';
   var CLIM_TEXT = {
-    mid: 'summers about 1.3 \u00b0C hotter over land, downpours about 9% heavier, seas about 20 cm higher',
+    mid: 'summers about 1.3 \u00b0C hotter over land, with dangerous heat days rising faster than that, downpours about 9% heavier, seas about 20 cm higher',
     high: 'summers about 1.9 \u00b0C hotter over land, downpours about 13% heavier, seas about 23 cm higher'
   };
   function renderClimNote() {
