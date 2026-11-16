@@ -173,6 +173,8 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
 .st-sp-o i { color: var(--ink2); font-size: 0.75rem; }
 .st-sp-o span { display: block; color: var(--ink2); font-size: 0.75rem; font-family: var(--font-mono); }
 .st-sp-o[aria-checked="true"] { border: 1.5px solid var(--ink); background: var(--surface2); }
+.st-tool { display: inline-flex; align-items: center; gap: 6px; }
+.st-tool svg { flex: none; }
 .st-bom summary { cursor: pointer; font-weight: 600; font-size: 0.95rem; }
 .st-bom-opts { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
 .st-bom-opts [aria-checked="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
