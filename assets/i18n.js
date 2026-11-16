@@ -8,7 +8,7 @@
     ['fr', 'Français'], ['bn', 'বাংলা'], ['pt', 'Português'], ['ru', 'Русский'], ['ur', 'اردو']
   ];
   // Languages appear in the menu once their translation file is in data/i18n
-  var READY = ['en', 'es'];
+  var READY = ['en', 'zh', 'es', 'fr', 'pt', 'ru'];
   LANGS = LANGS.filter(function (l) { return READY.indexOf(l[0]) >= 0; });
   var RTL = { ar: 1, ur: 1 };
   var FONTS = { zh: 'Noto+Sans+SC:wght@400;600;800', hi: 'Noto+Sans+Devanagari:wght@400;600;800', bn: 'Noto+Sans+Bengali:wght@400;600;800',
@@ -22,7 +22,7 @@
 
   function skip(el) {
     for (var p = el; p && p.nodeType === 1; p = p.parentElement) {
-      if (/^(SCRIPT|STYLE|CODE|TEXTAREA|NOSCRIPT)$/.test(p.tagName) || p.getAttribute('translate') === 'no' || (p.classList && p.classList.contains('notranslate'))) return true;
+      if (/^(SCRIPT|STYLE|CODE|TEXTAREA|NOSCRIPT)$/.test(p.tagName) || p.hasAttribute('data-tr') || p.getAttribute('translate') === 'no' || (p.classList && p.classList.contains('notranslate'))) return true;
     }
     return false;
   }
@@ -67,7 +67,30 @@
       var v = tr(a[k]); if (v !== cur) el.setAttribute(k, v); a['_' + k] = v;
     });
   }
+  // Whole sentences (data-tr): translated as one string, so word order can change. In the translation,
+  // <1>…</1>, <2>…</2> stand for the element's 1st, 2nd… child elements, which keep their styling.
+  var WORIG = new WeakMap();
+  function esc(t) { return t.replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function doWhole(el) {
+    var o = WORIG.get(el);
+    if (!o) { o = { html: el.innerHTML, key: el.textContent.trim().replace(/\s+/g, ' ') }; WORIG.set(el, o); }
+    var t = lang !== 'en' && DICT ? DICT[o.key] : null;
+    if (!t) { if (el.innerHTML !== o.html) el.innerHTML = o.html; return; }
+    var tmp = document.createElement('div'); tmp.innerHTML = o.html;
+    var kids = tmp.children, out = '', re = /<(\d+)>([\s\S]*?)<\/\1>/g, last = 0, m;
+    while ((m = re.exec(t))) {
+      out += esc(t.slice(last, m.index));
+      var k = kids[+m[1] - 1];
+      if (k) { var c = k.cloneNode(false); c.textContent = m[2]; out += c.outerHTML; } else out += esc(m[2]);
+      last = re.lastIndex;
+    }
+    el.innerHTML = out + esc(t.slice(last));
+  }
   function walk(root) {
+    if (root.nodeType === 1) {
+      if (root.hasAttribute && root.hasAttribute('data-tr')) doWhole(root);
+      if (root.querySelectorAll) root.querySelectorAll('[data-tr]').forEach(doWhole);
+    }
     if (root.nodeType === 3) { if (root.parentElement && !skip(root.parentElement)) doText(root); return; }
     if (root.nodeType !== 1 || skip(root)) return;
     var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
