@@ -75,7 +75,22 @@
         <button type="button" class="chip st-tool" data-shape="circle" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg><span>Circle</span></button>
         <button type="button" class="chip st-tool" data-shape="poly" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18l3-12 7 3 6-4-2 13z"/></svg><span>Outline</span></button>
         <button type="button" class="chip st-tool" data-shape="curve" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16c2-8 6-10 9-7s5 5 7-3"/></svg><span>Curve</span></button>
+        <button type="button" class="chip st-tool" data-shape="edit" aria-pressed="false" title="Select a shape to move it, reshape it, resize it, copy it or delete it"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4l6 15 2-6 6-2z"/><rect x="15" y="15" width="5" height="5" rx="1"/></svg><span>Edit</span></button>
         <button type="button" class="chip st-tool" data-shape="free" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17c3 0 3-6 6-6s2 6 5 6 3-9 7-9"/></svg><span>Freehand</span></button>
+      </div>
+      <div class="st-optrow">
+      <div class="st-dims" id="st-dims" hidden>
+        <span id="st-dims-rect">Exact size: <input id="st-dw" type="number" min="1" step="1" placeholder="width" aria-label="Width in meters"> &times; <input id="st-dh" type="number" min="1" step="1" placeholder="depth" aria-label="Depth in meters"> m</span>
+        <span id="st-dims-circ">Exact size: radius <input id="st-dr" type="number" min="1" step="1" placeholder="any" aria-label="Radius in meters"> m</span>
+        <span class="st-dims-note">Leave empty to drag any size; with a size set, one click places it.</span>
+      </div>
+      <div class="st-selbar" id="st-selbar" hidden role="toolbar" aria-label="Selected shape">
+        <span id="st-sel-what"></span>
+        <span id="st-sel-size"></span>
+        <button type="button" class="chip" id="st-sel-dup" title="Copy it next to the original (Ctrl or Cmd + D)">Duplicate</button>
+        <button type="button" class="chip" id="st-sel-del" title="Delete (Delete key)">Delete</button>
+        <button type="button" class="chip" id="st-sel-done">Done</button>
+      </div>
       </div>
       <div class="st-map" id="st-map">
         <canvas id="st-canvas" role="img" aria-label="Map for designing. Draw shapes to place elements; zoom in close to pick real lots, blocks and streets."></canvas>
@@ -204,7 +219,7 @@
       desc: 'Planted dips that catch storm runoff before it floods homes.' },
     { k: 'pond', name: 'Pond or lake', group: 'Water', color: '--m-water', draw: 'area', where: 'any', grow: 1, start: 0.5,
       desc: 'Holds floodwater and cools the air. Draw it at any size, from a pond to a lake; about 2 m deep.' },
-    { k: 'seawall', name: 'Sea wall or levee', group: 'Water', color: '--ink2', draw: 'line', where: 'any', grow: 5, start: 0, anyZoom: true, noPick: true,
+    { k: 'seawall', name: 'Sea wall or levee', group: 'Water', color: '--ink2', draw: 'line', where: 'any', grow: 5, start: 0, anyZoom: true,
       desc: 'A wall along a coast or river, built to the height you set. It shields flood-prone land behind it, up to about 3 km inland. Draw it at any zoom. About 5 years to build.' },
     { k: 'wetland', name: 'Wetland', group: 'Water', color: '--m-wet', draw: 'area', where: 'land', grow: 8, start: 0.2,
       desc: 'Restored marsh on farmland or open land. Stores floodwater and shelters wildlife. Matures in about 8 years.' },
@@ -768,6 +783,7 @@
     drawOSM(in3d);
     S.feats.forEach(function (f) { if (!in3d || !SOLID[f.kind]) drawFeat(f, false); });
     if (in3d) draw3D();
+    drawSelection();
     if (snapPt) { ctx.save(); ctx.beginPath(); ctx.arc(snapPt.x, snapPt.y, 6, 0, 7); ctx.lineWidth = 2; ctx.strokeStyle = css('--accent'); ctx.stroke(); ctx.restore(); }
     if (draft) drawDraft();
   }
@@ -810,15 +826,15 @@
       .then(function (r) { clearTimeout(t); if (!r.ok) throw new Error(r.status); return r.json(); })
       .catch(function (e) { clearTimeout(t); if (n + 1 < OVERPASS.length) return overpass(q, n + 1); throw e; });
   }
-  var LABELS = { building: 'Building', parking: 'Parking lot', lot: 'Vacant or unused lot', grass: 'Grass lot', park: 'Park or garden', pitch: 'Sports field', street: 'Street' };
-  var PLURAL = { building: 'buildings', parking: 'parking lots', lot: 'vacant lots', grass: 'grass lots', park: 'parks', pitch: 'sports fields', street: 'streets' };
+  var LABELS = { building: 'Building', parking: 'Parking lot', lot: 'Vacant or unused lot', grass: 'Grass lot', park: 'Park or garden', pitch: 'Sports field', street: 'Street', waterway: 'River or canal', coast: 'Coastline' };
+  var PLURAL = { building: 'buildings', parking: 'parking lots', lot: 'vacant lots', grass: 'grass lots', park: 'parks', pitch: 'sports fields', street: 'streets', waterway: 'rivers and canals', coast: 'coastlines' };
   // Share of the site that has to be cleared first (building = all of it; parking = pavement only, cheaper)
   var CLEARS = { building: 1, parking: 0.3, lot: 0.1, grass: 0, park: 0, pitch: 0.05, street: 0 };
   var PICK = {
     farmblock: ['parking', 'lot', 'grass', 'pitch', 'building'], park: ['parking', 'lot', 'grass', 'pitch', 'building'],
     pond: ['parking', 'lot', 'grass', 'park', 'pitch'], raingarden: ['parking', 'lot', 'grass', 'park'],
     __building__: ['building'], housing: ['parking', 'lot', 'building'], build: ['parking', 'lot', 'building', 'grass'], roof: ['building'], solar: ['building', 'parking'],
-    trees: ['street'], transit: ['street'], corridor: ['street'],
+    trees: ['street'], transit: ['street'], corridor: ['street', 'waterway'], seawall: ['waterway', 'coast'],
     urbanfarm: ['building', 'lot', 'grass'], regen: ['grass', 'lot'], wetland: ['grass', 'lot', 'park', 'parking'], forest: ['grass', 'lot', 'park', 'parking']
   };
   function PICK_NAMES(tool) {
@@ -833,6 +849,8 @@
     if (/^(park|garden|playground)$/.test(t.leisure || '')) return 'park';
     if (t.leisure === 'pitch') return 'pitch';
     if (t.highway) return 'street';
+    if (/^(river|canal|stream)$/.test(t.waterway || '')) return 'waterway';
+    if (t.natural === 'coastline') return 'coast';
     return null;
   }
   // Building height: OpenStreetMap height or floors where mapped, otherwise estimated from type and how built-up the hex is
@@ -853,7 +871,7 @@
     els.forEach(function (e) {
       if (!e.geometry || OSM.seen[e.id]) return;
       var kind = classify(e.tags || {}); if (!kind) return;
-      var pts = e.geometry.map(function (g) { return [g.lat, g.lon]; }), line = kind === 'street';
+      var pts = e.geometry.map(function (g) { return [g.lat, g.lon]; }), line = kind === 'street' || kind === 'waterway' || kind === 'coast';
       if (!line) { if (pts.length > 1 && pts[0][0] === pts[pts.length - 1][0] && pts[0][1] === pts[pts.length - 1][1]) pts.pop(); if (pts.length < 3) return; }
       else if (pts.length < 2) return;
       var m = pts.map(function (p) { return [mx(p[1]), my(p[0])]; }), x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -880,7 +898,7 @@
       OSM.cells[key] = 'loading'; OSM.loading++; modeChanged();
       var bb = '(' + [c[0] * CELL, c[1] * CELL, (c[0] + 1) * CELL, (c[1] + 1) * CELL].map(function (v) { return v.toFixed(4); }).join(',') + ')';
       var q = '[out:json][timeout:25];(way["building"]' + bb + ';way["amenity"="parking"]' + bb + ';way["landuse"~"^(brownfield|greenfield|vacant|construction|grass)$"]' + bb +
-        ';way["leisure"~"^(park|garden|playground|pitch)$"]' + bb + ';way["highway"~"^(primary|secondary|tertiary|residential|unclassified|living_street|pedestrian)$"]' + bb + ';);out geom;';
+        ';way["leisure"~"^(park|garden|playground|pitch)$"]' + bb + ';way["waterway"~"^(river|canal|stream)$"]' + bb + ';way["natural"="coastline"]' + bb + ';way["highway"~"^(primary|secondary|tertiary|residential|unclassified|living_street|pedestrian)$"]' + bb + ';);out geom;';
       overpass(q)
         .then(function (j) { OSM.cells[key] = 'ok'; addOSM(j.elements || []); })
         .catch(function () { OSM.cells[key] = Date.now(); })
@@ -1106,7 +1124,11 @@
     hint();
   }
   function setShape(v) {
+    if (v !== 'edit' && S.selF) select(null);
     S.shape = v; draft = null;
+    var c0 = BYK[S.tool], areaT = c0 && c0.draw === 'area';
+    $('#st-dims').hidden = !(areaT && (v === 'rect' || v === 'circle'));
+    $('#st-dims-rect').hidden = v !== 'rect'; $('#st-dims-circ').hidden = v !== 'circle';
     document.querySelectorAll('[data-shape]').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.shape === v ? 'true' : 'false'); });
   }
   function hint(t) {
@@ -1119,6 +1141,7 @@
         ? (view.z < OSM_Z ? 'Zoom in once more and the real ' + what + ' appear. Then click one to turn it into ' + c.name.toLowerCase() + '. Drag to move the map.'
           : 'Highlighted ' + what + ' can become ' + c.name.toLowerCase() + '. Hover to see its size and cost, click to place it. Drag to move the map.')
         : (c.draw === 'line' ? 'Click along the route; points snap to real street corners. Double-click or press Enter to finish; Esc cancels. Hold Shift for straight lines.'
+        : S.shape === 'edit' ? (S.selF ? 'Drag the shape to move it, or drag a square handle to reshape it. Delete removes it; Ctrl or Cmd + D duplicates; Ctrl or Cmd + C, then V, copies and pastes.' : 'Click any shape you placed to select it. Drag empty space to move the map.')
         : S.shape === 'circle' ? 'Press at the center and drag out to the size you want. The radius, area and cost show as you go.'
         : S.shape === 'free' ? (c.draw === 'line' ? 'Press and draw the route like a pen; let go to finish. It is smoothed for you.' : 'Press and draw around the area like a pen; let go to finish. It closes and smooths itself.')
         : S.shape === 'curve' ? (c.draw === 'line' ? 'Click along the route; it bends smoothly through your points. Double-click or press Enter to finish.' : 'Click around the area; the edges curve smoothly between your points. Click the first point, double-click or press Enter to finish.')
@@ -1349,6 +1372,7 @@
     if (!S.P) return;
     var pt = evPos(ev);
     if (panning || ev.button === 1 || ev.button === 2) { panFrom = { x: pt.x, y: pt.y, cx: view.cx, cy: view.cy }; cv.setPointerCapture(ev.pointerId); return; }
+    if (S.shape === 'edit') { editDown(pt, ev); return; }
     if (S.tool === 'erase' && streetMode()) {
       var fi = featAt(pt);
       if (fi >= 0) { var f = S.feats.splice(fi, 1)[0]; S.history.push([{ feat: f, removed: true }]); after(); return; }
@@ -1358,6 +1382,7 @@
     }
     if (drawsShapes(S.tool)) {
       var c = BYK[S.tool], ll = snapLL(pt, ev);
+      if (c.draw === 'area' && (S.shape === 'rect' || S.shape === 'circle') && exactSize()) { placeExact(unsnapLL(pt)); return; }
       if (c.draw === 'area' && S.shape === 'rect') { draft = { kind: S.tool, type: 'rect', a: ll, b: ll }; cv.setPointerCapture(ev.pointerId); draw(); return; }
       if (c.draw === 'area' && S.shape === 'circle') { draft = { kind: S.tool, type: 'circle', c: ll, b: ll }; cv.setPointerCapture(ev.pointerId); draw(); return; }
       if (S.shape === 'free') { draft = { kind: S.tool, type: c.draw === 'line' ? 'line' : 'poly', pts: [unsnapLL(pt)], free: true }; cv.setPointerCapture(ev.pointerId); draw(); return; }
@@ -1378,6 +1403,7 @@
     if (!S.P) return;
     var pt = evPos(ev);
     if (panFrom) { view.cx = panFrom.cx - (pt.x - panFrom.x) / k(); view.cy = panFrom.cy - (pt.y - panFrom.y) / k(); draw(); return; }
+    if (editDrag) { editMove(pt, ev); return; }
     if (pickFrom) {
       if (!pickFrom.moved && Math.hypot(pt.x - pickFrom.x, pt.y - pickFrom.y) > 5) pickFrom.moved = true;
       if (pickFrom.moved) { view.cx = pickFrom.cx - (pt.x - pickFrom.x) / k(); view.cy = pickFrom.cy - (pt.y - pickFrom.y) / k(); $('#st-tip').hidden = true; draw(); }
@@ -1385,7 +1411,7 @@
     }
     if (draft && draft.type === 'rect') { draft.b = snapLL(pt, ev); draw(); return; }
     if (draft && draft.type === 'circle') { draft.b = unsnapLL(pt); draw(); return; }
-    if (draft && draft.free) { draft.pts.push(unsnapLL(pt)); draft.pts = thinPts(draft.pts, 3); draw(); return; }
+    if (draft && draft.free) { draft.pts.push(canPick() ? snapLL(pt) : unsnapLL(pt)); draft.pts = thinPts(draft.pts, 3); draw(); return; }
     if (draft) { draft.cursor = snapLL(pt, ev); draw(); }
     else if (drawsShapes(S.tool) && S.shape !== 'pick') { var o = snapPt; snapLL(pt, ev); if (o !== snapPt) draw(); }
     if (drawsShapes(S.tool) && S.shape === 'pick') { var h = osmAt(pt, S.tool); if (h !== hoverOSM) { hoverOSM = h; draw(); } }
@@ -1394,6 +1420,7 @@
   });
   var pickFrom = null, hoverOSM = null;
   function endPointer(ev) {
+    if (editDrag) { editUp(); return; }
     if (panFrom) { panFrom = null; osmSoon(); return; }
     if (pickFrom) {
       var pf = pickFrom; pickFrom = null;
@@ -1405,20 +1432,20 @@
     }
     if (draft && draft.type === 'circle') {
       var rr = metersBetween(draft.c, draft.b);
-      if (rr * ppm() > 4) { draft = { kind: draft.kind, type: 'poly', pts: circlePts(draft.c, rr) }; finishDraft(); }
+      if (rr * ppm() > 4) { draft = { kind: draft.kind, type: 'poly', pts: circlePts(draft.c, rr), geom: { t: 'circle', c: draft.c, r: rr } }; finishDraft(); }
       else { draft = null; draw(); }
       return;
     }
     if (draft && draft.free) {
       var fp = thinPts(draft.pts, 6), ln = draft.type === 'line';
-      if (fp.length >= (ln ? 2 : 3)) { draft = { kind: draft.kind, type: draft.type, pts: fp, smooth: true }; finishDraft(); }
+      if (fp.length >= (ln ? 2 : 3)) { draft = { kind: draft.kind, type: draft.type, pts: fp, smooth: true, geom: { t: 'curve', ctrl: fp.slice(), closed: !ln } }; finishDraft(); }
       else { draft = null; draw(); }
       return;
     }
     if (draft && draft.type === 'rect') {
       var a = draft.a, b = draft.b;
       if (Math.abs(sx(mx(a[1])) - sx(mx(b[1]))) > 4 && Math.abs(sy(my(a[0])) - sy(my(b[0]))) > 4) {
-        draft = { kind: draft.kind, type: 'poly', pts: [a, [a[0], b[1]], b, [b[0], a[1]]] };
+        draft = { kind: draft.kind, type: 'poly', pts: [a, [a[0], b[1]], b, [b[0], a[1]]], geom: { t: 'rect', a: a, b: b } };
         finishDraft();
       } else { draft = null; draw(); }
       return;
@@ -1437,6 +1464,151 @@
     else if (ev.key === 'Escape') { draft = null; draw(); }
   });
   cv.addEventListener('pointerleave', function () { $('#st-tip').hidden = true; });
+
+  // ---- Editing: select a shape to move it, drag its handles, resize it exactly, duplicate or delete it
+  var editDrag = null, clip = null;
+  function cloneGeom(g) { return g ? JSON.parse(JSON.stringify(g)) : null; }
+  function regen(f) {
+    var g = f.geom; if (!g) return;
+    if (g.t === 'circle') f.pts = circlePts(g.c, g.r);
+    else if (g.t === 'rect') f.pts = [g.a, [g.a[0], g.b[1]], g.b, [g.b[0], g.a[1]]];
+    else if (g.t === 'curve') f.pts = smoothPts(g.ctrl, g.closed, 3);
+  }
+  function refit(f) {
+    f.size = f.type === 'line' ? lineLength(f.pts) : polyArea(f.pts);
+    allocate(f);
+  }
+  function handles(f) {
+    var g = f.geom, L = function (p) { return { x: sx(mx(p[1])), y: sy(my(p[0])) }; };
+    if (g && g.t === 'circle') { var e = [g.c[0], g.c[1] + g.r / (111320 * Math.cos(g.c[0] * Math.PI / 180))]; return [L(g.c), L(e)]; }
+    if (g && g.t === 'rect') return [L(g.a), L([g.a[0], g.b[1]]), L(g.b), L([g.b[0], g.a[1]])];
+    if (g && g.t === 'curve') return g.ctrl.map(L);
+    return f.pts.length <= 80 ? f.pts.map(L) : [];
+  }
+  function translate(f, d) {
+    var mv = function (p) { return [p[0] + d[0], p[1] + d[1]]; };
+    f.pts = f.pts.map(mv);
+    var g = f.geom;
+    if (g) { if (g.c) g.c = mv(g.c); if (g.a) { g.a = mv(g.a); g.b = mv(g.b); } if (g.ctrl) g.ctrl = g.ctrl.map(mv); }
+  }
+  function select(f) {
+    S.selF = f;
+    var bar = $('#st-selbar');
+    bar.hidden = !f;
+    if (!f) { draw(); return; }
+    var q = featQty(f), g = f.geom;
+    $('#st-sel-what').textContent = BYK[f.kind].name + ': ' + q.label + (q.cost ? ', ' + money(q.cost * S.F) : '');
+    var sz = '';
+    if (g && g.t === 'circle') sz = 'radius <input id="st-sel-r" type="number" min="1" value="' + Math.round(g.r) + '"> m';
+    else if (g && g.t === 'rect') sz = '<input id="st-sel-w" type="number" min="1" value="' + Math.round(metersBetween(g.a, [g.a[0], g.b[1]])) + '"> &times; <input id="st-sel-h" type="number" min="1" value="' + Math.round(metersBetween(g.a, [g.b[0], g.a[1]])) + '"> m';
+    $('#st-sel-size').innerHTML = sz;
+    draw();
+  }
+  function editDown(pt, ev) {
+    var f = S.selF;
+    if (f) {
+      var hs = handles(f);
+      for (var h = 0; h < hs.length; h++) if (Math.hypot(hs[h].x - pt.x, hs[h].y - pt.y) < 9) {
+        editDrag = { f: f, h: h, before: { pts: f.pts.slice(), geom: cloneGeom(f.geom) }, moved: false };
+        cv.setPointerCapture(ev.pointerId); return;
+      }
+    }
+    var i = featAt(pt);
+    if (i >= 0) {
+      var g = S.feats[i]; if (g !== S.selF) select(g);
+      editDrag = { f: g, h: -1, last: unsnapLL(pt), before: { pts: g.pts.slice(), geom: cloneGeom(g.geom) }, moved: false };
+      cv.setPointerCapture(ev.pointerId); return;
+    }
+    if (S.selF) select(null);
+    panFrom = { x: pt.x, y: pt.y, cx: view.cx, cy: view.cy }; cv.setPointerCapture(ev.pointerId);
+  }
+  function editMove(pt, ev) {
+    var d = editDrag, f = d.f, g = f.geom;
+    d.moved = true;
+    if (d.h < 0) {
+      var ll = unsnapLL(pt); translate(f, [ll[0] - d.last[0], ll[1] - d.last[1]]); d.last = ll;
+    } else {
+      var p = canPick() ? snapLL(pt, ev) : unsnapLL(pt);
+      if (g && g.t === 'circle') { if (d.h === 0) { translate(f, [p[0] - g.c[0], p[1] - g.c[1]]); } else { g.r = Math.max(1, metersBetween(g.c, p)); } }
+      else if (g && g.t === 'rect') { var opp = [g.b, [g.b[0], g.a[1]], g.a, [g.a[0], g.b[1]]][d.h]; g.a = opp; g.b = p; }
+      else if (g && g.t === 'curve') g.ctrl[d.h] = p;
+      else f.pts[d.h] = p;
+      regen(f);
+    }
+    draw();
+  }
+  function editUp() {
+    var d = editDrag; editDrag = null;
+    if (!d.moved) return;
+    refit(d.f);
+    if (!d.f.alloc.length) { d.f.pts = d.before.pts; d.f.geom = d.before.geom; refit(d.f); hint('That moves it off this place’s map, so it went back.'); setTimeout(function () { hint(); }, 3000); }
+    else S.history.push([{ feat: d.f, edit: d.before }]);
+    after(); select(d.f);
+  }
+  function duplicate(f, dx, dy) {
+    var c = JSON.parse(JSON.stringify(f)); c.id = S.nextId++; delete c.alloc; delete c.prot;
+    var a = unsnapLL({ x: view.W / 2, y: view.H / 2 }), b = unsnapLL({ x: view.W / 2 + dx, y: view.H / 2 + dy });
+    translate(c, [b[0] - a[0], b[1] - a[1]]);
+    refit(c);
+    if (!c.alloc.length) return null;
+    S.feats.push(c); S.history.push([{ feat: c, added: true }]); after(); select(c);
+    return c;
+  }
+  function removeSel() {
+    var f = S.selF; if (!f) return;
+    S.feats = S.feats.filter(function (x) { return x !== f; });
+    S.history.push([{ feat: f, removed: true }]); select(null); after();
+  }
+  $('#st-sel-dup').addEventListener('click', function () { if (S.selF) duplicate(S.selF, 24, 24); });
+  $('#st-sel-del').addEventListener('click', removeSel);
+  $('#st-sel-done').addEventListener('click', function () { select(null); });
+  // exact sizes typed into a selected circle or rectangle
+  $('#st-selbar').addEventListener('change', function (e) {
+    var f = S.selF, g = f && f.geom; if (!g) return;
+    var before = { pts: f.pts.slice(), geom: cloneGeom(g) }, v = Number(e.target.value);
+    if (!(v > 0)) return;
+    if (e.target.id === 'st-sel-r' && g.t === 'circle') g.r = v;
+    else if (g.t === 'rect' && (e.target.id === 'st-sel-w' || e.target.id === 'st-sel-h')) {
+      var w = Number($('#st-sel-w').value), h = Number($('#st-sel-h').value), c = [(g.a[0] + g.b[0]) / 2, (g.a[1] + g.b[1]) / 2];
+      var r = rectAt(c, w, h); g.a = r.a; g.b = r.b;
+    } else return;
+    regen(f); refit(f); S.history.push([{ feat: f, edit: before }]); after(); select(f);
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (S.shape !== 'edit' || /^(INPUT|SELECT|TEXTAREA)$/.test((ev.target && ev.target.tagName) || '')) return;
+    var mod = ev.ctrlKey || ev.metaKey, f = S.selF;
+    if ((ev.key === 'Delete' || ev.key === 'Backspace') && f) { ev.preventDefault(); removeSel(); }
+    else if (ev.key === 'Escape' && f) select(null);
+    else if (mod && (ev.key === 'c' || ev.key === 'C') && f) { clip = JSON.parse(JSON.stringify(f)); clip.n = 0; hint('Copied. Press Ctrl or Cmd + V to paste it.'); setTimeout(function () { hint(); }, 2500); }
+    else if (mod && (ev.key === 'v' || ev.key === 'V') && clip) { ev.preventDefault(); clip.n++; var c = duplicate(clip, 24 * clip.n, 24 * clip.n); if (!c) clip.n--; }
+    else if (mod && (ev.key === 'd' || ev.key === 'D') && f) { ev.preventDefault(); duplicate(f, 24, 24); }
+  });
+  function drawSelection() {
+    var f = S.selF; if (!f || S.shape !== 'edit' || S.feats.indexOf(f) < 0) return;
+    drawFeat(f, true);
+    ctx.save(); ctx.setLineDash([]);
+    handles(f).forEach(function (h, j) {
+      ctx.beginPath(); ctx.rect(h.x - 5, h.y - 5, 10, 10);
+      ctx.fillStyle = css('--bg'); ctx.fill(); ctx.lineWidth = 1.8; ctx.strokeStyle = css('--accent'); ctx.stroke();
+    });
+    ctx.restore();
+  }
+  // ---- Exact sizes for new rectangles and circles
+  function exactSize() {
+    if (S.shape === 'circle') return Number($('#st-dr').value) > 0;
+    if (S.shape === 'rect') return Number($('#st-dw').value) > 0 && Number($('#st-dh').value) > 0;
+    return false;
+  }
+  function rectAt(c, w, h) {
+    var dy = h / 2 / 111320, dx = w / 2 / (111320 * Math.cos(c[0] * Math.PI / 180));
+    return { a: [c[0] + dy, c[1] - dx], b: [c[0] - dy, c[1] + dx] };
+  }
+  function placeExact(c) {
+    if (S.shape === 'circle') { var r = Number($('#st-dr').value); draft = { kind: S.tool, type: 'poly', pts: circlePts(c, r), geom: { t: 'circle', c: c, r: r } }; }
+    else { var q = rectAt(c, Number($('#st-dw').value), Number($('#st-dh').value)); draft = { kind: S.tool, type: 'poly', pts: [q.a, [q.a[0], q.b[1]], q.b, [q.b[0], q.a[1]]], geom: { t: 'rect', a: q.a, b: q.b } }; }
+    finishDraft();
+  }
+
   // Smooth a run of points (Chaikin corner cutting), closed for areas, open for routes
   function smoothPts(pts, closed, rounds) {
     var p = pts.slice();
@@ -1469,9 +1641,10 @@
     if (!d) return;
     var isLine = d.type === 'line';
     if ((isLine && d.pts.length < 2) || (!isLine && d.pts.length < 3)) { draw(); return; }
-    if (d.smooth) d.pts = smoothPts(d.pts, !isLine, 3);
+    if (d.smooth) { if (!d.geom) d.geom = { t: 'curve', ctrl: d.pts.slice(), closed: !isLine }; d.pts = smoothPts(d.pts, !isLine, 3); }
     var f = { id: S.nextId++, kind: d.kind, type: isLine ? 'line' : 'area', pts: d.pts };
     if (d.osm) { f.osm = d.osm; f.clear = d.clear; }
+    if (d.geom) f.geom = d.geom;
     if (recipe(f.kind)) f.mix = S.mix[f.kind] || optOf(f.kind).id;
     if (f.kind === 'trees' && S.sp) f.sp = S.sp;
     if (f.kind === 'build') f.floors = S.floors;
@@ -1563,6 +1736,7 @@
       var e = st[n];
       if (e.feat && e.added) S.feats = S.feats.filter(function (f) { return f !== e.feat; });
       else if (e.feat && e.removed) S.feats.push(e.feat);
+      else if (e.feat && e.edit) { e.feat.pts = e.edit.pts; e.feat.geom = e.edit.geom; refit(e.feat); if (S.selF === e.feat) select(e.feat); }
       else if (e.prev) S.items.set(e.hex, e.prev); else S.items.delete(e.hex);
     }
     after();
