@@ -153,6 +153,11 @@ css += """
   .st-item-t { display: grid; gap: 2px; } .st-item-t span { color: var(--ink2); font-size: 0.8125rem; }
   .st-carb { font-size: 0.75rem !important; color: var(--accent) !important; }
   .st-bom { margin: 10px 0 4px; border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; background: var(--surface); }
+.st-sp [role="radiogroup"] { display: grid; gap: 4px; max-height: 260px; overflow-y: auto; }
+.st-sp-o { text-align: left; padding: 6px 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; font-size: 0.85rem; cursor: pointer; }
+.st-sp-o i { color: var(--ink2); font-size: 0.75rem; }
+.st-sp-o span { display: block; color: var(--ink2); font-size: 0.75rem; font-family: var(--font-mono); }
+.st-sp-o[aria-checked="true"] { border: 1.5px solid var(--ink); background: var(--surface2); }
 .st-bom summary { cursor: pointer; font-weight: 600; font-size: 0.95rem; }
 .st-bom-opts { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
 .st-bom-opts [aria-checked="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
