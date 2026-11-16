@@ -98,6 +98,9 @@
       <h2 class="st-h">Your design</h2>
       <div id="st-design" class="st-extra"></div>
 
+      <p style="margin:0 0 6px"><button type="button" class="chip" id="st-gis">Download design for GIS</button></p>
+      <p class="hint" style="margin:0 0 14px">A GeoJSON file of every element you placed, with its size, cost and settings, ready for QGIS or ArcGIS.</p>
+
       <h2 class="st-h">Challenges <span class="st-chal-n" id="st-chal-n"></span></h2>
       <p class="hint" style="margin:0">Checked in 2050, within the budget.</p>
       <ol class="st-chals" id="st-chals"></ol>
@@ -1064,6 +1067,42 @@
     $('#st-attr').hidden = S.basemap === 'none';
     draw();
   });
+
+  // ---- Download the design as GIS: drawn shapes as polygons and lines, whole-hex placements as hex polygons (EPSG:4326)
+  function downloadDesign() {
+    if (!S.P) return;
+    var feats = [], c = S.P.place.cells, r6 = function (v) { return Math.round(v * 1e6) / 1e6; };
+    S.feats.forEach(function (f) {
+      var q = featQty(f), co = f.pts.map(function (p) { return [r6(p[1]), r6(p[0])]; });
+      if (f.type === 'area') co.push(co[0]);
+      feats.push({ type: 'Feature', geometry: f.type === 'area' ? { type: 'Polygon', coordinates: [co] } : { type: 'LineString', coordinates: co },
+        properties: { element: BYK[f.kind].name, kind: f.kind, placed_as: f.osm ? 'picked ' + (LABELS[f.osm.kind] || f.osm.kind).toLowerCase() : 'drawn',
+          osm_way: f.osm ? f.osm.id : null, name: f.osm && f.osm.name || null,
+          area_m2: f.type === 'area' ? Math.round(f.size) : null, length_m: f.type === 'line' ? Math.round(f.size) : null,
+          floors: f.floors || null, height_m: f.height || null, summary: q.label,
+          cost_usd: Math.round(q.cost * S.F), upkeep_usd_per_year: Math.round(q.up * S.F) } });
+    });
+    S.items.forEach(function (kind, i) {
+      var p = c.poly[i], ring = [], q = hexQty(kind, i);
+      for (var j = 0; j + 1 < p.length; j += 2) ring.push([r6(Number(p[j + 1])), r6(Number(p[j]))]);
+      ring.push(ring[0]);
+      feats.push({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [ring] },
+        properties: { element: BYK[kind].name, kind: kind, placed_as: 'whole hex', hex_id: c.id ? c.id[i] : String(i), summary: q.label,
+          cost_usd: Math.round(q.cost * S.F), upkeep_usd_per_year: Math.round(q.up * S.F) } });
+    });
+    var T = totals(), r = run(2050).res;
+    var fc = { type: 'FeatureCollection', name: 'threadlands-studio-' + S.slug,
+      metadata: { place: S.P.place.display_name || S.P.place.name, made_in: 'https://threadlands.org/studio/', downloaded: new Date().toISOString(),
+        crs: 'EPSG:4326 (WGS 84 longitude, latitude)', budget_usd: Math.round(S.budget), spent_usd: Math.round(T.spent), upkeep_usd_per_year: Math.round(T.up),
+        prices: S.pl ? 'adjusted to ' + S.pl.name + ', about ' + Math.round(S.F * 100) + '% of US levels' : 'US prices',
+        resilience_index_2050: Math.round(r.index), metrics_2050: Object.keys(r.metrics).reduce(function (o, k2) { o[k2] = Math.round(r.metrics[k2] * 10) / 10; return o; }, {}),
+        sources: 'Costs and assumptions listed at https://threadlands.org/studio/ under Sources and assumptions. Street-level shapes from OpenStreetMap (ODbL).' },
+      features: feats };
+    var blob = new Blob([JSON.stringify(fc)], { type: 'application/geo+json' }), a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'threadlands-studio-' + S.slug + '.geojson';
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  $('#st-gis').addEventListener('click', function () { downloadDesign(); refresh(); });
 
   // ---- Storage
   function key() { return 'threadlands:studio2:' + S.slug + ':' + S.P.N; }

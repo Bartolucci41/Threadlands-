@@ -85,6 +85,10 @@
         <button class="chip" type="button" data-layer="sat" aria-pressed="false" id="sat-chip" hidden>Measured heat</button>
         <button class="chip" type="button" data-layer="now" aria-pressed="false" id="now-chip" hidden>This week</button>
       </div>
+      <div class="gis-row">
+        <button class="chip" type="button" id="gis-dl">Download GIS layers</button>
+        <span class="gis-note">One GeoJSON file for QGIS or ArcGIS: every hex with its land cover, people, elevation, heat, flooding and habitat, for the current plan and climate.</span>
+      </div>
       <div class="sketchbar">
         <button class="chip sk-on" type="button" id="sk-toggle" aria-pressed="false">Sketch a plan</button>
         <div class="sk-tools" id="sk-tools" role="group" aria-label="Sketch tool" hidden>
@@ -1494,6 +1498,52 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
       if (!ps.moved && ps.type !== 'mouse') { sel = ps.h === sel ? -1 : ps.h; describe(); scheduleDraw(); }
     });
   });
+
+  // ---- Download the place as GIS layers: a GeoJSON FeatureCollection in WGS 84 (EPSG:4326), one polygon per hex
+  function slugify(t) { return String(t || 'place').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'place'; }
+  function r3(v) { v = Number(v); return isFinite(v) ? Math.round(v * 1000) / 1000 : null; }
+  function downloadGIS() {
+    if (!P || !res) return;
+    var c = P.place.cells, base = P.BAU_TODAY, feats = [];
+    for (var i = 0; i < P.N; i++) {
+      var p = c.poly[i]; if (!p || p.length < 6) continue;
+      var ring = [];
+      for (var j = 0; j + 1 < p.length; j += 2) ring.push([Math.round(Number(p[j + 1]) * 1e6) / 1e6, Math.round(Number(p[j]) * 1e6) / 1e6]);
+      ring.push(ring[0]);
+      var cov = res.cover[i], urb = isUrban(cov);
+      feats.push({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [ring] }, properties: {
+        hex_id: c.id ? c.id[i] : String(i), inside_place: P.inside[i] ? 1 : 0, area_km2: r3(c.area[i]), population: Math.round(Number(c.pop[i]) || 0),
+        elevation_m: r3(c.elev && c.elev[i]), flood_prone: r3(c.flood[i]), river: r3(c.river && c.river[i]), water_km: r3(c.water_km && c.water_km[i]),
+        built: r3(c.built && c.built[i]), tree: r3(c.tree && c.tree[i]), shrub: r3(c.shrub && c.shrub[i]), grass: r3(c.grass && c.grass[i]),
+        crop: r3(c.crop && c.crop[i]), bare: r3(c.bare && c.bare[i]), water: r3(c.water && c.water[i]), wetland: r3(c.wetland && c.wetland[i]),
+        cover_today: base.cover[i], cover_plan: cov,
+        heat_load: urb ? Math.round(res.heat[i] / 1.4 * 100) : null,
+        flood_exposure: urb ? r3(res.floodExp[i] * (1 - res.retention) / (P.maxFloodExp || 1)) : null,
+        habitat: res.comp[i] === res.lcc ? 'main network' : res.comp[i] >= 0 ? 'isolated patch' : 'none',
+        lst_c: r3(c.lst && c.lst[i]), lst_vs_land_c: r3(c.lst_rel && c.lst_rel[i]),
+        this_week_c: NOWD && isFinite(NOWD.anom[i]) ? r3(NOWD.anom[i]) : null,
+        sketch: P.paint && P.paint.get(i) || null
+      } });
+    }
+    var fc = { type: 'FeatureCollection', name: 'threadlands-' + slugify(P.place.name),
+      metadata: {
+        place: P.place.display_name || P.place.name, generated_from: 'https://threadlands.org/explore/', downloaded: new Date().toISOString(),
+        crs: 'EPSG:4326 (WGS 84 longitude, latitude)', climate: CLIM, plan_levers: state, resilience_index: Math.round(res.index),
+        fields: {
+          inside_place: '1 inside the place outline, 0 surrounding region', population: 'WorldPop 2020', elevation_m: 'Copernicus DEM',
+          flood_prone: '0 to 1, low land beside rivers, lakes or the sea', 'built..wetland': 'share of the hex in each ESA WorldCover class',
+          cover_today: 'Threadlands land class today', cover_plan: 'land class under the current plan', heat_load: '0 to 100, built-up hexes only',
+          flood_exposure: '0 to 1, relative flood exposure of homes under the plan', habitat: 'connection to the main habitat network',
+          lst_c: 'Landsat land surface temperature, summer median', lst_vs_land_c: 'difference from typical land around it', this_week_c: 'latest clear Landsat pass against the same weeks in earlier years'
+        },
+        sources: 'OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, WWF HydroSHEDS, USGS and NASA Landsat; model and methods at https://threadlands.org/how-it-works/'
+      },
+      features: feats };
+    var blob = new Blob([JSON.stringify(fc)], { type: 'application/geo+json' }), a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'threadlands-' + slugify(P.place.name) + '.geojson';
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  $('#gis-dl').addEventListener('click', downloadGIS);
   $('#z-in').addEventListener('click', function () { zoomAt(2); });
   $('#z-out').addEventListener('click', function () { zoomAt(0.5); });
   $('#z-fit').addEventListener('click', function () { if (!VIEW) return; VIEW.z = 1; VIEW.cx = (bbox.minx + bbox.maxx) / 2; VIEW.cy = (bbox.miny + bbox.maxy) / 2; applyView(); });

@@ -210,6 +210,8 @@
   .badge-num { font: 800 1.9rem/1 var(--font-display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
   .badge-d { font: 500 0.8rem var(--font-mono); font-variant-numeric: tabular-nums; }
   .layers { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 10px; }
+  .gis-row { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; padding-top: 10px; }
+  .gis-note { font-size: 0.8125rem; color: var(--ink2); max-width: 40rem; }
   .chip {
     font: 500 0.8125rem/1 var(--font-body); min-height: 40px; padding: 0 14px; border-radius: 999px;
     border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer;
