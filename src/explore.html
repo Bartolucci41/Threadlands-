@@ -1322,7 +1322,6 @@
 
 
   // ---- The place's emblem, drawn from its own data: outline, rivers, farmland, forest and water, in the house palette
-  var LANDMARKS = { 'san-francisco': 1, 'mexico-city': 1, 'montreal': 1, 'bologna': 1, 'bangkok': 1 };
   function renderEmblem() {
     var c = $('#place-emblem'); if (!c || !P) return;
     var d = window.devicePixelRatio || 1, S2 = 72; c.width = S2 * d; c.height = S2 * d;
@@ -1382,7 +1381,13 @@
     g.restore();
     g.beginPath(); g.arc(S2 / 2, S2 / 2, S2 / 2 - 1, 0, 7); g.lineWidth = 2; g.strokeStyle = '#1d2b25'; g.globalAlpha = 0.85; g.stroke(); g.globalAlpha = 1;
     var art = $('#place-art'), slug = current || '';
-    if (LANDMARKS[slug]) { art.src = BASE + 'assets/landmarks/' + slug + '.svg'; art.alt = ''; art.hidden = false; } else { art.hidden = true; art.removeAttribute('src'); }
+    // Any place with a drawing in assets/landmarks shows it; new drawings appear without code changes
+    if (slug && slug !== 'demo' && art.dataset.slug !== slug) {
+      art.dataset.slug = slug; art.hidden = true;
+      art.onload = function () { if (art.dataset.slug === slug) art.hidden = false; };
+      art.onerror = function () { art.hidden = true; };
+      art.src = BASE + 'assets/landmarks/' + slug + '.svg';
+    } else if (!slug || slug === 'demo') { art.hidden = true; art.removeAttribute('src'); art.dataset.slug = ''; }
   }
   function renderPlaceInfo() {
     var pl = P.place;
