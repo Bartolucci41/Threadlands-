@@ -23,7 +23,6 @@
 
 
 <main class="wrap explore-main">
-  <img class="place-art" id="place-art" alt="" hidden>
   <h1 class="sect-h page-h" id="explore">Explore a place</h1>
   <div class="placebar" id="placebar">
     <div class="place-head"><canvas class="emblem" id="place-emblem" width="72" height="72" aria-hidden="true"></canvas>
@@ -1839,14 +1838,6 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     g.beginPath(); g.arc(S2 / 2, S2 / 2, S2 / 2 - 1, 0, 7); g.lineWidth = 2; g.strokeStyle = '#1d2b25'; g.globalAlpha = 0.85; g.stroke(); g.globalAlpha = 1;
     var nm = ((P.place.query || '').split('||')[0] || '').trim() || P.place.display_name || P.place.name;
     if (nm) { var want = P.place; fetchOutline(nm, function (ring) { if (P.place === want) drawOutlineEmblem(ring); }); }
-    var art = $('#place-art'), slug = current || '';
-    // Any place with a drawing in assets/landmarks shows it; new drawings appear without code changes
-    if (slug && slug !== 'demo' && art.dataset.slug !== slug) {
-      art.dataset.slug = slug; art.hidden = true;
-      art.onload = function () { if (art.dataset.slug === slug) art.hidden = false; };
-      art.onerror = function () { art.hidden = true; };
-      art.src = BASE + 'assets/landmarks/' + slug + '.svg';
-    } else if (!slug || slug === 'demo') { art.hidden = true; art.removeAttribute('src'); art.dataset.slug = ''; }
   }
   function renderPlaceInfo() {
     var pl = P.place;

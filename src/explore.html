@@ -174,9 +174,6 @@
   .glance { margin: 0 0 22px; }
   .glance::after { content: ""; display: block; clear: both; }
   .explore-main { position: relative; }
-  .place-art { position: absolute; right: 0; top: -24px; width: min(560px, 55%); height: auto; opacity: 0.2; filter: grayscale(1) contrast(1.5); mix-blend-mode: multiply; pointer-events: none; z-index: 0; -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 40%, transparent 75%); mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 40%, transparent 75%); }
-  .explore-main > :not(.place-art) { position: relative; z-index: 1; }
-  @media (max-width: 640px) { .place-art { width: 100%; top: -10px; opacity: 0.14; } }
   .place-head { display: flex; gap: 14px; align-items: center; min-width: 0; }
   .emblem { width: 72px; height: 72px; flex: 0 0 auto; border-radius: 50%; }
   .glance-h { margin: 0 0 4px; font: 600 1.125rem var(--font-body); color: var(--ink); }
@@ -394,7 +391,6 @@
 <!--NAV-->
 
 <main class="wrap explore-main">
-  <img class="place-art" id="place-art" alt="" hidden>
   <h1 class="sect-h page-h" id="explore">Explore a place</h1>
   <div class="placebar" id="placebar">
     <div class="place-head"><canvas class="emblem" id="place-emblem" width="72" height="72" aria-hidden="true"></canvas>
@@ -1421,14 +1417,6 @@
     g.beginPath(); g.arc(S2 / 2, S2 / 2, S2 / 2 - 1, 0, 7); g.lineWidth = 2; g.strokeStyle = '#1d2b25'; g.globalAlpha = 0.85; g.stroke(); g.globalAlpha = 1;
     var nm = ((P.place.query || '').split('||')[0] || '').trim() || P.place.display_name || P.place.name;
     if (nm) { var want = P.place; fetchOutline(nm, function (ring) { if (P.place === want) drawOutlineEmblem(ring); }); }
-    var art = $('#place-art'), slug = current || '';
-    // Any place with a drawing in assets/landmarks shows it; new drawings appear without code changes
-    if (slug && slug !== 'demo' && art.dataset.slug !== slug) {
-      art.dataset.slug = slug; art.hidden = true;
-      art.onload = function () { if (art.dataset.slug === slug) art.hidden = false; };
-      art.onerror = function () { art.hidden = true; };
-      art.src = BASE + 'assets/landmarks/' + slug + '.svg';
-    } else if (!slug || slug === 'demo') { art.hidden = true; art.removeAttribute('src'); art.dataset.slug = ''; }
   }
   function renderPlaceInfo() {
     var pl = P.place;
