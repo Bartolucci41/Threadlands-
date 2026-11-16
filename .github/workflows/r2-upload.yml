@@ -1,0 +1,24 @@
+name: Upload map data to R2
+
+# Copies the block-level detail (and anything else listed) to the Cloudflare R2 data store.
+on:
+  workflow_dispatch:
+    inputs:
+      paths:
+        description: "Folders under data/, space-separated"
+        required: true
+        default: "detail"
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: pipeline/r2_sync.sh ${{ inputs.paths }}
+      - name: Check the public address serves a file
+        run: curl -sf -o /dev/null -w "%{http_code}\n" https://pub-5cc2f5116c6c462596fbf16596585b83.r2.dev/detail/bologna/index.json
