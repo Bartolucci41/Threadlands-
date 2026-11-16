@@ -1187,7 +1187,7 @@
       default: what = r.unit === 'ha' ? '1 hectare' : num(u) + ' m²';
     }
     var b = bom(S.tool, cur.id, u, h, fl, 0, S.sp);
-    $('#st-bom-note').textContent = cur.note + ' For ' + what + ' at ' + (S.pl ? S.pl.name : 'US') + ' prices:';
+    $('#st-bom-note').innerHTML = '<span>' + esc(cur.note) + '</span> <span>For ' + esc(what) + ', at local prices:</span>';
     $('#st-bom-tbl').innerHTML = '<table><thead><tr><th>Material or work</th><th>Amount</th><th>Cost</th><th>CO₂</th></tr></thead><tbody>' +
       b.lines.map(function (l) { return '<tr><td>' + esc(l.name) + '</td><td>' + (l.unit.indexOf('US$') === 0 ? '' : fmtQty(l.qty) + ' ' + esc(l.unit)) + '</td><td>' + money(l.usd) + '</td><td>' + tco2(l.kg) + '</td></tr>'; }).join('') +
       '</tbody><tfoot><tr><td>Total</td><td></td><td>' + money(b.usd) + '</td><td>' + tco2(b.kg) + '</td></tr></tfoot></table>' +
