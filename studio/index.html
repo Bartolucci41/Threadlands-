@@ -664,6 +664,64 @@
     return { res: res, bau: bau };
   }
 
+
+  // ---- Block-level detail (data/detail/<slug>/): small cells measured from satellite data, loaded for the
+  // part of the map in view once you zoom in. Scores still come from the place's hexes.
+  var DET = { slug: null, idx: null, tiles: {}, pend: {}, psum: {}, pn: {} }, DCV = null;
+  function loadDetail(slug) {
+    if (DET.slug === slug) return;
+    DET = { slug: slug, idx: null, tiles: {}, pend: {}, psum: {}, pn: {} };
+    if (!slug || !window.fetch) return;
+    fetch('../data/detail/' + slug + '/index.json').then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j && DET.slug === slug) { DET.idx = j; scheduleDraw(); } }).catch(function () {});
+  }
+  function detailTile(id) {
+    var slug = DET.slug; DET.pend[id] = 1;
+    fetch('../data/detail/' + slug + '/' + id + '.json').then(function (r) { return r.ok ? r.json() : null; }).then(function (t) {
+      if (!t || DET.slug !== slug) return;
+      DET.tiles[id] = t;
+      t.parent.forEach(function (p, q) { var h = t.heat[q]; if (h != null) { DET.psum[p] = (DET.psum[p] || 0) + h; DET.pn[p] = (DET.pn[p] || 0) + 1; } });
+      scheduleDraw();
+    }).catch(function () {});
+  }
+  function drawDetail(C, heat) {
+    var P = S.P, res = S.res;
+    if (!DET.idx || S.grid || (S.show !== 'land' && S.show !== 'heat')) return;
+    var W = view.W, H = view.H, rpx = Math.sqrt(DET.idx.cell_km2 / Math.PI) * 1.2 * 1000 * ppm();
+    if (rpx < 1.6) return;
+    if (!DCV) DCV = document.createElement('canvas');
+    if (DCV.width !== W || DCV.height !== H) { DCV.width = W; DCV.height = H; }
+    var g = DCV.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W, H);
+    var any = false, base = P.base, X = function (lng) { return sx(mx(lng)); }, Y = function (lat) { return sy(my(lat)); };
+    DET.idx.tiles.forEach(function (ti) {
+      var b = ti.bbox, x0 = X(b[0]), x1 = X(b[2]), y0 = Y(b[3]), y1 = Y(b[1]);
+      if (x1 < -rpx || x0 > W + rpx || y1 < -rpx || y0 > H + rpx) return;
+      var t = DET.tiles[ti.id];
+      if (!t) { if (!DET.pend[ti.id]) detailTile(ti.id); return; }
+      any = true;
+      for (var q = 0; q < t.lat.length; q++) {
+        var x = X(t.lng[q]), y = Y(t.lat[q]);
+        if (x < -rpx || y < -rpx || x > W + rpx || y > H + rpx) continue;
+        var p = t.parent[q], cov = res.cover[p], fill, a = 1;
+        if (S.show === 'land') {
+          if (base && cov !== base[p]) continue;   // the design changed this hex: keep the design's colour
+          var bu = t.built[q], best = 'built', bv = bu;
+          [['tree', 'forest'], ['grass', 'open'], ['crop', 'farm'], ['water', 'water'], ['wetland', 'wetland'], ['bare', 'barren']].forEach(function (z) { if (t[z[0]][q] > bv) { bv = t[z[0]][q]; best = z[1]; } });
+          fill = best === 'built' ? (bu >= 70 ? C.core : bu >= 40 ? C.mid : C.suburb) : C[best];
+          if (S.basemap !== 'none') a = best === 'built' ? 0.3 : 0.7;
+        } else {
+          var h = t.heat[q]; if (h == null || !(DET.pn[p] > 0) || !URB[cov] || t.built[q] < 15) continue;
+          fill = ramp(heat, Math.max(0, Math.min(1, res.heat[p] / 1.4 + 0.07 * (h - DET.psum[p] / DET.pn[p]))));
+        }
+        g.globalAlpha = a; g.fillStyle = fill; g.beginPath(); g.arc(x, y, rpx, 0, 6.2832); g.fill();
+      }
+    });
+    if (!any) return;
+    var fade = S.basemap === 'none' ? 1 : view.z < 13 ? 0.75 : 0.5;
+    ctx.save(); ctx.filter = 'blur(' + Math.max(1, Math.min(12, rpx * 0.5)).toFixed(1) + 'px)'; ctx.globalAlpha = fade;
+    ctx.drawImage(DCV, 0, 0, W, H); ctx.restore();
+  }
+
   // ---- Drawing the map
   var drawQueued = false;
   function scheduleDraw() { if (!drawQueued) { drawQueued = true; requestAnimationFrame(function () { drawQueued = false; draw(); }); } }
@@ -730,6 +788,7 @@
       var e = HX[0] ? Math.hypot(sx(HX[0][0]) - sx(HX[0][2]), sy(HX[0][1]) - sy(HX[0][3])) : 10;
       ctx.save(); ctx.filter = 'blur(' + Math.max(2.5, Math.min(40, e * 0.8)).toFixed(1) + 'px)';
       ctx.drawImage(WASH, 0, 0, W, H); ctx.restore();
+      drawDetail(C, heat);
     }
     S.items.forEach(function (kind, i) {
       var m = maturity(kind, S.year, S.itemSp.get(i));
@@ -1798,7 +1857,7 @@
     $('#st-loading').hidden = false; $('#st-loading').textContent = 'Loading…';
     fetch('../data/places/' + slug + '.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
       var P = ThreadModel.prepare(d);
-      S.P = P; S.slug = slug; draft = null; setZone();
+      S.P = P; S.slug = slug; draft = null; setZone(); loadDetail(slug);
       S.base = P.evaluate({ canopy: 0, corridors: 0, wetlands: 0, regen: 0, compact: 0 });
       priceFor(d.country_code);
       if (MAT) renderBom();
