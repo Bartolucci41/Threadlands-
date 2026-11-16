@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        slug: ${{ fromJSON(format('["{0}"]', join(fromJSON(format('["{0}"]', replace(inputs.slugs, ',', '","'))), '","'))) }}
+        slug: ${{ fromJSON(format('["{0}"]', replace(inputs.slugs, ',', '","'))) }}
     env:
       TL_MAX_HEXES: ${{ inputs.max_hexes }}
     steps:
