@@ -1,0 +1,41 @@
+name: Block-level detail
+
+# Splits the hexes inside each place into block-sized cells and measures them from satellite data.
+on:
+  workflow_dispatch:
+    inputs:
+      slugs:
+        description: "Places, comma-separated, like mexico-city,bologna"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: detail
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pipeline/requirements.txt
+      - run: pip install -r pipeline/requirements.txt
+      - env:
+          SLUGS: ${{ inputs.slugs }}
+        run: python3 pipeline/detail.py $(echo "$SLUGS" | tr ',' ' ')
+      - name: Publish
+        run: |
+          git config user.name "threadlands-robot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/detail
+          git diff --cached --quiet && exit 0
+          git commit -qm "Block-level detail: ${{ inputs.slugs }}"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD && exit 0; sleep 10; done
+          exit 1
