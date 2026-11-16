@@ -90,6 +90,13 @@
   "status": "built with heat",
   "when": "2026-11-14T00:40:08Z"
  },
+ "bethlehem-united-states-r188220": {
+  "minutes": 2.8,
+  "query": "osm:R188220",
+  "slug": "bethlehem-united-states-r188220",
+  "status": "built with heat",
+  "when": "2026-11-16T15:55:23Z"
+ },
  "bogota": {
   "minutes": 1.3,
   "query": "Bogota, Colombia",

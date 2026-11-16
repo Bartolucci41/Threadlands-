@@ -1,1 +1,2 @@
 boulder-united-states-r112298 | osm:R112298
+bethlehem-united-states-r188220 | osm:R188220
