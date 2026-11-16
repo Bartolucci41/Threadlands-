@@ -87,6 +87,21 @@ css += """
   .st-g3-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 !important; }
   .st-legend3d:not([hidden]) { position: absolute; left: 10px; bottom: 26px; z-index: 2; display: flex; flex-wrap: wrap; gap: 4px 10px; max-width: calc(100% - 20px); padding: 6px 10px; border-radius: 10px; background: var(--surface); opacity: 0.95; font-size: 0.75rem; color: var(--ink); }
   .st-legend3d span { display: inline-flex; align-items: center; gap: 5px; } .st-legend3d i { width: 11px; height: 11px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.3); }
+  .st-banner:not([hidden]) { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--accent); font-size: 0.9375rem; }
+  .st-linkbox { flex: 1 1 260px; min-height: 34px; padding: 0 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 0.8125rem var(--font-mono); }
+  .st-wsbar:not([hidden]) { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px; border-radius: 14px; background: var(--ink); color: var(--bg); }
+  .st-wsbar .chip { background: transparent; color: var(--bg); border-color: rgba(255,255,255,0.35); }
+  .st-teams { display: flex; flex-wrap: wrap; gap: 6px; }
+  .st-teamchip { min-height: 38px; padding: 0 14px; border-radius: 999px; border: 2px solid var(--tc); background: transparent; color: var(--bg); font: 600 0.875rem var(--font-body); cursor: pointer; }
+  .st-teamchip[aria-checked="true"] { background: var(--tc); }
+  .st-timer { font: 600 0.9375rem var(--font-mono); margin-left: auto; }
+  .st-dialog { border: 0; border-radius: 16px; padding: 22px; max-width: 460px; width: calc(100% - 32px); background: var(--surface); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .st-dialog::backdrop { background: rgba(10,20,16,0.45); }
+  .st-dialog h2 { margin: 0 0 6px; font-size: 1.35rem; } .st-dialog p { color: var(--ink2); }
+  .st-dialog input { min-height: 38px; padding: 0 10px; border-radius: 8px; border: 1.5px solid var(--ink); background: var(--bg); color: var(--ink); font: 500 0.9375rem var(--font-body); }
+  .st-wsrow { display: flex; gap: 8px; align-items: center; margin: 6px 0; } .st-wsrow label { min-width: 4.5rem; color: var(--ink); }
+  .st-tdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+  .studio-wrap:fullscreen { background: var(--bg); overflow: auto; padding: 16px; max-width: none; }
   .st-zoom { position: absolute; top: 10px; right: 10px; display: grid; gap: 6px; z-index: 2; }
   .st-zoom .chip { width: 40px; min-height: 40px; padding: 0; font-size: 1.25rem; background: var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
   .st-mode { position: absolute; left: 10px; top: 10px; z-index: 2; padding: 5px 10px; border-radius: 99px; background: var(--ink); color: var(--bg); font-size: 0.8125rem; font-weight: 600; }

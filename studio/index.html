@@ -59,10 +59,30 @@
             <option value="satellite">Background: satellite</option>
             <option value="none">Background: none</option>
           </select>
+          <button type="button" class="chip" id="st-share">Share</button>
+          <button type="button" class="chip" id="st-wsbtn">Workshop</button>
           <button type="button" class="chip" id="st-undo" disabled>Undo</button>
           <button type="button" class="chip" id="st-clear">Clear</button>
         </div>
       </div>
+      <p class="st-banner" id="st-banner" hidden></p>
+      <div class="st-wsbar" id="st-wsbar" hidden>
+        <div class="st-teams" id="st-teams" role="radiogroup" aria-label="Whose turn"></div>
+        <span class="st-timer" id="st-timer" aria-live="polite"></span>
+        <button type="button" class="chip" id="st-next">Next team</button>
+        <button type="button" class="chip" id="st-full">Full screen</button>
+        <button type="button" class="chip" id="st-wsend">End workshop</button>
+      </div>
+      <dialog class="st-dialog" id="st-wsdlg" aria-labelledby="st-wsdlg-h">
+        <form method="dialog" id="st-wsform">
+          <h2 id="st-wsdlg-h">Workshop: design together</h2>
+          <p>For a room of people around one screen. Each team takes turns placing elements; the scoreboard shows what each team spent and what it added.</p>
+          <div id="st-wsnames"></div>
+          <p><button type="button" class="chip" id="st-wsadd">Add a team</button></p>
+          <p><label for="st-wsmin">Minutes per turn (0 for no timer)</label> <input id="st-wsmin" type="number" min="0" max="30" value="3"></p>
+          <p class="st-g3-row"><button type="submit" class="btn" value="start">Start</button><button type="submit" class="chip" value="cancel">Cancel</button></p>
+        </form>
+      </dialog>
       <div class="st-catwrap">
         <div class="st-cats" id="st-cats" role="toolbar" aria-label="What to build"></div>
         <div class="st-menu" id="st-menu" hidden role="menu"></div>
@@ -139,6 +159,11 @@
 
       <p style="margin:0 0 6px"><button type="button" class="chip" id="st-gis">Download design for GIS</button></p>
       <p class="hint" style="margin:0 0 14px">A GeoJSON file of every element you placed, with its size, cost and settings, ready for QGIS or ArcGIS.</p>
+
+      <div id="st-board" hidden>
+        <h2 class="st-h">Teams</h2>
+        <div id="st-boardlist" class="st-extra"></div>
+      </div>
 
       <h2 class="st-h">Challenges <span class="st-chal-n" id="st-chal-n"></span></h2>
       <p class="hint" style="margin:0">Checked in 2050, within the budget.</p>
@@ -229,7 +254,7 @@
   ];
   $('#st-sources').innerHTML = SOURCES.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('');
 
-  var S = { P: null, slug: null, tool: 'farmblock', shape: 'pick', floors: 6, wallH: 2, view3d: false, show: 'land', items: new Map(), feats: [], history: [], year: 2026, budget: 0, F: 1,
+  var S = { teams: [], team: null, itemTeam: new Map(), P: null, slug: null, tool: 'farmblock', shape: 'pick', floors: 6, wallH: 2, view3d: false, show: 'land', items: new Map(), feats: [], history: [], year: 2026, budget: 0, F: 1,
     pl: null, PRICES: null, base: null, basemap: 'streets', nextId: 1 };
   var cv = $('#st-canvas'), ctx = cv.getContext('2d'), view = null;
 
@@ -276,6 +301,7 @@
 
   // ---- OpenStreetMap tiles
   var TILES = {}, tileCount = 0;
+  var SHARED = null;   // a design passed in the address by a share link
   var ESRI_KEY = 'AAPTaocneTrJayeMxPQ9Sg5fUdw..O1VrUkUA0lfRD0N6gwf52PmxyLiPrNNyJ-5w5JgY1-4tQHO8XN13FgFY3diYhkzKcdfa76L6G6wzBN0EmY5e96evsF59JucvA6itv1Ny7COxNQ52H6h6WOrUi9LuwMYmGPKgT_PH4swdHd6p6uz0guauG5PnXtCa8ZXhPfYoUO1k54PKm1AKyu8J2itI1XcwLNZodHvK8owDAkhaEengrYO9Avn9RkDSRdHBEjEHkDnkYmgkbzCRbhdd3aRo5lA.AT1_ctVl1A3q';
   var esriFails = 0;
   var BASES = {
@@ -546,7 +572,7 @@
     if (draft) drawDraft();
   }
   function drawFeat(f, hover) {
-    var m = maturity(f.kind, S.year), col = css(BYK[f.kind].color), ink = css('--ink');
+    var m = maturity(f.kind, S.year), col = css(BYK[f.kind].color), ink = f.team != null && S.teams[f.team] ? S.teams[f.team].color : css('--ink');
     ctx.beginPath();
     f.pts.forEach(function (p, j) { var x = sx(mx(p[1])), y = sy(my(p[0])); if (j) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
     if (f.type === 'area') {
@@ -1012,7 +1038,7 @@
     if (S.tool === 'erase' || dragMode === 'remove') { if (cur) { stroke.push({ hex: i, prev: cur }); S.items.delete(i); } return; }
     if (cur === S.tool) return;
     if (!allowedHex(S.tool, i)) { refuse(i); return; }
-    stroke.push({ hex: i, prev: cur || null }); S.items.set(i, S.tool);
+    stroke.push({ hex: i, prev: cur || null }); S.items.set(i, S.tool); if (S.team != null) S.itemTeam.set(i, S.team); else S.itemTeam.delete(i);
   }
   var NAMES = { core: 'dense city', mid: 'city', suburb: 'suburb', farm: 'farmland', open: 'grassland', forest: 'forest', wetland: 'wetland', water: 'water', park: 'park', barren: 'bare land', regen: 'farmland' };
   var refuseT = null;
@@ -1114,6 +1140,7 @@
       var urbanShare = 0; f.alloc.forEach(function (e) { if (URB[S.base.cover[e[0]]]) urbanShare += e[1]; });
       if (urbanShare < 0.5 * f.size) { hint(c.name + ' go on built-up land. Most of that shape is not built up.'); setTimeout(function () { hint(); }, 3200); draw(); return; }
     }
+    if (S.team != null) f.team = S.team;
     S.feats.push(f); S.history.push([{ feat: f, added: true }]); after();
   }
   function drawDraft() {
@@ -1246,22 +1273,109 @@
 
   // ---- Storage
   function key() { return 'threadlands:studio2:' + S.slug + ':' + S.P.N; }
-  function save() { try { localStorage.setItem(key(), JSON.stringify({ items: Array.from(S.items.entries()), feats: S.feats.map(function (f) { return { kind: f.kind, type: f.type, pts: f.pts, osm: f.osm, clear: f.clear, floors: f.floors, height: f.height }; }) })); } catch (e) { /* storage unavailable */ } }
+  function serialize() {
+    var r6 = function (v) { return Math.round(v * 1e6) / 1e6; };
+    return { v: 2, items: Array.from(S.items.entries()).map(function (e) { var t = S.itemTeam.get(e[0]); return t != null ? [e[0], e[1], t] : e; }),
+      feats: S.feats.map(function (f) { return { kind: f.kind, type: f.type, pts: f.pts.map(function (p) { return [r6(p[0]), r6(p[1])]; }), osm: f.osm, clear: f.clear, floors: f.floors, height: f.height, team: f.team }; }),
+      teams: S.teams.length ? S.teams : undefined, budget: S.budget };
+  }
+  function deserialize(o) {
+    S.items = new Map(); S.itemTeam = new Map(); S.feats = []; S.history = [];
+    if (!o) return;
+    (o.items || []).forEach(function (e) { if (BYK[e[1]] && e[0] < S.P.N) { S.items.set(e[0], e[1]); if (e[2] != null) S.itemTeam.set(e[0], e[2]); } });
+    (o.feats || []).forEach(function (g) {
+      if (!BYK[g.kind]) return;
+      var f = { id: S.nextId++, kind: g.kind, type: g.type, pts: g.pts, osm: g.osm, clear: g.clear, floors: g.floors, height: g.height, team: g.team };
+      f.size = f.type === 'line' ? lineLength(f.pts) : polyArea(f.pts); allocate(f);
+      if (f.alloc.length) S.feats.push(f);
+    });
+    S.teams = o.teams && o.teams.length ? o.teams : [];
+    if (o.budget > 0) { S.budget = o.budget; $('#st-cap').value = money(S.budget).replace('$', ''); }
+  }
+  function save() { try { localStorage.setItem(key(), JSON.stringify(serialize())); } catch (e) { /* storage unavailable */ } }
   function restore() {
-    S.items = new Map(); S.feats = []; S.history = [];
-    try {
-      var o = JSON.parse(localStorage.getItem(key()) || 'null');
-      if (o) {
-        (o.items || []).forEach(function (e) { if (BYK[e[1]] && e[0] < S.P.N) S.items.set(e[0], e[1]); });
-        (o.feats || []).forEach(function (g) {
-          if (!BYK[g.kind]) return;
-          var f = { id: S.nextId++, kind: g.kind, type: g.type, pts: g.pts, osm: g.osm, clear: g.clear, floors: g.floors, height: g.height };
-          f.size = f.type === 'line' ? lineLength(f.pts) : polyArea(f.pts); allocate(f);
-          if (f.alloc.length) S.feats.push(f);
-        });
-      }
-    } catch (e) { /* none */ }
+    var o = null; try { o = JSON.parse(localStorage.getItem(key()) || 'null'); } catch (e) { /* none */ }
+    deserialize(o);
     $('#st-undo').disabled = true;
+  }
+
+  // ---- Share a design by link: the design rides in the address, compressed where the browser can
+  function b64u(bytes) { var s2 = ''; for (var i = 0; i < bytes.length; i++) s2 += String.fromCharCode(bytes[i]); return btoa(s2).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  function unb64u(t) { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; var s2 = atob(t), out = new Uint8Array(s2.length); for (var i = 0; i < s2.length; i++) out[i] = s2.charCodeAt(i); return out; }
+  function packDesign(o) {
+    var raw = new TextEncoder().encode(JSON.stringify(o));
+    if (!window.CompressionStream) return Promise.resolve('j' + b64u(raw));
+    var cs = new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+    return new Response(cs).arrayBuffer().then(function (buf) { return 'z' + b64u(new Uint8Array(buf)); });
+  }
+  function unpackDesign(t) {
+    if (t[0] === 'j') return Promise.resolve(JSON.parse(new TextDecoder().decode(unb64u(t.slice(1)))));
+    var ds = new Blob([unb64u(t.slice(1))]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return new Response(ds).text().then(JSON.parse);
+  }
+  $('#st-share').addEventListener('click', function () {
+    if (!S.items.size && !S.feats.length) { hint('Place something first, then share it.'); return; }
+    packDesign(serialize()).then(function (d) {
+      var url = location.origin + location.pathname + '#' + S.slug + '/d=' + d;
+      var done = function (ok) { banner(ok ? 'Link copied. Anyone who opens it sees this design for ' + S.P.place.name + ' and can build on it.' : 'Copy this link to share the design:', ok ? null : url); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(function () { done(true); }, function () { done(false); }); else done(false);
+    });
+  });
+  function banner(msg, url, action) {
+    var b = $('#st-banner'); b.innerHTML = '';
+    b.appendChild(document.createTextNode(msg + ' '));
+    if (url) { var i = document.createElement('input'); i.value = url; i.readOnly = true; i.className = 'st-linkbox'; i.setAttribute('aria-label', 'Share link'); b.appendChild(i); setTimeout(function () { i.select(); }, 50); }
+    if (action) { var a = document.createElement('button'); a.type = 'button'; a.className = 'chip'; a.textContent = action[0]; a.onclick = action[1]; b.appendChild(a); }
+    var x = document.createElement('button'); x.type = 'button'; x.className = 'chip'; x.textContent = 'Close'; x.onclick = function () { b.hidden = true; }; b.appendChild(x);
+    b.hidden = false;
+  }
+
+  // ---- Workshop: teams take turns; every element remembers who placed it
+  var TEAMCOL = ['#0b6b5b', '#b4541a', '#2f5d9e', '#8a3f8f', '#a27a2c', '#2f7d3a'];
+  var WS = { on: false, min: 3, left: 0, tick: 0 };
+  function teamRow(name, n) { return '<p class="st-wsrow"><label for="st-wsn' + n + '">Team ' + (n + 1) + '</label> <input id="st-wsn' + n + '" value="' + esc(name) + '" maxlength="24"></p>'; }
+  $('#st-wsbtn').addEventListener('click', function () {
+    var names = S.teams.length ? S.teams.map(function (t) { return t.name; }) : ['Team A', 'Team B', 'Team C'];
+    $('#st-wsnames').innerHTML = names.map(teamRow).join('');
+    var d = $('#st-wsdlg'); if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+  });
+  $('#st-wsadd').addEventListener('click', function () { var n = $('#st-wsnames').children.length; if (n < 6) $('#st-wsnames').insertAdjacentHTML('beforeend', teamRow('Team ' + String.fromCharCode(65 + n), n)); });
+  $('#st-wsdlg').addEventListener('close', function () {
+    if (this.returnValue !== 'start') return;
+    S.teams = Array.prototype.map.call($('#st-wsnames').querySelectorAll('input'), function (i, n) { return { name: i.value.trim() || 'Team ' + (n + 1), color: TEAMCOL[n % TEAMCOL.length] }; });
+    WS.min = Math.max(0, Math.min(30, Number($('#st-wsmin').value) || 0));
+    startWorkshop();
+  });
+  function startWorkshop() { WS.on = true; S.team = 0; $('#st-wsbar').hidden = false; renderTeams(); startTurn(); save(); refresh(); }
+  function renderTeams() {
+    $('#st-teams').innerHTML = S.teams.map(function (t, n) { return '<button type="button" class="st-teamchip" role="radio" aria-checked="' + (n === S.team) + '" data-team="' + n + '" style="--tc:' + t.color + '">' + esc(t.name) + '</button>'; }).join('');
+  }
+  function startTurn() {
+    clearInterval(WS.tick); WS.left = WS.min * 60;
+    var show = function () { $('#st-timer').textContent = WS.min ? 'Turn: ' + S.teams[S.team].name + ', ' + Math.floor(WS.left / 60) + ':' + ('0' + WS.left % 60).slice(-2) + ' left' : 'Turn: ' + S.teams[S.team].name; };
+    show();
+    if (WS.min) WS.tick = setInterval(function () { WS.left--; if (WS.left <= 0) { nextTeam(); return; } show(); }, 1000);
+  }
+  function nextTeam() { S.team = (S.team + 1) % S.teams.length; renderTeams(); startTurn(); hint('Over to ' + S.teams[S.team].name + '.'); }
+  $('#st-teams').addEventListener('click', function (e) { var b = e.target.closest('[data-team]'); if (b) { S.team = Number(b.dataset.team); renderTeams(); startTurn(); } });
+  $('#st-next').addEventListener('click', nextTeam);
+  $('#st-wsend').addEventListener('click', function () { WS.on = false; clearInterval(WS.tick); S.team = null; $('#st-wsbar').hidden = true; if (document.fullscreenElement) document.exitFullscreen(); refresh(); });
+  $('#st-full').addEventListener('click', function () {
+    var el = document.querySelector('.studio-wrap');
+    if (document.fullscreenElement) document.exitFullscreen(); else if (el.requestFullscreen) el.requestFullscreen();
+  });
+  document.addEventListener('fullscreenchange', function () { $('#st-full').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen'; setTimeout(function () { resizeView(); draw(); }, 100); });
+  function renderBoard() {
+    var box = $('#st-board');
+    if (!S.teams.length) { box.hidden = true; return; }
+    box.hidden = false;
+    var rows = S.teams.map(function (t, n) {
+      var c = 0, spent = 0;
+      S.feats.forEach(function (f) { if (f.team === n) { c++; spent += featQty(f).cost * S.F; } });
+      S.items.forEach(function (k2, i) { if (S.itemTeam.get(i) === n) { c++; spent += hexQty(k2, i).cost * S.F; } });
+      return '<p><i class="st-tdot" style="background:' + t.color + '"></i><b>' + esc(t.name) + '</b>: ' + c + ' placed, ' + money(spent) + '</p>';
+    });
+    $('#st-boardlist').innerHTML = rows.join('');
   }
 
   // ---- Totals, scores and challenges
@@ -1286,6 +1400,7 @@
     S.P.studio = new Map();
     $('#st-yr').textContent = S.year; $('#st-yr2').textContent = S.year;
     $('#st-cur-price').textContent = BYK[S.tool] ? priceHint(S.tool) : '';
+    renderBoard();
     var idx = Math.round(r.index), bi = Math.round(b.index), d = idx - bi, has = S.items.size || S.feats.length;
     $('#st-index').textContent = idx;
     $('#st-idelta').textContent = has ? (d >= 0 ? '+' : '−') + Math.abs(d) + ' compared with doing nothing (' + bi + ')' : 'Doing nothing scores ' + bi + ' in ' + S.year;
@@ -1399,9 +1514,19 @@
       priceFor(d.country_code);
       prepGeometry(); fitView();
       setBudgets(); makeChallenges(); restore();
+      if (SHARED) {
+        var mine = serialize(), had = S.items.size || S.feats.length, shared = SHARED; SHARED = null;
+        unpackDesign(shared).then(function (o) {
+          deserialize(o); save(); refresh();
+          if (S.teams.length) renderTeams();
+          banner('You opened a shared design for ' + S.P.place.name + '. It is now saved on this device, so you can build on it.', null,
+            had ? ['Go back to my own design', function () { deserialize(mine); save(); refresh(); $('#st-banner').hidden = true; }] : null);
+        }).catch(function () { banner('That shared link could not be read. It may have been cut off when it was copied.'); });
+      }
       S.year = 2026; $('#st-year').value = 2026;
       $('#st-loading').hidden = true;
       try { history.replaceState(null, '', '#' + slug); } catch (e) { /* ignore */ }
+      S.teams = S.teams || [];
       modeChanged(); refresh();
     }).catch(function () { $('#st-loading').textContent = 'This place could not be loaded.'; });
   }
@@ -1436,7 +1561,9 @@
     LIB = lib;
     $('#st-names').innerHTML = lib.map(function (e) { return '<option value="' + esc(e.name) + ', ' + esc(e.country) + '"></option>'; }).join('');
     if (lib.length) $('#st-pick').innerHTML = lib.map(function (e) { return '<option value="' + e.slug + '">' + esc(e.name) + ', ' + esc(e.country) + '</option>'; }).join('');
-    var h = location.hash.replace('#', ''), start = lib.some(function (e) { return e.slug === h; }) ? h : 'milan';
+    var h = location.hash.replace('#', ''), dm = h.match(/^([^/]+)\/d=(.+)$/);
+    if (dm) { h = dm[1]; SHARED = dm[2]; }
+    var start = lib.some(function (e) { return e.slug === h; }) ? h : 'milan';
     $('#st-pick').value = start;
     load(start);
   });
