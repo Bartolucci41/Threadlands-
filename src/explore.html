@@ -2079,6 +2079,15 @@
     input.addEventListener('blur', function () { setTimeout(close, 120); });
     return { input: input, searchWorld: searchWorld };
   }
+
+  // A visitor's own city first, guessed from their time zone (no location permission needed)
+  var TZ_CITY = { 'America/Mexico_City': 'mexico-city', 'America/Los_Angeles': 'san-francisco', 'America/Toronto': 'montreal', 'America/Montreal': 'montreal', 'Europe/Rome': 'bologna', 'Asia/Bangkok': 'bangkok' };
+  function nearSlug(lib) {
+    var tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { /* ignore */ }
+    var n = tz.split('/').pop().replace(/_/g, ' ').toLowerCase();
+    var hit = (lib || []).filter(function (e) { return String(e.name).toLowerCase() === n; })[0];
+    return hit ? hit.slug : TZ_CITY[tz] || null;
+  }
   if (location.protocol.indexOf('http') === 0 && window.fetch) {
     fetch(BASE + 'data/index.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (ix) {
       LIB = (ix.places || []).filter(function (e) { return e && e.slug; });
@@ -2086,15 +2095,15 @@
       var bar = wireSearch('#search-bar', '#q-bar', '#sugg-bar', false, '#req-bar');
       var h = location.hash.replace('#', '');
       if (h && h !== current && libEntry(h)) openLibrary(h, true);
-      else if (!current) openExample('milan', true);
+      else if (!current) { var ns = nearSlug(LIB); if (ns && libEntry(ns)) openLibrary(ns, true); else openExample('mexico-city', true); }
       var q = new URLSearchParams(location.search).get('q');
       if (q) { bar.input.value = q; bar.searchWorld(); bar.input.focus(); }
-    }).catch(function () { if (!current) openExample('milan', true); });
+    }).catch(function () { if (!current) openExample('mexico-city', true); });
   }
 
   var startHash = location.hash.replace('#', '');
   if (EXAMPLES.some(function (x) { return x.id === startHash; })) openExample(startHash, true);
-  else if (startHash === 'demo' || location.protocol.indexOf('http') !== 0) openExample(startHash === 'demo' ? 'demo' : 'milan', true);
+  else if (startHash === 'demo' || location.protocol.indexOf('http') !== 0) openExample(startHash === 'demo' ? 'demo' : 'mexico-city', true);
   offerReopen();
 })();
 </script>

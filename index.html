@@ -45,9 +45,10 @@
     <figure class="live" id="live" aria-labelledby="live-cap">
       <div class="live-top">
         <div class="live-cities" role="group" aria-label="City">
-          <button type="button" class="chip" data-city="milan" aria-pressed="true">Milan</button>
-          <button type="button" class="chip" data-city="mexico-city" aria-pressed="false">Mexico City</button>
-          <button type="button" class="chip" data-city="lagos" aria-pressed="false">Lagos</button>
+          <button type="button" class="chip" data-city="san-francisco" aria-pressed="false">San Francisco</button>
+          <button type="button" class="chip" data-city="mexico-city" aria-pressed="true">Mexico City</button>
+          <button type="button" class="chip" data-city="montreal" aria-pressed="false">Montreal</button>
+          <button type="button" class="chip" data-city="bologna" aria-pressed="false">Bologna</button>
           <button type="button" class="chip" data-city="bangkok" aria-pressed="false">Bangkok</button>
         </div>
         <div class="live-layers" role="group" aria-label="Map layer">
@@ -238,7 +239,7 @@
   function load(slug) {
     LIVE.slug = slug;
     document.querySelectorAll('[data-city]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.city === slug ? 'true' : 'false'); });
-    var name = { 'milan': 'Milan', 'mexico-city': 'Mexico City', 'lagos': 'Lagos', 'bangkok': 'Bangkok' }[slug] || slug;
+    var name = { 'san-francisco': 'San Francisco', 'mexico-city': 'Mexico City', 'montreal': 'Montreal', 'bologna': 'Bologna', 'bangkok': 'Bangkok' }[slug] || slug;
     $('#live-open').href = 'explore/#' + slug; $('#live-open').textContent = 'Open ' + name + ' in the full tool →';
     if (LIVE.cache[slug]) { LIVE.P = LIVE.cache[slug]; update(); return; }
     $('#live-loading').hidden = false;
@@ -259,7 +260,10 @@
   });
   window.addEventListener('resize', draw);
   if (window.matchMedia) { var mq = window.matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', draw); }
-  load('milan');
+  // Start on the visitor's own city when it is one of these, guessed from their time zone
+  var TZ_CITY = { 'America/Mexico_City': 'mexico-city', 'America/Los_Angeles': 'san-francisco', 'America/Toronto': 'montreal', 'America/Montreal': 'montreal', 'Europe/Rome': 'bologna', 'Asia/Bangkok': 'bangkok' };
+  var tz0 = ''; try { tz0 = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { /* ignore */ }
+  load(TZ_CITY[tz0] || 'mexico-city');
 
   // Right now, from space: the places running furthest from their usual heat this week
   var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

@@ -263,8 +263,8 @@ def page(rel, base, here, title, desc, body, script=""):
 # ---- Explore: the tool
 m = read(SRC, "model2.js")
 demo = read(SRC, "demo-place.json")
-examples = json.dumps([{"id": "milan", "label": "Milan, Italy"}, {"id": "san-francisco", "label": "San Francisco"},
-                       {"id": "bangkok", "label": "Bangkok, Thailand"}])
+examples = json.dumps([{"id": "san-francisco", "label": "San Francisco"}, {"id": "mexico-city", "label": "Mexico City"},
+                       {"id": "montreal", "label": "Montreal"}, {"id": "bologna", "label": "Bologna"}, {"id": "bangkok", "label": "Bangkok"}])
 for s in (m, demo):
     assert "</script" not in s.lower()
 body = explore.replace("/*MODEL*/", m).replace("/*DEMO*/", demo).replace("/*EXAMPLES*/", examples)

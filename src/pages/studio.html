@@ -511,7 +511,9 @@
     var heat = [css('--h0'), css('--h1'), css('--h2')].map(rgb), flood = [css('--f0'), css('--f1'), css('--f2')].map(rgb);
     var keep = 1 - res.retention, maxF = P.maxFloodExp || 1;
     var fade = S.basemap === 'none' ? 1 : view.z < 11 ? 0.9 : view.z < 13 ? 0.6 : view.z < STREET_Z ? 0.4 : 0.22;
-    for (var i = 0; i < P.N; i++) {
+    // At street level the real buildings and lots take over: the model's hexes step back (and vanish in 3D)
+    var hideHex = S.basemap !== 'none' && view.z >= OSM_Z && (S.view3d || S.show === 'land');
+    for (var i = 0; i < P.N && !hideHex; i++) {
       var a = HX[i];
       if (!a || a.length < 6) continue;
       var x = sx(HCX[i]), y = sy(HCY[i]);
@@ -1537,9 +1539,12 @@
     $('#st-names').innerHTML = lib.map(function (e) { return '<option value="' + esc(e.name) + ', ' + esc(e.country) + '"></option>'; }).join('');
     if (lib.length) $('#st-pick').innerHTML = lib.map(function (e) { return '<option value="' + e.slug + '">' + esc(e.name) + ', ' + esc(e.country) + '</option>'; }).join('');
     var h = location.hash.replace('#', ''), dm = h.match(/^([^/]+)\/d=(.+)$/);
-    var openWs = h === 'workshop'; if (openWs) h = 'milan';
+    var openWs = h === 'workshop'; if (openWs) h = '';
     if (dm) { h = dm[1]; SHARED = dm[2]; }
-    var start = lib.some(function (e) { return e.slug === h; }) ? h : 'milan';
+    var TZC = { 'America/Mexico_City': 'mexico-city', 'America/Los_Angeles': 'san-francisco', 'America/Toronto': 'montreal', 'Europe/Rome': 'bologna', 'Asia/Bangkok': 'bangkok' }, tz0 = '';
+    try { tz0 = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { /* ignore */ }
+    var tzn = tz0.split('/').pop().replace(/_/g, ' ').toLowerCase(), near = lib.filter(function (e) { return e.name.toLowerCase() === tzn; })[0];
+    var start = lib.some(function (e) { return e.slug === h; }) ? h : near ? near.slug : TZC[tz0] || 'mexico-city';
     $('#st-pick').value = start;
     load(start);
     if (openWs) setTimeout(function () { $('#st-wsbtn').click(); }, 1200);
