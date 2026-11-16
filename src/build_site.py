@@ -163,7 +163,7 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
 # Cloudflare Web Analytics: private visit counts for Robert, no cookies and no personal data
 ANALYTICS = ("<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' "
              "data-cf-beacon='{\"token\": \"a92b6704e81e4aaba11a9f8a11832ae1\"}'></script><!-- End Cloudflare Web Analytics -->\n")
-PAGES = [("", "Home"), ("explore/", "Explore"), ("studio/", "Studio"), ("library/", "Library"), ("how-it-works/", "How it works"), ("about/", "About"), ("about/#contact", "Contact")]
+PAGES = [("", "Home"), ("explore/", "Explore"), ("studio/", "Studio"), ("library/", "Library"), ("how-it-works/", "How it works"), ("about/", "About")]
 
 
 def head(base, title, desc):
