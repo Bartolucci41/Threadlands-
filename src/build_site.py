@@ -148,6 +148,11 @@ css += """
   .about-grid { display: grid; gap: 28px; max-width: 46rem; }
   .about-grid h2 { font-size: 1.5rem; margin: 0 0 8px; }
   .about-grid p { margin: 0 0 10px; color: var(--ink2); }
+  .about-grid .page-h { margin: 4px 0 14px; }
+  .about-list { margin: 0; padding-left: 1.2rem; display: grid; gap: 8px; color: var(--ink2); }
+  .about-list b { color: var(--ink); }
+  .about-grid a:not(.btn) { color: var(--accent); text-underline-offset: 2px; }
+  .contact-box { padding: 20px 22px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); scroll-margin-top: 20px; }
 """
 write("assets/site.css", css.strip() + "\n")
 write("assets/model.js", read(SRC, "model2.js"))
@@ -158,7 +163,7 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
 # Cloudflare Web Analytics: private visit counts for Robert, no cookies and no personal data
 ANALYTICS = ("<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' "
              "data-cf-beacon='{\"token\": \"a92b6704e81e4aaba11a9f8a11832ae1\"}'></script><!-- End Cloudflare Web Analytics -->\n")
-PAGES = [("", "Home"), ("explore/", "Explore"), ("studio/", "Studio"), ("library/", "Library"), ("how-it-works/", "How it works"), ("about/", "About")]
+PAGES = [("", "Home"), ("explore/", "Explore"), ("studio/", "Studio"), ("library/", "Library"), ("how-it-works/", "How it works"), ("about/", "About"), ("about/#contact", "Contact")]
 
 
 def head(base, title, desc):
