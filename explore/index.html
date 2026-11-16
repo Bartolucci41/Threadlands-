@@ -1153,8 +1153,9 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     var x = EXAMPLES.filter(function (e) { return e.id === id; })[0] || EXAMPLES[0];
     function go() {
       clearError();
-      setPlace(x.data, x.kind);
       current = x.id;
+      loadDetail(x.kind === 'real' ? x.id : null);
+      setPlace(x.data, x.kind);
       markExamples();
       if (!fromHash) { try { history.replaceState(null, '', '#' + x.id); } catch (e) { /* ignore */ } }
     }
@@ -1367,6 +1368,68 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     drawQueued = true;
     requestAnimationFrame(function () { drawQueued = false; draw(); });
   }
+
+  // ---- Block-level detail (data/detail/<slug>/): small cells measured from satellite data, loaded for the
+  // part of the map in view once you zoom in. Scores still come from the place's hexes; the detail shows
+  // where within each hex it is built up, green or hot.
+  var DET = { slug: null, idx: null, tiles: {}, pend: {}, psum: {}, pn: {} }, DCV = null;
+  function loadDetail(slug) {
+    if (DET.slug === slug) return;
+    DET = { slug: slug, idx: null, tiles: {}, pend: {}, psum: {}, pn: {} };
+    if (!slug || slug === 'demo' || !window.fetch) return;
+    fetch(BASE + 'data/detail/' + slug + '/index.json').then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j && DET.slug === slug) { DET.idx = j; draw(); } }).catch(function () {});
+  }
+  function detailTile(id) {
+    var slug = DET.slug; DET.pend[id] = 1;
+    fetch(BASE + 'data/detail/' + slug + '/' + id + '.json').then(function (r) { return r.ok ? r.json() : null; }).then(function (t) {
+      if (!t || DET.slug !== slug) return;
+      DET.tiles[id] = t;
+      // each hex's average measured heat, so a cell shows how much hotter or cooler it is than its hex
+      t.parent.forEach(function (p, k) { var h = t.heat[k]; if (h != null) { DET.psum[p] = (DET.psum[p] || 0) + h; DET.pn[p] = (DET.pn[p] || 0) + 1; } });
+      draw();
+    }).catch(function () {});
+  }
+  function drawDetail(C) {
+    if (!DET.idx || !P.MERC || GRID || (layer !== 'land' && layer !== 'heat' && layer !== 'sat')) return false;
+    var M = P.MERC, rkm = Math.sqrt(DET.idx.cell_km2 / Math.PI) * 1.2, rpx = rkm * S;
+    if (rpx < 1.6) return false;
+    var mxf = function (lng) { return (lng + 180) / 360; }, myf = function (lat) { var s1 = Math.sin(lat * Math.PI / 180); return 0.5 - Math.log((1 + s1) / (1 - s1)) / (4 * Math.PI); };
+    var X = function (lng) { return (mxf(lng) - M.mx0) * M.K * S + OX; }, Y = function (lat) { return (myf(lat) - M.my0) * M.K * S + OY; };
+    if (!DCV) DCV = document.createElement('canvas');
+    if (DCV.width !== W || DCV.height !== H) { DCV.width = W; DCV.height = H; }
+    var g = DCV.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W, H);
+    var any = false, base = P.base;
+    DET.idx.tiles.forEach(function (ti) {
+      var b = ti.bbox, x0 = X(b[0]), x1 = X(b[2]), y0 = Y(b[3]), y1 = Y(b[1]);
+      if (x1 < -rpx || x0 > W + rpx || y1 < -rpx || y0 > H + rpx) return;
+      var t = DET.tiles[ti.id];
+      if (!t) { if (!DET.pend[ti.id]) detailTile(ti.id); return; }
+      any = true;
+      for (var k = 0; k < t.lat.length; k++) {
+        var x = X(t.lng[k]), y = Y(t.lat[k]);
+        if (x < -rpx || y < -rpx || x > W + rpx || y > H + rpx) continue;
+        var p = t.parent[k], cov = res.cover[p], fill = null, a = 1;
+        if (layer === 'land') {
+          if (base && cov !== base[p]) continue;   // the plan changed this hex: keep the plan's colour
+          var bu = t.built[k], best = 'built', bv = bu;
+          [['tree', 'forest'], ['grass', 'open'], ['crop', 'farm'], ['water', 'water'], ['wetland', 'wetland'], ['bare', 'barren']].forEach(function (q) { if (t[q[0]][k] > bv) { bv = t[q[0]][k]; best = q[1]; } });
+          fill = best === 'built' ? (bu >= 70 ? C.core : bu >= 40 ? C.mid : C.suburb) : C[best];
+          if (BASEMAP !== 'none') a = best === 'built' ? 0.3 : 0.75;
+        } else {
+          var h = t.heat[k]; if (h == null || !(DET.pn[p] > 0)) continue;
+          if (layer === 'sat') { var lr = HC ? HC.rel[p] : NaN; if (!isFinite(lr)) continue; var v = lr + (h - DET.psum[p] / DET.pn[p]); fill = v >= 0 ? ramp(C.heat, 0.15 + 0.85 * Math.min(1, v / 6)) : ramp(C.flood, 0.15 + 0.85 * Math.min(1, -v / 6)); }
+          else { if (!isUrban(cov) || t.built[k] < 15) continue; fill = ramp(C.heat, Math.max(0, Math.min(1, res.heat[p] / 1.4 + 0.07 * (h - DET.psum[p] / DET.pn[p])))); }
+        }
+        g.globalAlpha = a; g.fillStyle = fill; g.beginPath(); g.arc(x, y, rpx, 0, 6.2832); g.fill();
+      }
+    });
+    if (!any) return false;
+    ctx.save(); ctx.filter = 'blur(' + Math.max(1, Math.min(12, rpx * 0.5)).toFixed(1) + 'px)'; ctx.globalAlpha = BASEMAP === 'none' ? 1 : 0.9;
+    ctx.drawImage(DCV, 0, 0, W, H); ctx.restore();
+    return true;
+  }
+
   // Turn river segments (pairs of hex ids) into chains that run between junctions and ends
   function riverChains(segs) {
     var adj = new Map();
@@ -1458,6 +1521,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
       ctx = mainCtx;
       ctx.save(); ctx.filter = 'blur(' + Math.max(2.5, Math.min(40, hexPx * 0.45)).toFixed(1) + 'px)';
       ctx.drawImage(WASH, 0, 0, W, H); ctx.restore();
+      drawDetail(C);
     }
     // The real boundary from OpenStreetMap, once loaded, instead of the stepped hex outline
     var REAL = SPOT && !SPOT.small && P.MERC ? OUTLINES[OUTLINE_NAME] : null;
