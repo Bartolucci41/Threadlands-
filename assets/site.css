@@ -436,6 +436,24 @@
   .st-panel { display: grid; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
   .st-h { font: 600 1rem var(--font-body); margin: 10px 0 2px; }
   .st-h:first-child { margin-top: 0; }
+  .st-catwrap { position: relative; }
+  .st-cats { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; }
+  @media (max-width: 760px) { .st-cats { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  .st-cat { display: grid; justify-items: center; gap: 4px; padding: 8px 4px; min-height: 64px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 600 0.75rem/1.15 var(--font-body); cursor: pointer; text-align: center; }
+  .st-cat:hover { border-color: var(--ink2); }
+  .st-cat.on { border-color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .st-cat[aria-expanded="true"] { background: var(--ink); color: var(--bg); }
+  .st-menu { position: absolute; top: calc(100% + 6px); z-index: 5; width: min(380px, 100%); padding: 8px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 10px 30px rgba(0,0,0,0.18); display: grid; gap: 4px; }
+  .st-menu-h { margin: 2px 6px 4px; font: 600 0.75rem var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink2); }
+  .st-item { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 10px; align-items: center; text-align: left; padding: 10px; border-radius: 10px; border: 1px solid transparent; background: none; color: var(--ink); cursor: pointer; font: 400 0.875rem var(--font-body); }
+  .st-item:hover, .st-item:focus-visible { background: var(--bg); border-color: var(--line); }
+  .st-item[aria-checked="true"] { border-color: var(--ink); }
+  .st-item i, .st-current i { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--ink); }
+  .st-current i.erase { background: repeating-linear-gradient(45deg, var(--surface), var(--surface) 2px, var(--ink2) 2px, var(--ink2) 3px); }
+  .st-item-t { display: grid; gap: 2px; } .st-item-t span { color: var(--ink2); font-size: 0.8125rem; }
+  .st-price { font: 500 0.75rem var(--font-mono); color: var(--ink2); white-space: nowrap; }
+  .st-current { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+  .st-current b { font-size: 1.0625rem; }
   .st-palette { display: grid; gap: 8px; }
   .st-group { display: grid; gap: 4px; }
   .st-tools { display: flex; flex-wrap: wrap; gap: 6px; }

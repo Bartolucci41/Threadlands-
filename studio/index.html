@@ -63,6 +63,10 @@
           <button type="button" class="chip" id="st-clear">Clear</button>
         </div>
       </div>
+      <div class="st-catwrap">
+        <div class="st-cats" id="st-cats" role="toolbar" aria-label="What to build"></div>
+        <div class="st-menu" id="st-menu" hidden role="menu"></div>
+      </div>
       <div class="st-shape" id="st-shape" hidden role="group" aria-label="How to place it">
         <span class="eyebrow" id="st-shape-l">How to place it</span>
         <button type="button" class="chip" data-shape="pick" aria-pressed="true">Pick a real place</button>
@@ -92,8 +96,8 @@
     </div>
 
     <aside class="st-panel">
-      <h2 class="st-h">Elements</h2>
-      <div class="st-palette" id="st-palette" role="radiogroup" aria-label="Elements"></div>
+      <h2 class="st-h">Placing</h2>
+      <div class="st-current"><i id="st-cur-dot"></i><b id="st-cur-name"></b><span id="st-cur-price" class="st-price"></span></div>
       <p class="st-tooldesc" id="st-tooldesc"></p>
       <div class="st-opts" id="st-opts" hidden>
         <label for="st-floors" id="st-floors-l">Floors</label><input id="st-floors" type="number" min="1" max="80" step="1" value="6">
@@ -839,25 +843,87 @@
     }
   }
 
-  // ---- Palette
-  var groups = {};
-  CAT.forEach(function (c) { (groups[c.group] = groups[c.group] || []).push(c); });
-  $('#st-palette').innerHTML = Object.keys(groups).map(function (g) {
-    return '<div class="st-group"><span class="eyebrow">' + g + '</span><div class="st-tools">' + groups[g].map(function (c) {
-      return '<button type="button" class="st-tool" role="radio" data-tool="' + c.k + '" aria-checked="false"><i style="background:var(' + c.color + ')"></i>' + c.name + '</button>';
-    }).join('') + '</div></div>';
-  }).join('') + '<div class="st-group"><div class="st-tools"><button type="button" class="st-tool" role="radio" data-tool="erase" aria-checked="false"><i class="erase"></i>Remove</button></div></div>';
+  // ---- What to build: eight categories, each opening a short list of elements
+  var ICON = {
+    food: '<path d="M12 21V9"/><path d="M12 13c-3 0-5-2-5-5 3 0 5 2 5 5z"/><path d="M12 11c0-3 2-5 5-5 0 3-2 5-5 5z"/>',
+    green: '<path d="M12 21v-5"/><circle cx="12" cy="10" r="6"/>',
+    water: '<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>',
+    flood: '<path d="M3 17h18"/><path d="M6 17V8h12v9"/><path d="M3 21c2 0 2-1.5 4.5-1.5S10 21 12 21s2-1.5 4.5-1.5S19 21 21 21"/>',
+    wild: '<path d="M4 20l6-12 4 7 2-3 4 8z"/>',
+    homes: '<path d="M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/>',
+    move: '<rect x="5" y="4" width="14" height="13" rx="2"/><path d="M5 11h14"/><path d="M8 20l1.5-3M16 20l-1.5-3"/>',
+    energy: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
+    remove: '<path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/>'
+  };
+  var CATS = [
+    { id: 'food', name: 'Food', items: ['farmblock', 'urbanfarm', 'regen'] },
+    { id: 'green', name: 'Trees and parks', items: ['trees', 'park', 'roof'] },
+    { id: 'water', name: 'Water', items: ['raingarden', 'pond', 'wetland'] },
+    { id: 'flood', name: 'Flood defense', items: ['seawall'] },
+    { id: 'wild', name: 'Wild land', items: ['forest', 'corridor'] },
+    { id: 'homes', name: 'Homes', items: ['build', 'housing'] },
+    { id: 'move', name: 'Getting around', items: ['transit'] },
+    { id: 'energy', name: 'Energy', items: ['solar'] },
+    { id: 'remove', name: 'Remove', tool: 'erase' }
+  ];
+  var SHORT = {
+    farmblock: 'Turn a lot or block into a working farm', urbanfarm: 'Small plots on roofs and vacant corners', regen: 'Healthier soil on the farms around the city',
+    trees: 'Shade along a street, one every 10 m', park: 'A planted park, from pocket-size to big', roof: 'Plants on top of buildings',
+    raingarden: 'Planted dips that catch storm water', pond: 'Holds floodwater and cools the air', wetland: 'Marsh that stores floods and shelters wildlife',
+    seawall: 'A wall along a coast or river, at a height you set',
+    forest: 'Native forest on open or farmed land', corridor: 'A green link for animals between wild places',
+    build: 'A new building, as many floors as you set', housing: 'More homes in existing neighborhoods',
+    transit: 'A bus rapid transit route', solar: 'Panels on roofs or over parking'
+  };
+  function priceHint(k) {
+    var f = S.F || 1, d = function (v) { return money(v * f); };
+    return ({ farmblock: d(32) + '/m² + clearing', urbanfarm: d(32) + '/m²', regen: d(90) + '/ha a year', trees: d(2050) + ' a tree',
+      park: d(38) + '/m² + clearing', roof: d(123) + '/m²', raingarden: d(38) + '/m²', pond: 'by volume', wetland: d(52000) + '/ha',
+      seawall: d(15e6) + '/km per m high', forest: d(1600) + '/ha', corridor: d(1600) + '/ha', build: d(2500) + '/m² of floor',
+      housing: 'no public cost', transit: d(12.95e6) + '/km', solar: d(2.95) + '/W' })[k] || '';
+  }
+  function svgIcon(id) { return '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[id] + '</svg>'; }
+  $('#st-cats').innerHTML = CATS.map(function (g) {
+    return '<button type="button" class="st-cat" data-cat="' + g.id + '" aria-haspopup="' + (g.tool ? 'false' : 'menu') + '" aria-expanded="false">' + svgIcon(g.id) + '<span>' + g.name + '</span></button>';
+  }).join('');
+  var openCat = null;
+  function catOf(tool) { for (var n = 0; n < CATS.length; n++) if ((CATS[n].items || []).indexOf(tool) >= 0 || CATS[n].tool === tool) return CATS[n].id; return null; }
+  function closeMenu() { openCat = null; $('#st-menu').hidden = true; document.querySelectorAll('.st-cat').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); }); }
+  function openMenu(id, btn) {
+    var g = CATS.filter(function (x) { return x.id === id; })[0];
+    if (g.tool) { closeMenu(); setTool(g.tool); return; }
+    if (openCat === id) { closeMenu(); return; }
+    openCat = id;
+    document.querySelectorAll('.st-cat').forEach(function (b) { b.setAttribute('aria-expanded', b === btn ? 'true' : 'false'); });
+    var m = $('#st-menu');
+    m.innerHTML = '<p class="st-menu-h">' + esc(g.name) + '</p>' + g.items.map(function (k) {
+      var c = BYK[k];
+      return '<button type="button" class="st-item" role="menuitemradio" aria-checked="' + (S.tool === k) + '" data-tool="' + k + '"><i style="background:var(' + c.color + ')"></i>' +
+        '<span class="st-item-t"><b>' + esc(c.name) + '</b><span>' + esc(SHORT[k] || '') + '</span></span><span class="st-price">' + esc(priceHint(k)) + '</span></button>';
+    }).join('');
+    m.hidden = false;
+    var wr = $('.st-catwrap').getBoundingClientRect(), br = btn.getBoundingClientRect();
+    m.style.left = Math.max(0, Math.min(br.left - wr.left, wr.width - Math.min(380, wr.width))) + 'px';
+    var first = m.querySelector('[data-tool]'); if (first) first.focus();
+  }
+  $('#st-cats').addEventListener('click', function (e) { var b = e.target.closest('[data-cat]'); if (b) openMenu(b.dataset.cat, b); });
+  $('#st-menu').addEventListener('click', function (e) { var b = e.target.closest('[data-tool]'); if (b) { setTool(b.dataset.tool); closeMenu(); } });
+  document.addEventListener('click', function (e) { if (openCat && !e.target.closest('.st-catwrap')) closeMenu(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && openCat) { var id = openCat; closeMenu(); var b = $('[data-cat="' + id + '"]'); if (b) b.focus(); } });
   function setTool(t) {
     var wasNoPick = BYK[S.tool] && BYK[S.tool].noPick;
     S.tool = t; draft = null; hoverOSM = null; snapPt = null; if (typeof showOpts === 'function') showOpts();
     if (wasNoPick && BYK[t] && !BYK[t].noPick && S.shape === 'poly') setShape('pick');
-    document.querySelectorAll('[data-tool]').forEach(function (b) { b.setAttribute('aria-checked', b.dataset.tool === t ? 'true' : 'false'); });
-    var c = BYK[t];
+    var c = BYK[t], cat = catOf(t);
+    document.querySelectorAll('.st-cat').forEach(function (b) { b.classList.toggle('on', b.dataset.cat === cat); });
+    $('#st-cur-name').textContent = c ? c.name : 'Remove';
+    $('#st-cur-dot').style.background = c ? 'var(' + c.color + ')' : '';
+    $('#st-cur-dot').className = c ? '' : 'erase';
+    $('#st-cur-price').textContent = c ? priceHint(t) : '';
     $('#st-tooldesc').textContent = c ? c.desc : 'Click any placed element or shape to remove it.';
     if (view) modeChanged(); else hint();
     if (S.P) draw();
   }
-  $('#st-palette').addEventListener('click', function (e) { var b = e.target.closest('[data-tool]'); if (b) setTool(b.dataset.tool); });
   function showOpts() {
     var bld = S.tool === 'build', wall = S.tool === 'seawall';
     $('#st-opts').hidden = !(bld || wall);
@@ -1177,6 +1243,7 @@
     var at2050 = S.year === 2050 ? now : run(2050);
     S.P.studio = new Map();
     $('#st-yr').textContent = S.year; $('#st-yr2').textContent = S.year;
+    $('#st-cur-price').textContent = BYK[S.tool] ? priceHint(S.tool) : '';
     var idx = Math.round(r.index), bi = Math.round(b.index), d = idx - bi, has = S.items.size || S.feats.length;
     $('#st-index').textContent = idx;
     $('#st-idelta').textContent = has ? (d >= 0 ? '+' : '−') + Math.abs(d) + ' compared with doing nothing (' + bi + ')' : 'Doing nothing scores ' + bi + ' in ' + S.year;
