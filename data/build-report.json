@@ -97,6 +97,13 @@
   "status": "built with heat",
   "when": "2026-11-14T00:49:25Z"
  },
+ "bologna": {
+  "minutes": 1.2,
+  "query": "Bologna, Emilia-Romagna, Italy || Bologna, Italy",
+  "slug": "bologna",
+  "status": "built with heat",
+  "when": "2026-11-16T01:09:55Z"
+ },
  "boston": {
   "minutes": 1.2,
   "query": "Boston, Massachusetts, USA",
