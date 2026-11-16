@@ -153,6 +153,21 @@ css += """
   .st-item-t { display: grid; gap: 2px; } .st-item-t span { color: var(--ink2); font-size: 0.8125rem; }
   .st-carb { font-size: 0.75rem !important; color: var(--accent) !important; }
   .st-bom { margin: 10px 0 4px; border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; background: var(--surface); }
+.topright { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; }
+.lang-sel { font: 500 0.8125rem var(--font-body); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; min-height: 34px; cursor: pointer; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+html[data-lang="zh"] { --font-body: 'Noto Sans SC', system-ui, sans-serif; --font-display: 'Noto Sans SC', system-ui, sans-serif; }
+html[data-lang="hi"] { --font-body: 'Noto Sans Devanagari', system-ui, sans-serif; --font-display: 'Noto Sans Devanagari', system-ui, sans-serif; }
+html[data-lang="bn"] { --font-body: 'Noto Sans Bengali', system-ui, sans-serif; --font-display: 'Noto Sans Bengali', system-ui, sans-serif; }
+html[data-lang="ar"] { --font-body: 'Noto Sans Arabic', system-ui, sans-serif; --font-display: 'Noto Sans Arabic', system-ui, sans-serif; }
+html[data-lang="ur"] { --font-body: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', system-ui, sans-serif; --font-display: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', system-ui, sans-serif; line-height: 1.9; }
+html[dir="rtl"] .st-bom th, html[dir="rtl"] .st-bom td, html[dir="rtl"] .st-sp-o { text-align: right; }
+html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(n+2) { text-align: left; }
+.st-bom { min-width: 0; max-width: 100%; box-sizing: border-box; overflow-wrap: anywhere; }
+.st-bom table { table-layout: auto; }
+.st-bom-tbl { overflow-x: auto; max-width: 100%; }
+.st-bom td:nth-child(2) { white-space: normal !important; }
+.st-sp-o { width: 100%; box-sizing: border-box; white-space: normal; }
 .st-sp [role="radiogroup"] { display: grid; gap: 4px; max-height: 260px; overflow-y: auto; }
 .st-sp-o { text-align: left; padding: 6px 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; font-size: 0.85rem; cursor: pointer; }
 .st-sp-o i { color: var(--ink2); font-size: 0.75rem; }
@@ -250,7 +265,8 @@ PAGES = [("", "Home"), ("explore/", "Explore"), ("studio/", "Studio"), ("library
 
 def APP(base):
     # Installable app: icon, manifest and offline support
-    return (f'<link rel="manifest" href="{base}manifest.webmanifest">\n'
+    return (f'<script src="{base}assets/i18n.js" defer></script>\n'
+            f'<link rel="manifest" href="{base}manifest.webmanifest">\n'
             '<meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">\n'
             '<meta name="theme-color" content="#0D1613" media="(prefers-color-scheme: dark)">\n'
             f'<link rel="icon" type="image/png" sizes="32x32" href="{base}assets/icons/favicon-32.png">\n'
@@ -271,8 +287,9 @@ def head(base, title, desc):
 def nav(base, here):
     links = "".join(f'<a href="{base}{p}"' + (' aria-current="page"' if p == here else "") + f'>{n}</a>'
                     for p, n in PAGES[1:])
-    return (f'<header class="wrap site-head" id="top">\n  <div class="topbar">\n    <a class="wordmark" href="{base}">Threadlands</a>\n'
-            f'    <nav class="topnav" aria-label="Site">{links}</nav>\n  </div>\n</header>\n')
+    return (f'<header class="wrap site-head" id="top">\n  <div class="topbar">\n    <a class="wordmark" href="{base}" translate="no">Threadlands</a>\n'
+            f'    <div class="topright"><nav class="topnav" aria-label="Site">{links}</nav>'
+            '<label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>\n  </div>\n</header>\n')
 
 
 def footer(base):
