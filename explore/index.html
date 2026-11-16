@@ -1154,6 +1154,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     function go() {
       clearError();
       current = x.id;
+      try { if (x.kind === 'real') localStorage.setItem('threadlands:last-slug', x.id); } catch (e) { /* ignore */ }
       loadDetail(x.kind === 'real' ? x.id : null);
       setPlace(x.data, x.kind);
       markExamples();
@@ -2702,6 +2703,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
       clearError();
       setPlace(d, 'real');
       current = slug;
+      try { localStorage.setItem('threadlands:last-slug', slug); } catch (e) { /* ignore */ }
       markExamples();
       if (!fromHash) { try { history.replaceState(null, '', '#' + slug); } catch (err) { /* ignore */ } }
       if (scroll) $('#explore').scrollIntoView({ behavior: 'smooth' });
@@ -2852,7 +2854,11 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
       var bar = wireSearch('#search-bar', '#q-bar', '#sugg-bar', false, '#req-bar');
       var h = location.hash.replace('#', '');
       if (h && h !== current && libEntry(h)) openLibrary(h, true);
-      else if (!current) { var ns = nearSlug(LIB); if (ns && libEntry(ns)) openLibrary(ns, true); else openExample('mexico-city', true); }
+      else if (!current) {
+        var ls = null; try { ls = localStorage.getItem('threadlands:last-slug'); } catch (e) { /* ignore */ }
+        var ns = ls && libEntry(ls) ? ls : nearSlug(LIB);
+        if (ns && libEntry(ns)) openLibrary(ns, true); else openExample('mexico-city', true);
+      }
       var q = new URLSearchParams(location.search).get('q');
       if (q) { bar.input.value = q; bar.searchWorld(); bar.input.focus(); }
     }).catch(function () { if (!current) openExample('mexico-city', true); });

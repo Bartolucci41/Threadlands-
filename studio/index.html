@@ -1915,6 +1915,7 @@
     fetch('../data/places/' + slug + '.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
       var P = ThreadModel.prepare(d);
       S.P = P; S.slug = slug; draft = null; setZone(); loadDetail(slug);
+      try { localStorage.setItem('threadlands:last-slug', slug); } catch (e) { /* ignore */ }
       S.base = P.evaluate({ canopy: 0, corridors: 0, wetlands: 0, regen: 0, compact: 0 });
       priceFor(d.country_code);
       if (MAT) renderBom();
@@ -1980,7 +1981,10 @@
     var TZC = { 'America/Mexico_City': 'mexico-city', 'America/Los_Angeles': 'san-francisco', 'America/Toronto': 'montreal', 'Europe/Rome': 'bologna', 'Asia/Bangkok': 'bangkok' }, tz0 = '';
     try { tz0 = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { /* ignore */ }
     var tzn = tz0.split('/').pop().replace(/_/g, ' ').toLowerCase(), near = lib.filter(function (e) { return e.name.toLowerCase() === tzn; })[0];
-    var start = lib.some(function (e) { return e.slug === h; }) ? h : near ? near.slug : TZC[tz0] || 'mexico-city';
+    var last = null; try { last = localStorage.getItem('threadlands:last-slug'); } catch (e) { /* ignore */ }
+    var has = function (x) { return x && lib.some(function (e) { return e.slug === x; }); };
+    // the place in the address first, then the last place opened on this device, then a guess from the time zone
+    var start = has(h) ? h : has(last) ? last : near ? near.slug : TZC[tz0] || 'mexico-city';
     $('#st-pick').value = start;
     load(start);
     if (openWs) setTimeout(function () { $('#st-wsbtn').click(); }, 1200);
