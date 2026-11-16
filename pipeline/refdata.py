@@ -120,6 +120,43 @@ def price_levels():
     print(f"price levels for {len(out)} countries; US ratio {us}; e.g. MX {out.get('MX')}, NG {out.get('NG')}, IT {out.get('IT')}")
 
 
+def grid_intensity():
+    """Carbon intensity of electricity by country (g CO2e per kWh), latest year, from Ember via Our World in Data."""
+    import csv, io, time, requests, pycountry
+    url = "https://ourworldindata.org/grapher/carbon-intensity-electricity.csv?v=1&csvType=full&useColumnShortNames=true"
+    r = None
+    for attempt in range(4):
+        try:
+            r = requests.get(url, timeout=120, headers={"User-Agent": "threadlands.org reference data"})
+            if r.status_code == 200:
+                break
+        except requests.RequestException as e:
+            print("Our World in Data busy, retrying:", e)
+        time.sleep(15 * (attempt + 1))
+    if r is None or r.status_code != 200:
+        raise SystemExit("Could not fetch grid carbon intensity")
+    rows = list(csv.reader(io.StringIO(r.text)))
+    head = rows[0]
+    ci, yi, vi = head.index("Code") if "Code" in head else 1, head.index("Year") if "Year" in head else 2, len(head) - 1
+    latest = {}
+    for row in rows[1:]:
+        try:
+            code, year, val = row[ci], int(row[yi]), float(row[vi])
+        except (ValueError, IndexError):
+            continue
+        if not code or code.startswith("OWID"):
+            if row[0] == "World":
+                latest["WORLD"] = max(latest.get("WORLD", (0, 0)), (year, val))
+            continue
+        c = pycountry.countries.get(alpha_3=code)
+        if c and (c.alpha_2 not in latest or year > latest[c.alpha_2][0]):
+            latest[c.alpha_2] = (year, val)
+    out = {k: {"g_per_kwh": round(v[1]), "year": v[0]} for k, v in latest.items()}
+    json.dump({"source": "Ember, via Our World in Data: carbon intensity of electricity generation (g CO2e per kWh)", "countries": out},
+              open(os.path.join(ROOT, "data", "grid-intensity.json"), "w"), separators=(",", ":"), sort_keys=True)
+    print(f"grid intensity for {len(out)} countries; world {out.get('WORLD')}, MX {out.get('MX')}, US {out.get('US')}")
+
+
 if __name__ == "__main__":
     tag_places()
     if len(sys.argv) < 2 or sys.argv[1] != "tag":
@@ -127,3 +164,7 @@ if __name__ == "__main__":
             price_levels()
         except BaseException as e:   # keep last month's prices and still save the country codes
             print("Price levels not refreshed this time:", repr(e)[:300])
+        try:
+            grid_intensity()
+        except BaseException as e:   # keep last month's figures
+            print("Grid intensity not refreshed this time:", repr(e)[:300])

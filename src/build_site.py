@@ -151,6 +151,8 @@ css += """
   .st-item i, .st-current i { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--ink); }
   .st-current i.erase { background: repeating-linear-gradient(45deg, var(--surface), var(--surface) 2px, var(--ink2) 2px, var(--ink2) 3px); }
   .st-item-t { display: grid; gap: 2px; } .st-item-t span { color: var(--ink2); font-size: 0.8125rem; }
+  .st-carb { font-size: 0.75rem !important; color: var(--accent) !important; }
+  .st-carbon { display: block; padding: 8px 10px; border-radius: 10px; background: var(--bg); }
   .st-price { font: 500 0.75rem var(--font-mono); color: var(--ink2); white-space: nowrap; }
   .st-current { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
   .st-current b { font-size: 1.0625rem; }

@@ -249,6 +249,7 @@
     'New buildings: about US$2,500 per m\u00b2 of floor space for mid-rise housing, plus clearing the site; about 35 m\u00b2 of floor space per resident. Heights of existing buildings come from OpenStreetMap where mapped (height or floors), otherwise they are estimated from the building type and how dense the area is.',
     'Sea walls and levees: about US$15 million per km for each meter of height, the middle of published ranges for building and raising flood defenses (Jonkman and others, Ocean & Coastal Management, 2013); upkeep about 1% of the cost a year. Protection grows with height, up to 85% of the flood risk behind the wall.',
     'Solar roofs: US$1.80 to $4.10 per watt installed in 2023 (Lawrence Berkeley National Laboratory). About 0.18 kW per m² of panels; yearly output estimated from latitude.',
+    'Carbon: trees store about 0.75 kg of CO\u2082 per m\u00b2 of canopy a year, net of losses (Nowak and others, i-Tree, 2013), about 37 kg for a grown street tree. Upfront carbon of new buildings about 600 kg per m\u00b2 of floor, between the LETI 2020 target and typical practice. Reinforced concrete about 300 kg per m\u00b3, a typical value in embodied-carbon inventories such as the ICE database. Rooftop solar about 41 g per kWh over its life (IPCC AR5 median), set against the country\u2019s electricity mix from Ember via Our World in Data, refreshed monthly (world average 458 g per kWh in 2025). Young forest about 7 t of CO\u2082 per hectare a year (IPCC default growth rates), restored wetlands about 1.5 t net of methane, regenerative farms about 0.5 t in soil. Transit assumes a conservative 1,000 t a year saved per km of bus rapid transit. These are screening estimates; live product data (EC3) is planned.',
     'Every cost is scaled to the place: about 70% follows the country’s price level (World Bank), 30% stays at world prices for materials.',
     'Buildings, lots, parks and streets at street level, and the streets background: © OpenStreetMap contributors, through the Overpass API; satellite imagery from Esri World Imagery (Maxar, Earthstar Geographics) through ArcGIS Location Platform, with Sentinel-2 cloudless by EOX as a backup. Effects run through the same Threadlands model as the Explore page, and the climate warms step by step toward the middle-path 2050 scenario.'
   ];
@@ -456,6 +457,49 @@
     }
     return { label: '', cost: 0, up: 0 };
   }
+
+  // ---- Carbon over the life of each element (kg CO2e). Building it costs carbon once; growing or generating saves some every year.
+  // Factors are published averages; the electricity mix comes from Ember (via Our World in Data) for the place's country, refreshed monthly.
+  var GRID = { world: 458 };   // g CO2e per kWh; Ember Global Electricity Review 2026: world average 2025
+  function gridG() { var g = S.cc && GRID[S.cc]; return g ? g.g_per_kwh : GRID.world; }
+  function carbonOf(kind, a) {
+    // a: amounts for this element. Returns { emb: kg once, yr: kg a year once mature (removed or avoided) }
+    var g = gridG() / 1000;   // kg per kWh
+    switch (kind) {
+      case 'trees': return { emb: a.n * 50, yr: a.n * 50 * 0.75 };                 // about 50 m2 of canopy each; i-Tree net uptake 0.75 kg CO2 per m2 of canopy a year
+      case 'park': return { emb: a.m2 * (15 + 60 * a.clear), yr: a.m2 * 0.4 };        // planting and soil, plus clearing; trees on about 40% of a park
+      case 'farmblock': return { emb: a.m2 * (20 + 60 * a.clear), yr: a.m2 * 0.2 };   // beds and soil, plus clearing; soil carbon build-up
+      case 'urbanfarm': return { emb: a.m2 * 20, yr: a.m2 * 0.2 };
+      case 'roof': return { emb: a.m2 * 25, yr: a.m2 * (0.3 + 2 * g) };              // substrate and membranes; plants plus about 2 kWh a year saved on cooling and heating
+      case 'raingarden': return { emb: a.m2 * 10, yr: a.m2 * 0.1 };
+      case 'pond': return { emb: a.m2 * 2 * 5, yr: 0 };                               // digging, about 5 kg per m3 moved
+      case 'wetland': return { emb: a.ha * 1000, yr: a.ha * 1500 };                  // net of methane, about 1.5 t a hectare a year
+      case 'forest': return { emb: a.ha * 500, yr: a.ha * 7000 };                    // young forest, about 7 t a hectare a year (IPCC default growth)
+      case 'corridor': return { emb: a.ha * 500, yr: a.ha * 3000 };
+      case 'regen': return { emb: 0, yr: a.ha * 500 };                               // soil carbon, about 0.5 t a hectare a year
+      case 'seawall': return { emb: a.m * a.h * (0.4 + 0.15 * a.h) * 300, yr: 0 };   // reinforced concrete, about 300 kg per m3
+      case 'build': return { emb: a.m2 * a.floors * 600, yr: 0 };                    // upfront carbon, about 600 kg per m2 of floor (LETI)
+      case 'solar': return { emb: a.kw * 1300, yr: a.mwh * 1000 * g };               // about 41 g per kWh over its life (IPCC); saves the local grid mix
+      case 'transit': return { emb: a.km * 1000000, yr: a.km * 1000000 };            // about 1,000 t to build and 1,000 t a year saved per km (conservative)
+    }
+    return { emb: 0, yr: 0 };
+  }
+  function hexAmounts(kind, i) {
+    var h = hexInfo(i), A = h.area * 1e6, q = hexQty(kind, i);
+    return { m2: kind === 'urbanfarm' ? 0.02 * A : kind === 'roof' ? 0.1 * h.built * A : kind === 'raingarden' ? 0.01 * A : kind === 'pond' ? 0.1 * A : A,
+      ha: (kind === 'regen' ? A * h.crop : A) / 1e4, n: q.trees || 0, clear: h.built, km: 1.07 * Math.sqrt(h.area), kw: 0.1 * h.built * A * 0.18, mwh: q.mwh || 0, m: 0, h: 0, floors: 0 };
+  }
+  function featAmounts(f) {
+    var q = featQty(f), clr = f.clear != null ? f.clear : 0.5;
+    return { m2: f.type === 'area' ? f.size : f.size * 30, ha: (f.type === 'area' ? f.size : f.size * 30) / 1e4, n: f.size / 10, clear: clr, km: f.size / 1000,
+      kw: f.size * 0.18, mwh: q.mwh || 0, m: f.size, h: f.height || 2, floors: f.floors || 6 };
+  }
+  var CARBON_HINT = {
+    trees: 'each stores about 37 kg of CO₂ a year once grown', park: 'about 0.4 kg of CO₂ per m² a year', farmblock: 'small carbon gain; the point is food',
+    roof: 'cuts building energy and stores a little carbon', wetland: 'about 1.5 t of CO₂ per hectare a year', forest: 'about 7 t of CO₂ per hectare a year',
+    regen: 'about 0.5 t of CO₂ per hectare a year', seawall: 'concrete: about 300 kg of CO₂ per m³ to build', build: 'about 600 kg of CO₂ per m² of floor to build',
+    solar: 'pays back its carbon in about 2 years', transit: 'about 1,000 t of CO₂ a year saved per km'
+  };
   function maturity(kind, year) {
     var c = BYK[kind], t = year - 2026;
     if (!c || c.grow <= 0) return 1;
@@ -980,7 +1024,7 @@
     m.innerHTML = '<p class="st-menu-h">' + esc(g.name) + '</p>' + g.items.map(function (k) {
       var c = BYK[k];
       return '<button type="button" class="st-item" role="menuitemradio" aria-checked="' + (S.tool === k) + '" data-tool="' + k + '"><i style="background:var(' + c.color + ')"></i>' +
-        '<span class="st-item-t"><b>' + esc(c.name) + '</b><span>' + esc(SHORT[k] || '') + '</span></span><span class="st-price">' + esc(priceHint(k)) + '</span></button>';
+        '<span class="st-item-t"><b>' + esc(c.name) + '</b><span>' + esc(SHORT[k] || '') + '</span>' + (CARBON_HINT[k] ? '<span class="st-carb">' + esc(CARBON_HINT[k]) + '</span>' : '') + '</span><span class="st-price">' + esc(priceHint(k)) + '</span></button>';
     }).join('');
     m.hidden = false;
     var wr = $('.st-catwrap').getBoundingClientRect(), br = btn.getBoundingClientRect();
@@ -1410,14 +1454,19 @@
   // ---- Totals, scores and challenges
   var MET = [['heat', 'Heat relief'], ['flood', 'Flood safety'], ['food', 'Local food'], ['habitat', 'Habitat'], ['storage', 'Water storage'], ['mobility', 'Low-carbon travel']];
   function totals() {
-    var T = { spent: 0, up: 0, by: {}, farmM2: 0, mwh: 0, trees: 0, residents: 0 };
+    var T = { spent: 0, up: 0, by: {}, farmM2: 0, mwh: 0, trees: 0, residents: 0, emb: 0, yr: 0, net: 0 };
+    function addc(kind, a) {
+      var c = carbonOf(kind, a); T.emb += c.emb; T.yr += c.yr;
+      var gained = 0; for (var y = 2026; y <= 2050; y++) gained += c.yr * maturity(kind, y);
+      T.net += gained - c.emb;
+    }
     function addq(kind, q) {
       T.spent += q.cost * S.F; T.up += q.up * S.F;
       var b = T.by[kind] = T.by[kind] || { n: 0, cost: 0 }; b.n++; b.cost += q.cost * S.F;
       T.farmM2 += q.farmM2 || 0; T.mwh += q.mwh || 0; T.trees += q.trees || 0; T.residents += q.residents || 0;
     }
-    S.items.forEach(function (kind, i) { addq(kind, hexQty(kind, i)); });
-    S.feats.forEach(function (f) { addq(f.kind, featQty(f)); });
+    S.items.forEach(function (kind, i) { addq(kind, hexQty(kind, i)); addc(kind, hexAmounts(kind, i)); });
+    S.feats.forEach(function (f) { addq(f.kind, featQty(f)); addc(f.kind, featAmounts(f)); });
     return T;
   }
   var last2050 = null;
@@ -1447,6 +1496,11 @@
     if (T.trees > 0) lines.push('<b>' + num(T.trees) + '</b> street trees');
     if (T.residents > 0) lines.push('Homes for <b>' + num(T.residents) + '</b> more residents' + (r.compactUsed > 0 ? ', so the farthest ' + Math.round(100 * r.compactUsed) + '% of sprawl stays unbuilt' : ''));
     if (T.mwh > 0) lines.push('<b>' + num(T.mwh) + ' MWh</b> of solar power a year');
+    if (T.emb > 0 || T.yr > 0) {
+      var tn = function (kg) { var t = kg / 1000; return t >= 1000 ? num(t) : t >= 10 ? num(t) : t.toFixed(1); };
+      lines.push('<span class="st-carbon"><b>Carbon:</b> ' + tn(T.emb) + ' t CO\u2082 to build; ' + tn(T.yr) + ' t a year stored or saved once grown; by 2050 a net ' +
+        (T.net >= 0 ? '<b class="up">gain of ' + tn(T.net) + ' t</b>' : '<b class="down">cost of ' + tn(-T.net) + ' t</b>') + '</span>');
+    }
     Object.keys(T.by).forEach(function (kd) { lines.push(BYK[kd].name + ': ' + T.by[kd].n + ' placed, ' + money(T.by[kd].cost)); });
     $('#st-design').innerHTML = lines.length ? lines.map(function (e) { return '<p>' + e + '</p>'; }).join('') : '<p>Nothing placed yet.</p>';
     $('#st-spent').textContent = money(T.spent);
@@ -1529,6 +1583,7 @@
 
   // ---- Loading places
   function priceFor(cc) {
+    S.cc = cc;
     var x = cc && S.PRICES && S.PRICES[cc];
     S.pl = x && x.factor > 0 ? x : null;
     S.F = S.pl ? 0.7 * S.pl.factor + 0.3 : 1;
@@ -1583,9 +1638,11 @@
   setTool('farmblock');
   Promise.all([
     fetch('../data/index.json').then(function (r) { return r.json(); }).catch(function () { return { places: [] }; }),
-    fetch('../data/price-levels.json').then(function (r) { return r.json(); }).catch(function () { return {}; })
+    fetch('../data/price-levels.json').then(function (r) { return r.json(); }).catch(function () { return {}; }),
+    fetch('../data/grid-intensity.json').then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })
   ]).then(function (a) {
     S.PRICES = a[1].countries || null;
+    if (a[2] && a[2].countries) { var w = a[2].countries.WORLD; GRID = a[2].countries; GRID.world = w ? w.g_per_kwh : 458; }
     var lib = (a[0].places || []).slice().sort(function (x, y) { return x.name.localeCompare(y.name); });
     LIB = lib;
     $('#st-names').innerHTML = lib.map(function (e) { return '<option value="' + esc(e.name) + ', ' + esc(e.country) + '"></option>'; }).join('');
