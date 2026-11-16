@@ -173,8 +173,10 @@
   .file-input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
   .glance { margin: 0 0 22px; }
   .glance::after { content: ""; display: block; clear: both; }
-  .place-art { float: right; width: min(300px, 40%); height: auto; margin: 0 0 12px 18px; border-radius: 16px; }
-  @media (max-width: 640px) { .place-art { float: none; width: 100%; margin: 0 0 12px; } }
+  .explore-main { position: relative; }
+  .place-art { position: absolute; right: 0; top: -24px; width: min(560px, 55%); height: auto; opacity: 0.2; filter: grayscale(1) contrast(1.5); mix-blend-mode: multiply; pointer-events: none; z-index: 0; -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 40%, transparent 75%); mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 40%, transparent 75%); }
+  .explore-main > :not(.place-art) { position: relative; z-index: 1; }
+  @media (max-width: 640px) { .place-art { width: 100%; top: -10px; opacity: 0.14; } }
   .place-head { display: flex; gap: 14px; align-items: center; min-width: 0; }
   .emblem { width: 72px; height: 72px; flex: 0 0 auto; border-radius: 50%; }
   .glance-h { margin: 0 0 4px; font: 600 1.125rem var(--font-body); color: var(--ink); }
@@ -391,7 +393,8 @@
 
 <!--NAV-->
 
-<main class="wrap">
+<main class="wrap explore-main">
+  <img class="place-art" id="place-art" alt="" hidden>
   <h1 class="sect-h page-h" id="explore">Explore a place</h1>
   <div class="placebar" id="placebar">
     <div class="place-head"><canvas class="emblem" id="place-emblem" width="72" height="72" aria-hidden="true"></canvas>
@@ -415,7 +418,6 @@
   </div>
   <p class="alert" id="alert" role="alert" hidden></p>
   <section class="glance" id="glance" aria-labelledby="glance-h" hidden>
-    <img class="place-art" id="place-art" alt="" hidden>
     <h3 class="glance-h" id="glance-h"></h3>
     <p class="glance-sub" id="glance-sub"></p>
     <div class="glance-grid" id="glance-grid"></div>
@@ -1322,6 +1324,43 @@
 
 
   // ---- The place's emblem, drawn from its own data: outline, rivers, farmland, forest and water, in the house palette
+
+  // The real outline of the place, from OpenStreetMap, cached on this device; the hex outline is the fallback
+  var OUTLINES = {};
+  function fetchOutline(name, cb) {
+    var key = 'threadlands:outline:' + name;
+    if (OUTLINES[name]) return cb(OUTLINES[name]);
+    try { var c0 = localStorage.getItem(key); if (c0) { OUTLINES[name] = JSON.parse(c0); return cb(OUTLINES[name]); } } catch (e) { /* ignore */ }
+    if (!window.fetch || location.protocol.indexOf('http') !== 0) return;
+    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&polygon_geojson=1&polygon_threshold=0.003&q=' + encodeURIComponent(name), { headers: { 'Accept-Language': 'en' } })
+      .then(function (r) { return r.json(); }).then(function (j) {
+        var gj = j && j[0] && j[0].geojson; if (!gj || !/Polygon/.test(gj.type)) return;
+        var polys = gj.type === 'Polygon' ? [gj.coordinates] : gj.coordinates;
+        // keep the largest polygon's outer ring, so far-off islands do not shrink the shape
+        var best = null, ba = 0;
+        polys.forEach(function (pg) { var r0 = pg[0], a = 0; for (var i = 0; i < r0.length - 1; i++) a += r0[i][0] * r0[i + 1][1] - r0[i + 1][0] * r0[i][1]; a = Math.abs(a); if (a > ba) { ba = a; best = r0; } });
+        if (!best) return;
+        var step = Math.max(1, Math.floor(best.length / 400)), ring = [];
+        for (var i = 0; i < best.length; i += step) ring.push([Math.round(best[i][0] * 1e4) / 1e4, Math.round(best[i][1] * 1e4) / 1e4]);
+        OUTLINES[name] = ring; try { localStorage.setItem(key, JSON.stringify(ring)); } catch (e) { /* ignore */ }
+        cb(ring);
+      }).catch(function () { /* keep the hex outline */ });
+  }
+  function drawOutlineEmblem(ring) {
+    var c = $('#place-emblem'); if (!c) return;
+    var d = window.devicePixelRatio || 1, S2 = 72, g = c.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); g.clearRect(0, 0, S2, S2);
+    var lat0 = ring.reduce(function (a, p) { return a + p[1]; }, 0) / ring.length, kx = Math.cos(lat0 * Math.PI / 180);
+    var xs = ring.map(function (p) { return p[0] * kx; }), ys = ring.map(function (p) { return -p[1]; });
+    var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+    var k = (S2 - 16) / Math.max(x1 - x0, y1 - y0), ox = S2 / 2 - (x0 + x1) / 2 * k, oy = S2 / 2 - (y0 + y1) / 2 * k;
+    g.save(); g.beginPath(); g.arc(S2 / 2, S2 / 2, S2 / 2 - 1, 0, 7); g.clip(); g.fillStyle = '#eef2e8'; g.fillRect(0, 0, S2, S2);
+    var shape = new Path2D(); xs.forEach(function (x, i) { var X = x * k + ox, Y = ys[i] * k + oy; if (i) shape.lineTo(X, Y); else shape.moveTo(X, Y); }); shape.closePath();
+    g.fillStyle = '#1d2b25'; g.fill(shape);
+    g.save(); g.clip(shape); g.strokeStyle = '#eef2e8'; g.globalAlpha = 0.18; g.lineWidth = 0.6; g.beginPath();
+    for (var t = 0; t < S2; t += 3) { g.moveTo(t, 0); g.lineTo(t, S2); g.moveTo(0, t); g.lineTo(S2, t); }
+    g.stroke(); g.restore(); g.restore();
+    g.beginPath(); g.arc(S2 / 2, S2 / 2, S2 / 2 - 1, 0, 7); g.lineWidth = 2; g.strokeStyle = '#1d2b25'; g.globalAlpha = 0.85; g.stroke(); g.globalAlpha = 1;
+  }
   function renderEmblem() {
     var c = $('#place-emblem'); if (!c || !P) return;
     var d = window.devicePixelRatio || 1, S2 = 72; c.width = S2 * d; c.height = S2 * d;
@@ -1380,6 +1419,8 @@
     g.stroke();
     g.restore();
     g.beginPath(); g.arc(S2 / 2, S2 / 2, S2 / 2 - 1, 0, 7); g.lineWidth = 2; g.strokeStyle = '#1d2b25'; g.globalAlpha = 0.85; g.stroke(); g.globalAlpha = 1;
+    var nm = ((P.place.query || '').split('||')[0] || '').trim() || P.place.display_name || P.place.name;
+    if (nm) { var want = P.place; fetchOutline(nm, function (ring) { if (P.place === want) drawOutlineEmblem(ring); }); }
     var art = $('#place-art'), slug = current || '';
     // Any place with a drawing in assets/landmarks shows it; new drawings appear without code changes
     if (slug && slug !== 'demo' && art.dataset.slug !== slug) {

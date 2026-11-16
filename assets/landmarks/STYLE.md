@@ -1,6 +1,6 @@
 # Threadlands landmark drawings
 
-One SVG per library place, named `<slug>.svg` (the slug from `data/index.json`). Explore shows it automatically beside "at a glance".
+One SVG per library place, named `<slug>.svg` (the slug from `data/index.json`). Explore shows it automatically as a faint, grey background mark behind the place name (about 20% opacity, edges faded), so it must read clearly in grayscale: strong silhouettes and clear contrast between the landmark and its setting matter more than color or small detail.
 
 ## The look
 
