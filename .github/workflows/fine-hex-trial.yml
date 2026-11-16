@@ -14,13 +14,23 @@ on:
         default: "18000"
 
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      slugs: ${{ steps.p.outputs.slugs }}
+    steps:
+      - id: p
+        env:
+          SLUGS: ${{ inputs.slugs }}
+        run: echo "slugs=$(python3 -c 'import json,os; print(json.dumps([s.strip() for s in os.environ["SLUGS"].split(",") if s.strip()]))')" >> "$GITHUB_OUTPUT"
   build:
+    needs: plan
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
       fail-fast: false
       matrix:
-        slug: ${{ fromJSON(format('["{0}"]', replace(inputs.slugs, ',', '","'))) }}
+        slug: ${{ fromJSON(needs.plan.outputs.slugs) }}
     env:
       TL_MAX_HEXES: ${{ inputs.max_hexes }}
     steps:
