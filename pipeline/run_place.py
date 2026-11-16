@@ -4,7 +4,7 @@ import sys, os, json, shutil, traceback
 PLACE = sys.argv[1]
 FINAL_OUT = os.path.abspath(sys.argv[2])
 REGION_BUFFER_KM = None
-MAX_HEXES = 2500
+MAX_HEXES = int(os.environ.get('TL_MAX_HEXES', '2500'))
 
 # ---- 3. Core logic (the same code Threadlands is tested with)
 # 3. Core logic (the same code Threadlands is tested with)

@@ -1,0 +1,44 @@
+name: Finer hexes trial (no publishing)
+
+# Builds places with more, smaller hexes and keeps the files as a download for testing.
+# Nothing is committed to the site.
+on:
+  workflow_dispatch:
+    inputs:
+      slugs:
+        description: "Places to build, comma-separated, like mexico-city,bologna"
+        required: true
+      max_hexes:
+        description: "Most hexes per place"
+        required: true
+        default: "18000"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        slug: ${{ fromJSON(format('["{0}"]', join(fromJSON(format('["{0}"]', replace(inputs.slugs, ',', '","'))), '","'))) }}
+    env:
+      TL_MAX_HEXES: ${{ inputs.max_hexes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pipeline/requirements.txt
+      - run: pip install -r pipeline/requirements.txt
+      - uses: actions/cache@v4
+        with:
+          path: cache/hybas_*.zip
+          key: hydrobasins-lev08-v1
+      - run: python3 pipeline/library.py build "${{ matrix.slug }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fine-${{ matrix.slug }}
+          path: out/
+          retention-days: 14
