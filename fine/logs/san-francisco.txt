@@ -1,0 +1,58 @@
+query: San Francisco, California, USA
+/home/runner/work/Threadlands-/Threadlands-/pipeline/run_place.py:315: DeprecationWarning: The 'shapely.ops.transform()' function is deprecated. Use 'shapely.transform()' or 'shapely.transform_coordseq()' instead. See https://shapely.readthedocs.io/en/latest/manual.html#shapely.ops.transform for more details.
+  place_km = shp_transform(to_km, geom)
+/home/runner/work/Threadlands-/Threadlands-/pipeline/run_place.py:323: DeprecationWarning: The 'shapely.ops.transform()' function is deprecated. Use 'shapely.transform()' or 'shapely.transform_coordseq()' instead. See https://shapely.readthedocs.io/en/latest/manual.html#shapely.ops.transform for more details.
+  REGION = shp_transform(to_deg, region_km)
+/home/runner/work/Threadlands-/Threadlands-/pipeline/run_place.py:324: DeprecationWarning: The 'shapely.ops.transform()' function is deprecated. Use 'shapely.transform()' or 'shapely.transform_coordseq()' instead. See https://shapely.readthedocs.io/en/latest/manual.html#shapely.ops.transform for more details.
+  PLACE_GEOM = shp_transform(to_deg, place_km)
+Found: San Francisco, California, United States
+Place area about 598 km2, plus 20 km of surrounding land; region about 5,795 km2.
+/home/runner/work/Threadlands-/Threadlands-/pipeline/run_place.py:381: DeprecationWarning: The 'shapely.ops.transform()' function is deprecated. Use 'shapely.transform()' or 'shapely.transform_coordseq()' instead. See https://shapely.readthedocs.io/en/latest/manual.html#shapely.ops.transform for more details.
+  region_km = base_km.intersection(shp_transform(to_km, zone).buffer(0))
+/home/runner/work/Threadlands-/Threadlands-/pipeline/run_place.py:385: DeprecationWarning: The 'shapely.ops.transform()' function is deprecated. Use 'shapely.transform()' or 'shapely.transform_coordseq()' instead. See https://shapely.readthedocs.io/en/latest/manual.html#shapely.ops.transform for more details.
+  REGION = shp_transform(to_deg, region_km)
+71% of the first region was open water. Trimmed to about 1,305 km2 around land, with 12 km of surrounding land.
+11965 hexes at H3 resolution 9, about 0.11 km2 each; 2775 inside San Francisco.
+Pixel grid 2352 x 1441, about 33 m per pixel.
+  land cover tile 1/2  land cover tile 2/2Land cover: 2 tiles; 0 hexes had no land data and count as water (usually sea).
+  elevation tile 1/4  elevation tile 2/4  elevation tile 3/4  elevation tile 4/4Elevation: 4 tiles; range -22 to 738 m.
+Population: about 1,999,483 people in the region.
+  asking overpass-api.de for waterways...
+Waterways: 7952 mapped lines cross 2405 hexes.
+Water thread: 1 sub-basins drain toward the city, about 2,547 km2.
+Food thread: 50 km: 52 km2 cropland, 4,166,412 people; 100 km: 1,917 km2 cropland, 7,554,210 people; 250 km: 12,843 km2 cropland, 13,271,873 people
+Saved san-francisco.threadlands.json (3,199 KB): 11965 hexes, 1,999,483 people.
+ - Open water more than about 3 km from land was left out, so the map spends its detail on land.
+ - Population covers United States only. Surrounding land in other countries counts as empty.
+Not running in Colab: the file is saved next to this notebook.
+PLACE_OK /home/runner/work/Threadlands-/Threadlands-/out/san-francisco.json
+San Francisco: 11,965 hexes; season used: June to August
+Using 20 scenes: 2021-06-09, 2021-08-28, 2022-06-19, 2022-06-20, 2022-08-31, 2023-07-17, 2024-06-09, 2024-06-16, 2024-06-17, 2024-07-02, 2024-07-03, 2024-07-11, 2024-07-19, 2024-08-19, 2024-08-20, 2025-06-19, 2025-06-20, 2025-07-05, 2025-08-30, 2025-08-31
+  1/20 2024-08-20: 11,881 hexes clear (4 s)
+  2/20 2024-07-03: 11,872 hexes clear (4 s)
+  3/20 2025-08-31: 11,829 hexes clear (4 s)
+  4/20 2022-06-20: 11,890 hexes clear (3 s)
+  5/20 2021-08-28: 11,529 hexes clear (3 s)
+  6/20 2024-06-17: 11,913 hexes clear (4 s)
+  7/20 2024-07-19: 11,724 hexes clear (3 s)
+  8/20 2025-06-20: 11,348 hexes clear (4 s)
+  9/20 2021-06-09: 9,299 hexes clear (4 s)
+  10/20 2023-07-17: 11,730 hexes clear (4 s)
+  11/20 2024-06-09: 9,519 hexes clear (4 s)
+  12/20 2024-08-19: 3,213 hexes clear (3 s)
+  13/20 2025-08-30: 4,052 hexes clear (3 s)
+  14/20 2024-07-02: 3,122 hexes clear (3 s)
+  15/20 2024-06-16: 2,383 hexes clear (3 s)
+  16/20 2025-06-19: 3,235 hexes clear (3 s)
+  17/20 2022-08-31: 11,303 hexes clear (3 s)
+  18/20 2025-07-05: 2,221 hexes clear (3 s)
+  19/20 2024-07-11: 10,328 hexes clear (4 s)
+  20/20 2022-06-19: 2,280 hexes clear (3 s)
+20 scenes used; 11,959 of 11,965 hexes have a reading.
+Saved san-francisco-heat.threadlands.json
+  Mostly built-up: +2.5 C compared with typical land (3614 hexes)
+  Mostly tree cover: -5.4 C compared with typical land (2079 hexes)
+Not running in Colab: the file is saved next to this notebook.
+HEAT_OK
+
+exit code: 0

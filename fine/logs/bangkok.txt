@@ -1,0 +1,63 @@
+query: Bangkok, Thailand
+/home/runner/work/Threadlands-/Threadlands-/pipeline/run_place.py:315: DeprecationWarning: The 'shapely.ops.transform()' function is deprecated. Use 'shapely.transform()' or 'shapely.transform_coordseq()' instead. See https://shapely.readthedocs.io/en/latest/manual.html#shapely.ops.transform for more details.
+  place_km = shp_transform(to_km, geom)
+/home/runner/work/Threadlands-/Threadlands-/pipeline/run_place.py:323: DeprecationWarning: The 'shapely.ops.transform()' function is deprecated. Use 'shapely.transform()' or 'shapely.transform_coordseq()' instead. See https://shapely.readthedocs.io/en/latest/manual.html#shapely.ops.transform for more details.
+  REGION = shp_transform(to_deg, region_km)
+/home/runner/work/Threadlands-/Threadlands-/pipeline/run_place.py:324: DeprecationWarning: The 'shapely.ops.transform()' function is deprecated. Use 'shapely.transform()' or 'shapely.transform_coordseq()' instead. See https://shapely.readthedocs.io/en/latest/manual.html#shapely.ops.transform for more details.
+  PLACE_GEOM = shp_transform(to_deg, place_km)
+Found: Bangkok, Thailand
+Place area about 1,642 km2, plus 32 km of surrounding land; region about 13,352 km2.
+/home/runner/work/Threadlands-/Threadlands-/pipeline/run_place.py:381: DeprecationWarning: The 'shapely.ops.transform()' function is deprecated. Use 'shapely.transform()' or 'shapely.transform_coordseq()' instead. See https://shapely.readthedocs.io/en/latest/manual.html#shapely.ops.transform for more details.
+  region_km = base_km.intersection(shp_transform(to_km, zone).buffer(0))
+/home/runner/work/Threadlands-/Threadlands-/pipeline/run_place.py:385: DeprecationWarning: The 'shapely.ops.transform()' function is deprecated. Use 'shapely.transform()' or 'shapely.transform_coordseq()' instead. See https://shapely.readthedocs.io/en/latest/manual.html#shapely.ops.transform for more details.
+  REGION = shp_transform(to_deg, region_km)
+37% of the first region was open water. Trimmed to about 9,189 km2 around land, with 31 km of surrounding land.
+10539 hexes at H3 resolution 8, about 0.88 km2 each; 1802 inside Bangkok.
+Pixel grid 1442 x 1022, about 89 m per pixel.
+  land cover tile 1/1Land cover: 1 tiles; 0 hexes had no land data and count as water (usually sea).
+  elevation tile 1/4  elevation tile 2/4  elevation tile 3/4  elevation tile 4/4Elevation: 4 tiles; range -4 to 11 m.
+Population: about 20,224,245 people in the region.
+  asking overpass-api.de for waterways...
+  overpass-api.de did not answer: server busy (502)
+  asking overpass.kumi.systems for waterways...
+  overpass.kumi.systems did not answer: server busy (504)
+  asking maps.mail.ru for waterways...
+Waterways: 8500 mapped lines cross 7677 hexes.
+Water thread: 197 sub-basins drain toward the city, about 144,310 km2.
+Food thread: 50 km: 2,104 km2 cropland, 19,345,016 people; 100 km: 11,706 km2 cropland, 25,694,001 people; 250 km: 61,923 km2 cropland, 35,569,978 people
+Saved bangkok.threadlands.json (2,878 KB): 10539 hexes, 20,224,245 people.
+ - Open water more than about 3 km from land was left out, so the map spends its detail on land.
+ - Population covers Thailand only. Surrounding land in other countries counts as empty.
+Not running in Colab: the file is saved next to this notebook.
+PLACE_OK /home/runner/work/Threadlands-/Threadlands-/out/bangkok.json
+Bangkok: 10,539 hexes; season used: all year (tropical climate)
+Using 20 scenes: 2021-02-05, 2021-02-21, 2021-12-22, 2022-01-07, 2022-02-24, 2023-01-18, 2023-01-26, 2023-02-27, 2023-03-07, 2023-05-18, 2023-12-20, 2023-12-28, 2024-02-06, 2024-02-14, 2024-04-26, 2024-12-30, 2025-01-15, 2025-02-16, 2025-12-01, 2025-12-25
+  1/20 2025-02-16: 9,032 hexes clear (3 s)
+  2/20 2024-02-14: 9,048 hexes clear (3 s)
+  3/20 2023-12-28: 8,995 hexes clear (3 s)
+  4/20 2022-01-07: 8,925 hexes clear (3 s)
+  5/20 2021-02-21: 8,922 hexes clear (3 s)
+  6/20 2024-12-30: 8,965 hexes clear (3 s)
+  7/20 2023-12-20: 9,044 hexes clear (3 s)
+  8/20 2025-12-01: 8,997 hexes clear (3 s)
+  9/20 2025-01-15: 9,021 hexes clear (3 s)
+  10/20 2021-12-22: 8,938 hexes clear (3 s)
+  11/20 2025-12-25: 9,046 hexes clear (3 s)
+  12/20 2021-02-05: 8,899 hexes clear (3 s)
+  13/20 2023-05-18: 8,982 hexes clear (3 s)
+  14/20 2024-04-26: 8,841 hexes clear (3 s)
+  15/20 2022-02-24: 8,943 hexes clear (3 s)
+  16/20 2023-02-27: 8,955 hexes clear (3 s)
+  17/20 2023-01-18: 8,937 hexes clear (3 s)
+  18/20 2023-03-07: 8,888 hexes clear (3 s)
+  19/20 2024-02-06: 8,896 hexes clear (3 s)
+  20/20 2023-01-26: 9,012 hexes clear (3 s)
+20 scenes used; 9,075 of 10,539 hexes have a reading.
+Saved bangkok-heat.threadlands.json
+  Mostly built-up: +3.8 C compared with typical land (1926 hexes)
+  Mostly tree cover: -0.7 C compared with typical land (709 hexes)
+  Mostly cropland: -1.6 C compared with typical land (2875 hexes)
+Not running in Colab: the file is saved next to this notebook.
+HEAT_OK
+
+exit code: 0

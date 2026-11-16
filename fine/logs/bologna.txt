@@ -1,0 +1,54 @@
+query: Bologna, Emilia-Romagna, Italy || Bologna, Italy
+/home/runner/work/Threadlands-/Threadlands-/pipeline/run_place.py:315: DeprecationWarning: The 'shapely.ops.transform()' function is deprecated. Use 'shapely.transform()' or 'shapely.transform_coordseq()' instead. See https://shapely.readthedocs.io/en/latest/manual.html#shapely.ops.transform for more details.
+  place_km = shp_transform(to_km, geom)
+/home/runner/work/Threadlands-/Threadlands-/pipeline/run_place.py:323: DeprecationWarning: The 'shapely.ops.transform()' function is deprecated. Use 'shapely.transform()' or 'shapely.transform_coordseq()' instead. See https://shapely.readthedocs.io/en/latest/manual.html#shapely.ops.transform for more details.
+  REGION = shp_transform(to_deg, region_km)
+/home/runner/work/Threadlands-/Threadlands-/pipeline/run_place.py:324: DeprecationWarning: The 'shapely.ops.transform()' function is deprecated. Use 'shapely.transform()' or 'shapely.transform_coordseq()' instead. See https://shapely.readthedocs.io/en/latest/manual.html#shapely.ops.transform for more details.
+  PLACE_GEOM = shp_transform(to_deg, place_km)
+Found: Bologna, Emilia-Romagna, Italy
+Place area about 140 km2, plus 12 km of surrounding land; region about 1,219 km2.
+Open water is 0% of the region, so nothing was trimmed.
+11364 hexes at H3 resolution 9, about 0.11 km2 each; 1305 inside Bologna.
+Pixel grid 1201 x 1164, about 33 m per pixel.
+  land cover tile 1/1Land cover: 1 tiles; 0 hexes had no land data and count as water (usually sea).
+  elevation tile 1/1Elevation: 1 tiles; range 8 to 742 m.
+Population: about 701,349 people in the region.
+  asking overpass-api.de for waterways...
+Waterways: 1628 mapped lines cross 2622 hexes.
+Water thread: 3 sub-basins drain toward the city, about 2,640 km2.
+Food thread: 50 km: 3,430 km2 cropland, 2,149,107 people; 100 km: 12,055 km2 cropland, 6,756,728 people; 250 km: 36,348 km2 cropland, 30,049,057 people
+Saved bologna.threadlands.json (2,931 KB): 11364 hexes, 701,349 people.
+ - Population covers Italy only. Surrounding land in other countries counts as empty.
+Not running in Colab: the file is saved next to this notebook.
+PLACE_OK /home/runner/work/Threadlands-/Threadlands-/out/bologna.json
+Bologna: 11,364 hexes; season used: June to August
+Using 20 scenes: 2021-06-22, 2021-08-09, 2022-07-02, 2022-07-03, 2022-07-19, 2022-08-04, 2023-08-07, 2023-08-15, 2023-08-22, 2023-08-23, 2024-07-16, 2024-08-01, 2024-08-08, 2024-08-09, 2024-08-24, 2024-08-25, 2025-06-01, 2025-06-25, 2025-08-11, 2025-08-12
+  1/20 2023-08-23: 11,364 hexes clear (3 s)
+  2/20 2025-08-12: 11,364 hexes clear (3 s)
+  3/20 2024-08-25: 11,362 hexes clear (3 s)
+  4/20 2022-07-03: 11,364 hexes clear (3 s)
+  5/20 2024-07-16: 11,364 hexes clear (3 s)
+  6/20 2022-07-19: 11,133 hexes clear (3 s)
+  7/20 2022-08-04: 11,364 hexes clear (3 s)
+  8/20 2023-08-15: 11,361 hexes clear (3 s)
+  9/20 2024-08-09: 11,361 hexes clear (3 s)
+  10/20 2025-06-01: 11,364 hexes clear (3 s)
+  11/20 2024-08-01: 11,364 hexes clear (3 s)
+  12/20 2021-06-22: 11,364 hexes clear (3 s)
+  13/20 2023-08-07: 11,354 hexes clear (3 s)
+  14/20 2025-06-25: 11,145 hexes clear (3 s)
+  15/20 2021-08-09: 11,363 hexes clear (3 s)
+  16/20 2025-08-11: 1,498 hexes clear (3 s)
+  17/20 2024-08-08: 2,165 hexes clear (3 s)
+  18/20 2023-08-22: 1,436 hexes clear (2 s)
+  19/20 2024-08-24: 1,464 hexes clear (2 s)
+  20/20 2022-07-02: 1,288 hexes clear (2 s)
+20 scenes used; 11,364 of 11,364 hexes have a reading.
+Saved bologna-heat.threadlands.json
+  Mostly built-up: +3.2 C compared with typical land (968 hexes)
+  Mostly tree cover: -5.7 C compared with typical land (3040 hexes)
+  Mostly cropland: +1.7 C compared with typical land (4496 hexes)
+Not running in Colab: the file is saved next to this notebook.
+HEAT_OK
+
+exit code: 0
