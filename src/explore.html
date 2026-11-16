@@ -428,6 +428,7 @@
           <button class="chip mapbtn" type="button" id="z-in" aria-label="Zoom in">+</button>
           <button class="chip mapbtn" type="button" id="z-out" aria-label="Zoom out">&minus;</button>
           <button class="chip mapbtn" type="button" id="z-fit" aria-label="Show the whole region" title="Show the whole region">&#8634;</button>
+          <button class="chip mapbtn" type="button" id="z-grid" aria-pressed="false" title="Show the analysis grid the scores are worked out on" style="font-size:0.75rem;width:auto;padding:0 8px">Grid</button>
         </div>
         <label class="sr-only" for="basemap">Background map</label>
         <select id="basemap" class="mapbase" title="What shows under the model">
@@ -776,7 +777,7 @@
   function renderLegend() { var h = legendHTML(); $('#legend-wide').innerHTML = h; $('#legend-narrow').innerHTML = h; }
 
   // ---- Canvas
-  var cv = $('#map'), ctx = cv.getContext('2d');
+  var cv = $('#map'), ctx = cv.getContext('2d'), WASH = null, GRID = false;
   var W = 0, H = 0, dpr = 1, S = 1, S0 = 1, OX = 0, OY = 0, hexPx = 10, bbox = null, VIEW = null;
   // Zoom and pan: VIEW.z multiplies the fitted scale, VIEW.cx/cy is the center in map km
   function applyView() {
@@ -907,6 +908,27 @@
     drawQueued = true;
     requestAnimationFrame(function () { drawQueued = false; draw(); });
   }
+  // Turn river segments (pairs of hex ids) into chains that run between junctions and ends
+  function riverChains(segs) {
+    var adj = new Map();
+    function link(x, y) { var l = adj.get(x); if (!l) adj.set(x, l = []); l.push(y); }
+    for (var s = 0; s < segs.length; s += 2) { link(segs[s], segs[s + 1]); link(segs[s + 1], segs[s]); }
+    var used = new Set(), out = [];
+    function key(x, y) { return x < y ? x + ',' + y : y + ',' + x; }
+    function walk(st, nx) {
+      var ch = [st, nx]; used.add(key(st, nx));
+      var prev = st, cur = nx;
+      while ((adj.get(cur) || []).length === 2) {
+        var l = adj.get(cur), nn = l[0] === prev ? l[1] : l[0];
+        if (used.has(key(cur, nn))) break;
+        used.add(key(cur, nn)); ch.push(nn); prev = cur; cur = nn;
+      }
+      return ch;
+    }
+    adj.forEach(function (l, x) { if (l.length !== 2) l.forEach(function (y) { if (!used.has(key(x, y))) out.push(walk(x, y)); }); });
+    adj.forEach(function (l, x) { l.forEach(function (y) { if (!used.has(key(x, y))) out.push(walk(x, y)); }); });   // loops
+    return out;
+  }
   function draw() {
     if (!W || !res || !P) return;
     var C = palette();
@@ -917,7 +939,16 @@
     var fade = !bgOn ? 1 : zl < 11 ? 0.88 : zl < 13 ? 0.6 : zl < 15 ? 0.4 : 0.25;
     var canopy = 1 - Math.pow(1 - state.canopy / 100, 1.8);
     var keep = 1 - res.retention;
-    var shrink = hexPx > 7 ? (hexPx > 60 ? 0.985 : 0.93) : 1.0;
+    // Scores are worked out per hex, but the map shows them as a smooth wash (hexes drawn small and blurred);
+    // the Grid button shows the hexes themselves
+    var wash = !GRID && hexPx < 400, mainCtx = ctx;
+    var shrink = wash ? 1.0 : hexPx > 7 ? (hexPx > 60 ? 0.985 : 0.93) : 1.0;
+    if (wash) {
+      if (!WASH) WASH = document.createElement('canvas');
+      var q = 0.5, ww = Math.max(1, Math.round(W * q)), wh = Math.max(1, Math.round(H * q));
+      if (WASH.width !== ww || WASH.height !== wh) { WASH.width = ww; WASH.height = wh; }
+      ctx = WASH.getContext('2d'); ctx.setTransform(q, 0, 0, q, 0, 0); ctx.clearRect(0, 0, W, H);
+    }
     var cells = P.place.cells;
     for (var i = 0; i < P.N; i++) {
       var cov = res.cover[i], fill = C[cov] || C.open, alpha = 1, inner = null;
@@ -956,14 +987,27 @@
       if (bgOn && layer === 'land' && isUrban(cov) && zl >= 12) alpha *= 0.4;
       alpha *= fade;
       ctx.globalAlpha = alpha; ctx.fillStyle = fill; ctx.fill();
+      if (wash) { ctx.strokeStyle = fill; ctx.lineWidth = 1.2; ctx.stroke(); }
       if (layer === 'land' && canopy > 0 && isUrban(cov)) {
         ctx.globalAlpha = 0.6 * canopy; ctx.fillStyle = C.canopy; ctx.fill();
       }
-      if (inner && hexPx > 4) { pathFor(i, 0.5); ctx.globalAlpha = 1; ctx.fillStyle = inner; ctx.fill(); }
+      if (inner && hexPx > 4 && !wash) { pathFor(i, 0.5); ctx.globalAlpha = 1; ctx.fillStyle = inner; ctx.fill(); }
       if (!P.inside[i]) { pathFor(i, shrink); ctx.globalAlpha = 0.38; ctx.fillStyle = C.surface; ctx.fill(); }
       ctx.globalAlpha = 1;
     }
-    if (SPOT && SPOT.segs.length) {
+    if (wash) {
+      ctx = mainCtx;
+      ctx.save(); ctx.filter = 'blur(' + Math.max(2.5, Math.min(40, hexPx * 0.45)).toFixed(1) + 'px)';
+      ctx.drawImage(WASH, 0, 0, W, H); ctx.restore();
+    }
+    // The real boundary from OpenStreetMap, once loaded, instead of the stepped hex outline
+    var REAL = SPOT && !SPOT.small && P.MERC ? OUTLINES[OUTLINE_NAME] : null;
+    if (REAL && REAL.length > 3) {
+      var M = P.MERC, mxf = function (lng) { return (lng + 180) / 360; }, myf = function (lat) { var s1 = Math.sin(lat * Math.PI / 180); return 0.5 - Math.log((1 + s1) / (1 - s1)) / (4 * Math.PI); };
+      ctx.beginPath();
+      REAL.forEach(function (pt, j) { var x = (mxf(pt[0]) - M.mx0) * M.K * S + OX, y = (myf(pt[1]) - M.my0) * M.K * S + OY; if (j) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
+      ctx.closePath(); ctx.lineJoin = 'round'; ctx.lineWidth = 1.8; ctx.strokeStyle = C.ink; ctx.globalAlpha = 0.65; ctx.stroke(); ctx.globalAlpha = 1;
+    } else if (SPOT && SPOT.segs.length) {
       ctx.beginPath();
       for (var sg = 0; sg < SPOT.segs.length; sg += 4) {
         ctx.moveTo(SPOT.segs[sg] * S + OX, SPOT.segs[sg + 1] * S + OY);
@@ -980,17 +1024,21 @@
     }
     if (P.hasRivers && (layer === 'land' || layer === 'flood')) {
       ctx.strokeStyle = C.water; ctx.fillStyle = C.water; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-      var passes = layer === 'flood' ? [true] : [false, true];
+      var passes = layer === 'flood' || hexPx < 9 ? [true] : [false, true];
       passes.forEach(function (major) {
         var net = major ? P.rivNet.major : P.rivNet.minor;
         ctx.globalAlpha = major ? 0.95 : 0.5;
         ctx.lineWidth = major ? Math.max(1.8, hexPx * 0.32) : Math.max(1, hexPx * 0.12);
+        // Draw each river as a smooth curve through its hexes rather than a staircase of straight steps
+        if (!net._chains) net._chains = riverChains(net.segs);
         ctx.beginPath();
-        for (var s = 0; s < net.segs.length; s += 2) {
-          var a = net.segs[s], bj = net.segs[s + 1];
-          ctx.moveTo(P.X[a] * S + OX, P.Y[a] * S + OY);
-          ctx.lineTo(P.X[bj] * S + OX, P.Y[bj] * S + OY);
-        }
+        net._chains.forEach(function (ch) {
+          var px = function (n) { return P.X[ch[n]] * S + OX; }, py = function (n) { return P.Y[ch[n]] * S + OY; };
+          ctx.moveTo(px(0), py(0));
+          if (ch.length === 2) { ctx.lineTo(px(1), py(1)); return; }
+          for (var n = 1; n < ch.length - 1; n++) ctx.quadraticCurveTo(px(n), py(n), (px(n) + px(n + 1)) / 2, (py(n) + py(n + 1)) / 2);
+          ctx.lineTo(px(ch.length - 1), py(ch.length - 1));
+        });
         ctx.stroke();
         net.lone.forEach(function (a) {
           ctx.beginPath(); ctx.arc(P.X[a] * S + OX, P.Y[a] * S + OY, ctx.lineWidth / 2, 0, Math.PI * 2); ctx.fill();
@@ -1271,6 +1319,7 @@
   $('#gis-dl').addEventListener('click', downloadGIS);
   $('#z-in').addEventListener('click', function () { zoomAt(2); });
   $('#z-out').addEventListener('click', function () { zoomAt(0.5); });
+  $('#z-grid').addEventListener('click', function () { GRID = !GRID; this.setAttribute('aria-pressed', GRID ? 'true' : 'false'); draw(); });
   $('#z-fit').addEventListener('click', function () { if (!VIEW) return; VIEW.z = 1; VIEW.cx = (bbox.minx + bbox.maxx) / 2; VIEW.cy = (bbox.miny + bbox.maxy) / 2; applyView(); });
   $('#basemap').addEventListener('change', function () { setBasemap(this.value); if (this.value !== 'none' && VIEW && VIEW.z < 2) zoomAt(1); });
   ['pointerup', 'pointercancel'].forEach(function (ev) {
@@ -1322,7 +1371,7 @@
   // ---- The place's emblem, drawn from its own data: outline, rivers, farmland, forest and water, in the house palette
 
   // The real outline of the place, from OpenStreetMap, cached on this device; the hex outline is the fallback
-  var OUTLINES = {};
+  var OUTLINES = {}, OUTLINE_NAME = null;
   function fetchOutline(name, cb) {
     var key = 'threadlands:outline:' + name;
     if (OUTLINES[name]) return cb(OUTLINES[name]);
@@ -1416,7 +1465,8 @@
     g.restore();
     g.beginPath(); g.arc(S2 / 2, S2 / 2, S2 / 2 - 1, 0, 7); g.lineWidth = 2; g.strokeStyle = '#1d2b25'; g.globalAlpha = 0.85; g.stroke(); g.globalAlpha = 1;
     var nm = ((P.place.query || '').split('||')[0] || '').trim() || P.place.display_name || P.place.name;
-    if (nm) { var want = P.place; fetchOutline(nm, function (ring) { if (P.place === want) drawOutlineEmblem(ring); }); }
+    OUTLINE_NAME = nm;
+    if (nm) { var want = P.place; fetchOutline(nm, function (ring) { if (P.place === want) { drawOutlineEmblem(ring); draw(); } }); }
   }
   function renderPlaceInfo() {
     var pl = P.place;
