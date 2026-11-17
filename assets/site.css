@@ -80,7 +80,7 @@
 
   /* Opening: top bar, hero, city cards */
   .topbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; padding-block: 18px 6px; }
-  .wordmark { display: inline-flex; align-items: center; gap: 12px; font: 700 1.4rem/1 "Nunito", ui-rounded, "SF Pro Rounded", system-ui, sans-serif; letter-spacing: -0.005em; color: #1F5C57; text-decoration: none; }
+  .wordmark { display: inline-flex; align-items: center; gap: 12px; font: 700 1.4rem/1 "Nunito", ui-rounded, "SF Pro Rounded", system-ui, sans-serif; letter-spacing: -0.005em; color: #123B38; text-decoration: none; }
   .wordmark .wm-sym { display: block; flex: 0 0 auto; }
   .wordmark span { display: block; padding-bottom: 1px; }
   .topnav { display: flex; flex-wrap: wrap; gap: 0 18px; }
