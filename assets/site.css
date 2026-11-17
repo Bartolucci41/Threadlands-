@@ -598,13 +598,18 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .lib-zoom .chip:disabled { opacity: 0.45; }
   .lib-tip a { color: var(--bg); text-decoration: underline; }
   .lib-tip { position: absolute; pointer-events: none; padding: 4px 8px; border-radius: 6px; background: var(--ink); color: var(--bg); font: 500 0.8125rem var(--font-body); transform: translate(-50%, -130%); white-space: nowrap; }
-  .lib-list { columns: 3 220px; column-gap: 32px; }
-  .lib-country { break-inside: avoid; margin: 0 0 14px; }
-  .lib-country h3 { font: 600 0.72rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); margin: 0 0 4px; }
-  .lib-country ul { list-style: none; margin: 0; padding: 0; }
-  .lib-country li a { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; color: var(--ink); text-decoration: none; }
-  .lib-country li a:hover { text-decoration: underline; }
-  .lib-country li span { font: 400 0.75rem var(--font-mono); color: var(--ink2); }
+  .lib-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 24px; }
+  .lib-chips .chip span { opacity: 0.6; margin-left: 4px; font-size: 0.8em; }
+  .lib-chips .chip.on { background: #123B38; color: #fff; border-color: #123B38; }
+  .lib-region { margin: 0 0 32px; }
+  .lib-region h2 { font: 700 1.5rem/1.1 var(--font-display); color: #123B38; margin: 0 0 12px; display: flex; align-items: baseline; gap: 10px; }
+  .lib-region h2 span { font: 500 0.8rem var(--font-mono); color: var(--ink2); }
+  .lib-cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+  .lib-cards a { display: flex; flex-direction: column; gap: 3px; height: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; border: 1px solid transparent; transition: border-color .15s, transform .15s; }
+  .lib-cards a:hover { border-color: #123B38; transform: translateY(-1px); }
+  .lib-cards strong { font: 650 1.05rem/1.2 var(--font-display); }
+  .lib-cty { font: 600 0.68rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); }
+  .lib-pop { font: 400 0.78rem var(--font-body); color: var(--ink2); margin-top: 4px; }
   .lib-empty { color: var(--ink2); }
   .bio { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 22px; align-items: start; }
   .bio-photo { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; }
