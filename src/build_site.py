@@ -298,7 +298,7 @@ def head(base, title, desc):
 def nav(base, here):
     links = "".join(f'<a href="{base}{p}"' + (' aria-current="page"' if p == here else "") + f'>{n}</a>'
                     for p, n in PAGES[1:])
-    return (f'<header class="wrap site-head" id="top">\n  <div class="topbar">\n    <a class="wordmark" href="{base}" translate="no">Threadlands</a>\n'
+    return (f'<header class="wrap site-head" id="top">\n  <div class="topbar">\n    <a class="wordmark" href="{base}" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="30" height="30" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#1F5C57" stroke="none"/></svg><span>Threadlands</span></a>\n'
             f'    <div class="topright"><nav class="topnav" aria-label="Site">{links}</nav>'
             '<label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>\n  </div>\n</header>\n')
 
