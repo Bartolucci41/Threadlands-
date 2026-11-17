@@ -137,6 +137,7 @@
   var ORDER = ['Africa', 'Asia', 'Europe', 'Latin America', 'Middle East', 'North America', 'Oceania'], CC2R = {}, REGION = 'All';
   ORDER.forEach(function (r) { REG[r].split(' ').forEach(function (c) { CC2R[c] = r; }); });
   function regionOf(e) { return CC2R[e.cc] || (e.lng < -30 ? (e.lat > 15 ? 'North America' : 'Latin America') : e.lng < 50 ? (e.lat > 35 ? 'Europe' : 'Africa') : e.lat < -10 ? 'Oceania' : 'Asia'); }
+  function where(e) { var ps = String(e.display || '').split(', '), st = ps.length >= 3 ? ps[ps.length - 2] : (/^New York/.test(e.name) ? 'New York' : ''); return (/^(US|CA|AU)$/.test(e.cc) && st && st !== e.name ? st + ' \u00b7 ' : '') + e.country; }
   function fmtN(n) { return n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : Math.round(n / 1e3) + 'K'; }
   function fmtPop(e) { var c = e.city_pop, r = e.pop; if (!r) return ''; if (!c || c >= r * 0.9) return fmtN(r) + ' people'; return fmtN(c) + ' in the city \u00b7 ' + fmtN(r) + ' in the region'; }
   function chips() {
@@ -156,7 +157,7 @@
     var rs = ORDER.filter(function (r) { return by[r]; });
     $('#lib-list').innerHTML = rs.length ? rs.map(function (r) {
       return '<section class="lib-region"><h2>' + r + ' <span>' + by[r].length + '</span></h2><ul class="lib-cards">' + by[r].sort(function (a, b) { return b.pop - a.pop; }).map(function (e) {
-        return '<li' + (e.requested ? ' class="vis"' : '') + '><a href="{B}explore/#' + e.slug + '"><strong>' + esc(e.name) + '</strong><span class="lib-cty">' + esc(e.country) + '</span><span class="lib-pop">' + fmtPop(e) + '</span>' + (e.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</a></li>';
+        return '<li' + (e.requested ? ' class="vis"' : '') + '><a href="{B}explore/#' + e.slug + '"><strong>' + esc(e.name) + '</strong><span class="lib-cty">' + esc(where(e)) + '</span><span class="lib-pop">' + fmtPop(e) + '</span>' + (e.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</a></li>';
       }).join('') + '</ul></section>';
     }).join('') : '<p class="lib-empty">No place in the library matches that. <a href="{B}explore/?q=' + encodeURIComponent($('#lib-q').value.trim()) + '">Search everywhere for it</a> and build it.</p>';
     fitTo(shown);
