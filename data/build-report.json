@@ -615,6 +615,13 @@
   "status": "built with heat",
   "when": "2026-11-14T01:48:08Z"
  },
+ "petaluma-united-states-r113151": {
+  "minutes": 1.7,
+  "query": "osm:R113151",
+  "slug": "petaluma-united-states-r113151",
+  "status": "built with heat",
+  "when": "2026-11-17T02:29:47Z"
+ },
  "phoenix": {
   "minutes": 2.2,
   "query": "Phoenix, Arizona, USA",
