@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=4">
+<link rel="stylesheet" href="../assets/site.css?v=5">
 <script src="../assets/i18n.js" defer></script>
 <link rel="manifest" href="../manifest.webmanifest">
 <meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">
@@ -174,24 +174,26 @@
   var ORDER = ['Africa', 'Asia', 'Europe', 'Latin America', 'Middle East', 'North America', 'Oceania'], CC2R = {}, REGION = 'All';
   ORDER.forEach(function (r) { REG[r].split(' ').forEach(function (c) { CC2R[c] = r; }); });
   function regionOf(e) { return CC2R[e.cc] || (e.lng < -30 ? (e.lat > 15 ? 'North America' : 'Latin America') : e.lng < 50 ? (e.lat > 35 ? 'Europe' : 'Africa') : e.lat < -10 ? 'Oceania' : 'Asia'); }
-  function fmtPop(n) { return !n ? '' : n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M people' : Math.round(n / 1e3) + 'K people'; }
+  function fmtN(n) { return n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : Math.round(n / 1e3) + 'K'; }
+  function fmtPop(e) { var c = e.city_pop, r = e.pop; if (!r) return ''; if (!c || c >= r * 0.9) return fmtN(r) + ' people'; return fmtN(c) + ' in the city \u00b7 ' + fmtN(r) + ' in the region'; }
   function chips() {
     var n = {}; LIB.forEach(function (e) { var r = regionOf(e); n[r] = (n[r] || 0) + 1; });
-    $('#lib-chips').innerHTML = ['All'].concat(ORDER.filter(function (r) { return n[r]; })).map(function (r) {
-      return '<button type="button" class="chip' + (r === REGION ? ' on' : '') + '" data-r="' + r + '" aria-pressed="' + (r === REGION) + '">' + r + ' <span>' + (r === 'All' ? LIB.length : n[r]) + '</span></button>';
+    var nv = LIB.filter(function (e) { return e.requested; }).length, V = 'Added by visitors';
+    $('#lib-chips').innerHTML = ['All'].concat(ORDER.filter(function (r) { return n[r]; })).concat(nv ? [V] : []).map(function (r) {
+      return '<button type="button" class="chip' + (r === V ? ' chip-vis' : '') + (r === REGION ? ' on' : '') + '" data-r="' + r + '" aria-pressed="' + (r === REGION) + '">' + r + ' <span>' + (r === 'All' ? LIB.length : r === V ? nv : n[r]) + '</span></button>';
     }).join('');
   }
   $('#lib-chips').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (!b) return; REGION = b.getAttribute('data-r'); chips(); render(); });
   function render() {
     var q = norm($('#lib-q').value.trim());
-    shown = LIB.filter(function (e) { return (REGION === 'All' || regionOf(e) === REGION) && (!q || norm(e.name + ' ' + e.country + ' ' + e.display).indexOf(q) >= 0); });
+    shown = LIB.filter(function (e) { return (REGION === 'All' || (REGION === 'Added by visitors' ? e.requested : regionOf(e) === REGION)) && (!q || norm(e.name + ' ' + e.country + ' ' + e.display).indexOf(q) >= 0); });
     var by = {}, nc = {};
     shown.forEach(function (e) { var r = regionOf(e); (by[r] = by[r] || []).push(e); nc[e.country] = 1; });
     $('#lib-n').textContent = shown.length + ' places in ' + Object.keys(nc).length + ' countries';
     var rs = ORDER.filter(function (r) { return by[r]; });
     $('#lib-list').innerHTML = rs.length ? rs.map(function (r) {
       return '<section class="lib-region"><h2>' + r + ' <span>' + by[r].length + '</span></h2><ul class="lib-cards">' + by[r].sort(function (a, b) { return b.pop - a.pop; }).map(function (e) {
-        return '<li><a href="../explore/#' + e.slug + '"><strong>' + esc(e.name) + '</strong><span class="lib-cty">' + esc(e.country) + '</span><span class="lib-pop">' + fmtPop(e.pop) + (e.requested ? ' · added by a visitor' : '') + '</span></a></li>';
+        return '<li' + (e.requested ? ' class="vis"' : '') + '><a href="../explore/#' + e.slug + '"><strong>' + esc(e.name) + '</strong><span class="lib-cty">' + esc(e.country) + '</span><span class="lib-pop">' + fmtPop(e) + '</span>' + (e.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</a></li>';
       }).join('') + '</ul></section>';
     }).join('') : '<p class="lib-empty">No place in the library matches that. <a href="../explore/?q=' + encodeURIComponent($('#lib-q').value.trim()) + '">Search everywhere for it</a> and build it.</p>';
     fitTo(shown);

@@ -97,7 +97,7 @@ def summary(path, slug):
     return {
         "slug": slug, "name": d.get("name") or slug, "country": disp.split(",")[-1].strip(),
         "display": disp, "lat": round(lat, 4), "lng": round(lng, 4),
-        "pop": int(sum(c["pop"])), "hexes": n, "heat": "lst_rel" in c,
+        "pop": int(sum(c["pop"])), "city_pop": int(sum(p for p, i in zip(c["pop"], c.get("inside") or [1] * n) if i)), "hexes": n, "heat": "lst_rel" in c,
         "regional": bool(reg), "generated": d.get("generated"), "cc": d.get("country_code"),
         "kb": round(os.path.getsize(path) / 1024),
     }

@@ -250,6 +250,9 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .lib-cards strong { font: 650 1.05rem/1.2 var(--font-display); }
   .lib-cty { font: 600 0.68rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); }
   .lib-pop { font: 400 0.78rem var(--font-body); color: var(--ink2); margin-top: 4px; }
+  .lib-cards li.vis a { background: transparent; border: 1.5px dashed #123B38; }
+  .lib-vis { align-self: flex-start; margin-top: 6px; font: 600 0.68rem var(--font-body); padding: 2px 8px; border-radius: 999px; background: #F3E3C4; color: #6B4510; }
+  .lib-chips .chip-vis { border-style: dashed; }
   .lib-empty { color: var(--ink2); }
   .bio { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 22px; align-items: start; }
   .bio-photo { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; }
@@ -297,7 +300,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=4">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=5">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
