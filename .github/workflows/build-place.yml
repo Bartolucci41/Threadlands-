@@ -47,7 +47,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - run: pip install pycountry
-      - run: python3 pipeline/library.py publish
+      - run: python3 pipeline/library.py publish && node pipeline/profile_dist.js
       - name: Commit the new place
         run: |
           git config user.name "threadlands-robot"

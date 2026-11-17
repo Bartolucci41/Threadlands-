@@ -389,6 +389,16 @@
   @media (prefers-reduced-motion: reduce) {
     .bar .fill { transition: none; }
   }
+  .press { display: grid; gap: 6px; margin: 0 0 22px; padding: 16px 18px; border-radius: 14px; background: var(--surface); border-left: 4px solid #123B38; }
+  .press h2 { margin: 0; font-size: 1.25rem; }
+  .press-list { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 12px; counter-reset: pr; }
+  .press-list li { counter-increment: pr; display: grid; gap: 3px; }
+  .press-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
+  .press-h strong::before { content: counter(pr) ". "; color: #123B38; }
+  .press-b { font: 500 0.72rem var(--font-mono); padding: 2px 8px; border-radius: 999px; background: #123B38; color: #fff; }
+  .press-list p { margin: 0; font-size: 0.9rem; }
+  .press-who { color: var(--ink2); }
+  .press[hidden] { display: none; }
 </style>
 
 <!--NAV-->
@@ -482,6 +492,11 @@
     </div>
 
     <div class="panel">
+      <section class="press" id="press" hidden>
+        <h2>Biggest pressures here</h2>
+        <p class="hint" id="press-note">Measured from this place's own data. Environmental and social together: each pressure says who carries it.</p>
+        <ol class="press-list" id="press-list"></ol>
+      </section>
       <h2 id="lab-h">Pull the threads</h2>
       <p class="hint">Drag a lever. The map and every score update together. Effort is capped, so the levers compete with each other.</p>
       <p class="clim-note" id="clim-note" hidden></p>
@@ -563,6 +578,7 @@
 
 <script type="application/json" id="demo-place">/*DEMO*/</script>
 <script type="application/json" id="example-places">/*EXAMPLES*/</script>
+<script src="../assets/profile.js"></script>
 <script>
 /*MODEL*/
 </script>
@@ -1594,6 +1610,18 @@
     };
   }
 
+  var PDIST = null, PDIST_N = 0;
+  fetch(BASE + 'data/profile-dist.json').then(function (r) { return r.json(); }).then(function (j) { PDIST = j.dist; PDIST_N = j.places; if (P && P._raw) renderPressures(P._raw); }).catch(function () {});
+  function renderPressures(data) {
+    var box = document.getElementById('press'); if (P) P._raw = data;
+    var pr = null; try { pr = window.TLProfile && TLProfile.profile(data, PDIST); } catch (e) { pr = null; }
+    if (!pr || !pr.top.length || !data.cells || !data.cells.pop) { box.hidden = true; return; }
+    document.getElementById('press-list').innerHTML = pr.top.map(function (t) {
+      return '<li><div class="press-h"><strong>' + t.t + '</strong>' + (t.pct !== null ? '<span class="press-b">Worse than ' + Math.min(99, t.pct) + '% of places</span>' : '') + '</div><p>' + t.what + '</p>' + (t.who ? '<p class="press-who">' + t.who + '</p>' : '') + '</li>';
+    }).join('');
+    document.getElementById('press-note').textContent = 'Measured from this place\u2019s own data' + (PDIST_N ? ' and compared with all ' + PDIST_N + ' places in the library' : '') + '. Environmental and social together: each pressure says who carries it.';
+    box.hidden = false;
+  }
   function setPlace(data, k) {
     var prepared = TM.prepare(data);   // throws on a bad file
     prepared.rivNet = riverNetwork(prepared);
@@ -1608,6 +1636,7 @@
     VIEW = null; THR.cache = {}; THR.def = null;
     loadSketch();
     PRI = P.priorities(8);
+    renderPressures(data);
     WTS.sel = -1; WTS.show = false;
     renderWTS();
     HC = heatCheck(P);

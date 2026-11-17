@@ -385,6 +385,16 @@
   @media (prefers-reduced-motion: reduce) {
     .bar .fill { transition: none; }
   }
+  .press { display: grid; gap: 6px; margin: 0 0 22px; padding: 16px 18px; border-radius: 14px; background: var(--surface); border-left: 4px solid #123B38; }
+  .press h2 { margin: 0; font-size: 1.25rem; }
+  .press-list { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 12px; counter-reset: pr; }
+  .press-list li { counter-increment: pr; display: grid; gap: 3px; }
+  .press-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
+  .press-h strong::before { content: counter(pr) ". "; color: #123B38; }
+  .press-b { font: 500 0.72rem var(--font-mono); padding: 2px 8px; border-radius: 999px; background: #123B38; color: #fff; }
+  .press-list p { margin: 0; font-size: 0.9rem; }
+  .press-who { color: var(--ink2); }
+  .press[hidden] { display: none; }
 
   /* Site pages */
   .site-head .topnav a[aria-current="page"] { color: var(--ink); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
