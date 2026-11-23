@@ -177,7 +177,8 @@
   .emblem { width: 72px; height: 72px; flex: 0 0 auto; border-radius: 50%; }
   .glance-h { margin: 0 0 4px; font: 600 1.125rem var(--font-body); color: var(--ink); }
   .glance-sub { margin: 0 0 12px; font-size: 0.9375rem; color: var(--ink2); max-width: 46rem; }
-  .glance-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+  .glance-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+  .tpanel .glance { margin: 0 0 18px; }
   .gl { padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); display: grid; gap: 4px; align-content: start; }
   .gl .gl-k { font: 500 0.68rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); }
   .gl .gl-v { font: 700 1.5rem/1.1 var(--font-body); color: var(--ink); }

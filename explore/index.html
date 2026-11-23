@@ -57,11 +57,6 @@
     </div>
   </div>
   <p class="alert" id="alert" role="alert" hidden></p>
-  <section class="glance" id="glance" aria-labelledby="glance-h" hidden>
-    <h3 class="glance-h" id="glance-h"></h3>
-    <p class="glance-sub" id="glance-sub"></p>
-    <div class="glance-grid" id="glance-grid"></div>
-  </section>
 
   <nav class="jump" aria-label="On this page"><span>Jump to</span><a href="#mapwrap">Map</a><a href="#tp-understand" data-go="understand">Understand</a><a href="#tp-plan" data-go="plan">Plan</a><a href="#tp-compare" data-go="compare">Compare</a><a href="#reg-h">Beyond the city</a><a href="../studio/">Design it in Studio &rarr;</a></nav>
   <section class="lab" aria-labelledby="lab-h">
@@ -136,6 +131,11 @@
         <p class="msub mctx" id="ps-ctx" style="flex-basis:100%;margin:0"></p>
       </div>
       <div class="tpanel" role="tabpanel" id="tp-understand" aria-labelledby="ptab-understand">
+        <section class="glance" id="glance" aria-labelledby="glance-h" hidden>
+          <h3 class="glance-h" id="glance-h"></h3>
+          <p class="glance-sub" id="glance-sub"></p>
+          <div class="glance-grid" id="glance-grid"></div>
+        </section>
       <section class="press" id="press" hidden>
         <h2>Biggest pressures here</h2>
         <p class="hint adv" id="press-note">Measured from this place's own data. Environmental and social together: each pressure says who carries it.</p>
@@ -2468,7 +2468,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     var small = SPOT && SPOT.small;
     $('#glance-h').textContent = small ? name + ' within its region' : name + ' at a glance';
     $('#glance-sub').textContent = small ? 'The outlined area is ' + name + '. The faded land around it is the region it depends on for water, food and nature, and every score below counts both.'
-      : 'The essentials before you start planning. Drag the levers below to see how they change.';
+      : 'The essentials, and how they compare with other places. Then make a plan.';
     var ST = null; try { ST = PCTX && window.TLProfile ? TLProfile.placeStats(P) : null; } catch (e) { ST = null; }
     // How each fact compares with every place in the library: [stat key, phrase for "more than X% of places"]
     var CMP = { 'People': ['pop', 'More people than'], 'Heat, measured': ['heat', 'A stronger heat island than'], 'Flooding': ['flood', 'More flood-prone land than'],
