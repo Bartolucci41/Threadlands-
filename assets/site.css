@@ -398,6 +398,13 @@
   .press-list p { margin: 0; font-size: 0.9rem; }
   .press-who { color: var(--ink2); }
   .press[hidden] { display: none; }
+  .live { margin: 0 0 22px; display: grid; gap: 8px; }
+  .live h2 { margin: 0; font-size: 1.25rem; }
+  .live-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+  .live-t { background: var(--surface); border-radius: 12px; padding: 12px 14px; display: grid; gap: 2px; }
+  .live-t b { font: 700 1.35rem/1.1 var(--font-display); color: #123B38; }
+  .live-t span:last-child { font-size: 0.8rem; color: var(--ink2); line-height: 1.35; }
+  .live[hidden] { display: none; }
 
   /* Site pages */
   .site-head .topnav a[aria-current="page"] { color: var(--ink); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }

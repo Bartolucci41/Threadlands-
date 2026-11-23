@@ -402,6 +402,13 @@
   .press-list p { margin: 0; font-size: 0.9rem; }
   .press-who { color: var(--ink2); }
   .press[hidden] { display: none; }
+  .live { margin: 0 0 22px; display: grid; gap: 8px; }
+  .live h2 { margin: 0; font-size: 1.25rem; }
+  .live-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+  .live-t { background: var(--surface); border-radius: 12px; padding: 12px 14px; display: grid; gap: 2px; }
+  .live-t b { font: 700 1.35rem/1.1 var(--font-display); color: #123B38; }
+  .live-t span:last-child { font-size: 0.8rem; color: var(--ink2); line-height: 1.35; }
+  .live[hidden] { display: none; }
 </style>
 
 <!--NAV-->
@@ -500,6 +507,15 @@
         <h2>Biggest pressures here</h2>
         <p class="hint" id="press-note">Measured from this place's own data. Environmental and social together: each pressure says who carries it.</p>
         <ol class="press-list" id="press-list"></ol>
+      </section>
+      <section class="live" id="live-now" hidden>
+        <h2>Right now</h2>
+        <div class="live-grid">
+          <div class="live-t" id="lv-wx"><span class="eyebrow">Weather</span><b>…</b><span></span></div>
+          <div class="live-t" id="lv-air"><span class="eyebrow">Air</span><b>…</b><span></span></div>
+          <div class="live-t" id="lv-bio"><span class="eyebrow">Wildlife</span><b>…</b><span></span></div>
+        </div>
+        <p class="hint">Fetched live when you open a place, never stored. Forecast and air quality from <a href="https://open-meteo.com/" rel="noopener" target="_blank">Open-Meteo</a>; species records from <a href="https://www.gbif.org/" rel="noopener" target="_blank">GBIF</a>.</p>
       </section>
       <h2 id="lab-h">Pull the threads</h2>
       <p class="hint">Drag a lever. The map and every score update together. Effort is capped, so the levers compete with each other.</p>
@@ -1654,6 +1670,44 @@
 
   var PDIST = null, PDIST_N = 0;
   fetch(BASE + 'data/profile-dist.json').then(function (r) { return r.json(); }).then(function (j) { PDIST = j.dist; PDIST_N = j.places; if (P && P._raw) renderPressures(P._raw); }).catch(function () {});
+  // ---- Right now: today's weather, air and recorded wildlife, fetched live from free open services, never stored
+  var LIVE_SEQ = 0;
+  function loadLive(data) {
+    var box = document.getElementById('live-now'), c = data.cells || {}, seq = ++LIVE_SEQ;
+    var la = c.lat || [], lo = c.lng || [], pop = c.pop || [], n = la.length;
+    if (!n || !window.fetch) { box.hidden = true; return; }
+    var sw = 0, sy = 0, sx = 0, a = 90, b = -90, w = 180, e = -180;
+    for (var i = 0; i < n; i++) {
+      var p = Math.max(0, +pop[i] || 0) + 1e-6; sw += p; sy += p * la[i]; sx += p * lo[i];
+      if (la[i] < a) a = la[i]; if (la[i] > b) b = la[i]; if (lo[i] < w) w = lo[i]; if (lo[i] > e) e = lo[i];
+    }
+    var lat = (sy / sw).toFixed(3), lng = (sx / sw).toFixed(3);
+    ['wx', 'air', 'bio'].forEach(function (k) { var t = document.getElementById('lv-' + k); t.querySelector('b').textContent = '…'; t.querySelector('span:last-child').textContent = ''; });
+    box.hidden = false;
+    function set(k, big, small) { if (seq !== LIVE_SEQ) return; var t = document.getElementById('lv-' + k); t.querySelector('b').textContent = big; t.querySelector('span:last-child').textContent = small; }
+    function fail(k) { set(k, '—', 'Not available right now'); }
+    function get(url) { return fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
+    get('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lng + '&current=temperature_2m&daily=temperature_2m_max,precipitation_sum,precipitation_probability_max&forecast_days=3&timezone=auto')
+      .then(function (j) {
+        var d = j.daily || {}, rain = (d.precipitation_sum || []).reduce(function (s, v) { return s + (+v || 0); }, 0);
+        var pmax = Math.max.apply(null, (d.precipitation_probability_max || [0]).map(function (v) { return +v || 0; }));
+        set('wx', Math.round(j.current.temperature_2m) + '°C', 'High today ' + Math.round(d.temperature_2m_max[0]) + '°C · ' +
+          (rain >= 1 ? Math.round(rain) + ' mm of rain over 3 days (up to ' + pmax + '% chance)' : 'little or no rain over 3 days'));
+      }).catch(function () { fail('wx'); });
+    get('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=' + lat + '&longitude=' + lng + '&current=us_aqi,pm2_5')
+      .then(function (j) {
+        var q = Math.round(j.current.us_aqi), lab = q <= 50 ? 'Good' : q <= 100 ? 'Moderate' : q <= 150 ? 'Unhealthy for sensitive groups' : q <= 200 ? 'Unhealthy' : q <= 300 ? 'Very unhealthy' : 'Hazardous';
+        set('air', 'AQI ' + q, lab + ' · fine particles ' + Math.round(j.current.pm2_5) + ' µg/m³');
+      }).catch(function () { fail('air'); });
+    var yr = new Date().getFullYear(), g = 'https://api.gbif.org/v1/occurrence/search?limit=0&decimalLatitude=' + a.toFixed(3) + ',' + b.toFixed(3) +
+      '&decimalLongitude=' + w.toFixed(3) + ',' + e.toFixed(3) + '&year=' + (yr - 10) + ',' + yr + '&facet=speciesKey&facetLimit=1000';
+    Promise.all([get(g), get(g + '&iucnRedListCategory=CR&iucnRedListCategory=EN&iucnRedListCategory=VU')]).then(function (r) {
+      function sp(j) { var f = (j.facets || [])[0]; return f ? f.counts.length : 0; }
+      var all = sp(r[0]), thr = sp(r[1]);
+      set('bio', (all >= 1000 ? '1,000+' : all.toLocaleString('en-US')) + ' species', 'Recorded in the last 10 years (' + (r[0].count || 0).toLocaleString('en-US') + ' sightings)' +
+        (thr ? ' · ' + thr + ' threatened' : ''));
+    }).catch(function () { fail('bio'); });
+  }
   function renderPressures(data) {
     var box = document.getElementById('press'); if (P) P._raw = data;
     var pr = null; try { pr = window.TLProfile && TLProfile.profile(data, PDIST); } catch (e) { pr = null; }
@@ -1679,6 +1733,7 @@
     loadSketch();
     PRI = P.priorities(8);
     renderPressures(data);
+    loadLive(data);
     WTS.sel = -1; WTS.show = false;
     renderWTS();
     HC = heatCheck(P);
