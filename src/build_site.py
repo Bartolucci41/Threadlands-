@@ -314,6 +314,10 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .rt-bar { height: 8px; border-radius: 4px; background: var(--surface2); overflow: hidden; } .rt-bar i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
   .rt-v { font: 800 1.35rem var(--font-display); text-align: right; font-variant-numeric: tabular-nums; }
   @media (max-width: 760px) { .rk-table a { grid-template-columns: 2.2rem minmax(0, 1fr) 64px 2.4rem; } .rt-p, .rt-j { display: none; } }
+  .rk-table li.vis a { background: linear-gradient(90deg, #F3E3C433, transparent 40%); }
+  .rt-c .lib-vis { justify-self: start; margin-top: 4px; }
+  .rt-v small { font: 500 0.72rem var(--font-body); color: var(--ink2); }
+  .page-lead a { color: var(--accent); text-underline-offset: 3px; }
   .rk-method { margin-top: 56px; padding: 32px; border-radius: 18px; background: var(--surface); }
   .rk-method h2 { font-size: 1.6rem; margin-bottom: 16px; }
   .rk-m-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px 32px; }
@@ -399,8 +403,8 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
 # Cloudflare Web Analytics: private visit counts for Robert, no cookies and no personal data
 ANALYTICS = ("<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' "
              "data-cf-beacon='{\"token\": \"a92b6704e81e4aaba11a9f8a11832ae1\"}'></script><!-- End Cloudflare Web Analytics -->\n")
-PAGES = [("", "Home"), ("explore/", "Explore"), ("studio/", "Studio"), ("rankings/", "Rankings"), ("projects/", "Projects"), ("library/", "Library"), ("how-it-works/", "How it works"), ("about/", "About")]
-NAV = [p for p in PAGES if p[0] in ("explore/", "studio/", "rankings/", "projects/", "library/", "about/")]
+PAGES = [("", "Home"), ("explore/", "Explore"), ("studio/", "Studio"), ("cities/", "Cities"), ("projects/", "Projects"), ("how-it-works/", "How it works"), ("about/", "About")]
+NAV = [p for p in PAGES if p[0] in ("explore/", "studio/", "cities/", "projects/", "about/")]
 
 
 def APP(base):
@@ -441,8 +445,8 @@ def footer(base):
     return (f'<footer class="site-foot2">\n  <div class="wrap foot-grid">\n'
             f'    <div class="foot-brand"><a class="wordmark foot-wm" href="{base}" translate="no">Threadlands</a>'
             '<p>See what&rsquo;s coming for your city, and what would fix it. Free, for any place on Earth.</p></div>\n'
-            f'    <nav aria-label="Tools"><h2>Tools</h2>{col([("explore/", "Explore"), ("studio/", "Studio"), ("library/", "Library")])}</nav>\n'
-            f'    <nav aria-label="Data"><h2>Data</h2>{col([("rankings/", "Rankings"), ("projects/", "Projects")])}</nav>\n'
+            f'    <nav aria-label="Tools"><h2>Tools</h2>{col([("explore/", "Explore"), ("studio/", "Studio")])}</nav>\n'
+            f'    <nav aria-label="Data"><h2>Data</h2>{col([("cities/", "Cities"), ("projects/", "Projects")])}</nav>\n'
             f'    <nav aria-label="About"><h2>About</h2>{col([("how-it-works/", "How it works"), ("about/", "About")])}</nav>\n'
             '  </div>\n  <div class="wrap foot-small">\n'
             '    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>\n'
@@ -472,7 +476,7 @@ for i, sc in enumerate(re.findall(r"<script>(.*?)</script>", doc, re.S)):
     write(f"src/.check/explore{i}.js", sc)
 
 # ---- The other pages
-for name in ("home", "studio", "rankings", "projects", "library", "how-it-works", "about"):
+for name in ("home", "studio", "cities", "projects", "how-it-works", "about"):
     spec = read(SRC, "pages", name + ".html")
     meta = dict(re.findall(r"<!--\s*(\w+):\s*(.*?)\s*-->", spec.split("\n\n", 1)[0]))
     content = spec.split("\n\n", 1)[1]
@@ -484,4 +488,10 @@ for name in ("home", "studio", "rankings", "projects", "library", "how-it-works"
          parts[1].replace("{B}", base) if len(parts) > 1 else "")
     if len(parts) > 1:
         write(f"src/.check/{name}.js", parts[1])
+# Old addresses: Library and Rankings became Cities
+for old in ("library", "rankings"):
+    write(f"{old}/index.html", '<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8"><title>Cities | Threadlands</title>'
+          '<link rel="canonical" href="../cities/"><meta http-equiv="refresh" content="0; url=../cities/">'
+          "<script>location.replace('../cities/' + location.search + location.hash);</script></head>"
+          '<body><p><a href="../cities/">Threadlands cities</a></p></body></html>\n')
 print("built: index.html, explore/, library/, how-it-works/, about/, assets/site.css")

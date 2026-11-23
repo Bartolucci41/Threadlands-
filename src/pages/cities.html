@@ -1,27 +1,46 @@
-<!-- title: The library | Threadlands -->
-<!-- description: Every place in Threadlands, on a map and in a list. Each has measured satellite heat, its river basin and its foodshed. -->
+<!-- title: Cities | Threadlands -->
+<!-- description: Every city in Threadlands on one map and one list, ranked for how prepared it is for heat, floods and drought, with real projects counted in. -->
 
 <main class="wrap">
-  <h1 class="page-h">The library</h1>
-  <p class="page-lede" id="lib-lede">Every place that opens instantly in Threadlands. Each one has measured satellite heat, the river basin it drinks from and the farmland around it. Don&rsquo;t see yours? <a href="{B}explore/">Search for it on the Explore page</a> and build it in about ten minutes.</p>
-  <div class="lib-map" id="lib-map"><canvas id="lib-canvas" role="img" aria-label="World map with a dot for every place in the library"></canvas><span class="lib-tip" id="lib-tip" hidden></span>
+  <header class="page-head">
+    <p class="page-kicker">Cities</p>
+    <h1>How prepared are cities for heat, floods and drought?</h1>
+    <p class="page-lead">Every place in Threadlands, ranked by its resilience index from 0 to 100. Real projects that are approved, under way or recently built count toward each score. Don&rsquo;t see your city? <a href="{B}explore/">Search for it in Explore</a> and build it in about ten minutes.</p>
+  </header>
+  <div class="lib-map" id="lib-map"><canvas id="lib-canvas" role="img" aria-label="World map with a dot for every city"></canvas><span class="lib-tip" id="lib-tip" hidden></span>
     <div class="lib-zoom"><button type="button" class="chip" id="lz-in" aria-label="Zoom in">+</button><button type="button" class="chip" id="lz-out" aria-label="Zoom out">&minus;</button><button type="button" class="chip" id="lz-fit" aria-label="Show the whole world" title="Show the whole world">&#8634;</button></div></div>
-  <p class="hint" style="margin:-16px 0 20px">Zoom with + and &minus;, your scroll wheel or a double-click, and drag to move. Names and smaller places appear as you zoom in. Dot size shows population. Map outlines from Natural Earth, public domain.</p>
-  <div class="lib-tools">
-    <label class="sr-only" for="lib-q">Filter places</label>
-    <input id="lib-q" type="search" placeholder="Filter by city or country" autocomplete="off">
-    <span class="search-note" id="lib-n"></span>
+
+  <div class="filters" role="group" aria-label="Sort by">
+    <span class="eyebrow" style="margin-right:4px">Sort by</span>
+    <button type="button" class="chip" data-sort="index" aria-pressed="true">Resilience</button>
+    <button type="button" class="chip" data-sort="heat" aria-pressed="false">Heat relief</button>
+    <button type="button" class="chip" data-sort="habitat" aria-pressed="false">Habitat</button>
+    <button type="button" class="chip" data-sort="food" aria-pressed="false">Local food</button>
+    <button type="button" class="chip" data-sort="pop" aria-pressed="false">Population</button>
+    <button type="button" class="chip" data-sort="name" aria-pressed="false">A&ndash;Z</button>
   </div>
-  <div class="lib-chips" id="lib-chips" role="group" aria-label="Filter by region"></div>
-  <div class="lib-list" id="lib-list"><p class="lib-empty">Loading the library&hellip;</p></div>
+  <div class="filters" id="rk-regions" role="group" aria-label="Region"></div>
+  <div class="filters"><label><span class="sr-only">Find a city</span><input type="search" id="rk-q" placeholder="Find a city or country"></label><span class="rk-count" id="rk-count"></span></div>
+
+  <ol class="rk-table" id="rk-table"><li class="rk-none">Loading the cities&hellip;</li></ol>
+
+  <section class="rk-method" aria-labelledby="rk-m-h">
+    <h2 id="rk-m-h">How the index works</h2>
+    <div class="rk-m-grid">
+      <div><h3>What goes in</h3><p>Heat relief, flood exposure, connected nature, local food and low-carbon travel, plus three stress tests (a heatwave, a river flood and a drought year). Each is modeled for the whole city region from open satellite, land cover and population data.</p></div>
+      <div><h3>Real projects</h3><p>Parks, wetlands and other projects with a public source are placed on the map. Those approved, under way or built since 2021 count toward the score. Older ones already show in the 2021 land cover.</p></div>
+      <div><h3>Read it as a first look</h3><p>This is a screening index, not a verdict. Flood and travel are not yet fully comparable between places, and some places are outlined larger than the city itself. We are working on both, and the index will change as the data improves.</p></div>
+    </div>
+    <p class="rank-note" id="rk-updated"></p>
+  </section>
 </main>
 <!--SCRIPT-->
 (function () {
   var $ = function (s) { return document.querySelector(s); };
   function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function norm(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function norm(t) { return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
   var LIB = [], shown = [], dots = [], LAND = null, cv = $('#lib-canvas'), tip = $('#lib-tip');
-  var V = { z: 1, lng: 0, lat: 7.5 }, W = 0, H = 0;   // zoom, and the center of the view
+  var V = { z: 1, lng: 0, lat: 7.5 }, W = 0, H = 0;
   fetch('{B}assets/land.json').then(function (r) { return r.json(); }).then(function (l) { LAND = l; drawMap(); }).catch(function () { /* map without coastlines */ });
   function color(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
   function drawMap() {
@@ -133,39 +152,55 @@
     cv.style.cursor = 'pointer'; showTip(d, false);
   });
   cv.addEventListener('mouseleave', function () { tip.hidden = true; });
+
   var REG = { Africa: 'AO CD EG ET GH KE MA NG RW SN TN TZ UG ZA', Asia: 'BD CN HK ID IN JP KR KZ LK MN MY NP PH PK SG TH TW UZ VN', Europe: 'AT CH CZ DE DK ES FI FR GB GR HU IE IT NL NO PL PT SE', 'Middle East': 'AE IL IR JO SA TR', 'North America': 'CA US', 'Latin America': 'AR BO BR CL CO CU EC GT MX PA PE UY', Oceania: 'AU NZ' };
-  var ORDER = ['Africa', 'Asia', 'Europe', 'Latin America', 'Middle East', 'North America', 'Oceania'], CC2R = {}, REGION = 'All';
+  var ORDER = ['Africa', 'Asia', 'Europe', 'Latin America', 'Middle East', 'North America', 'Oceania'], CC2R = {}, VIS = 'Added by visitors';
   ORDER.forEach(function (r) { REG[r].split(' ').forEach(function (c) { CC2R[c] = r; }); });
   function regionOf(e) { return CC2R[e.cc] || (e.lng < -30 ? (e.lat > 15 ? 'North America' : 'Latin America') : e.lng < 50 ? (e.lat > 35 ? 'Europe' : 'Africa') : e.lat < -10 ? 'Oceania' : 'Asia'); }
   function where(e) { var ps = String(e.display || '').split(', '), st = ps.length >= 3 ? ps[ps.length - 2] : (/^New York/.test(e.name) ? 'New York' : ''); return (/^(US|CA|AU)$/.test(e.cc) && st && st !== e.name ? st + ' \u00b7 ' : '') + e.country; }
   function fmtN(n) { return n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : Math.round(n / 1e3) + 'K'; }
-  function fmtPop(e) { var c = e.city_pop, r = e.pop; if (!r) return ''; if (!c || c >= r * 0.9) return fmtN(r) + ' people'; return fmtN(c) + ' in the city \u00b7 ' + fmtN(r) + ' in the region'; }
-  function chips() {
+  function fmtPop(e) { var c = e.city_pop, r = e.pop; if (!r) return ''; if (!c || c >= r * 0.9) return fmtN(r) + ' people'; return fmtN(c) + ' in the city, ' + fmtN(r) + ' in the region'; }
+  var PRESS = { heat: 'Heat', flood: 'Flooding', grey: 'Little green', crowd: 'Crowding', trees: 'Few trees', food: 'Food from far away' };
+  var SORT = 'index', REGION = 'All', LASTKEY = '';
+  function val(p) { return SORT === 'pop' ? (p.city_pop || p.pop || 0) : (p[SORT] == null ? -1 : p[SORT]); }
+  function render() {
+    var q = norm($('#rk-q').value.trim());
+    var list = LIB.slice().sort(SORT === 'name' ? function (a, b) { return a.name.localeCompare(b.name); } : function (a, b) { return val(b) - val(a); });
+    list.forEach(function (p, k) { p._rank = k + 1; });
+    shown = list.filter(function (p) { return (REGION === 'All' || (REGION === VIS ? p.requested : regionOf(p) === REGION)) && (!q || norm(p.name + ' ' + p.country + ' ' + (p.display || '')).indexOf(q) >= 0); });
+    var scored = list.filter(function (p) { return p.index != null; }), key = SORT === 'name' || SORT === 'pop' ? 'index' : SORT;
+    var hi = Math.max.apply(null, scored.map(function (p) { return p[key]; }).concat([1])), lo = Math.min.apply(null, scored.map(function (p) { return p[key]; }).concat([0]));
+    var nc = {}; shown.forEach(function (p) { nc[p.country] = 1; });
+    $('#rk-count').textContent = shown.length + ' of ' + LIB.length + ' places in ' + Object.keys(nc).length + ' countries';
+    $('#rk-table').innerHTML = shown.map(function (p) {
+      var v = p[key], has = v != null, w = has ? Math.max(3, Math.round(100 * (v - lo + 1) / (hi - lo + 1))) : 0;
+      var pj = p.projects && p.projects.add >= 0.05 ? '<span class="rk-pj">+' + p.projects.add.toFixed(1) + ' from projects</span>' : (p.projects ? '<span class="rk-pj rk-pj0">' + p.projects.n + ' project' + (p.projects.n > 1 ? 's' : '') + ' on the map</span>' : '');
+      var num = SORT === 'name' ? '' : SORT === 'pop' ? p._rank : (has ? p._rank : '');
+      return '<li' + (p.requested ? ' class="vis"' : '') + '><a href="{B}explore/#' + esc(p.slug) + '"><span class="rt-n">' + num + '</span><span class="rt-c"><b>' + esc(p.name) + '</b><span>' + esc(where(p)) + (fmtPop(p) ? ' \u00b7 ' + fmtPop(p) : '') + '</span>' + (p.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</span>' +
+        '<span class="rt-p">' + (p.top ? esc(PRESS[p.top] || '') : '') + '</span><span class="rt-j">' + pj + '</span>' +
+        '<span class="rt-bar" aria-hidden="true">' + (has ? '<i style="width:' + w + '%"></i>' : '') + '</span><span class="rt-v">' + (has ? Math.round(v) : '<small>new</small>') + '</span></a></li>';
+    }).join('') || '<li class="rk-none">No place matches. <a href="{B}explore/?q=' + encodeURIComponent($('#rk-q').value.trim()) + '">Search everywhere for it</a> and build it.</li>';
+    var k2 = REGION + '|' + q; if (k2 !== LASTKEY) { LASTKEY = k2; fitTo(shown); } else drawMap();
+  }
+  function regions() {
     var n = {}; LIB.forEach(function (e) { var r = regionOf(e); n[r] = (n[r] || 0) + 1; });
-    var nv = LIB.filter(function (e) { return e.requested; }).length, V = 'Added by visitors';
-    $('#lib-chips').innerHTML = ['All'].concat(ORDER.filter(function (r) { return n[r]; })).concat(nv ? [V] : []).map(function (r) {
-      return '<button type="button" class="chip' + (r === V ? ' chip-vis' : '') + (r === REGION ? ' on' : '') + '" data-r="' + r + '" aria-pressed="' + (r === REGION) + '">' + r + ' <span>' + (r === 'All' ? LIB.length : r === V ? nv : n[r]) + '</span></button>';
+    var nv = LIB.filter(function (e) { return e.requested; }).length;
+    $('#rk-regions').innerHTML = '<span class="eyebrow" style="margin-right:4px">Region</span>' + ['All'].concat(ORDER.filter(function (r) { return n[r]; })).concat(nv ? [VIS] : []).map(function (r) {
+      return '<button type="button" class="chip' + (r === VIS ? ' chip-vis' : '') + '" data-r="' + r + '" aria-pressed="' + (r === REGION) + '">' + r + '</button>';
     }).join('');
   }
-  $('#lib-chips').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (!b) return; REGION = b.getAttribute('data-r'); chips(); render(); });
-  function render() {
-    var q = norm($('#lib-q').value.trim());
-    shown = LIB.filter(function (e) { return (REGION === 'All' || (REGION === 'Added by visitors' ? e.requested : regionOf(e) === REGION)) && (!q || norm(e.name + ' ' + e.country + ' ' + e.display).indexOf(q) >= 0); });
-    var by = {}, nc = {};
-    shown.forEach(function (e) { var r = regionOf(e); (by[r] = by[r] || []).push(e); nc[e.country] = 1; });
-    $('#lib-n').textContent = shown.length + ' places in ' + Object.keys(nc).length + ' countries';
-    var rs = ORDER.filter(function (r) { return by[r]; });
-    $('#lib-list').innerHTML = rs.length ? rs.map(function (r) {
-      return '<section class="lib-region"><h2>' + r + ' <span>' + by[r].length + '</span></h2><ul class="lib-cards">' + by[r].sort(function (a, b) { return b.pop - a.pop; }).map(function (e) {
-        return '<li' + (e.requested ? ' class="vis"' : '') + '><a href="{B}explore/#' + e.slug + '"><strong>' + esc(e.name) + '</strong><span class="lib-cty">' + esc(where(e)) + '</span><span class="lib-pop">' + fmtPop(e) + '</span>' + (e.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</a></li>';
-      }).join('') + '</ul></section>';
-    }).join('') : '<p class="lib-empty">No place in the library matches that. <a href="{B}explore/?q=' + encodeURIComponent($('#lib-q').value.trim()) + '">Search everywhere for it</a> and build it.</p>';
-    fitTo(shown);
-  }
-  fetch('{B}data/index.json').then(function (r) { return r.json(); }).then(function (ix) {
-    LIB = (ix.places || []).filter(function (e) { return e && e.slug && isFinite(e.lat) && isFinite(e.lng); });
-    chips(); render();
-  }).catch(function () { $('#lib-list').innerHTML = '<p class="lib-empty">The library could not be loaded. Check your connection and refresh.</p>'; });
-  $('#lib-q').addEventListener('input', render);
+  document.querySelectorAll('[data-sort]').forEach(function (b) { b.addEventListener('click', function () { SORT = b.dataset.sort; document.querySelectorAll('[data-sort]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); render(); }); });
+  $('#rk-q').addEventListener('input', render);
+  $('#rk-regions').addEventListener('click', function (e) { var b = e.target.closest('[data-r]'); if (!b) return; REGION = b.dataset.r; regions(); render(); });
+  var qs = new URLSearchParams(location.search); if (qs.get('sort')) SORT = qs.get('sort');
+  document.querySelectorAll('[data-sort]').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.sort === SORT ? 'true' : 'false'); });
+  Promise.all([fetch('{B}data/index.json').then(function (r) { return r.json(); }), fetch('{B}data/ranking.json').then(function (r) { return r.json(); }).catch(function () { return { places: [] }; })]).then(function (x) {
+    var RK = {}; (x[1].places || []).forEach(function (p) { if (p && p.slug) RK[p.slug] = p; });
+    LIB = (x[0].places || []).filter(function (e) { return e && e.slug && isFinite(e.lat) && isFinite(e.lng); }).map(function (e) {
+      var r = RK[e.slug] || {}; return Object.assign({}, e, { index: r.index, heat: r.heat, habitat: r.habitat, food: r.food, top: r.top, projects: r.projects });
+    });
+    if (x[1].updated) $('#rk-updated').textContent = 'Updated ' + new Date(x[1].updated + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + '. The ranking refreshes whenever a place is built or a project is approved.';
+    regions(); render();
+  }).catch(function () { $('#rk-table').innerHTML = '<li class="rk-none">The cities could not be loaded. Check your connection and refresh.</li>'; });
   window.addEventListener('resize', drawMap);
 })();
