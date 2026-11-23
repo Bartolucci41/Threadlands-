@@ -198,7 +198,7 @@
   /* Lab */
   .lab { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-items: start; }
   .stage {
-    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    position: static; top: env(safe-area-inset-top, 0px); z-index: 5;
     background: var(--bg); padding-block: 8px 10px; border-bottom: 1px solid var(--line);
   }
   .mapwrap { position: relative; background: var(--surface); border-radius: 12px; overflow: hidden; }
@@ -236,6 +236,7 @@
   .dir-moves li::before { content: counter(mv); width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--accent-ink, #fff); display: grid; place-items: center; font-weight: 700; font-size: 0.875rem; }
   .dir-moves b { display: block; } .dir-moves p { margin: 2px 0 0; font-size: 0.875rem; color: var(--ink2); }
   .dir-acts { display: flex; gap: 6px; flex-wrap: wrap; }
+  @media (max-width: 720px) { .dir-moves li { grid-template-columns: 28px minmax(0, 1fr); } .dir-acts { grid-column: 2; } }
   .dir-src { font-size: 0.75rem; color: var(--ink2); margin: 0; }
   .gis-row { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; padding-top: 10px; }
   .gis-note { font-size: 0.8125rem; color: var(--ink2); max-width: 40rem; }
@@ -409,6 +410,27 @@
   .live-t b { font: 700 1.35rem/1.1 var(--font-display); color: #123B38; }
   .live-t span:last-child { font-size: 0.8rem; color: var(--ink2); line-height: 1.35; }
   .live[hidden] { display: none; }
+  .ptabs { position: static; top: 0; z-index: 5; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--bg); border-bottom: 1px solid var(--line); margin: 0 0 12px; }
+  .ptab { min-height: 52px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--ink2); font: 600 1rem var(--font-body, system-ui); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 4px; }
+  .ptab span { display: inline-flex; width: 22px; height: 22px; border-radius: 50%; align-items: center; justify-content: center; font-size: 0.75rem; border: 1.5px solid currentColor; }
+  .ptab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+  .ptab[aria-selected="true"] span { background: var(--accent); border-color: var(--accent); color: var(--accent-ink, #fff); }
+  .ptab:hover { color: var(--ink); }
+  .ptab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  @media (min-width: 960px) { .ptabs { position: sticky; } .stage { position: sticky; } }
+  .tpanel { display: grid; gap: 6px; align-content: start; }
+  .tpanel[hidden] { display: none; }
+  .psum { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-radius: 14px; background: var(--surface); margin: 0 0 10px; }
+  .psum[hidden] { display: none; }
+  .psum b { font: 800 1.9rem/1 var(--font-display, system-ui); margin-left: 10px; }
+  .psum .eyebrow { vertical-align: middle; }
+  .ps-d { margin-left: 8px; font-weight: 600; }
+  .ps-vs { display: block; font-size: 0.75rem; color: var(--ink2); margin-top: 2px; }
+  .ps-rng { font-size: 0.85rem; color: var(--ink2); text-align: right; }
+  .tgo { justify-self: start; margin-top: 14px; }
+  .tnext { margin-top: 10px; font-weight: 600; }
+  .studio-cta { display: flex; align-items: center; justify-content: center; min-height: 50px; margin-top: 18px; border-radius: 12px; background: var(--accent); color: var(--accent-ink, #fff); font-weight: 600; text-decoration: none; }
+  .studio-cta:hover { filter: brightness(1.08); }
 </style>
 
 <!--NAV-->
@@ -442,7 +464,7 @@
     <div class="glance-grid" id="glance-grid"></div>
   </section>
 
-  <nav class="jump" aria-label="On this page"><span>Jump to</span><a href="#mapwrap">Map</a><a href="#lab-h">Levers</a><a href="#scores-h">Scores</a><a href="#costs-h">Costs</a><a href="#start-h">Where to start</a><a href="#reg-h">Beyond the city</a><a href="../studio/">Design it in Studio &rarr;</a></nav>
+  <nav class="jump" aria-label="On this page"><span>Jump to</span><a href="#mapwrap">Map</a><a href="#tp-understand" data-go="understand">Understand</a><a href="#tp-plan" data-go="plan">Plan</a><a href="#tp-compare" data-go="compare">Compare</a><a href="#reg-h">Beyond the city</a><a href="../studio/">Design it in Studio &rarr;</a></nav>
   <section class="lab" aria-labelledby="lab-h">
     <div class="stage">
       <div class="mapwrap" id="mapwrap">
@@ -503,6 +525,16 @@
     </div>
 
     <div class="panel">
+      <div class="ptabs" role="tablist" aria-label="Steps">
+        <button type="button" role="tab" class="ptab" id="ptab-understand" aria-controls="tp-understand" aria-selected="true"><span>1</span>Understand</button>
+        <button type="button" role="tab" class="ptab" id="ptab-plan" aria-controls="tp-plan" aria-selected="false" tabindex="-1"><span>2</span>Plan</button>
+        <button type="button" role="tab" class="ptab" id="ptab-compare" aria-controls="tp-compare" aria-selected="false" tabindex="-1"><span>3</span>Compare</button>
+      </div>
+      <div class="psum" id="psum" hidden>
+        <div><span class="eyebrow">Resilience index</span><b id="ps-idx">0</b><span class="ps-d" id="ps-d"></span><span class="ps-vs">vs. business as usual</span></div>
+        <span class="ps-rng" id="ps-rng"></span>
+      </div>
+      <div class="tpanel" role="tabpanel" id="tp-understand" aria-labelledby="ptab-understand">
       <section class="press" id="press" hidden>
         <h2>Biggest pressures here</h2>
         <p class="hint" id="press-note">Measured from this place's own data. Environmental and social together: each pressure says who carries it.</p>
@@ -517,6 +549,22 @@
         </div>
         <p class="hint">Fetched live when you open a place, never stored. Forecast and air quality from <a href="https://open-meteo.com/" rel="noopener" target="_blank">Open-Meteo</a>; species records from <a href="https://www.gbif.org/" rel="noopener" target="_blank">GBIF</a>.</p>
       </section>
+      <div id="hc-wrap" hidden>
+        <h2>Satellite heat check</h2>
+        <div id="hc-body"></div>
+      </div>
+
+      <h2>About this place's data</h2>
+      <ul class="datalist" id="datalist"></ul>
+
+      <details class="legend-narrow">
+        <summary>Map key</summary>
+        <ul class="key" id="legend-narrow"></ul>
+      </details>
+        <a class="tnext" href="#reg-h">Beyond the city: the river basin and the foodshed &darr;</a>
+        <button type="button" class="btn tgo" data-go="plan">Next: make a plan &rarr;</button>
+      </div>
+      <div class="tpanel" role="tabpanel" id="tp-plan" aria-labelledby="ptab-plan" hidden>
       <h2 id="lab-h">Pull the threads</h2>
       <p class="hint">Drag a lever. The map and every score update together. Effort is capped, so the levers compete with each other.</p>
       <p class="clim-note" id="clim-note" hidden></p>
@@ -534,6 +582,22 @@
       </div>
       <div id="levers"></div>
 
+      <h2 id="start-h">Where to start</h2>
+      <p class="hint">The specific places where each action pays off most, ranked on today's map before any lever changes. Select a place to see it on the map.</p>
+      <div class="wts-actions" role="group" aria-label="Action to rank" id="wts-actions"></div>
+      <p class="msub" id="wts-intro" style="margin-top:8px"></p>
+      <ol class="wts" id="wts-list"></ol>
+      <div class="wts-tools">
+        <button class="btn" type="button" id="wts-add" hidden>Add these to my sketch</button>
+        <button class="btn ghost" type="button" id="wts-copy">Copy this list</button>
+        <button class="btn ghost" type="button" id="wts-hide" hidden>Hide from map</button>
+        <span class="msub" id="wts-copied" aria-live="polite"></span>
+      </div>
+      <textarea class="wts-text" id="wts-text" readonly hidden aria-label="List to copy"></textarea>
+
+        <button type="button" class="btn tgo" data-go="compare">Next: compare the results &rarr;</button>
+      </div>
+      <div class="tpanel" role="tabpanel" id="tp-compare" aria-labelledby="ptab-compare" hidden>
       <h2 id="scores-h">Scores</h2>
       <p class="hint">Each bar runs 0 to 100. The dark tick marks business as usual for this place.</p>
       <div id="metrics"></div>
@@ -558,31 +622,8 @@
         </ul>
       </details>
 
-      <h2 id="start-h">Where to start</h2>
-      <p class="hint">The specific places where each action pays off most, ranked on today's map before any lever changes. Select a place to see it on the map.</p>
-      <div class="wts-actions" role="group" aria-label="Action to rank" id="wts-actions"></div>
-      <p class="msub" id="wts-intro" style="margin-top:8px"></p>
-      <ol class="wts" id="wts-list"></ol>
-      <div class="wts-tools">
-        <button class="btn" type="button" id="wts-add" hidden>Add these to my sketch</button>
-        <button class="btn ghost" type="button" id="wts-copy">Copy this list</button>
-        <button class="btn ghost" type="button" id="wts-hide" hidden>Hide from map</button>
-        <span class="msub" id="wts-copied" aria-live="polite"></span>
       </div>
-      <textarea class="wts-text" id="wts-text" readonly hidden aria-label="List to copy"></textarea>
-
-      <div id="hc-wrap" hidden>
-        <h2>Satellite heat check</h2>
-        <div id="hc-body"></div>
-      </div>
-
-      <h2>About this place's data</h2>
-      <ul class="datalist" id="datalist"></ul>
-
-      <details class="legend-narrow">
-        <summary>Map key</summary>
-        <ul class="key" id="legend-narrow"></ul>
-      </details>
+      <a class="studio-cta" id="studio-cta" href="../studio/">Design it on real streets in Studio &rarr;</a>
     </div>
     <p class="sr-only" id="live" aria-live="polite"></p>
   </section>
@@ -1441,6 +1482,42 @@
     cv.addEventListener(ev, function () { if (painting) { painting = false; lastPainted = -1; saveSketch(); } });
   });
 
+  // ---- Panel tabs: Understand, Plan, Compare
+  var TAB = 'understand';
+  function showTab(k, focus) {
+    TAB = k;
+    ['understand', 'plan', 'compare'].forEach(function (t) {
+      var on = t === k, b = $('#ptab-' + t);
+      b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1;
+      $('#tp-' + t).hidden = !on;
+    });
+    $('#psum').hidden = k === 'understand' || !P;
+    if (focus) $('#ptab-' + k).focus();
+    try { localStorage.setItem('threadlands:tab', k); } catch (e) { /* ignore */ }
+  }
+  document.querySelectorAll('.ptab').forEach(function (b) {
+    b.addEventListener('click', function () { showTab(b.id.slice(5)); });
+    b.addEventListener('keydown', function (e) {
+      var order = ['understand', 'plan', 'compare'], i = order.indexOf(TAB);
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); showTab(order[(i + (e.key === 'ArrowRight' ? 1 : 2)) % 3], true); }
+      else if (e.key === 'Home') { e.preventDefault(); showTab('understand', true); }
+      else if (e.key === 'End') { e.preventDefault(); showTab('compare', true); }
+    });
+  });
+  document.addEventListener('click', function (e) {
+    var g = e.target.closest && e.target.closest('[data-go]'); if (!g) return;
+    e.preventDefault(); showTab(g.getAttribute('data-go'));
+    var tb = document.querySelector('.ptabs'); if (tb) tb.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  // Any link or code that jumps to a section inside a hidden tab opens that tab first
+  function revealFor(el) { var tp = el && el.closest && el.closest('.tpanel'); if (tp && tp.hidden) showTab(tp.id.slice(3)); }
+  window.addEventListener('hashchange', function () { try { revealFor(document.querySelector(location.hash)); } catch (e) { /* ignore */ } });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href^="#"]'); if (!a || a.hasAttribute('data-go')) return;
+    try { revealFor(document.querySelector(a.getAttribute('href'))); } catch (err) { /* ignore */ }
+  });
+  try { var t0 = localStorage.getItem('threadlands:tab'); if (t0 === 'plan' || t0 === 'compare') showTab(t0); } catch (e) { /* ignore */ }
+
   // ---- Uncertainty ranges: re-run the plan under varied assumptions, a moment after the last change
   var rangeTimer = 0, rangeCancel = null;
   function fmtR(x) { x = Math.round(x); return x > 0 ? '+' + x : x < 0 ? '\u2212' + Math.abs(x) : '0'; }
@@ -1454,6 +1531,7 @@
   }
   function clearRanges() {
     document.querySelectorAll('.rng').forEach(function (e) { e.textContent = ''; e.classList.remove('stale'); });
+    $('#ps-rng').textContent = '';
     document.querySelectorAll('.bar .band').forEach(function (e) { e.style.width = '0'; e.classList.remove('stale'); });
     $('#rng-note').hidden = true;
   }
@@ -1472,6 +1550,7 @@
     TESTS.forEach(function (t) { if (r.tests[t.k]) put($('#tr-' + t.k), $('#tb-' + t.k), bau.tests[t.k], res.tests[t.k], r.tests[t.k]); });
     var lo = Math.min(r.index[0], res.index - bau.index), hi = Math.max(r.index[1], res.index - bau.index), ix = $('#idxr');
     ix.classList.remove('stale'); ix.textContent = hi - lo >= 1 ? 'likely ' + fmtR(lo) + ' to ' + fmtR(hi) : '';
+    $('#ps-rng').textContent = ix.textContent;
     $('#rng-note').hidden = false;
   }
 
@@ -1493,6 +1572,8 @@
     });
     var idx = Math.round(res.index), bidx = Math.round(bau.index);
     $('#idx').textContent = idx;
+    $('#ps-idx').textContent = idx; var psd = $('#ps-d'); psd.textContent = fmtDelta(idx - bidx); psd.style.color = idx - bidx > 0 ? 'var(--pos)' : idx - bidx < 0 ? 'var(--neg)' : 'var(--ink2)';
+    $('#psum').hidden = TAB === 'understand';
     var d = $('#idxd');
     d.textContent = fmtDelta(idx - bidx);
     d.style.color = idx - bidx > 0 ? 'var(--pos)' : idx - bidx < 0 ? 'var(--neg)' : 'var(--ink2)';
