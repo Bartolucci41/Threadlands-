@@ -513,6 +513,10 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .pf-proj .pjc { display: grid; gap: 6px; padding: 14px 16px; } .pf-proj .pjc b { font: 700 1.08rem/1.3 var(--font-display); } .pf-proj .pjc-links { padding: 4px 0 0; }
   .pf-add { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: center; justify-content: space-between; margin-top: 16px; padding: 18px 20px; border-radius: 16px; border: 1.5px dashed var(--line); }
   .pf-add p { margin: 0; max-width: 46rem; color: var(--ink2); line-height: 1.5; } .pf-add b { color: var(--ink); }
+  .pjc-back { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 16px 0; } .pf-proj .pjc-back { padding: 6px 0 0; }
+  .back-btn { min-height: 36px; padding: 0 16px; font-size: 0.88rem; }
+  .back-btn[aria-pressed="true"] { background: transparent; color: var(--accent); border-color: var(--accent); }
+  .back-n { font-size: 0.82rem; color: var(--ink2); }
   .pf-none { color: var(--ink2); grid-column: 1 / -1; margin: 0; }
   #pf-scope { margin-bottom: 4px; }
   .pf-missing { padding: 48px 0; }

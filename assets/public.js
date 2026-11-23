@@ -107,7 +107,39 @@
     return best ? { place: best, km: Math.sqrt(bd) * 111 } : null;
   }
 
+  // "Back this project": counts come from the Threadlands relay; this device remembers what it backed
+  var RELAY = 'https://threadlands-relay.rob41pitt.workers.dev/', BACKED = 'threadlands:backed', countsP = null;
+  function backed() { try { var a = JSON.parse(store(BACKED) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function support() {
+    if (!countsP) countsP = fetch(RELAY + '?counts=1').then(function (r) { if (!r.ok) throw new Error('off'); return r.json(); }).then(function (j) { return j.counts || {}; });
+    return countsP;
+  }
+  function backProject(id) {
+    return fetch(RELAY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'back', id: id }) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'failed'); return j; }); })
+      .then(function (j) { var a = backed(); if (a.indexOf(id) < 0) { a.push(id); store(BACKED, JSON.stringify(a)); } return j; });
+  }
+  function backLabel(n, mine) { return (mine ? 'Backed \u2713' : 'Back this') + (n ? ' \u00b7 ' + n : ''); }
+  // Wire every [data-back] button inside root: show counts, and back on click
+  function wireBacking(root) {
+    var btns = root.querySelectorAll('[data-back]'); if (!btns.length) return;
+    support().then(function (c) {
+      var mine = backed();
+      btns.forEach(function (b) {
+        var id = b.dataset.back, on = mine.indexOf(id) >= 0;
+        b.hidden = false; b.textContent = backLabel(c[id] || 0, on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        var note = root.querySelector('[data-backn="' + id + '"]'); if (note) note.textContent = c[id] ? c[id] + (c[id] === 1 ? ' person backs this' : ' people back this') : '';
+        b.onclick = function () {
+          if (b.getAttribute('aria-pressed') === 'true') return;
+          b.disabled = true;
+          backProject(id).then(function (j) { c[id] = j.n; b.textContent = backLabel(j.n, true); b.setAttribute('aria-pressed', 'true'); if (note) note.textContent = j.n + (j.n === 1 ? ' person backs this' : ' people back this'); })
+            .catch(function () { b.textContent = 'Try again'; }).then(function () { b.disabled = false; });
+        };
+      });
+    }).catch(function () { /* backing not switched on yet: buttons stay hidden */ });
+  }
+
   window.TLP = { follows: follows, follow: follow, unfollow: unfollow, isFollowed: isFollowed, setFollows: setFollows, units: units, setUnits: setUnits, temp: temp, rain: rain,
     setBase: setBase, data: data, all: all, weather: weather, air: air, aqiWord: aqiWord, alerts: alerts, sky: sky, icon: icon, day: day,
-    PRESS: PRESS, TOPIC: TOPIC, TONE: TONE, esc: esc, norm: norm, ndate: ndate, fmtN: fmtN, where: where, headline: headline, matches: matches, nearest: nearest };
+    PRESS: PRESS, TOPIC: TOPIC, TONE: TONE, esc: esc, norm: norm, ndate: ndate, fmtN: fmtN, where: where, headline: headline, matches: matches, nearest: nearest, support: support, backProject: backProject, wireBacking: wireBacking, backed: backed };
 })();

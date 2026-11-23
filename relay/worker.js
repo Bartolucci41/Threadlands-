@@ -6,6 +6,8 @@
 //   GITHUB_TOKEN  (secret)  fine-grained token with "Contents: read and write" on Bartolucci41/Threadlands-
 //   REPO          (text)    Bartolucci41/Threadlands-
 //   SITE          (text)    https://threadlands.org
+//   SUPPORT       (KV namespace binding)  where "Back this project" counts are kept (Workers KV, free tier)
+//   SALT          (secret, optional)      any long random text; makes the stored visitor fingerprints unguessable
 
 const ALLOWED = ['https://threadlands.org', 'https://www.threadlands.org', 'https://bartolucci41.github.io'];
 const recent = new Map(); // per-visitor limit inside one worker instance (a soft brake, not a guarantee)
@@ -21,7 +23,7 @@ function reply(body, status, origin) {
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': ALLOWED.includes(origin) ? origin : ALLOWED[0],
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Vary': 'Origin',
     },
@@ -56,10 +58,51 @@ async function project(b, request, env, origin) {
   return reply({ ok: true }, 202, origin);
 }
 
+// "Back this project": one count per project, one back per visitor per project.
+// Counts live in a single KV entry so the website can read them all at once. Visitors are remembered only as a
+// one-way fingerprint (a hash of their network address, the project and a secret salt), never the address itself.
+async function knownProjects(env) {
+  const site = env.SITE || 'https://threadlands.org';
+  const r = await fetch(`${site}/data/projects.json`, { cf: { cacheTtl: 300 } });
+  if (!r.ok) return new Set();
+  const j = await r.json();
+  return new Set((j.projects || []).map((p) => String(p.id)));
+}
+async function fingerprint(text) {
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(d)].slice(0, 12).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+async function counts(env) {
+  return (await env.SUPPORT.get('counts', { type: 'json' })) || {};
+}
+async function back(b, request, env, origin) {
+  if (!env.SUPPORT) return reply({ error: 'Backing is not switched on yet.' }, 503, origin);
+  const id = String(b.id || '').slice(0, 40);
+  if (!id || !(await knownProjects(env)).has(id)) return reply({ error: 'Unknown project.' }, 400, origin);
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown', now = Date.now();
+  const times = (recent.get('b' + ip) || []).filter((t) => now - t < 3600e3);
+  if (times.length >= 30) return reply({ error: 'Please try again later.' }, 429, origin);
+  times.push(now); recent.set('b' + ip, times);
+  const key = 'v:' + id + ':' + (await fingerprint(ip + '|' + id + '|' + (env.SALT || 'threadlands')));
+  const c = await counts(env);
+  if (await env.SUPPORT.get(key)) return reply({ id, n: c[id] || 0, already: true }, 200, origin);
+  c[id] = (c[id] || 0) + 1;
+  await env.SUPPORT.put(key, '1', { expirationTtl: 60 * 60 * 24 * 365 });
+  await env.SUPPORT.put('counts', JSON.stringify(c));
+  return reply({ id, n: c[id] }, 200, origin);
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin') || '';
     if (request.method === 'OPTIONS') return reply({}, 204, origin);
+    // Anyone can read how many people back each project
+    if (request.method === 'GET' && new URL(request.url).searchParams.has('counts')) {
+      if (!env.SUPPORT) return reply({ error: 'Backing is not switched on yet.' }, 503, origin);
+      const res = reply({ counts: await counts(env) }, 200, origin);
+      res.headers.set('Cache-Control', 'public, max-age=60');
+      return res;
+    }
     if (request.method !== 'POST') return reply({ error: 'Use POST.' }, 405, origin);
     if (!ALLOWED.includes(origin)) return reply({ error: 'Requests are accepted from threadlands.org only.' }, 403, origin);
 
@@ -68,6 +111,7 @@ export default {
 
     // A visitor proposing a real project for the map: checked here, then opened as an issue for review on GitHub
     if (b.type === 'project') return project(b, request, env, origin);
+    if (b.type === 'back') return back(b, request, env, origin);
     const osm = String(b.osm || '');
     const name = String(b.name || '').slice(0, 80);
     const country = String(b.country || '').slice(0, 60);

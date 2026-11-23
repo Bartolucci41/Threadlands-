@@ -43,7 +43,7 @@
     </section>
 
     <section class="sect pf-sec" id="changing" aria-labelledby="changing-h">
-      <div class="sect-top"><div><h2 id="changing-h">What&rsquo;s changing</h2><p>Real parks, wetlands, trees and water projects here, each with a public source.</p></div></div>
+      <div class="sect-top"><div><h2 id="changing-h">What&rsquo;s changing</h2><p>Real parks, wetlands, trees and water projects here, each with a public source. Back the ones you want to see happen: the count shows city teams and funders where the public support is.</p></div></div>
       <div class="pf-proj" id="pf-proj"></div>
       <div class="pf-add"><p><b>Know a project that belongs here?</b> A new park, a wetland, a tree-planting drive, a flood barrier. Add it with a link to a public source and it is checked before it appears.</p><a class="btn" id="pf-add" href="{B}explore/?add=1">Add a project</a></div>
     </section>
@@ -130,9 +130,11 @@
     $('#pf-proj').innerHTML = mine.length ? mine.map(function (p) {
       var st = STAT[p.status] || STAT.proposed;
       return '<article class="pjc" style="--pc:' + st[1] + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span>' + (p.added_by_visitor ? '<span>Added by a visitor</span>' : '') + '</span><b>' + esc(p.name) + '</b><span class="pjc-sum">' + esc(p.summary || '') + '</span>' +
+        '<span class="pjc-back"><button type="button" class="btn back-btn" data-back="' + esc(p.id) + '" aria-pressed="false" hidden>Back this</button><span class="back-n" data-backn="' + esc(p.id) + '"></span></span>' +
         '<span class="pjc-links">' + (p.involved ? '<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Get involved</a>' : '') + (p.source && p.source.url ? '<a href="' + esc(p.source.url) + '" target="_blank" rel="noopener">Source</a>' : '') + '<a href="{B}explore/#' + esc(SLUG) + '">See it on the map</a></span></article>';
     }).join('') : '<p class="pf-none">No projects here yet. Be the first to add one.</p>';
     $('#pf-add').href = '{B}explore/?add=1#' + SLUG;
+    T.wireBacking($('#pf-proj'));
   }
   var SCOPE = 'city';
   function renderNews(e) {

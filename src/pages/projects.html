@@ -4,10 +4,11 @@
 <main class="wrap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="{B}assets/public.js"></script>
   <header class="page-head">
     <p class="page-kicker">Projects</p>
     <h1>Real projects changing cities</h1>
-    <p class="page-lead">Parks, wetlands, trees and water projects that are proposed, approved, under way or built, each with a public source. Open one in Explore to see what it adds to its city.</p>
+    <p class="page-lead">Parks, wetlands, trees and water projects that are proposed, approved, under way or built, each with a public source. Back the ones you want to see happen: every count shows city teams and funders where public support is.</p>
   </header>
 
   <div class="filters" id="pj-status" role="group" aria-label="Status">
@@ -49,8 +50,10 @@
       return '<li class="pjc" id="pjc-' + esc(p.id) + '" style="--pc:' + st[1] + '"><button type="button" class="pjc-go" data-id="' + esc(p.id) + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span>' + esc(NAMES[p.place] || p.place) + ' · ' + (KIND[p.kind] || 'Other') + '</span></span>' +
         '<b>' + esc(p.name) + '</b><span class="pjc-sum">' + esc(p.summary || '') + '</span></button>' +
         '<span class="pjc-links"><a href="../place/#' + esc(p.place) + '">' + esc(NAMES[p.place] || 'The city') + '</a><a href="../explore/#' + esc(p.place) + '">See it in Explore</a>' + (p.source && p.source.url ? '<a href="' + esc(p.source.url) + '" target="_blank" rel="noopener">Source</a>' : '') +
-        (p.involved ? '<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Get involved</a>' : '') + '</span></li>';
+        (p.involved ? '<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Get involved</a>' : '') + '</span>' +
+        '<span class="pjc-back"><button type="button" class="btn back-btn" data-back="' + esc(p.id) + '" aria-pressed="false" hidden>Back this</button><span class="back-n" data-backn="' + esc(p.id) + '"></span></span></li>';
     }).join('') || '<li class="rk-none">No projects with this status yet.</li>';
+    if (window.TLP) TLP.wireBacking($('#pj-list'));
     if (MAP) Object.keys(MARK).forEach(function (id) { var p = MARK[id].p, on = FILTER === 'all' || p.status === FILTER; if (on) MARK[id].m.addTo(MAP); else MARK[id].m.remove(); });
   }
   function focus(id) {
