@@ -396,6 +396,11 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
 
   /* ---- Two faces: the side switch in the top bar */
   .topnav .nav-home { margin-right: 5px; vertical-align: -2px; }
+  .lab-tabs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px; padding: 8px 0 10px; border-top: 1px solid var(--line); font-size: 0.9rem; }
+  .lab-tabs-k { font: 600 0.7rem var(--font-body); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); margin-right: 4px; }
+  .lab-tabs a { color: var(--ink2); text-decoration: none; font-weight: 600; min-height: 32px; display: inline-flex; align-items: center; }
+  .lab-tabs a:hover { color: var(--ink); }
+  .lab-tabs a[aria-current="page"] { color: var(--ink); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
   .side-sw { display: inline-flex; align-items: center; min-height: 34px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--deep, #123B38); color: var(--deep, #123B38); font: 600 0.82rem var(--font-body); text-decoration: none; white-space: nowrap; }
   .side-sw:hover { background: var(--deep, #123B38); color: #fff; }
   .side-sw .sw-s { display: none; }
@@ -522,6 +527,24 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   #pf-scope { margin-bottom: 4px; }
   .pf-missing { padding: 48px 0; }
   .pf + .site-foot2, .pf .pro-band { margin-top: 56px; }
+
+  /* ---- The Lab overview */
+  .lab-head { min-width: 0; } .lab-head h1 { max-width: 18ch; }
+  .lab-search { width: 100%; box-sizing: border-box; }
+  .lab-search { margin-top: 22px; max-width: 34rem; } .lab-search input { min-width: 0; flex: 1 1 auto; width: 0; }
+  .lab-tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 36px 0 0; }
+  @media (max-width: 860px) { .lab-tools { grid-template-columns: 1fr; } }
+  .lab-tool { display: grid; gap: 8px; align-content: start; padding: 24px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); text-decoration: none; transition: border-color .15s, transform .15s; }
+  .lab-tool:hover { border-color: var(--deep, #123B38); transform: translateY(-2px); }
+  @media (prefers-reduced-motion: reduce) { .lab-tool, .lab-tool:hover { transition: none; transform: none; } }
+  .lab-n { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--deep, #123B38); color: #fff; font: 700 0.9rem var(--font-body); }
+  .lab-tool b { font: 800 2rem/1.05 var(--font-display); letter-spacing: -0.02em; margin-top: 6px; }
+  .lab-what { font-weight: 600; font-size: 1.05rem; }
+  .lab-d { color: var(--ink2); line-height: 1.55; }
+  .lab-go { margin-top: 8px; font-weight: 700; color: var(--accent); }
+  .lab-path { margin: 56px 0 24px; padding: 28px; border-radius: 20px; background: var(--surface2); }
+  .lab-path h2 { font-size: 1.6rem; margin: 0 0 14px; }
+  .lab-path ol { margin: 0; padding-left: 1.3rem; display: grid; gap: 10px; color: var(--ink2); line-height: 1.5; max-width: 52rem; } .lab-path b { color: var(--ink); }
 """
 write("assets/site.css", css.strip() + "\n")
 write("assets/model.js", read(SRC, "model2.js"))
@@ -535,8 +558,8 @@ ANALYTICS = ("<!-- Cloudflare Web Analytics --><script type='module' src='https:
 PAGES = [("", "My places"), ("place/", "City"), ("cities/", "Cities"), ("projects/", "Projects"), ("about/", "About"),
          ("lab/", "The Lab"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")]
 # Two faces: everyone's side, and the professional side with the tools
-NAV = [("", "Home"), ("cities/", "Cities"), ("projects/", "Projects"), ("about/", "About")]
-NAV_PRO = [("", "Home"), ("lab/", "Lab"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")]
+NAV = [("", "Home"), ("cities/", "Cities"), ("projects/", "Projects"), ("lab/", "Lab")]
+NAV_LAB = [("lab/", "Overview"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")]
 PRO_PAGES = ("lab/", "explore/", "studio/", "how-it-works/")
 
 
@@ -566,17 +589,18 @@ def head(base, title, desc):
 
 
 def nav(base, here):
-    pro = here in PRO_PAGES
+    # One top bar on every page; the Lab's pages add a row of tabs underneath
+    lab = here in PRO_PAGES
     house = '<svg class="nav-home" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>'
-    links = "".join(f'<a href="{base}{p}"' + (' aria-current="page"' if p == here else "") + '>' + (house if p == "" else "") + f'{n}</a>'
-                    for p, n in (NAV_PRO if pro else NAV))
-    switch = ('' if pro else
-              f'<a class="side-sw" href="{base}lab/"><span class="sw-l">Open the Lab</span><span class="sw-s">Lab</span></a>')
-    tag = '<span class="wm-pro">Lab</span>' if pro else ''
-    home = base
-    return (f'<header class="wrap site-head{" is-pro" if pro else ""}" id="top">\n  <div class="topbar">\n    <a class="wordmark" href="{home}" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="28" height="28" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#123B38" stroke="none"/></svg><span>Threadlands</span>{tag}</a>\n'
-            f'    <div class="topright"><nav class="topnav" aria-label="Site">{links}</nav>{switch}'
-            '<label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>\n  </div>\n</header>\n')
+    cur = "lab/" if lab else ("cities/" if here == "place/" else here)
+    links = "".join(f'<a href="{base}{p}"' + (' aria-current="page"' if p == cur else "") + '>' + (house if p == "" else "") + f'{n}</a>' for p, n in NAV)
+    tabs = ""
+    if lab:
+        tabs = ('  <nav class="lab-tabs" aria-label="The Lab"><span class="lab-tabs-k">The Lab</span>' +
+                "".join(f'<a href="{base}{p}"' + (' aria-current="page"' if p == here else "") + f'>{n}</a>' for p, n in NAV_LAB) + '</nav>\n')
+    return (f'<header class="wrap site-head" id="top">\n  <div class="topbar">\n    <a class="wordmark" href="{base}" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="28" height="28" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#123B38" stroke="none"/></svg><span>Threadlands</span></a>\n'
+            f'    <div class="topright"><nav class="topnav" aria-label="Site">{links}</nav>'
+            '<label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>\n  </div>\n' + tabs + '</header>\n')
 
 
 def footer(base):
@@ -584,9 +608,9 @@ def footer(base):
     return (f'<footer class="site-foot2">\n  <div class="wrap foot-grid">\n'
             f'    <div class="foot-brand"><a class="wordmark foot-wm" href="{base}" translate="no">Threadlands</a>'
             '<p>Know your city, and help make it ready for what&rsquo;s coming. Free, for any place on Earth.</p></div>\n'
-            f'    <nav aria-label="Places"><h2>Places</h2>{col([("", "My places"), ("cities/", "Cities"), ("projects/", "Projects")])}</nav>\n'
-            f'    <nav aria-label="The Lab"><h2>The Lab</h2>{col([("lab/", "Overview"), ("explore/", "Explore"), ("studio/", "Studio")])}</nav>\n'
-            f'    <nav aria-label="About"><h2>About</h2>{col([("how-it-works/", "How it works"), ("about/", "About")])}</nav>\n'
+            f'    <nav aria-label="Threadlands"><h2>Threadlands</h2>{col([("", "Home"), ("cities/", "Cities"), ("projects/", "Projects")])}</nav>\n'
+            f'    <nav aria-label="The Lab"><h2>The Lab</h2>{col([("lab/", "Overview"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")])}</nav>\n'
+            f'    <nav aria-label="About"><h2>About</h2>{col([("about/", "About Threadlands")])}</nav>\n'
             '  </div>\n  <div class="wrap foot-small">\n'
             '    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>\n'
             '    <p>Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS, Landsat (USGS and NASA), Open-Meteo and GBIF.</p>\n'

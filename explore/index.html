@@ -26,11 +26,12 @@
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a92b6704e81e4aaba11a9f8a11832ae1"}'></script><!-- End Cloudflare Web Analytics -->
 </head>
 <body>
-<header class="wrap site-head is-pro" id="top">
+<header class="wrap site-head" id="top">
   <div class="topbar">
-    <a class="wordmark" href="../" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="28" height="28" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#123B38" stroke="none"/></svg><span>Threadlands</span><span class="wm-pro">Lab</span></a>
-    <div class="topright"><nav class="topnav" aria-label="Site"><a href="../"><svg class="nav-home" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Home</a><a href="../lab/">Lab</a><a href="../explore/" aria-current="page">Explore</a><a href="../studio/">Studio</a><a href="../how-it-works/">Method</a></nav><label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>
+    <a class="wordmark" href="../" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="28" height="28" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#123B38" stroke="none"/></svg><span>Threadlands</span></a>
+    <div class="topright"><nav class="topnav" aria-label="Site"><a href="../"><svg class="nav-home" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Home</a><a href="../cities/">Cities</a><a href="../projects/">Projects</a><a href="../lab/" aria-current="page">Lab</a></nav><label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>
   </div>
+  <nav class="lab-tabs" aria-label="The Lab"><span class="lab-tabs-k">The Lab</span><a href="../lab/">Overview</a><a href="../explore/" aria-current="page">Explore</a><a href="../studio/">Studio</a><a href="../how-it-works/">Method</a></nav>
 </header>
 
 
@@ -42,6 +43,7 @@
       <span class="eyebrow">Place</span>
       <span class="place-name"><span id="place-name">Fictional river city</span><span class="tag" id="place-tag">Demo</span></span>
       <span class="place-meta" id="place-meta"></span>
+      <a class="place-prof" id="place-prof" href="../" hidden>See this city&rsquo;s profile &rarr;</a>
     </div></div>
     <div class="place-actions">
       <form class="search compact" id="search-bar" role="search" hidden>
@@ -315,9 +317,9 @@
 <footer class="site-foot2">
   <div class="wrap foot-grid">
     <div class="foot-brand"><a class="wordmark foot-wm" href="../" translate="no">Threadlands</a><p>Know your city, and help make it ready for what&rsquo;s coming. Free, for any place on Earth.</p></div>
-    <nav aria-label="Places"><h2>Places</h2><a href="../">My places</a><a href="../cities/">Cities</a><a href="../projects/">Projects</a></nav>
-    <nav aria-label="The Lab"><h2>The Lab</h2><a href="../lab/">Overview</a><a href="../explore/">Explore</a><a href="../studio/">Studio</a></nav>
-    <nav aria-label="About"><h2>About</h2><a href="../how-it-works/">How it works</a><a href="../about/">About</a></nav>
+    <nav aria-label="Threadlands"><h2>Threadlands</h2><a href="../">Home</a><a href="../cities/">Cities</a><a href="../projects/">Projects</a></nav>
+    <nav aria-label="The Lab"><h2>The Lab</h2><a href="../lab/">Overview</a><a href="../explore/">Explore</a><a href="../studio/">Studio</a><a href="../how-it-works/">Method</a></nav>
+    <nav aria-label="About"><h2>About</h2><a href="../about/">About Threadlands</a></nav>
   </div>
   <div class="wrap foot-small">
     <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>
@@ -2412,6 +2414,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     var meta = [fmtPop(P.totalPop) + ' people in the city and around it'];
     if (pl.buffer_km) meta.push('plus ' + Math.round(pl.buffer_km) + ' km of surrounding land');
     $('#place-meta').textContent = meta.join(' · ');
+    setTimeout(function () { var pp = $('#place-prof'); if (!pp) return; pp.hidden = !(kind !== 'demo' && current); if (current) pp.href = '../place/#' + current; }, 0);
     var items = [];
     (pl.sources || []).forEach(function (s) { items.push('<li>' + esc(s) + '</li>'); });
     if (pl.display_name) items.unshift('<li>' + esc(pl.display_name) + '</li>');

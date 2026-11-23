@@ -161,6 +161,7 @@
   }
   .place-id { display: grid; gap: 2px; min-width: 0; }
   .place-name { font: 700 1.5rem/1.15 var(--font-display); letter-spacing: -0.01em; overflow-wrap: anywhere; }
+  .place-prof { font-size: 0.85rem; font-weight: 600; color: var(--accent); text-underline-offset: 3px; }
   .place-meta { font: 400 0.8125rem/1.3 var(--font-mono); color: var(--ink2); font-variant-numeric: tabular-nums; }
   .tag {
     display: inline-block; font: 500 0.68rem/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase;
@@ -511,6 +512,7 @@
       <span class="eyebrow">Place</span>
       <span class="place-name"><span id="place-name">Fictional river city</span><span class="tag" id="place-tag">Demo</span></span>
       <span class="place-meta" id="place-meta"></span>
+      <a class="place-prof" id="place-prof" href="../" hidden>See this city&rsquo;s profile &rarr;</a>
     </div></div>
     <div class="place-actions">
       <form class="search compact" id="search-bar" role="search" hidden>
@@ -2010,6 +2012,7 @@
     var meta = [fmtPop(P.totalPop) + ' people in the city and around it'];
     if (pl.buffer_km) meta.push('plus ' + Math.round(pl.buffer_km) + ' km of surrounding land');
     $('#place-meta').textContent = meta.join(' · ');
+    setTimeout(function () { var pp = $('#place-prof'); if (!pp) return; pp.hidden = !(kind !== 'demo' && current); if (current) pp.href = '../place/#' + current; }, 0);
     var items = [];
     (pl.sources || []).forEach(function (s) { items.push('<li>' + esc(s) + '</li>'); });
     if (pl.display_name) items.unshift('<li>' + esc(pl.display_name) + '</li>');
