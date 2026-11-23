@@ -534,8 +534,8 @@ ANALYTICS = ("<!-- Cloudflare Web Analytics --><script type='module' src='https:
 PAGES = [("", "My places"), ("place/", "City"), ("cities/", "Cities"), ("projects/", "Projects"), ("about/", "About"),
          ("lab/", "The Lab"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")]
 # Two faces: everyone's side, and the professional side with the tools
-NAV = [("", "My places"), ("cities/", "Cities"), ("projects/", "Projects"), ("about/", "About")]
-NAV_PRO = [("explore/", "Explore"), ("studio/", "Studio"), ("cities/", "Cities"), ("how-it-works/", "Method")]
+NAV = [("", "Home"), ("cities/", "Cities"), ("projects/", "Projects"), ("about/", "About")]
+NAV_PRO = [("", "Home"), ("lab/", "Lab"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")]
 PRO_PAGES = ("lab/", "explore/", "studio/", "how-it-works/")
 
 
@@ -568,10 +568,10 @@ def nav(base, here):
     pro = here in PRO_PAGES
     links = "".join(f'<a href="{base}{p}"' + (' aria-current="page"' if p == here else "") + f'>{n}</a>'
                     for p, n in (NAV_PRO if pro else NAV))
-    switch = (f'<a class="side-sw" href="{base}"><span class="sw-l">My places</span><span class="sw-s">Places</span></a>' if pro else
+    switch = ('' if pro else
               f'<a class="side-sw" href="{base}lab/"><span class="sw-l">Open the Lab</span><span class="sw-s">Lab</span></a>')
     tag = '<span class="wm-pro">Lab</span>' if pro else ''
-    home = f"{base}lab/" if pro else base
+    home = base
     return (f'<header class="wrap site-head{" is-pro" if pro else ""}" id="top">\n  <div class="topbar">\n    <a class="wordmark" href="{home}" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="28" height="28" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#123B38" stroke="none"/></svg><span>Threadlands</span>{tag}</a>\n'
             f'    <div class="topright"><nav class="topnav" aria-label="Site">{links}</nav>{switch}'
             '<label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>\n  </div>\n</header>\n')
