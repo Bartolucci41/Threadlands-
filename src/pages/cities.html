@@ -131,12 +131,12 @@
   });
   cv.addEventListener('pointerup', function (ev) {
     var dr = drag; drag = null;
-    if (dr && !dr.moved) { var d = hit(ev); if (d) { if (ev.pointerType === 'mouse') location.href = '{B}explore/#' + d.e.slug; else showTip(d, true); } }
+    if (dr && !dr.moved) { var d = hit(ev); if (d) { if (ev.pointerType === 'mouse') location.href = '{B}place/#' + d.e.slug; else showTip(d, true); } }
   });
   function showTip(d, tap) {
     tip.hidden = false; tip.innerHTML = '';
     tip.style.pointerEvents = tap ? 'auto' : 'none';
-    if (tap) { var a = document.createElement('a'); a.href = '{B}explore/#' + d.e.slug; a.textContent = d.e.name + ', ' + d.e.country + ' \u2192'; tip.appendChild(a); }
+    if (tap) { var a = document.createElement('a'); a.href = '{B}place/#' + d.e.slug; a.textContent = d.e.name + ', ' + d.e.country + ' \u2192'; tip.appendChild(a); }
     else tip.textContent = d.e.name + ', ' + d.e.country;
     tip.style.left = d.x + 'px'; tip.style.top = d.y + 'px';
   }
@@ -176,7 +176,7 @@
       var v = p[key], has = v != null, w = has ? Math.max(3, Math.round(100 * (v - lo + 1) / (hi - lo + 1))) : 0;
       var pj = p.projects && p.projects.add >= 0.05 ? '<span class="rk-pj">+' + p.projects.add.toFixed(1) + ' from projects</span>' : (p.projects ? '<span class="rk-pj rk-pj0">' + p.projects.n + ' project' + (p.projects.n > 1 ? 's' : '') + ' on the map</span>' : '');
       var num = SORT === 'name' ? '' : SORT === 'pop' ? p._rank : (has ? p._rank : '');
-      return '<li' + (p.requested ? ' class="vis"' : '') + '><a href="{B}explore/#' + esc(p.slug) + '"><span class="rt-n">' + num + '</span><span class="rt-c"><b>' + esc(p.name) + '</b><span>' + esc(where(p)) + (fmtPop(p) ? ' \u00b7 ' + fmtPop(p) : '') + '</span>' + (p.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</span>' +
+      return '<li' + (p.requested ? ' class="vis"' : '') + '><a href="{B}place/#' + esc(p.slug) + '"><span class="rt-n">' + num + '</span><span class="rt-c"><b>' + esc(p.name) + '</b><span>' + esc(where(p)) + (fmtPop(p) ? ' \u00b7 ' + fmtPop(p) : '') + '</span>' + (p.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</span>' +
         '<span class="rt-p">' + (p.top ? esc(PRESS[p.top] || '') : '') + '</span><span class="rt-j">' + pj + '</span>' +
         '<span class="rt-bar" aria-hidden="true">' + (has ? '<i style="width:' + w + '%"></i>' : '') + '</span><span class="rt-v">' + (has ? Math.round(v) : '<small>new</small>') + '</span></a></li>';
     }).join('') || '<li class="rk-none">No place matches. <a href="{B}explore/?q=' + encodeURIComponent($('#rk-q').value.trim()) + '">Search everywhere for it</a> and build it.</li>';
@@ -192,7 +192,7 @@
   document.querySelectorAll('[data-sort]').forEach(function (b) { b.addEventListener('click', function () { SORT = b.dataset.sort; document.querySelectorAll('[data-sort]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); render(); }); });
   $('#rk-q').addEventListener('input', render);
   $('#rk-regions').addEventListener('click', function (e) { var b = e.target.closest('[data-r]'); if (!b) return; REGION = b.dataset.r; regions(); render(); });
-  var qs = new URLSearchParams(location.search); if (qs.get('sort')) SORT = qs.get('sort');
+  var qs = new URLSearchParams(location.search); if (qs.get('sort')) SORT = qs.get('sort'); if (qs.get('q')) $('#rk-q').value = qs.get('q');
   document.querySelectorAll('[data-sort]').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.sort === SORT ? 'true' : 'false'); });
   Promise.all([fetch('{B}data/index.json').then(function (r) { return r.json(); }), fetch('{B}data/ranking.json').then(function (r) { return r.json(); }).catch(function () { return { places: [] }; })]).then(function (x) {
     var RK = {}; (x[1].places || []).forEach(function (p) { if (p && p.slug) RK[p.slug] = p; });

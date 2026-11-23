@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=9">
+<link rel="stylesheet" href="../assets/site.css?v=10">
 <script src="../assets/i18n.js" defer></script>
 <link rel="manifest" href="../manifest.webmanifest">
 <meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">
@@ -29,7 +29,7 @@
 <header class="wrap site-head" id="top">
   <div class="topbar">
     <a class="wordmark" href="../" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="28" height="28" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#123B38" stroke="none"/></svg><span>Threadlands</span></a>
-    <div class="topright"><nav class="topnav" aria-label="Site"><a href="../explore/">Explore</a><a href="../studio/">Studio</a><a href="../cities/" aria-current="page">Cities</a><a href="../projects/">Projects</a><a href="../about/">About</a></nav><label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>
+    <div class="topright"><nav class="topnav" aria-label="Site"><a href="../">My places</a><a href="../cities/" aria-current="page">Cities</a><a href="../projects/">Projects</a><a href="../about/">About</a></nav><a class="side-sw" href="../pro/"><span class="sw-l">For professionals</span><span class="sw-s">Pro</span></a><label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>
   </div>
 </header>
 <main class="wrap">
@@ -68,8 +68,8 @@
 <footer class="site-foot2">
   <div class="wrap foot-grid">
     <div class="foot-brand"><a class="wordmark foot-wm" href="../" translate="no">Threadlands</a><p>See what&rsquo;s coming for your city, and what would fix it. Free, for any place on Earth.</p></div>
-    <nav aria-label="Tools"><h2>Tools</h2><a href="../explore/">Explore</a><a href="../studio/">Studio</a></nav>
-    <nav aria-label="Data"><h2>Data</h2><a href="../cities/">Cities</a><a href="../projects/">Projects</a></nav>
+    <nav aria-label="For everyone"><h2>For everyone</h2><a href="../">My places</a><a href="../cities/">Cities</a><a href="../projects/">Projects</a></nav>
+    <nav aria-label="For professionals"><h2>For professionals</h2><a href="../pro/">Overview</a><a href="../explore/">Explore</a><a href="../studio/">Studio</a></nav>
     <nav aria-label="About"><h2>About</h2><a href="../how-it-works/">How it works</a><a href="../about/">About</a></nav>
   </div>
   <div class="wrap foot-small">
@@ -175,12 +175,12 @@
   });
   cv.addEventListener('pointerup', function (ev) {
     var dr = drag; drag = null;
-    if (dr && !dr.moved) { var d = hit(ev); if (d) { if (ev.pointerType === 'mouse') location.href = '../explore/#' + d.e.slug; else showTip(d, true); } }
+    if (dr && !dr.moved) { var d = hit(ev); if (d) { if (ev.pointerType === 'mouse') location.href = '../place/#' + d.e.slug; else showTip(d, true); } }
   });
   function showTip(d, tap) {
     tip.hidden = false; tip.innerHTML = '';
     tip.style.pointerEvents = tap ? 'auto' : 'none';
-    if (tap) { var a = document.createElement('a'); a.href = '../explore/#' + d.e.slug; a.textContent = d.e.name + ', ' + d.e.country + ' \u2192'; tip.appendChild(a); }
+    if (tap) { var a = document.createElement('a'); a.href = '../place/#' + d.e.slug; a.textContent = d.e.name + ', ' + d.e.country + ' \u2192'; tip.appendChild(a); }
     else tip.textContent = d.e.name + ', ' + d.e.country;
     tip.style.left = d.x + 'px'; tip.style.top = d.y + 'px';
   }
@@ -220,7 +220,7 @@
       var v = p[key], has = v != null, w = has ? Math.max(3, Math.round(100 * (v - lo + 1) / (hi - lo + 1))) : 0;
       var pj = p.projects && p.projects.add >= 0.05 ? '<span class="rk-pj">+' + p.projects.add.toFixed(1) + ' from projects</span>' : (p.projects ? '<span class="rk-pj rk-pj0">' + p.projects.n + ' project' + (p.projects.n > 1 ? 's' : '') + ' on the map</span>' : '');
       var num = SORT === 'name' ? '' : SORT === 'pop' ? p._rank : (has ? p._rank : '');
-      return '<li' + (p.requested ? ' class="vis"' : '') + '><a href="../explore/#' + esc(p.slug) + '"><span class="rt-n">' + num + '</span><span class="rt-c"><b>' + esc(p.name) + '</b><span>' + esc(where(p)) + (fmtPop(p) ? ' \u00b7 ' + fmtPop(p) : '') + '</span>' + (p.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</span>' +
+      return '<li' + (p.requested ? ' class="vis"' : '') + '><a href="../place/#' + esc(p.slug) + '"><span class="rt-n">' + num + '</span><span class="rt-c"><b>' + esc(p.name) + '</b><span>' + esc(where(p)) + (fmtPop(p) ? ' \u00b7 ' + fmtPop(p) : '') + '</span>' + (p.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</span>' +
         '<span class="rt-p">' + (p.top ? esc(PRESS[p.top] || '') : '') + '</span><span class="rt-j">' + pj + '</span>' +
         '<span class="rt-bar" aria-hidden="true">' + (has ? '<i style="width:' + w + '%"></i>' : '') + '</span><span class="rt-v">' + (has ? Math.round(v) : '<small>new</small>') + '</span></a></li>';
     }).join('') || '<li class="rk-none">No place matches. <a href="../explore/?q=' + encodeURIComponent($('#rk-q').value.trim()) + '">Search everywhere for it</a> and build it.</li>';
@@ -236,7 +236,7 @@
   document.querySelectorAll('[data-sort]').forEach(function (b) { b.addEventListener('click', function () { SORT = b.dataset.sort; document.querySelectorAll('[data-sort]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); render(); }); });
   $('#rk-q').addEventListener('input', render);
   $('#rk-regions').addEventListener('click', function (e) { var b = e.target.closest('[data-r]'); if (!b) return; REGION = b.dataset.r; regions(); render(); });
-  var qs = new URLSearchParams(location.search); if (qs.get('sort')) SORT = qs.get('sort');
+  var qs = new URLSearchParams(location.search); if (qs.get('sort')) SORT = qs.get('sort'); if (qs.get('q')) $('#rk-q').value = qs.get('q');
   document.querySelectorAll('[data-sort]').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.sort === SORT ? 'true' : 'false'); });
   Promise.all([fetch('../data/index.json').then(function (r) { return r.json(); }), fetch('../data/ranking.json').then(function (r) { return r.json(); }).catch(function () { return { places: [] }; })]).then(function (x) {
     var RK = {}; (x[1].places || []).forEach(function (p) { if (p && p.slug) RK[p.slug] = p; });

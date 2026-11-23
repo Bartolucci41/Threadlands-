@@ -35,6 +35,12 @@ NOISE = r"flood(ing|ed)? (the |international |global )?(market|inbox|zone)|flood
 NOISE += r"|\b(participants|fans|crowds?|people|tourists|visitors|thousands|runners|shoppers|buyers|orders|calls|messages) (flood|flooded)"
 # Places whose name is shared with somewhere else: how to search for them, and headlines that mean the other place
 SEARCH_AS = {"washington-dc": "Washington DC"}
+# The name local papers use, for the search in the local language and to recognise the city in a headline
+LOCAL = {"mexico-city": ["Ciudad de México", "CDMX"], "rome": ["Roma"], "milan": ["Milano"], "naples": ["Napoli"], "turin": ["Torino"],
+         "munich": ["München"], "lisbon": ["Lisboa"], "seville": ["Sevilla"], "vienna": ["Wien"], "zurich": ["Zürich"], "guatemala-city": ["Ciudad de Guatemala"],
+         "panama-city": ["Ciudad de Panamá"], "havana": ["La Habana"], "marseille": ["Marseille"], "new-york": ["NYC", "New York City"],
+         "washington-dc": ["D.C.", "Washington, DC"], "ho-chi-minh-city": ["Saigon"], "delhi": ["New Delhi"], "bengaluru": ["Bangalore"],
+         "kolkata": ["Calcutta"], "mumbai": ["Bombay"], "copenhagen": ["København"], "prague": ["Praha"], "warsaw": ["Warszawa"]}
 NOT_HERE = {"washington-dc": r"washington (state|coast)|oregon|seattle|spokane", "porto": r"porto (murtinho|alegre|velho|seguro|rico|nacional)",
             "santiago": r"santiago de (compostela|cuba|los caballeros|queretaro)", "cordoba": r"cordoba,? spain|andaluc"}
 SKIP_SOURCES = {"facebook", "youtube", "instagram", "x", "tiktok", "reddit", "linkedin"}
@@ -129,7 +135,7 @@ def regions_of(p):
     if (p.get("cc") or "").upper() not in REGION_CCS:
         return []
     city = fold(p["name"].split(",")[0])
-    parts = [x for x in parts if x and city not in fold(x) and not re.search(r"region\b|regi[oó]n |township|district of columbia", x, re.I)]
+    parts = [x for x in parts if x and (city not in fold(x) or re.search(r" (county|parish)$", x, re.I)) and not re.search(r"region\b|regi[oó]n |township|district of columbia", x, re.I)]
     out = []
     county = next((x for x in parts if re.search(r" (county|parish)$", x, re.I)), None)
     if county:
@@ -140,13 +146,15 @@ def regions_of(p):
     return out
 
 
-def gather(name, cc, slug, cutoff, seen, wide=False):
-    """Headlines for one name in English and the local language: risks, then building and politics."""
+def gather(name, cc, slug, cutoff, seen, extra=()):
+    """Headlines for one name in English and the local language: risks, then building and politics.
+    Only headlines that name the place are kept, so a story about somewhere else never shows up here."""
     langs = ["en"] + ([LANG_OF[cc]] if cc in LANG_OF else [])
     found, items, fn = 0, [], fold(name)
+    names = [fold(x) for x in [name] + LOCAL.get(slug, []) + list(extra)]
     for kind in ("risk", "build"):
         for lang in langs:
-            arts = search(name, lang, cc, kind)
+            arts = search(LOCAL[slug][0] if lang != "en" and slug in LOCAL else name, lang, cc, kind)
             found += len(arts)
             for a in arts:
                 if not a["title"] or not a["url"].startswith("http") or (a["date"] and a["date"] < cutoff):
@@ -157,14 +165,15 @@ def gather(name, cc, slug, cutoff, seen, wide=False):
                 ft = fold(a["title"])
                 if fold(a["source"]) in SKIP_SOURCES or re.search(fold(NOISE), ft) or ("new " + fn) in ft or re.search(NOT_HERE.get(slug, "$^"), ft):
                     continue
+                named = any(re.search(r"(?<![a-z])" + re.escape(x) + r"(?![a-z])", ft) for x in names)
                 topic = next((k for k, rx in TOPICS.items() if re.search(fold(rx), ft)), None)
-                if not topic:
-                    continue                  # the headline itself must be about one of the topics
+                if not topic or not named:
+                    continue                  # the headline itself must name the place and be about one of the topics
                 seen.add(key)
                 tone = "gain" if re.search(fold(GAIN), ft) else ("concern" if topic in HAZARDS else "update")
-                items.append(dict(a, title=a["title"][:180], topic=topic, tone=tone, named=re.search(r"\b" + re.escape(fn) + r"\b", ft) is not None))
+                items.append(dict(a, title=a["title"][:180], topic=topic, tone=tone, named=True))
             time.sleep(2)
-    items.sort(key=lambda x: (x["named"], x["date"]), reverse=True)
+    items.sort(key=lambda x: x["date"], reverse=True)
     return found, items
 
 
@@ -194,7 +203,7 @@ def main():
         print(f"{n + 1}/{len(places)} {name}: {found} found, {len(mix)} kept", flush=True)
     reg_out = {}
     for k, (r, cc) in enumerate(regions.items()):
-        found, items = gather(REGION_SEARCH.get(r, r), cc, "", cutoff, seen)
+        found, items = gather(REGION_SEARCH.get(r, r), cc, "", cutoff, seen, extra=[r.replace(" County", "").replace(" Parish", "")] if r != "Georgia" else [])
         if items:
             reg_out[r] = items[:8]
         print(f"region {k + 1}/{len(regions)} {r}: {found} found, {len(items[:8])} kept", flush=True)

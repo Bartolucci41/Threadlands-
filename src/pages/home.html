@@ -1,75 +1,55 @@
-<!-- title: Threadlands: see what's coming for your city, and what would fix it -->
-<!-- description: Threadlands maps heat, flooding, food and nature for any city region, finds the plan that does the most for your goal, and estimates what it costs. Free, for any place on Earth. -->
+<!-- title: Threadlands: your places, and what's changing in them -->
+<!-- description: Follow the cities you care about: live weather and warnings, the risks they face, the land and water they depend on, real projects and the latest news. Free, for any place on Earth. -->
 
 <main class="wrap">
-<script src="{B}assets/model.js"></script>
-  <section class="hero3 bleed band-deep" aria-labelledby="hero-h">
-    <div class="hero3-in">
-      <div class="hero3-copy">
-        <p class="hero3-kick">Planning for cities and the land around them</p>
-        <h1 id="hero-h" class="hero3-h">See what&rsquo;s coming for your city, and what would fix it.</h1>
-        <p class="hero3-sub">Threadlands maps heat, flooding, food and nature for any city region, finds the plan that does the most for your goal, and estimates what it would cost. Free, for any place on&nbsp;Earth.</p>
-      <form class="search" id="search-home" role="search">
-        <label class="sr-only" for="q-home">Search for a place</label>
-        <input id="q-home" type="search" placeholder="Type a city, town or postal code" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sugg-home" aria-autocomplete="list">
-        <button class="btn" type="submit">Explore</button>
-        <ul class="sugg" id="sugg-home" role="listbox" hidden></ul>
+<script src="{B}assets/public.js"></script>
+  <section class="mp-hero bleed band-deep" aria-labelledby="mp-h">
+    <div class="mp-hero-in">
+      <p class="hero3-kick">Threadlands</p>
+      <h1 id="mp-h" class="mp-h">Your places, and what&rsquo;s changing in them.</h1>
+      <p class="mp-sub">Weather and warnings, the risks your city faces, the land and water it depends on, and the projects and news that are changing it. Follow as many places as you like.</p>
+      <form class="search mp-search" id="mp-form" role="search">
+        <label class="sr-only" for="mp-q">Add a place</label>
+        <input id="mp-q" type="search" placeholder="Add a city or town" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="mp-sugg" aria-autocomplete="list">
+        <button class="btn" type="submit">Add</button>
+        <ul class="sugg" id="mp-sugg" role="listbox" hidden></ul>
       </form>
-        <p class="search-note" id="lib-note">Any city, town, county or postal code on Earth.</p>
-        <p class="byline">Created by <b>Robert Bartolucci</b></p>
-      </div>
-    <figure class="live" id="live" aria-labelledby="live-cap">
-      <div class="live-top">
-        <div class="live-cities" role="group" aria-label="City">
-          <button type="button" class="chip" data-city="san-francisco" aria-pressed="false">San Francisco</button>
-          <button type="button" class="chip" data-city="mexico-city" aria-pressed="true">Mexico City</button>
-          <button type="button" class="chip" data-city="montreal" aria-pressed="false">Montreal</button>
-          <button type="button" class="chip" data-city="bologna" aria-pressed="false">Bologna</button>
-          <button type="button" class="chip" data-city="bangkok" aria-pressed="false">Bangkok</button>
-        </div>
-        <div class="live-layers" role="group" aria-label="Map layer">
-          <button type="button" class="chip" data-show="land" aria-pressed="true">Land</button>
-          <button type="button" class="chip" data-show="heat" aria-pressed="false">Heat</button>
-          <button type="button" class="chip" data-show="flood" aria-pressed="false">Flooding</button>
-        </div>
-      </div>
-      <div class="live-map" id="live-map">
-        <canvas id="live-canvas" role="img" aria-label="Hex map of the city and the land around it"></canvas>
-        <div class="live-badge"><span class="eyebrow">Resilience index</span><span class="live-score" id="live-score">&ndash;</span><span class="live-delta" id="live-delta"></span></div>
-        <p class="live-loading" id="live-loading">Loading the map&hellip;</p>
-      </div>
-      <div class="live-ctl">
-        <div class="live-goals" role="group" aria-label="Try a plan">
-          <button type="button" class="chip" data-goal="none" aria-pressed="true">Today</button>
-          <button type="button" class="chip" data-goal="heat" aria-pressed="false">Cool the streets</button>
-          <button type="button" class="chip" data-goal="flood" aria-pressed="false">Keep homes dry</button>
-          <button type="button" class="chip" data-goal="all" aria-pressed="false">Balanced plan</button>
-        </div>
-        <input type="range" id="live-range" min="0" max="100" step="1" value="0" hidden>
-      </div>
-      <figcaption id="live-cap"><span id="live-msg">Real land cover, people and heat for the whole city region, from open satellite data.</span> <a href="{B}explore/#milan" id="live-open">Find the best plan in Explore &rarr;</a></figcaption>
-    </figure>
+      <p class="mp-near"><button type="button" class="linkbtn" id="mp-loc">Use my location</button><span id="mp-loc-msg" aria-live="polite"></span></p>
     </div>
-    <div class="bigstats hero3-stats">
-      <div class="bigstat"><b id="st-places">126</b><span>cities and regions, ready to open</span></div>
-      <div class="bigstat"><b id="st-countries">72</b><span>countries</span></div>
-      <div class="bigstat"><b id="st-projects">9</b><span>real projects on the map</span></div>
-      <div class="bigstat"><b>$0</b><span>to use, for anyone</span></div>
+  </section>
+
+  <section class="sect mp" aria-labelledby="mine-h">
+    <div class="sect-top">
+      <div><h2 id="mine-h">My places</h2><p id="mine-sub">Saved on this device. Tap a place to see its full profile.</p></div>
+      <div class="mp-units" role="group" aria-label="Temperature units"><button type="button" class="chip" data-u="c">&deg;C</button><button type="button" class="chip" data-u="f">&deg;F</button></div>
+    </div>
+    <div class="mp-grid" id="mp-grid"></div>
+    <div class="mp-empty" id="mp-empty" hidden>
+      <p>You aren&rsquo;t following any places yet. Add your city above, or start with one of these:</p>
+      <div class="mp-pop" id="mp-pop"></div>
     </div>
   </section>
 
   <section class="sect news" id="news" aria-labelledby="news-h" hidden>
     <div class="sect-top">
-      <div><h2 id="news-h">In the news</h2><p id="news-sub">The latest flood, heat, drought and city-greening stories from places in the library, updated every day.</p></div>
+      <div><h2 id="news-h">Across the world today</h2><p id="news-sub">Risks, progress and decisions in cities around the world, updated every day.</p></div>
     </div>
-    <ol class="news-list" id="news-list"></ol>
+    <ol class="nw2-grid" id="news-list"></ol>
     <p class="news-note">Headlines gathered automatically from <a href="https://news.google.com/" target="_blank" rel="noopener">Google News</a> searches. Each links to the original story; Threadlands does not write or check them.</p>
+  </section>
+
+  <section class="sect bleed band-white feed" id="feed" aria-labelledby="feed-h" hidden>
+    <div class="sect-top">
+      <div><h2 id="feed-h">Real projects changing cities</h2><p>Parks, wetlands, trees and water projects, each with a public source. Know one? Anyone can add it.</p></div>
+      <a class="more" href="{B}projects/">See all projects &rarr;</a>
+    </div>
+    <div class="feed-grid" id="feed-grid"></div>
   </section>
 
   <section class="sect" id="rank" aria-labelledby="rank-h" hidden>
     <div class="sect-top">
       <div><h2 id="rank-h">How prepared are cities?</h2><p id="rank-sub">The Threadlands resilience index, 0 to 100, with real projects counted in.</p></div>
-      <a class="more" href="{B}cities/">See all cities &rarr;</a>
+      <a class="more" href="{B}cities/">See every city &rarr;</a>
     </div>
     <div class="rank-cols">
       <div><h3>Best prepared</h3><ol class="rank-list" id="rank-top"></ol></div>
@@ -77,85 +57,78 @@
     </div>
   </section>
 
-  <section class="sect bleed band-white feed" id="feed" aria-labelledby="feed-h" hidden>
-    <div class="sect-top">
-      <div><h2 id="feed-h">Real projects, on the map</h2><p>Parks, wetlands, trees and water projects, each with a public source. Anyone can add one.</p></div>
-      <a class="more" href="{B}projects/">See all projects &rarr;</a>
+  <section class="sect bleed band-deep pro-band" aria-labelledby="pro-h">
+    <div class="pro-band-in">
+      <div>
+        <p class="hero3-kick">For professionals</p>
+        <h2 id="pro-h">Planning the response?</h2>
+        <p>City teams, consultants, researchers and funders use the same data in depth: model heat, floods and food for a whole region, find the plan that does the most, design it on real streets and take a costed brief to council.</p>
+      </div>
+      <a class="btn" href="{B}pro/">Threadlands for professionals &rarr;</a>
     </div>
-    <div class="feed-grid" id="feed-grid"></div>
-  </section>
-
-  <section class="sect now" id="now" aria-labelledby="now-h" hidden>
-    <div class="sect-top"><div><h2 id="now-h">Right now, from space</h2><p class="now-sub" id="now-sub">The latest clear satellite pass over each place, compared with the same weeks in earlier years.</p></div></div>
-    <div class="now-grid" id="now-grid"></div>
-  </section>
-
-  <section class="sect bleed band-deep who" aria-labelledby="who-h">
-    <div class="sect-top"><div><h2 id="who-h">Built for the people who decide</h2></div></div>
-    <div class="who-grid">
-      <div class="who"><span class="who-n">01</span><h3>City and resilience teams</h3><p>See where heat and flooding hit hardest, compare plans, and take a costed decision brief to council or funders.</p></div>
-      <div class="who"><span class="who-n">02</span><h3>Consultants and engineers</h3><p>Screen a site or a whole region in minutes, then export the map and plan to QGIS or ArcGIS for detailed work.</p></div>
-      <div class="who"><span class="who-n">03</span><h3>Funders and NGOs</h3><p>Compare places side by side, see who carries each risk, and find where nature-based projects do the most.</p></div>
-    </div>
-  </section>
-
-  <section class="sect" aria-labelledby="do-h">
-    <div class="sect-top"><div><h2 id="do-h">Three ways in</h2></div></div>
-    <div class="do-grid">
-      <a class="do-card" href="{B}explore/"><span class="do-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></span><b>Explore a place</b><span>See a city and the land around it, test it against heat, floods and 2050, and find where to act first.</span><span class="do-go">Open Explore &rarr;</span></a>
-      <a class="do-card" href="{B}studio/"><span class="do-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V10l8-6 8 6v11"/><path d="M12 21v-6"/><path d="M8 13h8"/></svg></span><b>Design in Studio</b><span>Build urban farms, parks, ponds, sea walls and homes on real streets, in 3D, with real local costs.</span><span class="do-go">Open Studio &rarr;</span></a>
-      <a class="do-card" href="{B}studio/#workshop"><span class="do-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M3 20c0-3 2.5-5 5-5s5 2 5 5"/><path d="M11 20c0-3 2.5-5 5-5s5 2 5 5"/></svg></span><b>Run a workshop</b><span>Teams take turns designing on one screen, with a timer and a scoreboard. Share the result by link.</span><span class="do-go">Start a workshop &rarr;</span></a>
-    </div>
-  </section>
-
-  <section class="sect" aria-labelledby="cities-h" style="padding-top:0">
-    <div class="sect-top"><div><h2 id="cities-h">Every city depends on land it doesn&rsquo;t see</h2><p>Three examples.</p></div><a class="more" href="{B}cities/">Browse every city &rarr;</a></div>
-    <div class="cities">
-    <article class="city-card"><span class="eyebrow">Milan, Italy</span><div class="mini"><img src="{B}assets/card-milan.webp" width="395" height="211" alt="Regional map around Milan"></div><span class="city-num">33%</span><p>of the land that drains into Milan is already built up, so rain runs off fast into small rivers like the Seveso.</p><a class="btn ghost" href="{B}explore/#milan">Open Milan</a></article>
-    <article class="city-card"><span class="eyebrow">San Francisco, USA</span><div class="mini"><img src="{B}assets/card-san-francisco.webp" width="396" height="211" alt="Regional map around San Francisco"></div><span class="city-num">1%</span><p>of the people within 50 km could be fed by the farmland within 50 km. The Bay Area eats from far away.</p><a class="btn ghost" href="{B}explore/#san-francisco">Open San Francisco</a></article>
-    <article class="city-card"><span class="eyebrow">Bangkok, Thailand</span><div class="mini"><img src="{B}assets/card-bangkok.webp" width="396" height="211" alt="Regional map around Bangkok"></div><span class="city-num">144,000 km&sup2;</span><p>of river basin drains down through Bangkok, from the mountains of northern Thailand to the Gulf.</p><a class="btn ghost" href="{B}explore/#bangkok">Open Bangkok</a></article>
-    </div>
-    <p class="lib-line" id="lib-count">Over 120 cities on six continents open instantly. Anyone can add a place, and it is saved for the next person.</p>
   </section>
 </main>
 <!--SCRIPT-->
 (function () {
-  // Old shared links such as threadlands.org/#lagos now live on the Explore page
+  // Old shared links such as threadlands.org/#lagos now open that city's profile
   var h = location.hash.replace('#', '');
-  if (h && !/^(top|cities|how-h|threads-h|lib-h)$/.test(h)) { location.replace('{B}explore/#' + h); return; }
-  var $ = function (s) { return document.querySelector(s); };
-  function norm(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
-  function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  var LIB = [], form = $('#search-home'), input = $('#q-home'), list = $('#sugg-home'), items = [], active = -1;
-  fetch('{B}data/index.json').then(function (r) { return r.json(); }).then(function (ix) {
-    LIB = (ix.places || []).filter(function (e) { return e && e.slug; });
-    var countries = {};
-    LIB.forEach(function (e) { countries[e.country] = 1; });
-    var stp = document.getElementById('st-places'); if (stp) stp.textContent = LIB.length; var stc = document.getElementById('st-countries'); if (stc) stc.textContent = Object.keys(countries).length;
-    $('#lib-note').textContent = LIB.length + ' places in ' + Object.keys(countries).length + ' countries open instantly, and any other place on Earth can be built in minutes.';
-    $('#lib-count').textContent = LIB.length + ' places in ' + Object.keys(countries).length + ' countries open instantly, each with measured satellite heat, its river basin and its foodshed. Anyone can add a place, and every new place is saved for the next person.';
-  }).catch(function () { /* the search still sends people to Explore */ });
-  function matches(q) {
-    var n = norm(q), a = [], b = [];
-    if (!n) return [];
-    LIB.forEach(function (e) {
-      if (norm(e.name).indexOf(n) === 0) a.push(e);
-      else if (norm(e.name + ' ' + e.query + ' ' + e.display).indexOf(n) >= 0) b.push(e);
-    });
-    return a.concat(b).slice(0, 8);
+  if (h && !/^(top|mine-h|news-h|rank-h)$/.test(h)) { location.replace('{B}place/#' + h); return; }
+  var T = window.TLP, $ = function (s) { return document.querySelector(s); }, esc = T.esc;
+  T.setBase('{B}');
+  var D = null;
+  var POPULAR = ['mexico-city', 'new-york', 'sao-paulo', 'london', 'mumbai', 'tokyo', 'lagos', 'paris'];
+
+  function unitsUI() { document.querySelectorAll('[data-u]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.u === T.units() ? 'true' : 'false'); }); }
+  document.querySelector('.mp-units').addEventListener('click', function (e) { var b = e.target.closest('[data-u]'); if (!b) return; T.setUnits(b.dataset.u); unitsUI(); cards(); });
+  unitsUI();
+
+  function card(slug) {
+    var e = D.lib[slug]; if (!e) return '';
+    var r = D.rank[slug] || {}, sm = D.summary[slug] || {}, nw = (D.news.places || {})[slug] || [];
+    var top = (sm.pressures || [])[0], lead = nw.filter(function (x) { return x.named; })[0] || nw[0];
+    return '<article class="mpc" data-slug="' + esc(slug) + '">' +
+      '<a class="mpc-main" href="{B}place/#' + esc(slug) + '">' +
+        '<span class="mpc-top"><span><b class="mpc-name">' + esc(e.name) + '</b><span class="mpc-where">' + esc(T.where(e)) + '</span></span>' +
+        '<span class="mpc-wx" id="wx-' + esc(slug) + '"><span class="mpc-t">&ndash;</span></span></span>' +
+        '<span class="mpc-alert" id="al-' + esc(slug) + '" hidden></span>' +
+        '<span class="mpc-stats">' + (r.index != null ? '<span><i>Resilience</i><b>' + Math.round(r.index) + '</b><small>#' + r.rank + ' of ' + D.rankN + '</small></span>' : '') +
+          (top ? '<span><i>Biggest pressure</i><b class="mpc-press">' + esc(top.t) + '</b></span>' : '') + '</span>' +
+        (lead ? '<span class="mpc-news"><i>' + esc(T.TONE[lead.tone] || 'News') + '</i>' + esc(lead.title) + '</span>' : '') +
+      '</a>' +
+      '<button type="button" class="mpc-x" data-rm="' + esc(slug) + '" aria-label="Stop following ' + esc(e.name) + '" title="Stop following">&times;</button>' +
+    '</article>';
   }
+  function cards() {
+    var f = T.follows().filter(function (s) { return D.lib[s]; });
+    $('#mp-grid').innerHTML = f.map(card).join('');
+    $('#mp-empty').hidden = f.length > 0;
+    $('#mine-sub').textContent = f.length ? 'Saved on this device. Tap a place to see its full profile.' : 'Saved on this device, no account needed.';
+    if (!f.length) $('#mp-pop').innerHTML = POPULAR.filter(function (s) { return D.lib[s]; }).map(function (s) { return '<button type="button" class="chip" data-add="' + s + '">+ ' + esc(D.lib[s].name) + '</button>'; }).join('');
+    f.forEach(function (slug) {
+      var e = D.lib[slug];
+      T.weather(e.lat, e.lng).then(function (w) {
+        var c = w.current || {}, d = w.daily || {}, el = document.getElementById('wx-' + slug); if (!el) return;
+        el.innerHTML = T.icon(c.weather_code, 26) + '<span class="mpc-t">' + T.temp(c.temperature_2m) + '</span><span class="mpc-hl">' + T.sky(c.weather_code)[0] + (d.temperature_2m_max ? '<br>' + T.temp(d.temperature_2m_max[0]) + ' / ' + T.temp(d.temperature_2m_min[0]) : '') + '</span>';
+        var al = T.alerts(w)[0], ae = document.getElementById('al-' + slug);
+        if (al && ae) { ae.hidden = false; ae.className = 'mpc-alert al-' + al.kind; ae.textContent = al.text.split(':')[0].split('.')[0]; }
+      }).catch(function () { /* weather is optional */ });
+    });
+  }
+  function add(slug) { T.follow(slug); cards(); var c = document.querySelector('.mpc[data-slug="' + slug + '"]'); if (c) { c.classList.add('mpc-new'); c.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } }
+  $('#mp-grid').addEventListener('click', function (e) { var b = e.target.closest('[data-rm]'); if (!b) return; T.unfollow(b.dataset.rm); cards(); });
+  $('#mp-pop').addEventListener('click', function (e) { var b = e.target.closest('[data-add]'); if (b) add(b.dataset.add); });
+
+  // Add a place: the library first; anything else is built in Explore
+  var form = $('#mp-form'), input = $('#mp-q'), list = $('#mp-sugg'), items = [], active = -1;
   function close() { list.hidden = true; input.setAttribute('aria-expanded', 'false'); active = -1; }
   function show() {
-    var q = input.value.trim();
-    items = matches(q);
-    if (!q) { close(); return; }
-    list.innerHTML = items.map(function (e, k) {
-      return '<li role="option" id="sh-' + k + '" data-slug="' + e.slug + '" aria-selected="' + (k === active) + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + esc(e.country) + '</span></li>';
-    }).join('') + '<li role="option" data-world="1"><span class="s-world">Search everywhere for “' + esc(q) + '”</span></li>';
+    var q = input.value.trim(); if (!q || !D) { close(); return; }
+    items = T.matches(D.list, q, 7);
+    list.innerHTML = items.map(function (e, k) { return '<li role="option" data-slug="' + e.slug + '" aria-selected="' + (k === active) + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + esc(T.where(e)) + '</span></li>'; }).join('') +
+      '<li role="option" data-world="1"><span class="s-world">Not listed? Build “' + esc(q) + '” in Explore (about ten minutes)</span></li>';
     list.hidden = false; input.setAttribute('aria-expanded', 'true');
   }
-  function goWorld() { location.href = '{B}explore/?q=' + encodeURIComponent(input.value.trim()); }
-  function goSlug(slug) { location.href = '{B}explore/#' + slug; }
+  function pick(slug) { input.value = ''; close(); add(slug); }
   input.addEventListener('input', function () { active = -1; show(); });
   input.addEventListener('keydown', function (ev) {
     if (ev.key === 'ArrowDown' && items.length) { active = Math.min(items.length - 1, active + 1); show(); ev.preventDefault(); }
@@ -163,214 +136,63 @@
     else if (ev.key === 'Escape') close();
   });
   form.addEventListener('submit', function (ev) {
-    ev.preventDefault();
-    if (!input.value.trim()) return;
-    items = matches(input.value);
-    if (active >= 0 && items[active]) goSlug(items[active].slug);
-    else if (items.length && norm(items[0].name) === norm(input.value.split(',')[0])) goSlug(items[0].slug);
-    else goWorld();
+    ev.preventDefault(); var q = input.value.trim(); if (!q || !D) return;
+    items = T.matches(D.list, q, 7);
+    if (active >= 0 && items[active]) pick(items[active].slug);
+    else if (items.length) pick(items[0].slug);
+    else location.href = '{B}explore/?q=' + encodeURIComponent(q);
   });
   list.addEventListener('mousedown', function (ev) {
-    var li = ev.target.closest('[data-slug],[data-world]');
-    if (!li) return;
-    ev.preventDefault();
-    if (li.dataset.slug) goSlug(li.dataset.slug); else goWorld();
+    var li = ev.target.closest('[data-slug],[data-world]'); if (!li) return; ev.preventDefault();
+    if (li.dataset.slug) pick(li.dataset.slug); else location.href = '{B}explore/?q=' + encodeURIComponent(input.value.trim());
   });
   input.addEventListener('blur', function () { setTimeout(close, 120); });
-
-  // ---- Live map: a real city and its region, with one slider that pulls every thread at once
-  var LIVE = { slug: 'milan', show: 'land', P: null, res: null, cache: {} };
-  var BAL = { canopy: 40, corridors: 60, wetlands: 40, regen: 60, compact: 40 };
-  var cv = $('#live-canvas'), ctx = cv.getContext('2d');
-  function css(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
-  function rgb(h) { h = h.replace('#', ''); var n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
-  function mixc(a, b, t) { return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ',' + Math.round(a[1] + (b[1] - a[1]) * t) + ',' + Math.round(a[2] + (b[2] - a[2]) * t) + ')'; }
-  function ramp(st, t) { t = Math.max(0, Math.min(1, t)); return t < 0.5 ? mixc(st[0], st[1], t * 2) : mixc(st[1], st[2], (t - 0.5) * 2); }
-  var URB = { core: 1, mid: 1, suburb: 1, greenway: 1 };
-  var GOALMIX = { none: { canopy: 0, corridors: 0, wetlands: 0, regen: 0, compact: 0 }, all: BAL,
-    heat: { canopy: 100, corridors: 30, wetlands: 60, regen: 10, compact: 25 }, flood: { canopy: 70, corridors: 10, wetlands: 100, regen: 90, compact: 0 } };
-  LIVE.L = GOALMIX.none; LIVE.goal = 'none';
-  function levers() { return LIVE.L; }
-  // A continuous surface: each pixel a smooth blend of nearby area centres, so no hexagons show
-  function field(P, R, G, B, A, minx, miny, maxx, maxy) {
-    if (!P.hexKmF) { var ar = 0, cc = P.place.cells; for (var q0 = 0; q0 < P.N; q0++) ar += +cc.area[q0] || 0; P.hexKmF = Math.sqrt(Math.max(1e-6, ar / P.N) / 2.598); }
-    var sp = P.hexKmF * Math.sqrt(3), pad = sp, x0 = minx - pad, y0 = miny - pad, w = maxx - minx + 2 * pad, h = maxy - miny + 2 * pad;
-    var px = Math.max(sp / 2.5, Math.max(w, h) / 520), nx = Math.ceil(w / px), ny = Math.ceil(h / px);
-    var gs = sp, gx = Math.ceil(w / gs) + 1, gy = Math.ceil(h / gs) + 1, head = new Int32Array(gx * gy).fill(-1), next = new Int32Array(P.N);
-    for (var i = 0; i < P.N; i++) { var cx = Math.floor((P.X[i] - x0) / gs), cy = Math.floor((P.Y[i] - y0) / gs); if (cx < 0 || cy < 0 || cx >= gx || cy >= gy) { next[i] = -1; continue; } var k = cy * gx + cx; next[i] = head[k]; head[k] = i; }
-    var sig2 = 2 * Math.pow(0.55 * sp, 2), R2 = Math.pow(1.6 * sp, 2), cv2 = document.createElement('canvas'); cv2.width = nx; cv2.height = ny;
-    var c2 = cv2.getContext('2d'), img = c2.createImageData(nx, ny), d = img.data, sw = new Float32Array(nx * ny), Wref = 0, acc = new Float32Array(nx * ny * 4);
-    for (var yy = 0; yy < ny; yy++) { var wy = y0 + (yy + 0.5) * px, cyy = Math.floor((wy - y0) / gs);
-      for (var xx = 0; xx < nx; xx++) { var wx = x0 + (xx + 0.5) * px, cxx = Math.floor((wx - x0) / gs), W0 = 0, r = 0, g = 0, b = 0, a = 0;
-        for (var oy = -2; oy <= 2; oy++) { var ry = cyy + oy; if (ry < 0 || ry >= gy) continue;
-          for (var ox = -2; ox <= 2; ox++) { var rx = cxx + ox; if (rx < 0 || rx >= gx) continue;
-            for (var j = head[ry * gx + rx]; j >= 0; j = next[j]) { var dx = P.X[j] - wx, dy = P.Y[j] - wy, dd = dx * dx + dy * dy; if (dd > R2) continue; var wt = Math.exp(-dd / sig2); W0 += wt; r += wt * R[j]; g += wt * G[j]; b += wt * B[j]; a += wt * A[j]; } } }
-        var o = yy * nx + xx; sw[o] = W0; if (W0 > 0) { acc[o * 4] = r / W0; acc[o * 4 + 1] = g / W0; acc[o * 4 + 2] = b / W0; acc[o * 4 + 3] = a / W0; if (W0 > Wref) Wref = W0; } } }
-    Wref *= 0.75;
-    for (var q = 0; q < nx * ny; q++) { if (!(sw[q] > 0)) continue; var cvr = Math.min(1, sw[q] / Wref); d[q * 4] = acc[q * 4]; d[q * 4 + 1] = acc[q * 4 + 1]; d[q * 4 + 2] = acc[q * 4 + 2]; d[q * 4 + 3] = Math.round(255 * acc[q * 4 + 3] * cvr * cvr * (3 - 2 * cvr)); }
-    c2.putImageData(img, 0, 0);
-    return { cv: cv2, x0: x0, y0: y0, w: nx * px, h: ny * px };
-  }
-  function draw() {
-    var P = LIVE.P, res = LIVE.res;
-    if (!P || !res) return;
-    var W = cv.parentNode.clientWidth;
-    if (!W) return;
-    var minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
-    P.POLY.forEach(function (p) { for (var j = 0; j + 1 < p.length; j += 2) { minx = Math.min(minx, p[j]); maxx = Math.max(maxx, p[j]); miny = Math.min(miny, p[j + 1]); maxy = Math.max(maxy, p[j + 1]); } });
-    var H = Math.round(Math.min(W * 1.05, Math.max(320, window.innerHeight * 0.62)));
-    var S = Math.min((W - 16) / (maxx - minx), (H - 16) / (maxy - miny)), OX = (W - (maxx - minx) * S) / 2 - minx * S, OY = (H - (maxy - miny) * S) / 2 - miny * S;
-    var dpr = window.devicePixelRatio || 1;
-    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.height = H + 'px';
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
-    var C = { core: css('--m-core'), mid: css('--m-mid'), suburb: css('--m-sub'), farm: css('--m-farm'), regen: css('--m-regen'), forest: css('--m-forest'),
-      wetland: css('--m-wet'), water: css('--m-water'), park: css('--m-park'), open: css('--m-open'), barren: css('--m-barren'), corridor: css('--m-corr'),
-      canopy: css('--m-canopy'), dim: css('--m-dim'), surface: css('--surface'), f0: css('--f0') };
-    var heat = [css('--h0'), css('--h1'), css('--h2')].map(rgb), flood = [css('--f0'), css('--f1'), css('--f2')].map(rgb);
-    var canopy = 1 - Math.pow(1 - LIVE.L.canopy / 100, 1.8), keep = 1 - res.retention;
-    var R = new Float32Array(P.N), G = new Float32Array(P.N), B = new Float32Array(P.N), A = new Float32Array(P.N);
-    function toRGB(c) { var m = /^rgba?\(([^)]+)\)/.exec(c); if (m) { var v = m[1].split(',').map(Number); return v; } return rgb(c || '#888888'); }
-    for (var i = 0; i < P.N; i++) {
-      var cov = res.cover[i], fill = C[cov] || C.open, alpha = 1;
-      if (cov === 'greenway') fill = C.corridor;
-      if (LIVE.show === 'heat') { if (URB[cov]) fill = ramp(heat, res.heat[i] / 1.4); else if (cov === 'water') { fill = C.water; alpha = 0.5; } else { fill = C.dim; alpha = 0.55; } }
-      else if (LIVE.show === 'flood') {
-        if (URB[cov]) { if (res.floodExp[i] > 0) fill = ramp(flood, Math.sqrt(res.floodExp[i] * keep / P.maxFloodExp)); else { fill = C.dim; alpha = 0.45; } }
-        else if (cov !== 'wetland' && cov !== 'water') { fill = C.dim; alpha = 0.45; }
-      }
-      var c3 = toRGB(fill);
-      if (LIVE.show === 'land' && canopy > 0 && URB[cov]) { var k3 = toRGB(C.canopy), u = 0.6 * canopy; c3 = [c3[0] + (k3[0] - c3[0]) * u, c3[1] + (k3[1] - c3[1]) * u, c3[2] + (k3[2] - c3[2]) * u]; }
-      if (!P.inside[i]) { var s3 = toRGB(C.surface); c3 = [c3[0] + (s3[0] - c3[0]) * 0.38, c3[1] + (s3[1] - c3[1]) * 0.38, c3[2] + (s3[2] - c3[2]) * 0.38]; }
-      R[i] = c3[0]; G[i] = c3[1]; B[i] = c3[2]; A[i] = alpha;
-    }
-    var F = field(P, R, G, B, A, minx, miny, maxx, maxy);
-    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(F.cv, F.x0 * S + OX, F.y0 * S + OY, F.w * S, F.h * S);
-    ctx.globalAlpha = 1;
-  }
-  function update() {
-    var P = LIVE.P;
-    if (!P) return;
-    LIVE.res = P.evaluate(levers());
-    var now = Math.round(LIVE.res.index), base = Math.round(P.BAU.index), d = now - base;
-    $('#live-score').textContent = now;
-    $('#live-delta').textContent = d ? (d > 0 ? '+' : '\u2212') + Math.abs(d) : '';
-    var name = P.place.name || 'this city', g = LIVE.goal, msg;
-    if (g === 'none') msg = name + ' today: resilience index ' + base + ' of 100. Pick a plan to see what changes.';
-    else {
-      var r = LIVE.res, b0 = P.BAU, hb = 0, ha = 0, fb = 0, fa = 0, c = P.place.cells;
-      for (var i = 0; i < P.N; i++) { var pp = +c.pop[i] || 0; if (b0.heat[i] > 0) { hb += pp * b0.heat[i]; ha += pp * r.heat[i]; } if (b0.floodExp[i] > 0) { fb += b0.floodExp[i]; fa += r.floodExp[i]; } }
-      var hc = hb > 0 ? Math.round(100 * (1 - ha / hb)) : 0, fc = fb > 0 ? Math.round(100 * (1 - fa * (1 - r.retention) / (fb * (1 - b0.retention)))) : 0;
-      msg = (g === 'heat' ? 'Street trees and green where people live: ' + hc + '% less heat for residents'
-        : g === 'flood' ? 'Wetlands and living farmland that hold water: ' + fc + '% less flood exposure for homes'
-        : 'Trees, wetlands, corridors and compact growth together: ' + hc + '% less heat, ' + fc + '% less flood exposure') + '. Index ' + base + ' \u2192 ' + now + '.';
-    }
-    $('#live-msg').textContent = msg;
-    draw();
-  }
-  function animateTo(goal) {
-    var from = LIVE.L, to = GOALMIX[goal], t0 = performance.now(), dur = 900;
-    LIVE.goal = goal;
-    document.querySelectorAll('[data-goal]').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.goal === goal ? 'true' : 'false'); });
-    if (goal === 'heat' && LIVE.show !== 'heat') setShow('heat'); else if (goal === 'flood' && LIVE.show !== 'flood') setShow('flood');
-    (function step(t) {
-      var k = Math.min(1, (t - t0) / dur), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2, L = {};
-      for (var key in to) L[key] = Math.round(from[key] + (to[key] - from[key]) * e);
-      LIVE.L = L; update();
-      if (k < 1) setTimeout(function () { requestAnimationFrame(step); }, 40);
-    })(t0);
-  }
-  function setShow(v) { LIVE.show = v; document.querySelectorAll('[data-show]').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.show === v ? 'true' : 'false'); }); }
-  function load(slug) {
-    LIVE.slug = slug;
-    document.querySelectorAll('[data-city]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.city === slug ? 'true' : 'false'); });
-    var name = { 'san-francisco': 'San Francisco', 'mexico-city': 'Mexico City', 'montreal': 'Montreal', 'bologna': 'Bologna', 'bangkok': 'Bangkok' }[slug] || slug;
-    $('#live-open').href = '{B}explore/#' + slug; $('#live-open').textContent = 'Find the best plan for ' + name + ' \u2192';
-    if (LIVE.cache[slug]) { LIVE.P = LIVE.cache[slug]; update(); return; }
-    $('#live-loading').hidden = false;
-    fetch('{B}data/places/' + slug + '.json').then(function (r) { return r.json(); }).then(function (d) {
-      var P = ThreadModel.prepare(d);
-      LIVE.cache[slug] = P;
-      if (LIVE.slug !== slug) return;
-      LIVE.P = P; $('#live-loading').hidden = true; update();
-    }).catch(function () { $('#live-loading').textContent = 'The map could not be loaded.'; });
-  }
-  document.querySelector('.live-goals').addEventListener('click', function (e) { var b = e.target.closest('[data-goal]'); if (b && LIVE.P) animateTo(b.dataset.goal); });
-  document.querySelector('.live-cities').addEventListener('click', function (e) { var b = e.target.closest('[data-city]'); if (b && b.dataset.city !== LIVE.slug) load(b.dataset.city); });
-  document.querySelector('.live-layers').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-show]'); if (!b) return;
-    LIVE.show = b.dataset.show;
-    document.querySelectorAll('[data-show]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
-    update();
+  $('#mp-loc').addEventListener('click', function () {
+    var msg = $('#mp-loc-msg');
+    if (!navigator.geolocation) { msg.textContent = ' Location is not available in this browser.'; return; }
+    msg.textContent = ' Finding you…';
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      var n = D && T.nearest(D.list, pos.coords.latitude, pos.coords.longitude);
+      if (!n) { msg.textContent = ''; return; }
+      if (n.km > 60) { msg.innerHTML = ' The nearest place we have is ' + esc(n.place.name) + ', ' + Math.round(n.km) + ' km away. <a href="{B}explore/?q=' + pos.coords.latitude.toFixed(3) + ',' + pos.coords.longitude.toFixed(3) + '">Build your own area</a> or <button type="button" class="linkbtn" data-add="' + n.place.slug + '">follow ' + esc(n.place.name) + '</button>.'; return; }
+      msg.textContent = ' Added ' + n.place.name + '.'; add(n.place.slug);
+    }, function () { msg.textContent = ' Location was not shared. You can type your city instead.'; }, { maximumAge: 600000, timeout: 10000 });
   });
-  window.addEventListener('resize', draw);
-  if (window.matchMedia) { var mq = window.matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', draw); }
-  // Start on the visitor's own city when it is one of these, guessed from their time zone
-  var TZ_CITY = { 'America/Mexico_City': 'mexico-city', 'America/Los_Angeles': 'san-francisco', 'America/Toronto': 'montreal', 'America/Montreal': 'montreal', 'Europe/Rome': 'bologna', 'Asia/Bangkok': 'bangkok' };
-  var tz0 = ''; try { tz0 = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { /* ignore */ }
-  load(TZ_CITY[tz0] || 'mexico-city');
+  $('#mp-loc-msg').addEventListener('click', function (e) { var b = e.target.closest('[data-add]'); if (b) { add(b.dataset.add); $('#mp-loc-msg').textContent = ''; } });
 
-  // Right now, from space: the places running furthest from their usual heat this week
-  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  function nice(iso) { var d = String(iso).split('-'); return MONTHS[Number(d[1]) - 1] + ' ' + Number(d[2]); }
-  fetch('{B}data/now/index.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (ix) {
-    var cutoff = Date.now() - 45 * 864e5;
-    var rows = (ix.places || []).filter(function (r) { return r.land_anom != null && !r.uncertain && Date.parse(r.date) >= cutoff; });
-    if (rows.length < 4) return;
-    var val = function (r) { return r.built_anom != null ? r.built_anom : r.land_anom; };
-    rows.sort(function (a, b) { return val(b) - val(a); });
-    var pick = rows.slice(0, 4).concat(rows.slice(-2).reverse().filter(function (r) { return val(r) < 0; }));
-    $('#now-grid').innerHTML = pick.map(function (r) {
-      var v = val(r), hot = v >= 0;
-      return '<a class="now-card ' + (hot ? 'hot' : 'cool') + '" href="{B}explore/#' + r.slug + '"><span class="eyebrow">' + esc(r.name) + ', ' + esc(r.country) + '</span>' +
-        '<span class="now-v">' + (hot ? '+' : '\u2212') + Math.abs(v).toFixed(1) + ' \u00b0C</span><span class="now-t">' + (hot ? 'warmer' : 'cooler') + ' than usual, pass on ' + nice(r.date) + '</span></a>';
-    }).join('');
-    $('#now-sub').textContent = 'Surface heat from the latest clear satellite pass over each of ' + rows.length + ' places, compared with the same weeks in earlier years. Updated twice a week.';
-    $('#now').hidden = false;
-  }).catch(function () { /* readings not published yet */ });
-  // ---- Resilience ranking of every place in the library
-  var PRESS = { heat: 'heat', flood: 'flooding', grey: 'little green', crowd: 'crowding', trees: 'few trees', food: 'food from far away' };
-  fetch('{B}data/ranking.json').then(function (r) { return r.json(); }).then(function (rk) {
-    var all = (rk.places || []).filter(function (p) { return p && p.slug; }), n = all.length;
-    if (n < 10) return;
-    var hi = all[0].index, lo = all[n - 1].index;
-    function row(p, k) {
-      var w = Math.max(4, Math.round(100 * (p.index - lo + 2) / (hi - lo + 2)));
-      return '<li><a href="{B}explore/#' + p.slug + '"><span class="rk-n">' + (k + 1) + '</span><span class="rk-c"><b>' + esc(p.name) + '</b><span>' + esc(p.country) + (p.top ? ' · ' + (PRESS[p.top] || '') : '') + (p.projects && p.projects.add >= 0.05 ? ' · +' + p.projects.add.toFixed(1) + ' from projects' : '') + '</span></span>' +
-        '<span class="rk-bar" aria-hidden="true"><i style="width:' + w + '%"></i></span><span class="rk-v">' + Math.round(p.index) + '</span></a></li>';
+  T.all().then(function (d) {
+    D = d; cards();
+    var names = {}; d.list.forEach(function (e) { names[e.slug] = e.name; });
+    // Across the world: the biggest headlines, one per city
+    var top = (d.news.top || []).slice(0, 8);
+    if (top.length) {
+      $('#news-list').innerHTML = top.map(function (it) { return T.headline(it, names); }).join('');
+      if (d.news.updated) $('#news-sub').textContent = 'Risks, progress and decisions in cities around the world. Updated ' + T.ndate(d.news.updated.replace(/-/g, '')) + '.';
+      $('#news').hidden = false;
     }
-    $('#rank-top').innerHTML = all.slice(0, 3).map(function (p, k) { return row(p, k); }).join('');
-    $('#rank-bot').innerHTML = all.slice(-3).reverse().map(function (p, k) { return row(p, n - 1 - k); }).join('');
-    $('#rank-sub').textContent = 'The Threadlands resilience index for all ' + n + ' places, 0 to 100, with real projects counted in. As of ' + new Date(rk.updated + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + '.';
-    $('#rank').hidden = false;
-  }).catch(function () { /* the ranking is optional */ });
-  // ---- Latest real projects across all cities
-  var FSTAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
-  Promise.all([fetch('{B}data/projects.json').then(function (r) { return r.json(); }), fetch('{B}data/index.json').then(function (r) { return r.json(); })]).then(function (x) {
-    var ps = (x[0].projects || []).slice(), names = {};
-    (x[1].places || []).forEach(function (e) { names[e.slug] = e.name; });
-    if (!ps.length) return;
-    var stj = document.getElementById('st-projects'); if (stj) stj.textContent = ps.length;
-    ps.sort(function (a, b) { return String(b.added || '').localeCompare(String(a.added || '')) || (b.year || 0) - (a.year || 0); });
-    $('#feed-grid').innerHTML = ps.slice(0, 3).map(function (p) {
-      var st = FSTAT[p.status] || FSTAT.proposed;
-      return '<a class="feed-card" href="{B}explore/#' + esc(p.place) + '" style="--pc:' + st[1] + '"><span class="feed-top"><span class="feed-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span class="feed-city">' + esc(names[p.place] || p.place) + '</span></span>' +
-        '<b>' + esc(p.name) + '</b><span class="feed-sum">' + esc(String(p.summary || '').split('. ')[0].replace(/\.$/, '')) + '.</span></a>';
-    }).join('');
-    $('#feed').hidden = false;
-  }).catch(function () { /* the feed is optional */ });
-  // ---- In the news: the biggest flood, heat, drought, fire and greening headlines, refreshed daily
-  var NTOPIC = { flood: 'Flooding', heat: 'Heat', drought: 'Drought', fire: 'Fire', greening: 'Greening', water: 'Water', climate: 'Climate' };
-  function ndate(d) { if (!d || d.length < 8) return ''; var dt = new Date(d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6, 8) + 'T12:00:00'); return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
-  Promise.all([fetch('{B}data/news.json').then(function (r) { return r.json(); }), fetch('{B}data/index.json').then(function (r) { return r.json(); })]).then(function (x) {
-    var top = (x[0].top || []).slice(0, 8), names = {};
-    (x[1].places || []).forEach(function (e) { names[e.slug] = e.name; });
-    if (!top.length) return;
-    $('#news-list').innerHTML = top.map(function (it) {
-      return '<li class="nw nw-' + esc(it.topic) + '"><span class="nw-t">' + (NTOPIC[it.topic] || '') + '</span><a class="nw-h" href="' + esc(it.url) + '" target="_blank" rel="noopener">' + esc(it.title) + '</a>' +
-        '<span class="nw-m"><a href="{B}explore/#' + esc(it.place) + '">' + esc(names[it.place] || it.place) + '</a> · ' + esc(it.source) + ' · ' + ndate(it.date) + '</span></li>';
-    }).join('');
-    $('#news-sub').textContent = 'The latest flood, heat, drought and city-greening stories from places in the library. Updated ' + ndate((x[0].updated || '').replace(/-/g, '')) + '.';
-    $('#news').hidden = false;
-  }).catch(function () { /* news is optional */ });
+    // Latest real projects
+    var FSTAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
+    var ps = d.projects.slice().sort(function (a, b) { return String(b.added || '').localeCompare(String(a.added || '')) || (b.year || 0) - (a.year || 0); });
+    if (ps.length) {
+      $('#feed-grid').innerHTML = ps.slice(0, 3).map(function (p) {
+        var st = FSTAT[p.status] || FSTAT.proposed;
+        return '<a class="feed-card" href="{B}place/#' + esc(p.place) + '" style="--pc:' + st[1] + '"><span class="feed-top"><span class="feed-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span class="feed-city">' + esc(names[p.place] || p.place) + '</span></span>' +
+          '<b>' + esc(p.name) + '</b><span class="feed-sum">' + esc(String(p.summary || '').split('. ')[0].replace(/\.$/, '')) + '.</span></a>';
+      }).join('');
+      $('#feed').hidden = false;
+    }
+    // Best and least prepared
+    var all = Object.keys(d.rank).map(function (k) { return d.rank[k]; }).sort(function (a, b) { return b.index - a.index; }), n = all.length;
+    if (n >= 10) {
+      var hi = all[0].index, lo = all[n - 1].index;
+      var row = function (p, k) {
+        var w = Math.max(4, Math.round(100 * (p.index - lo + 2) / (hi - lo + 2)));
+        return '<li><a href="{B}place/#' + p.slug + '"><span class="rk-n">' + (k + 1) + '</span><span class="rk-c"><b>' + esc(p.name) + '</b><span>' + esc(p.country) + (p.top ? ' · ' + (T.PRESS[p.top] || '').toLowerCase() : '') + '</span></span>' +
+          '<span class="rk-bar" aria-hidden="true"><i style="width:' + w + '%"></i></span><span class="rk-v">' + Math.round(p.index) + '</span></a></li>';
+      };
+      $('#rank-top').innerHTML = all.slice(0, 3).map(function (p, k) { return row(p, k); }).join('');
+      $('#rank-bot').innerHTML = all.slice(-3).reverse().map(function (p, k) { return row(p, n - 1 - k); }).join('');
+      $('#rank').hidden = false;
+    }
+  }).catch(function () { $('#mp-grid').innerHTML = '<p class="mp-err">The places could not be loaded. Check your connection and refresh.</p>'; });
 })();

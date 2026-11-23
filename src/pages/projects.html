@@ -48,7 +48,7 @@
       var st = STAT[p.status] || STAT.proposed;
       return '<li class="pjc" id="pjc-' + esc(p.id) + '" style="--pc:' + st[1] + '"><button type="button" class="pjc-go" data-id="' + esc(p.id) + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span>' + esc(NAMES[p.place] || p.place) + ' · ' + (KIND[p.kind] || 'Other') + '</span></span>' +
         '<b>' + esc(p.name) + '</b><span class="pjc-sum">' + esc(p.summary || '') + '</span></button>' +
-        '<span class="pjc-links"><a href="../explore/#' + esc(p.place) + '">See it in Explore</a>' + (p.source && p.source.url ? '<a href="' + esc(p.source.url) + '" target="_blank" rel="noopener">Source</a>' : '') +
+        '<span class="pjc-links"><a href="../place/#' + esc(p.place) + '">' + esc(NAMES[p.place] || 'The city') + '</a><a href="../explore/#' + esc(p.place) + '">See it in Explore</a>' + (p.source && p.source.url ? '<a href="' + esc(p.source.url) + '" target="_blank" rel="noopener">Source</a>' : '') +
         (p.involved ? '<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Get involved</a>' : '') + '</span></li>';
     }).join('') || '<li class="rk-none">No projects with this status yet.</li>';
     if (MAP) Object.keys(MARK).forEach(function (id) { var p = MARK[id].p, on = FILTER === 'all' || p.status === FILTER; if (on) MARK[id].m.addTo(MAP); else MARK[id].m.remove(); });
@@ -72,7 +72,7 @@
       ALL.forEach(function (p) {
         var st = STAT[p.status] || STAT.proposed;
         var m = L.circleMarker([p.lat, p.lng], { radius: 8, color: '#fff', weight: 2.5, fillColor: st[1], fillOpacity: 1 })
-          .bindPopup('<b>' + esc(p.name) + '</b><br>' + st[0] + (p.year ? ' · ' + p.year : '') + ' · ' + esc(NAMES[p.place] || p.place) + '<br><a href="../explore/#' + esc(p.place) + '">See it in Explore</a>');
+          .bindPopup('<b>' + esc(p.name) + '</b><br>' + st[0] + (p.year ? ' · ' + p.year : '') + ' · ' + esc(NAMES[p.place] || p.place) + '<br><a href="../place/#' + esc(p.place) + '">City profile</a> · <a href="../explore/#' + esc(p.place) + '">Explore</a>');
         m.on('click', function () { focus(p.id); });
         MARK[p.id] = { m: m, p: p };
       });

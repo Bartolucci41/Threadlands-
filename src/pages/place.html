@@ -1,0 +1,169 @@
+<!-- title: City profile | Threadlands -->
+<!-- description: Live weather and warnings, the risks a city faces, the land and water it depends on, the projects changing it and the latest news. -->
+
+<main class="wrap">
+<script src="{B}assets/public.js"></script>
+  <div class="pf-missing" id="pf-missing" hidden></div>
+  <article class="pf" id="pf" hidden>
+    <section class="pf-head bleed band-deep" aria-labelledby="pf-name">
+      <div class="pf-head-in">
+        <div class="pf-id">
+          <a class="pf-back" href="{B}">&larr; My places</a>
+          <h1 id="pf-name" class="pf-h"></h1>
+          <p class="pf-where" id="pf-where"></p>
+          <div class="pf-actions">
+            <button type="button" class="btn" id="pf-follow" aria-pressed="false">Follow</button>
+            <button type="button" class="btn ghost-inv" id="pf-share">Share</button>
+          </div>
+        </div>
+        <div class="pf-now" id="pf-now" aria-live="polite"><p class="pf-wait">Loading the weather&hellip;</p></div>
+      </div>
+      <ol class="pf-week" id="pf-week" aria-label="Seven-day forecast"></ol>
+    </section>
+
+    <div class="pf-alerts" id="pf-alerts"></div>
+
+    <nav class="pf-jump" aria-label="On this page">
+      <a href="#pressing">What&rsquo;s pressing</a><a href="#tied">What it depends on</a><a href="#ready">How ready</a><a href="#changing">What&rsquo;s changing</a><a href="#pf-news-h">News</a>
+    </nav>
+
+    <section class="sect pf-sec" id="pressing" aria-labelledby="pressing-h">
+      <div class="sect-top"><div><h2 id="pressing-h">What&rsquo;s pressing here</h2><p>The pressures that stand out most for this place, compared with every other city in Threadlands.</p></div></div>
+      <div class="pf-press" id="pf-press"></div>
+    </section>
+
+    <section class="sect pf-sec" id="tied" aria-labelledby="tied-h">
+      <div class="sect-top"><div><h2 id="tied-h">What it depends on</h2><p id="tied-sub">Every city lives off land and water it doesn&rsquo;t see. These are the threads that tie this one to the region around it.</p></div></div>
+      <div class="pf-tied" id="pf-tied"></div>
+    </section>
+
+    <section class="sect pf-sec" id="ready" aria-labelledby="ready-h">
+      <div class="sect-top"><div><h2 id="ready-h">How ready is it?</h2><p>The Threadlands resilience index and three stress tests, from 0 to 100. Higher is better prepared.</p></div><a class="more" id="pf-cities" href="{B}cities/">Compare every city &rarr;</a></div>
+      <div class="pf-ready" id="pf-ready"></div>
+    </section>
+
+    <section class="sect pf-sec" id="changing" aria-labelledby="changing-h">
+      <div class="sect-top"><div><h2 id="changing-h">What&rsquo;s changing</h2><p>Real parks, wetlands, trees and water projects here, each with a public source.</p></div></div>
+      <div class="pf-proj" id="pf-proj"></div>
+      <div class="pf-add"><p><b>Know a project that belongs here?</b> A new park, a wetland, a tree-planting drive, a flood barrier. Add it with a link to a public source and it is checked before it appears.</p><a class="btn" id="pf-add" href="{B}explore/?add=1">Add a project</a></div>
+    </section>
+
+    <section class="sect pf-sec" aria-labelledby="pf-news-h">
+      <div class="sect-top"><div><h2 id="pf-news-h">In the news</h2><p id="pf-news-sub">Risks, progress and decisions from the last two weeks.</p></div></div>
+      <div class="filters" id="pf-scope" role="group" aria-label="Area" hidden></div>
+      <ol class="nw2-list" id="pf-news"></ol>
+      <p class="news-note">Headlines gathered automatically from <a href="https://news.google.com/" target="_blank" rel="noopener">Google News</a> searches. Each links to the original story; Threadlands does not write or check them.</p>
+    </section>
+
+    <section class="sect bleed band-deep pro-band" aria-labelledby="deep-h">
+      <div class="pro-band-in">
+        <div>
+          <p class="hero3-kick">Go deeper</p>
+          <h2 id="deep-h">Work on this city</h2>
+          <p>See the full map of heat, flooding, farmland and nature, test the city against 2050, find the plan that does the most, and take a costed brief to council.</p>
+        </div>
+        <div class="pro-band-go"><a class="btn" id="pf-explore" href="{B}explore/">Open in Explore &rarr;</a><a class="btn ghost-inv" id="pf-studio" href="{B}studio/">Design in Studio</a></div>
+      </div>
+    </section>
+  </article>
+</main>
+<!--SCRIPT-->
+(function () {
+  var T = window.TLP, $ = function (s) { return document.querySelector(s); }, esc = T.esc;
+  T.setBase('{B}');
+  var D = null, SLUG = '';
+  function pctWord(p) { return p >= 50 ? 'More pressing than in ' + p + '% of cities' : ''; }
+  function bar(v, label, sub) {
+    var w = Math.max(2, Math.min(100, Math.round(v)));
+    return '<div class="pf-bar"><span class="pf-bar-l">' + label + '</span><span class="pf-bar-t" aria-hidden="true"><i style="width:' + w + '%"></i></span><b>' + Math.round(v) + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>';
+  }
+  function followUI() { var on = T.isFollowed(SLUG), b = $('#pf-follow'); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.textContent = on ? 'Following ✓' : 'Follow'; }
+  $('#pf-follow').addEventListener('click', function () { if (T.isFollowed(SLUG)) T.unfollow(SLUG); else T.follow(SLUG); followUI(); });
+  $('#pf-share').addEventListener('click', function () {
+    var e = D.lib[SLUG], data = { title: e.name + ' on Threadlands', text: 'What’s changing in ' + e.name + ': risks, projects and news.', url: location.href };
+    if (navigator.share) navigator.share(data).catch(function () {});
+    else if (navigator.clipboard) navigator.clipboard.writeText(location.href).then(function () { $('#pf-share').textContent = 'Link copied'; setTimeout(function () { $('#pf-share').textContent = 'Share'; }, 2000); });
+  });
+
+  function renderWeather(e) {
+    T.weather(e.lat, e.lng).then(function (w) {
+      var c = w.current || {}, d = w.daily || {};
+      $('#pf-now').innerHTML = '<div class="pf-now-main">' + T.icon(c.weather_code, 44) + '<span class="pf-temp">' + T.temp(c.temperature_2m) + '</span></div>' +
+        '<p class="pf-sky">' + esc(T.sky(c.weather_code)[0]) + ' · feels like ' + T.temp(c.apparent_temperature) + '</p>' +
+        '<p class="pf-meta">Humidity ' + Math.round(c.relative_humidity_2m || 0) + '% · Wind ' + Math.round(c.wind_speed_10m || 0) + ' km/h' + (d.uv_index_max ? ' · UV ' + Math.round(d.uv_index_max[0]) : '') + '<span id="pf-aqi"></span></p>' +
+        '<div class="mp-units" role="group" aria-label="Temperature units"><button type="button" class="chip" data-u="c" aria-pressed="' + (T.units() === 'c') + '">&deg;C</button><button type="button" class="chip" data-u="f" aria-pressed="' + (T.units() === 'f') + '">&deg;F</button></div>';
+      $('#pf-week').innerHTML = (d.time || []).map(function (t, k) {
+        return '<li><span class="pw-d">' + (k === 0 ? 'Today' : T.day(t)) + '</span>' + T.icon(d.weather_code[k], 24) + '<span class="pw-t"><b>' + T.temp(d.temperature_2m_max[k]) + '</b> ' + T.temp(d.temperature_2m_min[k]) + '</span><span class="pw-r">' + (d.precipitation_sum[k] >= 1 ? T.rain(d.precipitation_sum[k]) : '') + '</span></li>';
+      }).join('');
+      $('#pf-alerts').innerHTML = T.alerts(w).map(function (a) { return '<p class="pf-alert al-' + a.kind + '"><b>' + (a.kind === 'rain' ? 'Rain warning' : a.kind === 'heat' ? 'Heat warning' : 'Storms') + '</b> ' + esc(a.text) + '</p>'; }).join('');
+      T.air(e.lat, e.lng).then(function (a) { if (a.us_aqi != null) $('#pf-aqi').textContent = ' · Air ' + Math.round(a.us_aqi) + ' (' + T.aqiWord(a.us_aqi).toLowerCase() + ')'; }).catch(function () {});
+    }).catch(function () { $('#pf-now').innerHTML = '<p class="pf-wait">The weather could not be loaded right now.</p>'; });
+  }
+  $('#pf-now').addEventListener('click', function (ev) { var b = ev.target.closest('[data-u]'); if (!b) return; T.setUnits(b.dataset.u); renderWeather(D.lib[SLUG]); });
+
+  function renderPressures(sm) {
+    var ps = sm.pressures || [];
+    $('#pf-press').innerHTML = ps.length ? ps.map(function (p) {
+      return '<article class="pfp pfp-' + esc(p.key) + '"><span class="pfp-k">' + esc(pctWord(p.pct)) + '</span><h3>' + esc(p.t) + '</h3><p class="pfp-what">' + esc(p.what) + '</p><p class="pfp-who">' + esc(p.who) + '</p></article>';
+    }).join('') : '<p class="pf-none">No pressure stands out here compared with other cities.</p>';
+  }
+  function renderTied(e, sm) {
+    var t = sm.threads || {}, out = [], n = esc(e.name);
+    if (t.basin_km2) out.push(['Water', t.basin_km2 >= 10000 ? T.fmtN(t.basin_km2) + ' km²' : t.basin_km2.toLocaleString('en-US') + ' km²',
+      'of river basin drains through ' + n + '.' + (t.basin_built != null ? ' ' + t.basin_built + '% of it is built over' + (t.basin_built >= 25 ? ', so rain runs off fast instead of soaking in.' : '.') : '') + (t.basin_forest ? ' ' + t.basin_forest + '% is still forest or wetland, which holds water back.' : '')]);
+    if (t.food50 != null) out.push(['Food', (t.food50 < 1 ? 'Under 1' : t.food50) + '%', 'of the people within 50 km could be fed from the farmland within 50 km.' + (t.food250 != null ? ' Widen the circle to 250 km and it is ' + (t.food250 < 1 ? 'under 1' : t.food250) + '%.' : '') + (t.food50 < 20 ? ' Most food travels far to get here.' : '')]);
+    if (t.wild_km != null) out.push(['Nature', t.wild_km < 1 ? 'Under 1 km' : t.wild_km + ' km', 'from the center to the nearest forest or wetland.' + (t.natural != null ? ' ' + t.natural + '% of the surrounding region is still forest, wetland or open land.' : '')]);
+    $('#pf-tied').innerHTML = out.length ? out.map(function (o) { return '<article class="pft"><span class="eyebrow">' + o[0] + '</span><b class="pft-n">' + o[1] + '</b><p>' + o[2] + '</p></article>'; }).join('') : '<p class="pf-none">The regional data for this place is still being built.</p>';
+  }
+  function renderReady(e, r, sm) {
+    if (r.index == null) { $('#pf-ready').innerHTML = '<p class="pf-none">This place has not been scored yet.</p>'; return; }
+    var t = sm.tests || {};
+    $('#pf-ready').innerHTML = '<div class="pfr-score"><span class="eyebrow">Resilience index</span><b>' + Math.round(r.index) + '</b><span>#' + r.rank + ' of ' + D.rankN + ' cities</span>' +
+      (r.projects && r.projects.add >= 0.05 ? '<span class="rk-pj">+' + r.projects.add.toFixed(1) + ' from real projects</span>' : '') + '</div>' +
+      '<div class="pfr-bars">' + (t.heatwave != null ? bar(t.heatwave, 'A heatwave') : '') + (t.flood != null ? bar(t.flood, 'A river flood') : '') + (t.drought != null ? bar(t.drought, 'A drought year') : '') +
+      (r.heat != null ? bar(r.heat, 'Heat relief today') : '') + (r.habitat != null ? bar(r.habitat, 'Connected nature') : '') + '</div>';
+    $('#pf-cities').href = '{B}cities/?q=' + encodeURIComponent(e.name);
+  }
+  function renderProjects(e) {
+    var STAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
+    var mine = D.projects.filter(function (p) { return p.place === SLUG; });
+    $('#pf-proj').innerHTML = mine.length ? mine.map(function (p) {
+      var st = STAT[p.status] || STAT.proposed;
+      return '<article class="pjc" style="--pc:' + st[1] + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span>' + (p.added_by_visitor ? '<span>Added by a visitor</span>' : '') + '</span><b>' + esc(p.name) + '</b><span class="pjc-sum">' + esc(p.summary || '') + '</span>' +
+        '<span class="pjc-links">' + (p.involved ? '<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Get involved</a>' : '') + (p.source && p.source.url ? '<a href="' + esc(p.source.url) + '" target="_blank" rel="noopener">Source</a>' : '') + '<a href="{B}explore/#' + esc(SLUG) + '">See it on the map</a></span></article>';
+    }).join('') : '<p class="pf-none">No projects here yet. Be the first to add one.</p>';
+    $('#pf-add').href = '{B}explore/?add=1#' + SLUG;
+  }
+  var SCOPE = 'city';
+  function renderNews(e) {
+    var nw = D.news || {}, regs = (nw.place_region || {})[SLUG] || [], opts = [['city', e.name, (nw.places || {})[SLUG] || []]];
+    regs.forEach(function (r) { var it = (nw.regions || {})[r]; if (it && it.length) opts.push([r, r, it]); });
+    $('#pf-scope').hidden = opts.length < 2;
+    $('#pf-scope').innerHTML = opts.map(function (o) { return '<button type="button" class="chip" data-scope="' + esc(o[0]) + '" aria-pressed="' + (o[0] === SCOPE) + '">' + esc(o[1]) + '</button>'; }).join('');
+    var cur = opts.filter(function (o) { return o[0] === SCOPE; })[0] || opts[0];
+    $('#pf-news').innerHTML = cur[2].length ? cur[2].map(function (it) { return T.headline(it, null); }).join('') : '<li class="pf-none">No headlines in the last two weeks.</li>';
+    if (nw.updated) $('#pf-news-sub').textContent = 'Risks, progress and decisions from the last two weeks. Updated ' + T.ndate(nw.updated.replace(/-/g, '')) + '.';
+  }
+  $('#pf-scope').addEventListener('click', function (ev) { var b = ev.target.closest('[data-scope]'); if (!b) return; SCOPE = b.dataset.scope; renderNews(D.lib[SLUG]); });
+
+  function open() {
+    SLUG = decodeURIComponent(location.hash.replace('#', '')).trim(); SCOPE = 'city';
+    var e = D.lib[SLUG];
+    if (!e) {
+      $('#pf').hidden = true; $('#pf-missing').hidden = false;
+      $('#pf-missing').innerHTML = '<h1 class="page-h">' + (SLUG ? 'We don’t have that place yet' : 'Choose a place') + '</h1><p class="page-lede">' + (SLUG ? 'Search for it in Explore and it will be built in about ten minutes, then it opens here for everyone.' : 'Pick a city to see its profile.') + '</p><p><a class="btn" href="{B}">My places</a> <a class="btn ghost" href="{B}explore/' + (SLUG ? '?q=' + encodeURIComponent(SLUG.replace(/-/g, ' ')) : '') + '">Search in Explore</a></p>';
+      return;
+    }
+    $('#pf-missing').hidden = true; $('#pf').hidden = false;
+    document.title = e.name + ' | Threadlands';
+    $('#pf-name').textContent = e.name;
+    $('#pf-where').textContent = T.where(e) + (e.city_pop ? ' · ' + T.fmtN(e.city_pop) + ' people in the city' : '') + (e.pop && (!e.city_pop || e.pop > e.city_pop * 1.1) ? ', ' + T.fmtN(e.pop) + ' in the region' : '');
+    $('#pf-explore').href = '{B}explore/#' + SLUG; $('#pf-studio').href = '{B}studio/#' + SLUG;
+    followUI();
+    var r = D.rank[SLUG] || {}, sm = D.summary[SLUG] || {};
+    renderWeather(e); renderPressures(sm); renderTied(e, sm); renderReady(e, r, sm); renderProjects(e); renderNews(e);
+    window.scrollTo(0, 0);
+  }
+  T.all().then(function (d) { D = d; open(); }).catch(function () { $('#pf-missing').hidden = false; $('#pf-missing').innerHTML = '<p class="page-lede">This profile could not be loaded. Check your connection and refresh.</p>'; });
+  window.addEventListener('hashchange', function () { if (D) open(); });
+})();
