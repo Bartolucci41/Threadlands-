@@ -290,6 +290,9 @@
 
   .bar { position: relative; height: 10px; background: var(--surface2); border-radius: 5px; }
   .bar .fill { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--accent); border-radius: 5px; transition: width 0.25s ease; }
+  .bar .band { position: absolute; top: 0; bottom: 0; background: var(--ink); opacity: 0.14; border-radius: 3px; transition: left .25s, width .25s; }
+  .rng { display: block; font-size: 0.72rem; color: var(--ink2); text-align: right; white-space: nowrap; }
+  .rng.stale, .bar .band.stale { opacity: 0.35; }
   .bar .tick { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); opacity: 0.6; }
 
   #levers { margin-top: 6px; }
@@ -453,6 +456,7 @@
         <div class="badge">
           <span class="eyebrow" id="badge-label">Resilience index</span>
           <span class="badge-row"><span class="badge-num" id="idx">0</span><span class="badge-d" id="idxd"></span></span>
+          <span class="rng" id="idxr" style="text-align:left"></span>
         </div>
       </div>
       <div class="climbar" role="group" aria-label="Climate">
@@ -521,6 +525,7 @@
       <h2>Stress tests</h2>
       <p class="hint">The same map, hit three ways. Select one to see where it bites.</p>
       <div id="tests"></div>
+      <p class="hint" id="rng-note" hidden>Gray bands and “likely” ranges show how far each gain could move if the model’s assumptions are off: 30 runs varying how much trees cool, how much water wetlands and farms hold, how fast storms and heat harm grow, how much each land cover supports wildlife, and regenerative yields. The range covers the middle 80% of runs.</p>
 
       <h2 id="costs-h">Rough costs and benefits</h2>
       <p class="hint" id="cost-hint">What this plan might cost and return across the whole map, city and surrounding land, at US prices. A first-pass estimate for comparing plans, not a budget.</p>
@@ -748,14 +753,16 @@
   $('#metrics').innerHTML = METRICS.map(function (m) {
     return '<div class="mrow"><div class="mhead"><span class="mname">' + m.name + '</span>' +
       '<span class="mval"><b id="mv-' + m.k + '">0</b><span class="delta" id="md-' + m.k + '"></span></span></div>' +
-      '<div class="bar"><span class="fill" id="mf-' + m.k + '"></span><span class="tick" id="mt-' + m.k + '"></span></div>' +
+      '<span class="rng" id="mr-' + m.k + '"></span>' +
+      '<div class="bar"><span class="band" id="mb-' + m.k + '"></span><span class="fill" id="mf-' + m.k + '"></span><span class="tick" id="mt-' + m.k + '"></span></div>' +
       '<p class="msub">' + m.sub + '</p></div>';
   }).join('');
   $('#tests').innerHTML = TESTS.map(function (t) {
     return '<button type="button" class="trow" data-layer="' + t.layer + '">' +
       '<span class="mhead"><span class="mname">' + t.name + '</span>' +
       '<span class="mval"><b id="tv-' + t.k + '">0</b><span class="delta" id="td-' + t.k + '"></span></span></span>' +
-      '<span class="bar"><span class="fill" id="tf-' + t.k + '"></span><span class="tick" id="tt-' + t.k + '"></span></span></button>';
+      '<span class="rng" id="tr-' + t.k + '"></span>' +
+      '<span class="bar"><span class="band" id="tb-' + t.k + '"></span><span class="fill" id="tf-' + t.k + '"></span><span class="tick" id="tt-' + t.k + '"></span></span></button>';
   }).join('');
 
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -1418,6 +1425,40 @@
     cv.addEventListener(ev, function () { if (painting) { painting = false; lastPainted = -1; saveSketch(); } });
   });
 
+  // ---- Uncertainty ranges: re-run the plan under varied assumptions, a moment after the last change
+  var rangeTimer = 0, rangeCancel = null;
+  function fmtR(x) { x = Math.round(x); return x > 0 ? '+' + x : x < 0 ? '\u2212' + Math.abs(x) : '0'; }
+  function scheduleRanges() {
+    clearTimeout(rangeTimer); if (rangeCancel) { rangeCancel(); rangeCancel = null; }
+    document.querySelectorAll('.rng, .bar .band').forEach(function (e) { e.classList.add('stale'); });
+    var any = LEVERS.some(function (L) { return state[L.key]; }) || (P.studio && P.studio.size) || (P.paint && P.paint.size);
+    if (!any || !P.ensemble) { clearRanges(); return; }
+    var L = {}; LEVERS.forEach(function (x) { L[x.key] = state[x.key]; });
+    rangeTimer = setTimeout(function () { rangeCancel = P.ensemble(L, 30, showRanges); }, 350);
+  }
+  function clearRanges() {
+    document.querySelectorAll('.rng').forEach(function (e) { e.textContent = ''; e.classList.remove('stale'); });
+    document.querySelectorAll('.bar .band').forEach(function (e) { e.style.width = '0'; e.classList.remove('stale'); });
+    $('#rng-note').hidden = true;
+  }
+  function showRanges(r) {
+    rangeCancel = null;
+    var bau = P.BAU;
+    function put(txt, band, base, now, lohi) {
+      var lo = Math.min(lohi[0], now - base), hi = Math.max(lohi[1], now - base);
+      txt.classList.remove('stale'); band.classList.remove('stale');
+      if (hi - lo < 1) { txt.textContent = ''; band.style.width = '0'; return; }
+      txt.textContent = 'likely ' + fmtR(lo) + ' to ' + fmtR(hi);
+      var a = Math.max(0, Math.min(100, base + lo)), b = Math.max(0, Math.min(100, base + hi));
+      band.style.left = a + '%'; band.style.width = Math.max(0.5, b - a) + '%';
+    }
+    METRICS.forEach(function (m) { if (r.metrics[m.k]) put($('#mr-' + m.k), $('#mb-' + m.k), bau.metrics[m.k], res.metrics[m.k], r.metrics[m.k]); });
+    TESTS.forEach(function (t) { if (r.tests[t.k]) put($('#tr-' + t.k), $('#tb-' + t.k), bau.tests[t.k], res.tests[t.k], r.tests[t.k]); });
+    var lo = Math.min(r.index[0], res.index - bau.index), hi = Math.max(r.index[1], res.index - bau.index), ix = $('#idxr');
+    ix.classList.remove('stale'); ix.textContent = hi - lo >= 1 ? 'likely ' + fmtR(lo) + ' to ' + fmtR(hi) : '';
+    $('#rng-note').hidden = false;
+  }
+
   // ---- Updates
   var announceTimer = 0;
   function render() {
@@ -1448,6 +1489,7 @@
       var same = p && p.v && LEVERS.every(function (L) { return p.v[L.key] === state[L.key]; });
       b.setAttribute('aria-pressed', same ? 'true' : 'false');
     });
+    scheduleRanges();
     renderSketchSum();
     renderClimNote();
     renderCosts();

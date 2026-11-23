@@ -29,6 +29,18 @@ const ThreadModel = (function () {
   const REQUIRED = ['lat', 'lng', 'area', 'pop', 'built', 'tree', 'shrub', 'grass', 'crop', 'bare', 'water', 'wetland', 'flood', 'nb', 'poly'];
 
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  // Uncertainty: each factor scales one assumption the model cannot know exactly. 1 = the central estimate.
+  // ensemble() varies them together to show how much a plan's result could move.
+  let U = { cool: 1, hab: 1, kh: 1, amp: 1, ret: 1, rain: 1, yield: 1 };
+  const URANGE = {
+    cool: [0.7, 1.3],   // how much tree canopy and nearby green cool a street
+    hab: [0.85, 1.15],  // how much each land cover supports wildlife
+    kh: [0.85, 1.15],   // the heat level at which heat becomes dangerous
+    amp: [0.5, 1.5],    // how fast heat harm grows with warming
+    ret: [0.7, 1.3],    // how much water wetlands, trees and regenerative farms hold back
+    rain: [0.7, 1.3],   // how much heavier storms get per degree of warming
+    yield: [0.9, 1.1]   // regenerative farm yields compared with conventional
+  };
 
   function validate(d) {
     if (!d || typeof d !== 'object') throw new Error('This file is not a Threadlands place file.');
@@ -498,7 +510,7 @@ const ThreadModel = (function () {
         for (const j of NB[i]) cs += COOL[cover[j]] || 0;
         const coolN = Math.min(1, cs / 3);
         const cvi = 1 - (1 - cv) * (1 - lc[i]);
-        const hv = (0.4 + 0.6 * dn) * (1 - 0.55 * cvi) * (1 - 0.5 * coolN) * (1 - BREEZE * breeze[i]) * CAL[i] * (1 + 0.1 * climate.dT);
+        const hv = (0.4 + 0.6 * dn) * (1 - Math.min(0.9, 0.55 * U.cool) * cvi) * (1 - Math.min(0.9, 0.5 * U.cool) * coolN) * (1 - BREEZE * breeze[i]) * CAL[i] * (1 + 0.1 * climate.dT);
         heat[i] = hv;
         const w = usePop ? pop[i] * scale + 1e-9 : area[i];
         sw += w; sh += w * hv;
@@ -506,7 +518,7 @@ const ThreadModel = (function () {
       const avgHeat = sw > 0 ? sh / sw : 0;
       // Dangerous heat grows faster than average warming: hot days above 35 C and heat deaths climb steeply with each degree
       // (WRI on CMIP6: about 29 more such days in the average city at 3 C than at 1.5 C; Lancet Countdown 2023: heat deaths up 370% by 2050 at 2 C)
-      const heatScore = sw > 0 ? 100 * clamp(1 - (avgHeat / KH) * (1 + HEAT_AMP * climate.dT), 0, 1) : 100;
+      const heatScore = sw > 0 ? 100 * clamp(1 - (avgHeat / (KH * U.kh)) * (1 + HEAT_AMP * U.amp * climate.dT), 0, 1) : 100;
 
       // Floods
       let farmA = 0, regenA = 0;
@@ -517,7 +529,7 @@ const ThreadModel = (function () {
       const wetFrac = restorableW > 0 ? Math.min(1, wetW / restorableW) : (wetW > 0 ? Math.min(1, wetW / Math.max(1, 0.05 * N)) : 0);
       const regenShare = farmA + regenA > 0 ? regenA / (farmA + regenA) : 0;
       const rainBonus = nUrban0 > 0 ? 0.08 * Math.min(1, nRain / Math.max(3, 0.05 * nUrban0)) : 0;
-      const retention = clamp(0.6 * wetFrac + 0.18 * cvAll + 0.14 * regenShare + rainBonus, 0, 0.92);
+      const retention = clamp(U.ret * (0.6 * wetFrac + 0.18 * cvAll + 0.14 * regenShare) + rainBonus, 0, 0.92);
       const floodExp = new Float64Array(N);
       let E = 0;
       for (let i = 0; i < N; i++) {
@@ -527,7 +539,7 @@ const ThreadModel = (function () {
         E += floodExp[i];
       }
       // Storms 7% heavier per degree (IPCC AR6) overflow drains built for today's storms, so damage rises faster than the rain itself
-      const risk = E0 > 0 ? (E / E0) * (1 - retention) * (1 + 0.07 * climate.dT) : 0;
+      const risk = E0 > 0 ? (E / E0) * (1 - retention) * (1 + 0.07 * U.rain * climate.dT) : 0;
       const floodScore = 100 * clamp(1 - 0.7 * risk, 0, 1);
       const storage = 100 * retention;
 
@@ -537,10 +549,10 @@ const ThreadModel = (function () {
         if (cover[i] !== 'farm' && cover[i] !== 'regen') continue;
         const a = retired[i] ? area[i] * RETIRED_CROP : cropArea[i];
         const isRegen = cover[i] === 'regen';
-        supply += a * (isRegen ? 0.96 : 1) * (1 - 0.04 * climate.dT);
+        supply += a * (isRegen ? Math.min(1.05, 0.96 * U.yield) : 1) * (1 - 0.04 * climate.dT);
         let wetNear = false;
         for (const j of near2[i]) if (cover[j] === 'wetland') { wetNear = true; break; }
-        supplyDry += a * ((isRegen ? 0.9 * (1 - 0.04 * climate.dT) : 0.58 * (1 - 0.08 * climate.dT)) + (wetNear ? 0.14 : 0));
+        supplyDry += a * ((isRegen ? 0.9 * U.yield * (1 - 0.04 * climate.dT) : 0.58 * (1 - 0.08 * climate.dT)) + (wetNear ? 0.14 : 0));
       }
       supply += 0.6 * urbFarm * (1 - 0.04 * climate.dT);          // urbFarm is stored as field-crop-equivalent area / 0.6
       supplyDry += 0.5 * urbFarm;
@@ -552,7 +564,7 @@ const ThreadModel = (function () {
       let sumW = 0;
       for (let i = 0; i < N; i++) {
         const cvr = cover[i];
-        hw[i] = (cvr === 'core' || cvr === 'mid' || cvr === 'suburb') ? 0.06 + 0.25 * (1 - (1 - cv) * (1 - lc[i])) : (HAB[cvr] || 0);
+        hw[i] = (cvr === 'core' || cvr === 'mid' || cvr === 'suburb') ? 0.06 + 0.25 * (1 - (1 - cv) * (1 - lc[i])) : Math.min(1, (HAB[cvr] || 0) * U.hab);
         sumW += hw[i];
       }
       const comp = new Int32Array(N).fill(-1);
@@ -741,6 +753,40 @@ const ThreadModel = (function () {
       return { wetlands, canopy: take(trees), corridors: take(corridors), regen: take(regen), compact: take(compact), reachKm };
     };
 
+    // How much could this plan's gains move if the model's assumptions are off? Runs n paired samples
+    // (business as usual and the plan, under the same assumptions) and returns the 10th to 90th percentile of each gain.
+    // Work is split into small steps so the page stays responsive; onDone(result) when finished. Returns a cancel function.
+    out.ensemble = function (L, n, onDone) {
+      n = n || 30;
+      const keys = Object.keys(URANGE), d = { index: [] }, M = {}, T = {};
+      let k = 0, stop = false;
+      function sample(j) {
+        const saved = U; U = {};
+        keys.forEach(function (key, q) { const r = URANGE[key], h = hash01(j * 7 + q, 911); U[key] = r[0] + h * (r[1] - r[0]); });
+        let b, p;
+        const sp = out.paint, ss = out.studio;
+        try {
+          out.paint = new Map(); out.studio = new Map(); b = evaluate(ZERO);     // business as usual: no levers, no sketch, no designs
+          out.paint = sp; out.studio = ss; p = evaluate(L);
+        } finally { U = saved; out.paint = sp; out.studio = ss; }
+        d.index.push(p.index - b.index);
+        for (const m in p.metrics) (M[m] = M[m] || []).push(p.metrics[m] - b.metrics[m]);
+        for (const t in p.tests) (T[t] = T[t] || []).push(p.tests[t] - b.tests[t]);
+      }
+      function band(a) { return [quantile(a, 0.1), quantile(a, 0.9)]; }
+      function step() {
+        if (stop) return;
+        const end = Math.min(n, k + 3);
+        for (; k < end; k++) sample(k);
+        if (k < n) return setTimeout(step, 0);
+        const res = { n: n, index: band(d.index), metrics: {}, tests: {} };
+        for (const m in M) res.metrics[m] = band(M[m]);
+        for (const t in T) res.tests[t] = band(T[t]);
+        onDone && onDone(res);
+      }
+      setTimeout(step, 0);
+      return function () { stop = true; };
+    };
     out.locate = function (i) {
       const dx = X[i] - cx, dy = Y[i] - cy;
       const d = Math.hypot(dx, dy);
