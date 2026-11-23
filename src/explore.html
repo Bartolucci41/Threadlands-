@@ -7,12 +7,15 @@
   /* Layout concept: a survey sheet. A sticky hex map on one side, the levers and scores on the other,
      rules instead of cards, and the map is the only loud thing on the page. */
   :root {
-    --bg: #E8EDE6;
-    --surface: #F5F8F1;
-    --surface2: #D9E2D6;
+    --bg: #F3F4EF;
+    --surface: #FFFFFF;
+    --surface2: #E4E9E1;
+    --deep: #123B38;
+    --deep-ink: #EAF2EE;
+    --warm: #C0603A;
     --ink: #12231E;
     --ink2: #3D4A42;
-    --line: #C2CEC3;
+    --line: #D6DDD3;
     --accent: #0B6B5B;
     --accent-ink: #FFFFFF;
     --neg: #9C3418;
@@ -2194,6 +2197,7 @@
     FIX = null; $('#fixit').hidden = false; $('#fix-name').textContent = (data.name || 'this place').split(',')[0]; fixShow('ask');
     loadLive(data);
     PJ.at = null; PJ.hl = null; renderProjects();
+    if (/[?&]add=1/.test(location.search) && kind !== 'demo') { setTimeout(function () { showTab('understand'); $('#proj-add-btn').click(); $('#projs').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 400); try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) { /* ignore */ } }
     WTS.sel = -1; WTS.show = false;
     renderWTS();
     HC = heatCheck(P);

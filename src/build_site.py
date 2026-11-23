@@ -269,6 +269,89 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .feed-card b { font-size: 1.02rem; line-height: 1.3; } .feed-sum { font-size: 0.86rem; color: var(--ink2); line-height: 1.45; }
   .who-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 32px; margin-top: 8px; }
   .who h3 { margin: 0 0 6px; font-size: 1.05rem; } .who p { margin: 0; color: var(--ink2); line-height: 1.5; }
+  /* ---- Site-wide revamp: full-width bands, dark footer, page headers */
+  html { overflow-x: clip; }
+  .bleed { margin-inline: calc(50% - 50vw); padding-inline: max(16px, calc(50vw - 50% + 0px)); }
+  .band-deep { background: var(--deep, #123B38); color: var(--deep-ink, #EAF2EE); }
+  .band-deep a { color: #fff; }
+  .band-white { background: var(--surface); }
+  .site-foot2 { background: var(--deep, #123B38); color: #cfe0da; margin: 64px calc(50% - 50vw) -56px; padding: 48px max(16px, calc(50vw - 50%)) 40px; }
+  .foot-grid { display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: 28px 40px; }
+  .foot-brand p { margin: 10px 0 0; max-width: 32ch; color: #b9cfc8; line-height: 1.5; }
+  .site-foot2 .foot-wm { color: #fff; font-size: 1.4rem; }
+  .site-foot2 nav { display: grid; gap: 6px; align-content: start; }
+  .site-foot2 nav h2 { margin: 0 0 6px; font: 600 0.75rem var(--font-body); letter-spacing: 0.1em; text-transform: uppercase; color: #8fb3a8; }
+  .site-foot2 nav a { color: #eaf2ee; text-decoration: none; } .site-foot2 nav a:hover { text-decoration: underline; }
+  .foot-small { margin-top: 36px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.12); display: grid; gap: 4px; font-size: 0.8rem; color: #8fb3a8; }
+  .foot-small p { margin: 0; }
+  @media (max-width: 720px) { .foot-grid { grid-template-columns: 1fr 1fr; } .foot-brand { grid-column: 1 / -1; } }
+  .page-head { padding: 28px 0 8px; display: grid; gap: 10px; }
+  .page-kicker { margin: 0; font: 600 0.8rem var(--font-body); letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+  .page-head h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); line-height: 1; letter-spacing: -0.035em; max-width: 18ch; }
+  .page-lead { margin: 0; font-size: 1.15rem; color: var(--ink2); max-width: 60ch; line-height: 1.5; }
+  .bigstats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 18px 28px; padding: 36px 0; }
+  .bigstat b { display: block; font: 800 clamp(2.2rem, 5vw, 3.4rem)/1 var(--font-display); letter-spacing: -0.03em; }
+  .bigstat span { display: block; margin-top: 6px; font-size: 0.92rem; opacity: 0.85; }
+  .sect { padding-block: 64px; }
+  .sect-top { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; margin-bottom: 22px; }
+  .sect-top h2 { font-size: clamp(1.9rem, 4.6vw, 2.9rem); letter-spacing: -0.03em; line-height: 1.05; max-width: 20ch; }
+  .sect-top p { margin: 8px 0 0; color: var(--ink2); max-width: 56ch; }
+  .band-deep .sect-top p { color: #b9cfc8; }
+  .more { font-weight: 600; color: var(--accent); text-decoration: none; white-space: nowrap; } .more:hover { text-decoration: underline; }
+  .band-deep .more { color: #fff; }
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 16px; }
+  .filters .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink, #fff); border-color: var(--accent); }
+  .filters input[type=search] { min-height: 40px; padding: 6px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; min-width: 200px; }
+  .rk-count { font-size: 0.85rem; color: var(--ink2); margin-left: 8px; }
+  .rk-table { list-style: none; margin: 8px 0 0; padding: 0; border-top: 2px solid var(--ink); }
+  .rk-table a { display: grid; grid-template-columns: 3rem minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.2fr) minmax(80px, 1fr) 3rem; gap: 14px; align-items: center; padding: 14px 4px; border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; }
+  .rk-table a:hover { background: var(--surface); }
+  .rt-n { font: 700 1.1rem var(--font-display); color: var(--ink2); text-align: right; font-variant-numeric: tabular-nums; }
+  .rt-c { display: grid; min-width: 0; } .rt-c b { font: 700 1.15rem var(--font-display); letter-spacing: -0.01em; } .rt-c span { font-size: 0.82rem; color: var(--ink2); }
+  .rt-p { font-size: 0.85rem; color: var(--ink2); }
+  .rk-pj { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink, #fff); }
+  .rk-pj0 { background: transparent; color: var(--ink2); border: 1px solid var(--line); font-weight: 500; }
+  .rt-bar { height: 8px; border-radius: 4px; background: var(--surface2); overflow: hidden; } .rt-bar i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+  .rt-v { font: 800 1.35rem var(--font-display); text-align: right; font-variant-numeric: tabular-nums; }
+  @media (max-width: 760px) { .rk-table a { grid-template-columns: 2.2rem minmax(0, 1fr) 64px 2.4rem; } .rt-p, .rt-j { display: none; } }
+  .rk-method { margin-top: 56px; padding: 32px; border-radius: 18px; background: var(--surface); }
+  .rk-method h2 { font-size: 1.6rem; margin-bottom: 16px; }
+  .rk-m-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px 32px; }
+  .rk-m-grid h3 { font-size: 1rem; margin-bottom: 6px; } .rk-m-grid p { margin: 0; color: var(--ink2); line-height: 1.55; font-size: 0.95rem; }
+  .pj-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  .pj-map { height: 620px; border-radius: 18px; overflow: hidden; background: var(--surface2); position: sticky; top: 12px; }
+  .pj-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; max-height: 620px; overflow-y: auto; }
+  .pjc { background: var(--surface); border-radius: 14px; border-left: 4px solid var(--pc); padding: 2px 0 12px; }
+  .pjc.hl { outline: 2px solid var(--accent); }
+  .pjc-go { display: grid; gap: 4px; width: 100%; text-align: left; background: none; border: 0; padding: 12px 16px 6px; font: inherit; color: var(--ink); cursor: pointer; }
+  .pjc-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; font-size: 0.78rem; color: var(--ink2); } .pjc-st { font-weight: 700; color: var(--pc); }
+  .pjc-go b { font: 700 1.08rem/1.3 var(--font-display); } .pjc-sum { font-size: 0.88rem; color: var(--ink2); line-height: 1.45; }
+  .pjc-links { display: flex; flex-wrap: wrap; gap: 14px; padding: 0 16px; font-size: 0.85rem; } .pjc-links a { color: var(--accent); font-weight: 600; }
+  .pj-add { margin-top: 40px; padding: 28px 32px; border-radius: 18px; background: var(--deep, #123B38); color: #eaf2ee; display: flex; flex-wrap: wrap; gap: 18px 32px; align-items: center; justify-content: space-between; }
+  .pj-add h2 { font-size: 1.6rem; color: #fff; } .pj-add p { margin: 6px 0 0; color: #b9cfc8; max-width: 52ch; }
+  .pj-add-f { display: flex; flex-wrap: wrap; gap: 8px; } .pj-add-f select { min-height: 44px; border-radius: 10px; border: 0; padding: 0 12px; font: inherit; min-width: 240px; }
+  .pj-add .btn { background: #fff; color: var(--deep, #123B38); border-color: #fff; }
+  @media (max-width: 900px) { .pj-layout { grid-template-columns: 1fr; } .pj-map { height: 380px; position: static; } .pj-list { max-height: none; } }
+  .hero3 { padding-top: 56px; padding-bottom: 8px; margin-top: 8px; }
+  .hero3-in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 32px 48px; align-items: center; }
+  .hero3-kick { margin: 0 0 16px; font: 600 0.8rem var(--font-body); letter-spacing: 0.12em; text-transform: uppercase; color: #8fd3bf; }
+  .hero3-h { color: #fff; font-size: clamp(2.4rem, 5vw, 4.1rem); line-height: 1.02; letter-spacing: -0.035em; max-width: 14ch; }
+  .hero3-sub { margin: 20px 0 24px; font-size: 1.15rem; line-height: 1.55; color: #cfe0da; max-width: 44ch; }
+  .hero3-in > * { min-width: 0; }
+  .hero3 .search { display: flex; gap: 8px; max-width: 100%; }
+  .hero3 .search input { background: #fff; border-color: #fff; min-width: 0; flex: 1 1 auto; }
+  .hero3 .search .btn { background: #8fd3bf; color: #0b2624; border-color: #8fd3bf; }
+  .hero3 .search-note, .hero3 .byline { color: #a9c6bd; } .hero3 .byline b { color: #fff; }
+  .hero3 .live { background: var(--surface); color: var(--ink); border-radius: 20px; padding: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.35); }
+  .hero3 .live a { color: var(--accent); }
+  .hero3-stats { border-top: 1px solid rgba(255,255,255,0.14); margin-top: 48px; color: #fff; }
+  .rank-cols h3 { font-size: 0.85rem; }
+  .who-grid { gap: 28px 48px; }
+  .band-deep .who h3 { color: #fff; font-size: 1.35rem; margin: 8px 0 8px; } .band-deep .who p { color: #cfe0da; font-size: 1.02rem; }
+  .who-n { font: 800 2.6rem/1 var(--font-display); color: #8fd3bf; }
+  .band-deep h2 { color: #fff; }
+  .lib-line { margin: 18px 0 0; color: var(--ink2); }
+  @media (max-width: 900px) { .hero3-in { grid-template-columns: 1fr; } .hero3 { padding-top: 32px; } }
   .viewsw { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 0.8rem; color: var(--ink2); margin: 0 0 4px; }
   .viewsw .chip { min-height: 32px; padding: 4px 12px; font-size: 0.8rem; }
   body.simple .adv { display: none !important; }
@@ -309,7 +392,8 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
 # Cloudflare Web Analytics: private visit counts for Robert, no cookies and no personal data
 ANALYTICS = ("<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' "
              "data-cf-beacon='{\"token\": \"a92b6704e81e4aaba11a9f8a11832ae1\"}'></script><!-- End Cloudflare Web Analytics -->\n")
-PAGES = [("", "Home"), ("explore/", "Explore"), ("studio/", "Studio"), ("library/", "Library"), ("how-it-works/", "How it works"), ("about/", "About")]
+PAGES = [("", "Home"), ("explore/", "Explore"), ("studio/", "Studio"), ("rankings/", "Rankings"), ("projects/", "Projects"), ("library/", "Library"), ("how-it-works/", "How it works"), ("about/", "About")]
+NAV = [p for p in PAGES if p[0] in ("explore/", "studio/", "rankings/", "projects/", "library/")]
 
 
 def APP(base):
@@ -334,23 +418,29 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=8">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=9">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
     links = "".join(f'<a href="{base}{p}"' + (' aria-current="page"' if p == here else "") + f'>{n}</a>'
-                    for p, n in PAGES[1:])
+                    for p, n in NAV)
     return (f'<header class="wrap site-head" id="top">\n  <div class="topbar">\n    <a class="wordmark" href="{base}" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="28" height="28" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#123B38" stroke="none"/></svg><span>Threadlands</span></a>\n'
             f'    <div class="topright"><nav class="topnav" aria-label="Site">{links}</nav>'
             '<label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>\n  </div>\n</header>\n')
 
 
 def footer(base):
-    links = "".join(f'<a href="{base}{p}">{n}</a>' for p, n in PAGES)
-    return (f'<footer class="wrap site-foot">\n  <nav aria-label="Footer">{links}</nav>\n'
-            '  <p style="margin:0">&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>\n'
-            '  <p style="margin:0">Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS and Landsat (USGS and NASA).</p>\n'
-            '</footer>\n')
+    col = lambda items: "".join(f'<a href="{base}{p}">{n}</a>' for p, n in items)
+    return (f'<footer class="site-foot2">\n  <div class="wrap foot-grid">\n'
+            f'    <div class="foot-brand"><a class="wordmark foot-wm" href="{base}" translate="no">Threadlands</a>'
+            '<p>See what&rsquo;s coming for your city, and what would fix it. Free, for any place on Earth.</p></div>\n'
+            f'    <nav aria-label="Tools"><h2>Tools</h2>{col([("explore/", "Explore"), ("studio/", "Studio"), ("library/", "Library")])}</nav>\n'
+            f'    <nav aria-label="Data"><h2>Data</h2>{col([("rankings/", "Rankings"), ("projects/", "Projects")])}</nav>\n'
+            f'    <nav aria-label="About"><h2>About</h2>{col([("how-it-works/", "How it works"), ("about/", "About")])}</nav>\n'
+            '  </div>\n  <div class="wrap foot-small">\n'
+            '    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>\n'
+            '    <p>Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS, Landsat (USGS and NASA), Open-Meteo and GBIF.</p>\n'
+            '  </div>\n</footer>\n')
 
 
 def page(rel, base, here, title, desc, body, script=""):
@@ -375,7 +465,7 @@ for i, sc in enumerate(re.findall(r"<script>(.*?)</script>", doc, re.S)):
     write(f"src/.check/explore{i}.js", sc)
 
 # ---- The other pages
-for name in ("home", "studio", "library", "how-it-works", "about"):
+for name in ("home", "studio", "rankings", "projects", "library", "how-it-works", "about"):
     spec = read(SRC, "pages", name + ".html")
     meta = dict(re.findall(r"<!--\s*(\w+):\s*(.*?)\s*-->", spec.split("\n\n", 1)[0]))
     content = spec.split("\n\n", 1)[1]

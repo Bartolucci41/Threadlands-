@@ -1,0 +1,82 @@
+<!-- title: Real projects | Threadlands -->
+<!-- description: Parks, wetlands, trees and water projects in cities around the world, each with a public source, and what Threadlands estimates each one adds. -->
+
+<main class="wrap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <header class="page-head">
+    <p class="page-kicker">Projects</p>
+    <h1>Real projects changing cities</h1>
+    <p class="page-lead">Parks, wetlands, trees and water projects that are proposed, approved, under way or built, each with a public source. Open one in Explore to see what it adds to its city.</p>
+  </header>
+
+  <div class="filters" id="pj-status" role="group" aria-label="Status">
+    <span class="eyebrow" style="margin-right:4px">Status</span>
+    <button type="button" class="chip" data-st="all" aria-pressed="true">All</button>
+    <button type="button" class="chip" data-st="built" aria-pressed="false">Built</button>
+    <button type="button" class="chip" data-st="underway" aria-pressed="false">Under way</button>
+    <button type="button" class="chip" data-st="approved" aria-pressed="false">Approved</button>
+    <button type="button" class="chip" data-st="proposed" aria-pressed="false">Proposed</button>
+  </div>
+
+  <div class="pj-layout">
+    <div class="pj-map" id="pj-map" role="region" aria-label="World map of projects"></div>
+    <ol class="pj-list" id="pj-list"></ol>
+  </div>
+
+  <section class="pj-add" aria-labelledby="pj-add-h">
+    <div>
+      <h2 id="pj-add-h">Know a project that belongs here?</h2>
+      <p>Add it with a link to a public source: a news story, an official page or a report. Each one is checked before it appears.</p>
+    </div>
+    <form class="pj-add-f" id="pj-add-f">
+      <label><span class="sr-only">City</span><select id="pj-city" required><option value="">Choose a city</option></select></label>
+      <button type="submit" class="btn">Add a project</button>
+    </form>
+  </section>
+</main>
+<!--SCRIPT-->
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  var STAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
+  var KIND = { trees: 'Trees', park: 'Park', wetland: 'Wetland', corridor: 'Green corridor', rain: 'Rainwater', farm: 'Farm', river: 'River', transit: 'Transit or cycling', other: 'Other' };
+  var ALL = [], NAMES = {}, FILTER = 'all', MAP = null, MARK = {};
+  function cards() {
+    var list = ALL.filter(function (p) { return FILTER === 'all' || p.status === FILTER; });
+    $('#pj-list').innerHTML = list.map(function (p) {
+      var st = STAT[p.status] || STAT.proposed;
+      return '<li class="pjc" id="pjc-' + esc(p.id) + '" style="--pc:' + st[1] + '"><button type="button" class="pjc-go" data-id="' + esc(p.id) + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span>' + esc(NAMES[p.place] || p.place) + ' · ' + (KIND[p.kind] || 'Other') + '</span></span>' +
+        '<b>' + esc(p.name) + '</b><span class="pjc-sum">' + esc(p.summary || '') + '</span></button>' +
+        '<span class="pjc-links"><a href="../explore/#' + esc(p.place) + '">See it in Explore</a>' + (p.source && p.source.url ? '<a href="' + esc(p.source.url) + '" target="_blank" rel="noopener">Source</a>' : '') +
+        (p.involved ? '<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Get involved</a>' : '') + '</span></li>';
+    }).join('') || '<li class="rk-none">No projects with this status yet.</li>';
+    if (MAP) Object.keys(MARK).forEach(function (id) { var p = MARK[id].p, on = FILTER === 'all' || p.status === FILTER; if (on) MARK[id].m.addTo(MAP); else MARK[id].m.remove(); });
+  }
+  function focus(id) {
+    var o = MARK[id]; if (!o) return;
+    document.querySelectorAll('.pjc.hl').forEach(function (n) { n.classList.remove('hl'); });
+    var el = document.getElementById('pjc-' + id); if (el) { el.classList.add('hl'); el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    if (MAP) { MAP.flyTo([o.p.lat, o.p.lng], Math.max(MAP.getZoom(), 11), { duration: 0.8 }); o.m.openPopup(); }
+  }
+  $('#pj-list').addEventListener('click', function (e) { var b = e.target.closest('.pjc-go'); if (b) focus(b.dataset.id); });
+  $('#pj-status').addEventListener('click', function (e) { var b = e.target.closest('[data-st]'); if (!b) return; FILTER = b.dataset.st; document.querySelectorAll('[data-st]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); cards(); });
+  $('#pj-add-f').addEventListener('submit', function (e) { e.preventDefault(); var c = $('#pj-city').value; if (c) location.href = '../explore/?add=1#' + c; });
+  Promise.all([fetch('../data/projects.json').then(function (r) { return r.json(); }), fetch('../data/index.json').then(function (r) { return r.json(); })]).then(function (x) {
+    (x[1].places || []).forEach(function (e) { NAMES[e.slug] = e.name; });
+    ALL = (x[0].projects || []).slice().sort(function (a, b) { return String(b.added || '').localeCompare(String(a.added || '')) || (b.year || 0) - (a.year || 0); });
+    $('#pj-city').innerHTML = '<option value="">Choose a city</option>' + (x[1].places || []).slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).map(function (e) { return '<option value="' + esc(e.slug) + '">' + esc(e.name) + ', ' + esc(e.country) + '</option>'; }).join('');
+    if (window.L) {
+      MAP = L.map('pj-map', { worldCopyJump: true, scrollWheelZoom: false }).setView([25, 10], 2);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(MAP);
+      ALL.forEach(function (p) {
+        var st = STAT[p.status] || STAT.proposed;
+        var m = L.circleMarker([p.lat, p.lng], { radius: 8, color: '#fff', weight: 2.5, fillColor: st[1], fillOpacity: 1 })
+          .bindPopup('<b>' + esc(p.name) + '</b><br>' + st[0] + (p.year ? ' · ' + p.year : '') + ' · ' + esc(NAMES[p.place] || p.place) + '<br><a href="../explore/#' + esc(p.place) + '">See it in Explore</a>');
+        m.on('click', function () { focus(p.id); });
+        MARK[p.id] = { m: m, p: p };
+      });
+    } else $('#pj-map').innerHTML = '<p class="rk-none" style="padding:16px">The map could not be loaded.</p>';
+    cards();
+  }).catch(function () { $('#pj-list').innerHTML = '<li class="rk-none">The projects could not be loaded.</li>'; });
+})();

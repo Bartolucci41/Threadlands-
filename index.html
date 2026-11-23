@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=8">
+<link rel="stylesheet" href="assets/site.css?v=9">
 <script src="assets/i18n.js" defer></script>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">
@@ -29,25 +29,26 @@
 <header class="wrap site-head" id="top">
   <div class="topbar">
     <a class="wordmark" href="" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="28" height="28" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#123B38" stroke="none"/></svg><span>Threadlands</span></a>
-    <div class="topright"><nav class="topnav" aria-label="Site"><a href="explore/">Explore</a><a href="studio/">Studio</a><a href="library/">Library</a><a href="how-it-works/">How it works</a><a href="about/">About</a></nav><label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>
+    <div class="topright"><nav class="topnav" aria-label="Site"><a href="explore/">Explore</a><a href="studio/">Studio</a><a href="rankings/">Rankings</a><a href="projects/">Projects</a><a href="library/">Library</a></nav><label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>
   </div>
 </header>
 <main class="wrap">
 <script src="assets/model.js"></script>
-  <div class="hero2">
-    <div class="hero-copy">
-      <p class="hero-eyebrow">Planning for cities and the land around them</p>
-      <h1 class="hero-h hero-h2">See what&rsquo;s coming for your city, and what would fix it.</h1>
-      <p class="hero-sub">Threadlands maps heat, flooding, food and nature for any city region, finds the plan that does the most for your goal, and estimates what it would cost. Free, for any place on&nbsp;Earth.</p>
+  <section class="hero3 bleed band-deep" aria-labelledby="hero-h">
+    <div class="hero3-in">
+      <div class="hero3-copy">
+        <p class="hero3-kick">Planning for cities and the land around them</p>
+        <h1 id="hero-h" class="hero3-h">See what&rsquo;s coming for your city, and what would fix it.</h1>
+        <p class="hero3-sub">Threadlands maps heat, flooding, food and nature for any city region, finds the plan that does the most for your goal, and estimates what it would cost. Free, for any place on&nbsp;Earth.</p>
       <form class="search" id="search-home" role="search">
         <label class="sr-only" for="q-home">Search for a place</label>
         <input id="q-home" type="search" placeholder="Type a city, town or postal code" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sugg-home" aria-autocomplete="list">
         <button class="btn" type="submit">Explore</button>
         <ul class="sugg" id="sugg-home" role="listbox" hidden></ul>
       </form>
-      <p class="search-note" id="lib-note">Any city, town, county or postal code on Earth.</p>
-      <p class="byline">Created by <b>Robert Bartolucci</b></p>
-    </div>
+        <p class="search-note" id="lib-note">Any city, town, county or postal code on Earth.</p>
+        <p class="byline">Created by <b>Robert Bartolucci</b></p>
+      </div>
     <figure class="live" id="live" aria-labelledby="live-cap">
       <div class="live-top">
         <div class="live-cities" role="group" aria-label="City">
@@ -79,54 +80,50 @@
       </div>
       <figcaption id="live-cap"><span id="live-msg">Real land cover, people and heat for the whole city region, from open satellite data.</span> <a href="explore/#milan" id="live-open">Find the best plan in Explore &rarr;</a></figcaption>
     </figure>
-  </div>
-
-  <section class="rank" id="rank" aria-labelledby="rank-h" hidden>
-    <div class="rank-head">
-      <div>
-        <h2 class="sect-h" id="rank-h">How resilient are cities today?</h2>
-        <p class="rank-sub" id="rank-sub">The Threadlands resilience index for every place in the library, 0 to 100.</p>
-      </div>
-      <label class="rank-find"><span class="sr-only">Find a city in the ranking</span><input type="search" id="rank-q" placeholder="Find a city"></label>
     </div>
-    <div class="rank-cols">
-      <div><h3>Most resilient</h3><ol class="rank-list" id="rank-top"></ol></div>
-      <div><h3>Most at risk</h3><ol class="rank-list" id="rank-bot"></ol></div>
+    <div class="bigstats hero3-stats">
+      <div class="bigstat"><b id="st-places">126</b><span>cities and regions, ready to open</span></div>
+      <div class="bigstat"><b id="st-countries">72</b><span>countries</span></div>
+      <div class="bigstat"><b id="st-projects">9</b><span>real projects on the map</span></div>
+      <div class="bigstat"><b>$0</b><span>to use, for anyone</span></div>
     </div>
-    <details class="rank-all"><summary id="rank-all-s">See all places</summary><ol class="rank-list" id="rank-all"></ol></details>
-    <p class="rank-note" id="rank-note">A screening index from open data: heat, flood exposure, connected nature, local food, low-carbon travel and three stress tests, each modeled for the whole city region. It changes when the data is rebuilt. Some places are outlined larger than the city itself, and flood and travel are not yet comparable between places, so read the ranking as a first look, not a verdict. <a href="how-it-works/">How it works</a></p>
   </section>
 
-  <section class="feed" id="feed" aria-labelledby="feed-h" hidden>
-    <h2 class="sect-h" id="feed-h">Real projects, on the map</h2>
-    <p class="rank-sub">Parks, wetlands, trees and water projects in the library's cities, each with a public source. Anyone can add one; each is checked before it appears.</p>
+  <section class="sect" id="rank" aria-labelledby="rank-h" hidden>
+    <div class="sect-top">
+      <div><h2 id="rank-h">How prepared are cities?</h2><p id="rank-sub">The Threadlands resilience index, 0 to 100, with real projects counted in.</p></div>
+      <a class="more" href="rankings/">See all rankings &rarr;</a>
+    </div>
+    <div class="rank-cols">
+      <div><h3>Best prepared</h3><ol class="rank-list" id="rank-top"></ol></div>
+      <div><h3>Most at risk</h3><ol class="rank-list" id="rank-bot"></ol></div>
+    </div>
+  </section>
+
+  <section class="sect bleed band-white feed" id="feed" aria-labelledby="feed-h" hidden>
+    <div class="sect-top">
+      <div><h2 id="feed-h">Real projects, on the map</h2><p>Parks, wetlands, trees and water projects, each with a public source. Anyone can add one.</p></div>
+      <a class="more" href="projects/">See all projects &rarr;</a>
+    </div>
     <div class="feed-grid" id="feed-grid"></div>
   </section>
 
-  <section class="now" id="now" aria-labelledby="now-h" hidden>
-    <h2 class="sect-h" id="now-h">Right now, from space</h2>
-    <p class="now-sub" id="now-sub">The latest clear satellite pass over each place, compared with the same weeks in earlier years.</p>
+  <section class="sect now" id="now" aria-labelledby="now-h" hidden>
+    <div class="sect-top"><div><h2 id="now-h">Right now, from space</h2><p class="now-sub" id="now-sub">The latest clear satellite pass over each place, compared with the same weeks in earlier years.</p></div></div>
     <div class="now-grid" id="now-grid"></div>
   </section>
 
-  <h2 class="sect-h" id="cities">Three cities, one pattern</h2>
-  <div class="cities">
-    <article class="city-card"><span class="eyebrow">Milan, Italy</span><div class="mini"><img src="assets/card-milan.webp" width="395" height="211" alt="Regional map around Milan"></div><span class="city-num">33%</span><p>of the land that drains into Milan is already built up, so rain runs off fast into small rivers like the Seveso.</p><a class="btn ghost" href="explore/#milan">Open Milan</a></article>
-    <article class="city-card"><span class="eyebrow">San Francisco, USA</span><div class="mini"><img src="assets/card-san-francisco.webp" width="396" height="211" alt="Regional map around San Francisco"></div><span class="city-num">1%</span><p>of the people within 50 km could be fed by the farmland within 50 km. The Bay Area eats from far away.</p><a class="btn ghost" href="explore/#san-francisco">Open San Francisco</a></article>
-    <article class="city-card"><span class="eyebrow">Bangkok, Thailand</span><div class="mini"><img src="assets/card-bangkok.webp" width="396" height="211" alt="Regional map around Bangkok"></div><span class="city-num">144,000 km&sup2;</span><p>of river basin drains down through Bangkok, from the mountains of northern Thailand to the Gulf.</p><a class="btn ghost" href="explore/#bangkok">Open Bangkok</a></article>
-  </div>
-
-  <section class="story" aria-labelledby="who-h">
-    <h2 id="who-h">Who uses it</h2>
+  <section class="sect bleed band-deep who" aria-labelledby="who-h">
+    <div class="sect-top"><div><h2 id="who-h">Built for the people who decide</h2></div></div>
     <div class="who-grid">
-      <div class="who"><h3>City and resilience teams</h3><p>See where heat and flooding hit hardest, compare plans, and take a costed decision brief to council or funders.</p></div>
-      <div class="who"><h3>Consultants and engineers</h3><p>Screen a site or a whole region in minutes, then export the map and plan to QGIS or ArcGIS for detailed work.</p></div>
-      <div class="who"><h3>Funders and NGOs</h3><p>Compare places side by side, see who carries each risk, and find where nature-based projects do the most.</p></div>
+      <div class="who"><span class="who-n">01</span><h3>City and resilience teams</h3><p>See where heat and flooding hit hardest, compare plans, and take a costed decision brief to council or funders.</p></div>
+      <div class="who"><span class="who-n">02</span><h3>Consultants and engineers</h3><p>Screen a site or a whole region in minutes, then export the map and plan to QGIS or ArcGIS for detailed work.</p></div>
+      <div class="who"><span class="who-n">03</span><h3>Funders and NGOs</h3><p>Compare places side by side, see who carries each risk, and find where nature-based projects do the most.</p></div>
     </div>
   </section>
 
-  <section class="story" aria-labelledby="do-h" style="margin-top:24px">
-    <h2 id="do-h">Three ways in</h2>
+  <section class="sect" aria-labelledby="do-h">
+    <div class="sect-top"><div><h2 id="do-h">Three ways in</h2></div></div>
     <div class="do-grid">
       <a class="do-card" href="explore/"><span class="do-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></span><b>Explore a place</b><span>See a city and the land around it, test it against heat, floods and 2050, and find where to act first.</span><span class="do-go">Open Explore &rarr;</span></a>
       <a class="do-card" href="studio/"><span class="do-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V10l8-6 8 6v11"/><path d="M12 21v-6"/><path d="M8 13h8"/></svg></span><b>Design in Studio</b><span>Build urban farms, parks, ponds, sea walls and homes on real streets, in 3D, with real local costs.</span><span class="do-go">Open Studio &rarr;</span></a>
@@ -134,19 +131,27 @@
     </div>
   </section>
 
-
-  <section class="story" aria-labelledby="lib-h">
-    <h2 id="lib-h">A growing library of places</h2>
-    <div class="prose">
-      <p id="lib-count">Over 120 cities on six continents open instantly. Anyone can add a place, and it is saved for the next person.</p>
+  <section class="sect" aria-labelledby="cities-h" style="padding-top:0">
+    <div class="sect-top"><div><h2 id="cities-h">Every city depends on land it doesn&rsquo;t see</h2><p>Three examples from the library.</p></div><a class="more" href="library/">Browse the library &rarr;</a></div>
+    <div class="cities">
+    <article class="city-card"><span class="eyebrow">Milan, Italy</span><div class="mini"><img src="assets/card-milan.webp" width="395" height="211" alt="Regional map around Milan"></div><span class="city-num">33%</span><p>of the land that drains into Milan is already built up, so rain runs off fast into small rivers like the Seveso.</p><a class="btn ghost" href="explore/#milan">Open Milan</a></article>
+    <article class="city-card"><span class="eyebrow">San Francisco, USA</span><div class="mini"><img src="assets/card-san-francisco.webp" width="396" height="211" alt="Regional map around San Francisco"></div><span class="city-num">1%</span><p>of the people within 50 km could be fed by the farmland within 50 km. The Bay Area eats from far away.</p><a class="btn ghost" href="explore/#san-francisco">Open San Francisco</a></article>
+    <article class="city-card"><span class="eyebrow">Bangkok, Thailand</span><div class="mini"><img src="assets/card-bangkok.webp" width="396" height="211" alt="Regional map around Bangkok"></div><span class="city-num">144,000 km&sup2;</span><p>of river basin drains down through Bangkok, from the mountains of northern Thailand to the Gulf.</p><a class="btn ghost" href="explore/#bangkok">Open Bangkok</a></article>
     </div>
-    <div class="hero-cta" style="margin-top:16px"><a class="btn" href="library/">Browse the library</a><a class="btn ghost" href="how-it-works/">How it works</a></div>
+    <p class="lib-line" id="lib-count">Over 120 cities on six continents open instantly. Anyone can add a place, and it is saved for the next person.</p>
   </section>
 </main>
-<footer class="wrap site-foot">
-  <nav aria-label="Footer"><a href="">Home</a><a href="explore/">Explore</a><a href="studio/">Studio</a><a href="library/">Library</a><a href="how-it-works/">How it works</a><a href="about/">About</a></nav>
-  <p style="margin:0">&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>
-  <p style="margin:0">Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS and Landsat (USGS and NASA).</p>
+<footer class="site-foot2">
+  <div class="wrap foot-grid">
+    <div class="foot-brand"><a class="wordmark foot-wm" href="" translate="no">Threadlands</a><p>See what&rsquo;s coming for your city, and what would fix it. Free, for any place on Earth.</p></div>
+    <nav aria-label="Tools"><h2>Tools</h2><a href="explore/">Explore</a><a href="studio/">Studio</a><a href="library/">Library</a></nav>
+    <nav aria-label="Data"><h2>Data</h2><a href="rankings/">Rankings</a><a href="projects/">Projects</a></nav>
+    <nav aria-label="About"><h2>About</h2><a href="how-it-works/">How it works</a><a href="about/">About</a></nav>
+  </div>
+  <div class="wrap foot-small">
+    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>
+    <p>Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS, Landsat (USGS and NASA), Open-Meteo and GBIF.</p>
+  </div>
 </footer>
 <script>
 
@@ -162,6 +167,7 @@
     LIB = (ix.places || []).filter(function (e) { return e && e.slug; });
     var countries = {};
     LIB.forEach(function (e) { countries[e.country] = 1; });
+    var stp = document.getElementById('st-places'); if (stp) stp.textContent = LIB.length; var stc = document.getElementById('st-countries'); if (stc) stc.textContent = Object.keys(countries).length;
     $('#lib-note').textContent = LIB.length + ' places in ' + Object.keys(countries).length + ' countries open instantly, and any other place on Earth can be built in minutes.';
     $('#lib-count').textContent = LIB.length + ' places in ' + Object.keys(countries).length + ' countries open instantly, each with measured satellite heat, its river basin and its foodshed. Anyone can add a place, and every new place is saved for the next person.';
   }).catch(function () { /* the search still sends people to Explore */ });
@@ -369,17 +375,9 @@
       return '<li><a href="explore/#' + p.slug + '"><span class="rk-n">' + (k + 1) + '</span><span class="rk-c"><b>' + esc(p.name) + '</b><span>' + esc(p.country) + (p.top ? ' · ' + (PRESS[p.top] || '') : '') + (p.projects && p.projects.add >= 0.05 ? ' · +' + p.projects.add.toFixed(1) + ' from projects' : '') + '</span></span>' +
         '<span class="rk-bar" aria-hidden="true"><i style="width:' + w + '%"></i></span><span class="rk-v">' + Math.round(p.index) + '</span></a></li>';
     }
-    $('#rank-top').innerHTML = all.slice(0, 5).map(function (p, k) { return row(p, k); }).join('');
-    $('#rank-bot').innerHTML = all.slice(-5).reverse().map(function (p, k) { return row(p, n - 1 - k); }).join('');
-    function renderAll(q) {
-      q = norm(q || '');
-      $('#rank-all').innerHTML = all.map(function (p, k) { return { p: p, k: k }; }).filter(function (x) { return !q || norm(x.p.name + ' ' + x.p.country).indexOf(q) >= 0; })
-        .map(function (x) { return row(x.p, x.k); }).join('') || '<li class="rk-none">No place matches. Search above to build it.</li>';
-    }
-    renderAll('');
-    $('#rank-all-s').textContent = 'See all ' + n + ' places';
-    $('#rank-q').addEventListener('input', function () { renderAll(this.value); document.querySelector('.rank-all').open = !!this.value.trim(); });
-    $('#rank-sub').textContent = 'The Threadlands resilience index for all ' + n + ' places in the library, 0 to 100, as of ' + new Date(rk.updated + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + '. Higher is better prepared for heat, floods and drought.';
+    $('#rank-top').innerHTML = all.slice(0, 3).map(function (p, k) { return row(p, k); }).join('');
+    $('#rank-bot').innerHTML = all.slice(-3).reverse().map(function (p, k) { return row(p, n - 1 - k); }).join('');
+    $('#rank-sub').textContent = 'The Threadlands resilience index for all ' + n + ' places, 0 to 100, with real projects counted in. As of ' + new Date(rk.updated + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + '.';
     $('#rank').hidden = false;
   }).catch(function () { /* the ranking is optional */ });
   // ---- Latest real projects across all cities
@@ -388,8 +386,9 @@
     var ps = (x[0].projects || []).slice(), names = {};
     (x[1].places || []).forEach(function (e) { names[e.slug] = e.name; });
     if (!ps.length) return;
+    var stj = document.getElementById('st-projects'); if (stj) stj.textContent = ps.length;
     ps.sort(function (a, b) { return String(b.added || '').localeCompare(String(a.added || '')) || (b.year || 0) - (a.year || 0); });
-    $('#feed-grid').innerHTML = ps.slice(0, 6).map(function (p) {
+    $('#feed-grid').innerHTML = ps.slice(0, 3).map(function (p) {
       var st = FSTAT[p.status] || FSTAT.proposed;
       return '<a class="feed-card" href="explore/#' + esc(p.place) + '" style="--pc:' + st[1] + '"><span class="feed-top"><span class="feed-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span class="feed-city">' + esc(names[p.place] || p.place) + '</span></span>' +
         '<b>' + esc(p.name) + '</b><span class="feed-sum">' + esc(String(p.summary || '').split('. ')[0].replace(/\.$/, '')) + '.</span></a>';
