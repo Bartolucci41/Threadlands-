@@ -26,6 +26,9 @@ TOPICS = {
     "water": r"rainfall|\brains?\b|lluvias?|chuvas?|pioggia|landslide|deslave|deslizamento|frana|storm|tormenta|tempesta",
     "greening": r"\bparks?\b|parque|\bparc\b|\bparco\b|wetland|humedal|zona úmida|tree planting|trees|árboles|arborização|alberi|bäume|green infrastructure|sponge city|reforest|urban forest|verde urbano|stadtgrün|river restoration",
 }
+# Headlines that match the words but are not about the city's climate or land
+NOISE = r"flood(ing|ed)? (the |international |global )?(market|inbox|zone)|flooded with|stock|shares|crypto|tokyo cement|box office|\bnba\b|\bnfl\b|football|soccer|fútbol|futebol|calcio"
+SKIP_SOURCES = {"facebook", "youtube", "instagram", "x", "tiktok", "reddit", "linkedin"}
 PRIORITY = {"flood": 5, "heat": 5, "fire": 4, "drought": 4, "greening": 3, "water": 3, "climate": 1}
 
 # Search words per language, and the Google News edition to ask (hl, ceid language)
@@ -115,9 +118,13 @@ def main():
                 if key in seen:
                     continue
                 seen.add(key)
-                ft = fold(a["title"])
-                topic = next((k for k, rx in TOPICS.items() if re.search(fold(rx), ft)), "climate")
-                items.append(dict(a, title=a["title"][:180], topic=topic, named=fold(name) in ft))
+                ft, fn = fold(a["title"]), fold(name)
+                if fold(a["source"]) in SKIP_SOURCES or re.search(fold(NOISE), ft) or ("new " + fn) in ft:
+                    continue
+                topic = next((k for k, rx in TOPICS.items() if re.search(fold(rx), ft)), None)
+                if not topic:
+                    continue                  # the headline itself must be about one of the topics
+                items.append(dict(a, title=a["title"][:180], topic=topic, named=re.search(r"\b" + re.escape(fn) + r"\b", ft) is not None))
             time.sleep(2)
         items.sort(key=lambda x: (x["named"], x["topic"] != "climate", x["date"]), reverse=True)
         if items:
