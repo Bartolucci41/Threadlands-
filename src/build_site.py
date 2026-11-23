@@ -395,6 +395,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .contact-box { padding: 20px 22px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); scroll-margin-top: 20px; }
 
   /* ---- Two faces: the side switch in the top bar */
+  .topnav .nav-home { margin-right: 5px; vertical-align: -2px; }
   .side-sw { display: inline-flex; align-items: center; min-height: 34px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--deep, #123B38); color: var(--deep, #123B38); font: 600 0.82rem var(--font-body); text-decoration: none; white-space: nowrap; }
   .side-sw:hover { background: var(--deep, #123B38); color: #fff; }
   .side-sw .sw-s { display: none; }
@@ -566,7 +567,8 @@ def head(base, title, desc):
 
 def nav(base, here):
     pro = here in PRO_PAGES
-    links = "".join(f'<a href="{base}{p}"' + (' aria-current="page"' if p == here else "") + f'>{n}</a>'
+    house = '<svg class="nav-home" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>'
+    links = "".join(f'<a href="{base}{p}"' + (' aria-current="page"' if p == here else "") + '>' + (house if p == "" else "") + f'{n}</a>'
                     for p, n in (NAV_PRO if pro else NAV))
     switch = ('' if pro else
               f'<a class="side-sw" href="{base}lab/"><span class="sw-l">Open the Lab</span><span class="sw-s">Lab</span></a>')

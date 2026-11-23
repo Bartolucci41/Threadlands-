@@ -865,6 +865,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .contact-box { padding: 20px 22px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); scroll-margin-top: 20px; }
 
   /* ---- Two faces: the side switch in the top bar */
+  .topnav .nav-home { margin-right: 5px; vertical-align: -2px; }
   .side-sw { display: inline-flex; align-items: center; min-height: 34px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--deep, #123B38); color: var(--deep, #123B38); font: 600 0.82rem var(--font-body); text-decoration: none; white-space: nowrap; }
   .side-sw:hover { background: var(--deep, #123B38); color: #fff; }
   .side-sw .sw-s { display: none; }
