@@ -186,6 +186,10 @@
   .gl .gl-k { font: 500 0.68rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); }
   .gl .gl-v { font: 700 1.5rem/1.1 var(--font-body); color: var(--ink); }
   .gl .gl-t { font-size: 0.875rem; color: var(--ink2); text-wrap: pretty; }
+  .gl-cx, .mctx { display: grid; gap: 5px; font-size: 0.78rem; color: var(--ink2); margin-top: 6px; line-height: 1.35; }
+  .mctx:empty { display: none; }
+  .cx-bar { position: relative; display: block; height: 4px; border-radius: 2px; background: var(--line); }
+  .cx-bar i { position: absolute; top: -3px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); }
   table.costs td, table.costs th { font-size: 0.8125rem; vertical-align: top; }
   table.costs td:first-child { font-weight: 600; white-space: nowrap; }
   table.costs .cost-total td { font-weight: 700; border-top: 2px solid var(--ink); }
@@ -420,7 +424,7 @@
   @media (min-width: 960px) { .ptabs { position: sticky; } .stage { position: sticky; } }
   .tpanel { display: grid; gap: 6px; align-content: start; }
   .tpanel[hidden] { display: none; }
-  .psum { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-radius: 14px; background: var(--surface); margin: 0 0 10px; }
+  .psum { flex-wrap: wrap; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-radius: 14px; background: var(--surface); margin: 0 0 10px; }
   .psum[hidden] { display: none; }
   .psum b { font: 800 1.9rem/1 var(--font-display, system-ui); margin-left: 10px; }
   .psum .eyebrow { vertical-align: middle; }
@@ -533,6 +537,7 @@
       <div class="psum" id="psum" hidden>
         <div><span class="eyebrow">Resilience index</span><b id="ps-idx">0</b><span class="ps-d" id="ps-d"></span><span class="ps-vs">vs. business as usual</span></div>
         <span class="ps-rng" id="ps-rng"></span>
+        <p class="msub mctx" id="ps-ctx" style="flex-basis:100%;margin:0"></p>
       </div>
       <div class="tpanel" role="tabpanel" id="tp-understand" aria-labelledby="ptab-understand">
       <section class="press" id="press" hidden>
@@ -761,7 +766,7 @@
       for (var i = 0; i < P.N; i++) { var v = d.cells.anom[i]; a[i] = v == null ? NaN : Number(v); }
       NOWD = { date: d.date, anom: a, land: d.land_anom, built: d.built_anom, usual: d.usual_scenes, uncertain: !!d.uncertain };
       $('#now-chip').hidden = false;
-      renderGlance();
+      renderGlance(); renderCtx();
       if (layer === 'now') { renderLegend(); scheduleDraw(); }
     }).catch(function () { /* no reading for this place yet */ });
   }
@@ -812,7 +817,7 @@
       '<span class="mval"><b id="mv-' + m.k + '">0</b><span class="delta" id="md-' + m.k + '"></span></span></div>' +
       '<span class="rng" id="mr-' + m.k + '"></span>' +
       '<div class="bar"><span class="band" id="mb-' + m.k + '"></span><span class="fill" id="mf-' + m.k + '"></span><span class="tick" id="mt-' + m.k + '"></span></div>' +
-      '<p class="msub">' + m.sub + '</p></div>';
+      '<p class="msub">' + m.sub + '</p><p class="msub mctx" id="mc-' + m.k + '"></p></div>';
   }).join('');
   $('#tests').innerHTML = TESTS.map(function (t) {
     return '<button type="button" class="trow" data-layer="' + t.layer + '">' +
@@ -1749,8 +1754,8 @@
     };
   }
 
-  var PDIST = null, PDIST_N = 0;
-  fetch(BASE + 'data/profile-dist.json').then(function (r) { return r.json(); }).then(function (j) { PDIST = j.dist; PDIST_N = j.places; if (P && P._raw) renderPressures(P._raw); }).catch(function () {});
+  var PDIST = null, PDIST_N = 0, PCTX = null;
+  fetch(BASE + 'data/profile-dist.json').then(function (r) { return r.json(); }).then(function (j) { PDIST = j.dist; PDIST_N = j.places; PCTX = j.ctx || null; if (P && P._raw) renderPressures(P._raw); if (P) { renderGlance(); renderCtx(); } }).catch(function () {});
   // ---- Right now: today's weather, air and recorded wildlife, fetched live from free open services, never stored
   var LIVE_SEQ = 0;
   function loadLive(data) {
@@ -1826,7 +1831,7 @@
     renderPlaceInfo();
     renderLegend();
     SPOT = spotOutline(P);
-    renderGlance();
+    renderGlance(); renderCtx();
     render();
     resize();
     renderRegional();
@@ -1854,6 +1859,16 @@
   }
   function fmtPeople(v) { return v >= 1e6 ? (v / 1e6).toFixed(v >= 1e7 ? 0 : 1) + ' million' : v >= 1e4 ? Math.round(v / 1000).toLocaleString('en-US') + ',000' : Math.round(v).toLocaleString('en-US'); }
   function fmtKm(v) { return v >= 100 ? Math.round(v).toLocaleString('en-US') : v >= 10 ? Math.round(v) : v.toFixed(1); }
+  // Today's scores for this place against every place in the library
+  function renderCtx() {
+    var ok = PCTX && P && P.BAU_TODAY;
+    function line(el, v, list) {
+      var r = ok ? TLProfile.rankIn(v, list) : null;
+      el.innerHTML = r === null ? '' : '<span class="cx-bar" aria-hidden="true"><i style="left:' + r + '%"></i></span>Today, better than ' + r + '% of the ' + list.length + ' places in the library';
+    }
+    METRICS.forEach(function (m) { var el = $('#mc-' + m.k); if (el) line(el, ok ? P.BAU_TODAY.metrics[m.k] : null, ok ? PCTX['m_' + m.k] : null); });
+    var pi = $('#ps-ctx'); if (pi) line(pi, ok ? P.BAU_TODAY.index : null, ok ? PCTX.index : null);
+  }
   function renderGlance() {
     var box = $('#glance');
     if (!P || kind === 'demo') { box.hidden = true; return; }
@@ -1901,8 +1916,14 @@
     $('#glance-h').textContent = small ? name + ' within its region' : name + ' at a glance';
     $('#glance-sub').textContent = small ? 'The outlined area is ' + name + '. The faded land around it is the region it depends on for water, food and nature, and every score below counts both.'
       : 'The essentials before you start planning. Drag the levers below to see how they change.';
+    var ST = null; try { ST = PCTX && window.TLProfile ? TLProfile.placeStats(P) : null; } catch (e) { ST = null; }
+    // How each fact compares with every place in the library: [stat key, phrase for "more than X% of places"]
+    var CMP = { 'People': ['pop', 'More people than'], 'Heat, measured': ['heat', 'A stronger heat island than'], 'Flooding': ['flood', 'More flood-prone land than'],
+      'Water': ['basin', 'A larger river basin than'], 'Food': ['food', 'More nearby farmland per person than'], 'Wild places': ['wild', 'Nature farther away than'] };
     $('#glance-grid').innerHTML = cards.map(function (k) {
-      return '<div class="gl"><span class="gl-k">' + k[0] + '</span><span class="gl-v">' + k[1] + '</span><span class="gl-t">' + esc(k[2]) + '</span></div>';
+      var cm = CMP[k[0]], r = cm && ST ? TLProfile.rankIn(ST[cm[0]], PCTX[cm[0]]) : null;
+      var ctx = r === null ? '' : '<span class="gl-cx"><span class="cx-bar" aria-hidden="true"><i style="left:' + r + '%"></i></span>' + cm[1] + ' ' + r + '% of the ' + PCTX[cm[0]].length + ' places in the library</span>';
+      return '<div class="gl"><span class="gl-k">' + k[0] + '</span><span class="gl-v">' + k[1] + '</span><span class="gl-t">' + esc(k[2]) + '</span>' + ctx + '</div>';
     }).join('');
     box.hidden = false;
   }

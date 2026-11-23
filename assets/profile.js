@@ -80,6 +80,45 @@
     out.sort(function (a, b) { return b.rank - a.rank; });
     return { m: m, top: out.slice(0, 3).map(function (o) { var d = describe(o.key, m); d.key = o.key; d.pct = o.pct; return d; }) };
   }
-  var api = { measure: measure, profile: profile, KEYS: KEYS };
+  // Headline facts about a place, computed the same way everywhere so any place can be ranked against the library.
+  // P is a prepared ThreadModel place. Higher is not always worse: CTX says which way is better.
+  function placeStats(P) {
+    var c = P.place.cells, n = P.N, base = P.BAU_TODAY, pop = 0, area = 0, land = 0, flood = 0, hot = 0, hotN = 0, sx = 0, sy = 0, sw = 0;
+    for (var i = 0; i < n; i++) {
+      if (!P.inside[i]) continue;
+      var a = Number(c.area[i]) || 0, pp = Number(c.pop[i]) || 0, isLand = (Number(c.water[i]) || 0) < 0.5;
+      pop += pp; area += a;
+      if (isLand) {
+        land += a; if ((Number(c.flood[i]) || 0) >= 0.5) flood += a;
+        var lr = c.lst_rel ? c.lst_rel[i] : null;
+        if (lr != null && isFinite(Number(lr))) { hot += Number(lr); hotN++; }
+      }
+      var w = pp + 0.01; sx += P.X[i] * w; sy += P.Y[i] * w; sw += w;
+    }
+    var cx = sx / sw, cy = sy / sw, wild = Infinity, natural = 0, natTotal = 0;
+    for (i = 0; i < n; i++) {
+      var cv = base.cover[i]; if (cv === 'water') continue;
+      natTotal++;
+      if (cv === 'forest' || cv === 'wetland' || cv === 'open') natural++;
+      if (cv === 'forest' || cv === 'wetland') { var d = Math.hypot(P.X[i] - cx, P.Y[i] - cy); if (d < wild) wild = d; }
+    }
+    var reg = P.place.regional || {}, out = {
+      pop: pop, density: area > 0 ? pop / area : null, heat: hotN ? hot / hotN : null, flood: land > 0 ? flood / land : null,
+      basin: reg.basin && reg.basin.area_km2 ? reg.basin.area_km2 : null, wild: isFinite(wild) ? wild : null, natural: natTotal ? natural / natTotal : null,
+      food: null, index: base.index
+    };
+    if (reg.foodshed && reg.foodshed.length && pop > 0) out.food = reg.foodshed[0].crop_km2 / (pop * (reg.need_km2_per_person || 0.0019));
+    for (var m in base.metrics) out['m_' + m] = base.metrics[m];
+    for (var t in base.tests) out['t_' + t] = base.tests[t];
+    return out;
+  }
+  // Where a value sits among all library places: share of places with a lower value (0 to 100)
+  function rankIn(v, list) {
+    if (v === null || v === undefined || !isFinite(v) || !list || list.length < 5) return null;
+    if (list[list.length - 1] - list[0] < 1e-6) return null;               // a score that is the same everywhere says nothing
+    var lo = 0, eq = 0; for (var k = 0; k < list.length; k++) { if (list[k] < v) lo++; else if (list[k] === v) eq++; }
+    return Math.max(1, Math.min(99, Math.round(100 * (lo + eq / 2) / list.length)));
+  }
+  var api = { measure: measure, profile: profile, KEYS: KEYS, placeStats: placeStats, rankIn: rankIn };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.TLProfile = api;
 })(this);
