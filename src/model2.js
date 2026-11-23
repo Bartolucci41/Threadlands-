@@ -802,7 +802,9 @@ const ThreadModel = (function () {
   const effort = (L) => LEVER_KEYS.reduce((s, k) => s + L[k] * COST[k], 0);
 
   // Best mix within the effort cap, searched on a coarse grid in small batches so the page stays responsive
-  function searchBest(P, step, onProgress, onDone) {
+  function searchBest(P, step, onProgress, onDone, score) {
+    // score(result) picks what 'best' means (a goal); the resilience index by default
+    score = score || (r => r.index);
     // A grid over the five levers within the effort cap, then a local polish around the best point.
     // Places with many hexes use a coarser grid (fewer tries); the polish recovers the precision.
     if (P.N > 4000 && step < 25) step = 25;
@@ -814,11 +816,11 @@ const ThreadModel = (function () {
       if (effort(L) <= BUDGET + 1e-9) combos.push(L);
     }
     const seen = new Set(), key = L => LEVER_KEYS.map(k => L[k]).join(',');
-    let i = 0, best = null, bestI = -1, cancelled = false, polishing = false, queue = [], rounds = 0, improved = false;
+    let i = 0, best = null, bestI = -Infinity, cancelled = false, polishing = false, queue = [], rounds = 0, improved = false;
     function tryL(L) {
       const k = key(L); if (seen.has(k)) return; seen.add(k);
-      const r = P.evaluate(L);
-      if (r.index > bestI + 1e-9) { bestI = r.index; best = L; improved = true; }
+      const r = P.evaluate(L), sc = score(r);
+      if (sc > bestI + 1e-9) { bestI = sc; best = L; improved = true; }
     }
     function neighbors(B) {
       const out = [], d = 5;

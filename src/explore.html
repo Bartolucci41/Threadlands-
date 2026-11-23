@@ -444,6 +444,26 @@
   .viewsw { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 0.8rem; color: var(--ink2); margin: 0 0 4px; }
   .viewsw .chip { min-height: 32px; padding: 4px 12px; font-size: 0.8rem; }
   body.simple .adv, body.simple .adv-wrap { display: none !important; }
+  .fixit { background: var(--accent); color: var(--accent-ink, #fff); border-radius: 16px; padding: 18px 20px; margin: 0 0 14px; display: grid; gap: 12px; }
+  .fixit[hidden], .fixit [hidden] { display: none !important; }
+  .fixit h2 { margin: 0 0 10px; font-size: 1.35rem; color: inherit; }
+  .fix-goals { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+  .fix-goal { text-align: left; display: grid; gap: 3px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.28); background: rgba(255,255,255,0.1); color: inherit; font: inherit; cursor: pointer; min-height: 72px; transition: background .15s, transform .15s; }
+  .fix-goal:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
+  .fix-goal:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  .fix-goal b { font-size: 0.98rem; } .fix-goal span { font-size: 0.8rem; opacity: 0.85; line-height: 1.35; }
+  .fix-status { margin: 0 0 8px; font-weight: 600; }
+  .fix-prog { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.2); overflow: hidden; }
+  .fix-prog i { display: block; height: 100%; width: 0; background: #fff; border-radius: 4px; transition: width .2s; }
+  .fix-lead { margin: 0 0 12px; font-size: 1.05rem; font-weight: 600; }
+  .fix-nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+  .fix-nums div { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 14px; display: grid; gap: 2px; }
+  .fix-nums b { font: 800 1.9rem/1.05 var(--font-display, system-ui); font-variant-numeric: tabular-nums; }
+  .fix-nums span { font-size: 0.82rem; opacity: 0.9; line-height: 1.35; }
+  .fix-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .fixit .btn { background: #fff; color: var(--accent); border-color: #fff; }
+  .fixit .btn.ghost { background: transparent; color: inherit; border-color: rgba(255,255,255,0.55); }
+  .fixit .btn[aria-pressed="true"] { background: #F3E3C4; color: #3d2c09; border-color: #F3E3C4; }
 </style>
 
 <!--NAV-->
@@ -475,6 +495,37 @@
   <nav class="jump" aria-label="On this page"><span>Jump to</span><a href="#mapwrap">Map</a><a href="#tp-understand" data-go="understand">Understand</a><a href="#tp-plan" data-go="plan">Plan</a><a href="#tp-compare" data-go="compare">Compare</a><a href="#reg-h">Beyond the city</a><a href="../studio/">Design it in Studio &rarr;</a></nav>
   <section class="lab" aria-labelledby="lab-h">
     <div class="stage">
+      <section class="fixit" id="fixit" aria-labelledby="fix-h" hidden>
+        <div class="fix-ask" id="fix-ask">
+          <h2 id="fix-h">What should <span id="fix-name">this place</span> fix first?</h2>
+          <div class="fix-goals" role="group" aria-label="Goals">
+            <button type="button" class="fix-goal" data-goal="heat"><b>Cool the hottest streets</b><span>Shade and green where people swelter</span></button>
+            <button type="button" class="fix-goal" data-goal="flood"><b>Keep homes dry</b><span>Room for water before it reaches houses</span></button>
+            <button type="button" class="fix-goal" data-goal="food"><b>Grow food nearby</b><span>Farmland that feeds the city, even in drought</span></button>
+            <button type="button" class="fix-goal" data-goal="habitat"><b>Bring nature back</b><span>Connected wild places, parks included</span></button>
+            <button type="button" class="fix-goal" data-goal="all"><b>All of it, balanced</b><span>The strongest overall plan</span></button>
+          </div>
+        </div>
+        <div class="fix-run" id="fix-run" hidden aria-live="polite">
+          <p class="fix-status" id="fix-status">Testing plans…</p>
+          <div class="fix-prog"><i id="fix-bar"></i></div>
+        </div>
+        <div class="fix-done" id="fix-done" hidden>
+          <p class="fix-lead" id="fix-lead"></p>
+          <div class="fix-nums">
+            <div><b id="fx-a">0</b><span id="fx-a-l"></span></div>
+            <div><b id="fx-b">0</b><span id="fx-b-l"></span></div>
+            <div><b id="fx-c">0</b><span id="fx-c-l">on the resilience index, compared with doing nothing</span></div>
+            <div><b id="fx-d">–</b><span id="fx-d-l">to build, rough estimate</span></div>
+          </div>
+          <div class="fix-acts">
+            <button type="button" class="btn" id="fix-cmp" aria-pressed="false">Show today</button>
+            <button type="button" class="btn ghost" id="fix-brief">Get the decision brief</button>
+            <button type="button" class="btn ghost" id="fix-edit">Adjust the plan</button>
+            <button type="button" class="btn ghost" id="fix-again">Try another goal</button>
+          </div>
+        </div>
+      </section>
       <div class="mapwrap" id="mapwrap">
         <canvas id="map" role="img" aria-label="Hex map of the loaded city-region. Colors show land cover, heat, flood exposure or habitat depending on the selected layer."></canvas>
         <div class="mapctl">
@@ -928,10 +979,12 @@
   var TILES = {}, tileCount = 0;
   function setBasemap(v) {
     BASEMAP = v; var a = $('#mapattr');
+    try { if (v !== 'sentinel') localStorage.setItem('threadlands:basemap', v); } catch (e) { /* ignore */ }
     a.hidden = v === 'none'; a.innerHTML = v === 'none' ? '' : BASES[v].attr;
     $('#basemap').value = v === 'sentinel' ? 'satellite' : v;
     scheduleDraw();
   }
+  (function () { var b = null; try { b = localStorage.getItem('threadlands:basemap'); } catch (e) { /* ignore */ } setBasemap(b === 'none' || b === 'satellite' ? b : 'streets'); })();
   function drawTiles() {
     if (BASEMAP === 'none' || !P || !P.MERC || kind === 'demo') return;
     var B0 = BASES[BASEMAP], K = P.MERC.K, z = Math.log2(K * S / 256);
@@ -1014,6 +1067,65 @@
     return true;
   }
   function isUrban(c) { return c === 'core' || c === 'mid' || c === 'suburb' || c === 'greenway'; }
+  var RGBC = {};
+  function toRGB(col) {
+    if (RGBC[col]) return RGBC[col];
+    var m = /^rgba?\(([^)]+)\)/.exec(col), out;
+    if (m) { var v = m[1].split(',').map(Number); out = [v[0], v[1], v[2]]; } else out = hex2rgb(col || '#888888');
+    return (RGBC[col] = out);
+  }
+  function blendRGB(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+  // The continuous surface: a fine grid over the whole place, each pixel a smooth weighted blend of nearby area centres.
+  // Built once per plan or layer change; panning and zooming only redraw it (the browser smooths it further when scaled up).
+  var FIELD = null, FADE = null;
+  function buildField(FC, key) {
+    var sp = P.hexKm * Math.sqrt(3), px = sp / 3, pad = sp;
+    var x0 = bbox.minx - pad, y0 = bbox.miny - pad, w = bbox.maxx - bbox.minx + 2 * pad, h = bbox.maxy - bbox.miny + 2 * pad;
+    var scale = Math.max(1, Math.max(w, h) / px / 1400);
+    px *= scale;
+    var nx = Math.max(2, Math.ceil(w / px)), ny = Math.max(2, Math.ceil(h / px));
+    // spatial hash of area centres
+    var gs = sp, gx = Math.ceil(w / gs) + 1, gy = Math.ceil(h / gs) + 1, head = new Int32Array(gx * gy).fill(-1), next = new Int32Array(P.N);
+    for (var i = 0; i < P.N; i++) {
+      var cx = Math.floor((P.X[i] - x0) / gs), cy = Math.floor((P.Y[i] - y0) / gs);
+      if (cx < 0 || cy < 0 || cx >= gx || cy >= gy) { next[i] = -1; continue; }
+      var k = cy * gx + cx; next[i] = head[k]; head[k] = i;
+    }
+    var sig2 = 2 * Math.pow(0.55 * sp, 2), R2 = Math.pow(1.6 * sp, 2), Wref = 0;
+    var cv2 = document.createElement('canvas');
+    cv2.width = nx; cv2.height = ny;
+    var c2 = cv2.getContext('2d'), img = c2.createImageData(nx, ny), d = img.data;
+    var sumW = new Float32Array(nx * ny), acc = new Float32Array(nx * ny * 4);
+    for (var yy = 0; yy < ny; yy++) {
+      var wy = y0 + (yy + 0.5) * px, cyy = Math.floor((wy - y0) / gs);
+      for (var xx = 0; xx < nx; xx++) {
+        var wx = x0 + (xx + 0.5) * px, cxx = Math.floor((wx - x0) / gs), sw = 0, sr = 0, sg = 0, sb = 0, sa = 0;
+        for (var oy = -2; oy <= 2; oy++) {
+          var ry = cyy + oy; if (ry < 0 || ry >= gy) continue;
+          for (var ox = -2; ox <= 2; ox++) {
+            var rx = cxx + ox; if (rx < 0 || rx >= gx) continue;
+            for (var j = head[ry * gx + rx]; j >= 0; j = next[j]) {
+              var dx = P.X[j] - wx, dy = P.Y[j] - wy, dd = dx * dx + dy * dy;
+              if (dd > R2) continue;
+              var wt = Math.exp(-dd / sig2);
+              sw += wt; sr += wt * FC.r[j]; sg += wt * FC.g[j]; sb += wt * FC.b[j]; sa += wt * FC.a[j];
+            }
+          }
+        }
+        var o = yy * nx + xx; sumW[o] = sw;
+        if (sw > 0) { acc[o * 4] = sr / sw; acc[o * 4 + 1] = sg / sw; acc[o * 4 + 2] = sb / sw; acc[o * 4 + 3] = sa / sw; if (sw > Wref) Wref = sw; }
+      }
+    }
+    Wref *= 0.75;
+    for (var q = 0; q < nx * ny; q++) {
+      if (!(sumW[q] > 0)) continue;
+      var cover = Math.min(1, sumW[q] / Wref);
+      d[q * 4] = acc[q * 4]; d[q * 4 + 1] = acc[q * 4 + 1]; d[q * 4 + 2] = acc[q * 4 + 2];
+      d[q * 4 + 3] = Math.round(255 * acc[q * 4 + 3] * cover * cover * (3 - 2 * cover));
+    }
+    c2.putImageData(img, 0, 0);
+    FIELD = { cv: cv2, x0: x0, y0: y0, w: nx * px, h: ny * px, res: res, key: key };
+  }
   var drawQueued = false;
   function scheduleDraw() {
     if (drawQueued) return;
@@ -1118,21 +1230,21 @@
     ctx.clearRect(0, 0, W, H);
     drawTiles();
     var bgOn = BASEMAP !== 'none' && kind !== 'demo', zl = P.MERC ? Math.log2(P.MERC.K * S / 256) : 0;
-    var fade = !bgOn ? 1 : zl < 11 ? 0.88 : zl < 13 ? 0.6 : zl < 15 ? 0.4 : 0.25;
+    var fade = !bgOn ? 1 : zl < 11 ? 0.8 : zl < 13 ? 0.6 : zl < 15 ? 0.42 : 0.28;
     var canopy = 1 - Math.pow(1 - state.canopy / 100, 1.8);
     var keep = 1 - res.retention;
     // Scores are worked out per hex, but the map shows them as a smooth wash (hexes drawn small and blurred);
     // the Grid button shows the hexes themselves
-    var wash = !GRID && hexPx < 400, mainCtx = ctx;
+    // Scores are worked out per area, but the map shows a continuous surface: each area's colour is blended
+    // with its neighbours on a fine grid (FIELD), so no hexagons show. Grid shows the areas themselves.
+    var wash = !GRID, mainCtx = ctx;
     var shrink = wash ? 1.0 : hexPx > 7 ? (hexPx > 60 ? 0.985 : 0.93) : 1.0;
-    if (wash) {
-      if (!WASH) WASH = document.createElement('canvas');
-      var q = 0.5, ww = Math.max(1, Math.round(W * q)), wh = Math.max(1, Math.round(H * q));
-      if (WASH.width !== ww || WASH.height !== wh) { WASH.width = ww; WASH.height = wh; }
-      ctx = WASH.getContext('2d'); ctx.setTransform(q, 0, 0, q, 0, 0); ctx.clearRect(0, 0, W, H);
-    }
+    var fkey = wash ? [layer, state.canopy, HC ? 1 : 0, NOWD ? 1 : 0, document.documentElement.getAttribute('data-theme') || ''].join('|') : '';
+    var needField = wash && (!FIELD || FIELD.res !== res || FIELD.key !== fkey);
+    var FC = needField ? { r: new Float32Array(P.N), g: new Float32Array(P.N), b: new Float32Array(P.N), a: new Float32Array(P.N) } : null;
     var cells = P.place.cells;
     for (var i = 0; i < P.N; i++) {
+      if (wash && !needField) break;
       var cov = res.cover[i], fill = C[cov] || C.open, alpha = 1, inner = null;
       if (cov === 'greenway') fill = C[res.ucls[i]];
       if (layer === 'heat') {
@@ -1163,6 +1275,13 @@
       } else if (cov === 'greenway') {
         inner = C.corridor;
       }
+      if (wash) {
+        var rgb = toRGB(fill), aa = alpha;
+        if (layer === 'land' && canopy > 0 && isUrban(cov)) rgb = blendRGB(rgb, toRGB(C.canopy), 0.6 * canopy);
+        if (!P.inside[i]) rgb = blendRGB(rgb, toRGB(C.surface), 0.38);
+        FC.r[i] = rgb[0]; FC.g[i] = rgb[1]; FC.b[i] = rgb[2]; FC.a[i] = aa;
+        continue;
+      }
       var hx = P.X[i] * S + OX, hy = P.Y[i] * S + OY;
       if (hx < -hexPx * 2 || hy < -hexPx * 2 || hx > W + hexPx * 2 || hy > H + hexPx * 2) continue;
       if (!pathFor(i, shrink)) continue;
@@ -1179,8 +1298,14 @@
     }
     if (wash) {
       ctx = mainCtx;
-      ctx.save(); ctx.filter = 'blur(' + Math.max(2.5, Math.min(40, hexPx * 0.45)).toFixed(1) + 'px)';
-      ctx.drawImage(WASH, 0, 0, W, H); ctx.restore();
+      if (needField) buildField(FC, fkey);
+      var fadeK = 1;
+      if (FADE && FADE.from && FADE.f !== FIELD) { fadeK = Math.min(1, (performance.now() - FADE.t0) / 700); if (fadeK < 1) { ctx.save(); ctx.imageSmoothingEnabled = true; ctx.globalAlpha = fade * (1 - fadeK); ctx.drawImage(FADE.from, FADE.f.x0 * S + OX, FADE.f.y0 * S + OY, FADE.f.w * S, FADE.f.h * S); ctx.restore(); requestAnimationFrame(scheduleDraw); } else FADE = null; }
+      if (FIELD) {
+        var urbanFade = bgOn && layer === 'land' && zl >= 12 ? 0.75 : 1;
+        ctx.save(); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.globalAlpha = fade * urbanFade * (fadeK < 1 ? fadeK : 1);
+        ctx.drawImage(FIELD.cv, FIELD.x0 * S + OX, FIELD.y0 * S + OY, FIELD.w * S, FIELD.h * S); ctx.restore();
+      }
       drawDetail(C);
     }
     // The real boundary from OpenStreetMap, once loaded, instead of the stepped hex outline
@@ -1924,6 +2049,8 @@
     loadSketch();
     PRI = P.priorities(8);
     renderPressures(data);
+    if (fixSearch) { fixSearch.cancel(); fixSearch = null; }
+    FIX = null; $('#fixit').hidden = false; $('#fix-name').textContent = (data.name || 'this place').split(',')[0]; fixShow('ask');
     loadLive(data);
     WTS.sel = -1; WTS.show = false;
     renderWTS();
@@ -2231,6 +2358,86 @@
       var parts = LEVERS.map(function (L) { return SHORT[L.key] + ' ' + best[L.key]; });
       msg.textContent = 'Best mix found: resilience index ' + Math.round(score) + ' (' + parts.join(', ') + '). It is now applied and saved as the Best mix scenario.';
     });
+  });
+  // ---- Fix it: pick a goal, Threadlands searches the plans, applies the best one and shows what it changes
+  var FIX = null, fixSearch = null;
+  var GOALS = {
+    heat: { name: 'cooler streets', layer: 'heat', score: function (r) { return r.metrics.heat + 0.1 * r.index; } },
+    flood: { name: 'homes kept dry', layer: 'flood', score: function (r) { return r.metrics.flood + 0.1 * r.index; } },
+    food: { name: 'food grown nearby', layer: 'land', score: function (r) { return 0.5 * (r.metrics.food + r.metrics.foodDry) + 0.1 * r.index; } },
+    habitat: { name: 'nature brought back', layer: 'habitat', score: function (r) { return r.metrics.habitat + 0.1 * r.index; } },
+    all: { name: 'a balanced plan', layer: 'land', score: function (r) { return r.index; } }
+  };
+  function fixShow(which) { ['ask', 'run', 'done'].forEach(function (k) { $('#fix-' + k).hidden = k !== which; }); }
+  function countUp(el, to, fmt) {
+    var t0 = performance.now(), dur = 1300;
+    (function step(t) { var k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(to * e); if (k < 1) requestAnimationFrame(step); })(t0);
+  }
+  function fmtBig(n) { n = Math.round(n); return n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : n >= 1e4 ? Math.round(n / 1e3) + 'K' : n.toLocaleString('en-US'); }
+  document.querySelectorAll('.fix-goal').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (!P || fixSearch) return;
+      var g = GOALS[b.dataset.goal], forP = P;
+      fixShow('run'); $('#fix-bar').style.width = '0';
+      $('#fix-status').textContent = 'Testing plans for ' + (P.place.name || 'this place') + '…';
+      setLayer(g.layer);
+      fixSearch = TM.searchBest(P, 25, function (f) {
+        $('#fix-bar').style.width = Math.round(f * 100) + '%';
+        $('#fix-status').textContent = 'Testing ' + (fixSearch ? fixSearch.total.toLocaleString('en-US') + ' ' : '') + 'plans for ' + (forP.place.name || 'this place') + '… ' + Math.round(f * 100) + '%';
+      }, function (best) {
+        fixSearch = null;
+        if (forP !== P || !best) { fixShow('ask'); return; }
+        var before = P.BAU;
+        FIX = { goal: b.dataset.goal, plan: best };
+        Object.assign(state, best); $('#budget-note').hidden = true;
+        FADE = { from: FIELD ? FIELD.cv : null, f: FIELD, t0: performance.now() };
+        render();
+        // What changed, in people
+        var c = P.place.cells, cooled = 0, dry = 0, heatAfter = res.heat, heatBefore = before.heat, hs = [];
+        // the hottest neighborhoods: the hottest quarter of residents today
+        for (var h = 0; h < P.N; h++) if (heatBefore[h] > 0 && +c.pop[h] > 0) hs.push([heatBefore[h], +c.pop[h]]);
+        hs.sort(function (x, y) { return y[0] - x[0]; });
+        var tp = hs.reduce(function (a2, x) { return a2 + x[1]; }, 0), acc = 0, hot = Infinity;
+        for (var q = 0; q < hs.length && acc < tp * 0.25; q++) { acc += hs[q][1]; hot = hs[q][0]; }
+        var hb = 0, ha = 0, hotPop = 0, fb = 0, fa = 0, floodPop = 0;
+        for (var i = 0; i < P.N; i++) {
+          var pp = +c.pop[i] || 0; if (!pp) continue;
+          if (heatBefore[i] >= hot) { hb += pp * heatBefore[i]; ha += pp * heatAfter[i]; hotPop += pp; }
+          if (before.floodExp[i] > 0) { fb += before.floodExp[i]; fa += res.floodExp[i]; floodPop += pp; }
+        }
+        var heatCut = hb > 0 ? 1 - ha / hb : 0;
+        var floodCut = fb > 0 ? 1 - (fa * (1 - res.retention) * (1 + 0)) / (fb * (1 - before.retention)) : 0;
+        var nm = P.place.name || 'this place';
+        $('#fix-lead').textContent = 'Best plan for ' + g.name + ' in ' + nm + ', out of ' + fixTotal + ' tested. It is now on the map.';
+        var HEAT = [heatCut, (heatCut >= 0 ? 'less' : 'more') + ' heat in the hottest neighborhoods, where ' + fmtBig(hotPop) + ' people live'];
+        var FLD = [floodCut, (floodCut >= 0 ? 'less' : 'more') + ' flood exposure for the ' + fmtBig(floodPop) + ' people in flood-prone areas'];
+        var A = b.dataset.goal === 'flood' ? FLD : HEAT, B = b.dataset.goal === 'flood' ? HEAT : FLD;
+        $('#fx-a-l').textContent = A[1]; $('#fx-b-l').textContent = B[1];
+        var pctF = function (x) { return Math.abs(Math.round(x * 100)) + '%'; };
+        fixShow('done');
+        countUp($('#fx-a'), A[0], pctF); countUp($('#fx-b'), B[0], pctF);
+        var d = res.index - before.index; countUp($('#fx-c'), d, function (x) { return (x >= 0 ? '+' : '−') + Math.abs(Math.round(x)); });
+        var tot = Array.prototype.slice.call(document.querySelectorAll('#costs tr')).pop(), cost = tot && tot.cells[2] ? tot.cells[2].textContent.trim() : '';
+        $('#fx-d').textContent = cost && cost !== '—' ? cost : '–';
+        $('#fix-cmp').setAttribute('aria-pressed', 'false'); $('#fix-cmp').textContent = 'Show today';
+      }, g.score);
+      var fixTotal = fixSearch.total.toLocaleString('en-US');
+    });
+  });
+  $('#fix-cmp').addEventListener('click', function () {
+    if (!P || !FIX) return;
+    var on = this.getAttribute('aria-pressed') !== 'true';
+    this.setAttribute('aria-pressed', on ? 'true' : 'false');
+    this.textContent = on ? 'Show with the plan' : 'Show today';
+    FADE = { from: FIELD ? FIELD.cv : null, f: FIELD, t0: performance.now() };
+    if (on) { Object.assign(state, TM.ZERO); } else { Object.assign(state, FIX.plan); }
+    render();
+  });
+  $('#fix-brief').addEventListener('click', function () { $('#dl-brief').click(); });
+  $('#fix-edit').addEventListener('click', function () { showTab('plan'); var tb = document.querySelector('.ptabs'); if (tb) tb.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  $('#fix-again').addEventListener('click', function () {
+    if (FIX && $('#fix-cmp').getAttribute('aria-pressed') === 'true') { Object.assign(state, FIX.plan); render(); }
+    fixShow('ask');
   });
   function setLayer(l) {
     layer = l;
