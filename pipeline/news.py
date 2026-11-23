@@ -18,14 +18,16 @@ TOPICS = {
     "heat": r"heat ?wave|heatwave|extreme heat|record heat|ola de calor|canicule|ondata di calore|temperatures soar|scorching",
     "drought": r"drought|water shortage|water crisis|sequía|sécheresse|siccit|dry spell|reservoir",
     "fire": r"wildfire|forest fire|bushfire|incendio forestal|feux? de forêt",
+    "water": r"water supply|rainfall|\brains?\b|lluvia|storm|tormenta|landslide|deslave",
     "greening": r"\bpark\b|parque|parc|wetland|humedal|tree planting|trees planted|green infrastructure|sponge city|reforest|urban forest|rain garden|river restoration",
 }
 TOPIC_TERMS = ('(flood OR flooding OR "heat wave" OR heatwave OR drought OR wildfire OR "water shortage" OR '
                'wetland OR "urban park" OR "green infrastructure" OR "tree planting" OR "climate adaptation")')
-PRIORITY = {"flood": 5, "heat": 5, "fire": 4, "drought": 4, "greening": 3}
+LANGS = {"English", "Spanish", "French", "Portuguese", "Italian", "German"}
+PRIORITY = {"flood": 5, "heat": 5, "fire": 4, "drought": 4, "greening": 3, "water": 3, "climate": 1}
 
 
-def fetch(url, tries=3):
+def fetch(url, tries=4):
     for k in range(tries):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "Threadlands news (threadlands.org)"})
@@ -34,7 +36,7 @@ def fetch(url, tries=3):
             return json.loads(txt) if txt.strip().startswith("{") else {}
         except Exception as e:  # GDELT asks for gentle use; back off and retry
             print("  retry", k + 1, e, file=sys.stderr)
-            time.sleep(8 * (k + 1))
+            time.sleep(45 * (k + 1))            # 429 means "slow down": wait well past GDELT's window
     return {}
 
 
@@ -68,25 +70,25 @@ def main():
             key = re.sub(r"[^a-z0-9]", "", title.lower())[:60]
             if key in seen:
                 continue
-            topic = topic_of(title)
-            if not topic:
-                continue                      # only keep headlines that are clearly about the topics
+            if (a.get("language") or "English") not in LANGS:
+                continue                      # keep headlines readers of the site can follow
+            topic = topic_of(title) or "climate"   # GDELT already matched the topic in the full text
             named = name.lower() in title.lower()
             seen.add(key)
             items.append({"title": title[:180], "url": link, "source": a.get("domain") or "", "date": (a.get("seendate") or "")[:8],
                           "lang": a.get("language") or "", "topic": topic, "named": named})
-        items.sort(key=lambda x: (x["named"], x["date"]), reverse=True)
+        items.sort(key=lambda x: (x["named"], x["topic"] != "climate", x["date"]), reverse=True)
         if items:
             out[p["slug"]] = items[:6]
         print(f"{n + 1}/{len(places)} {name}: {len(arts)} found, {len(items)} kept", flush=True)
-        time.sleep(6)
+        time.sleep(12)                       # GDELT asks for no more than one request every few seconds
     # The biggest stories across all places: named in the headline, most urgent topics, newest first
     top = []
     for slug, items in out.items():
         for it in items:
             if it["named"]:
                 top.append(dict(it, place=slug))
-    top.sort(key=lambda x: (x["date"][:8], PRIORITY.get(x["topic"], 0)), reverse=True)
+    top.sort(key=lambda x: (x["topic"] != "climate", x["date"][:8], PRIORITY.get(x["topic"], 0)), reverse=True)
     picked, per = [], {}
     for it in top:
         if per.get(it["place"], 0) >= 1:

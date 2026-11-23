@@ -2073,7 +2073,7 @@
   function renderNews() {
     var box = $('#pnews'), items = NEWS && NEWS.places && NEWS.places[current] || [];
     if (!P || kind === 'demo' || !items.length) { box.hidden = true; return; }
-    var T = { flood: 'Flooding', heat: 'Heat', drought: 'Drought', fire: 'Fire', greening: 'Greening' };
+    var T = { flood: 'Flooding', heat: 'Heat', drought: 'Drought', fire: 'Fire', greening: 'Greening', water: 'Water', climate: 'Climate' };
     $('#pnews-list').innerHTML = items.slice(0, 4).map(function (it) {
       var d = it.date || '', ds = d.length >= 8 ? new Date(d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6, 8) + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
       return '<li><span class="pn-t">' + (T[it.topic] || '') + '</span><a href="' + esc(it.url) + '" target="_blank" rel="noopener">' + esc(it.title) + '</a><span class="pn-m">' + esc(it.source) + (ds ? ' · ' + ds : '') + '</span></li>';

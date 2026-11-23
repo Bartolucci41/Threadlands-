@@ -404,7 +404,7 @@
     $('#feed').hidden = false;
   }).catch(function () { /* the feed is optional */ });
   // ---- In the news: the biggest flood, heat, drought, fire and greening headlines, refreshed daily
-  var NTOPIC = { flood: 'Flooding', heat: 'Heat', drought: 'Drought', fire: 'Fire', greening: 'Greening' };
+  var NTOPIC = { flood: 'Flooding', heat: 'Heat', drought: 'Drought', fire: 'Fire', greening: 'Greening', water: 'Water', climate: 'Climate' };
   function ndate(d) { if (!d || d.length < 8) return ''; var dt = new Date(d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6, 8) + 'T12:00:00'); return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
   Promise.all([fetch('data/news.json').then(function (r) { return r.json(); }), fetch('data/index.json').then(function (r) { return r.json(); })]).then(function (x) {
     var top = (x[0].top || []).slice(0, 8), names = {};
