@@ -673,6 +673,30 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .lib-zoom .chip:disabled { opacity: 0.45; }
   .lib-tip a { color: var(--bg); text-decoration: underline; }
   .lib-tip { position: absolute; pointer-events: none; padding: 4px 8px; border-radius: 6px; background: var(--ink); color: var(--bg); font: 500 0.8125rem var(--font-body); transform: translate(-50%, -130%); white-space: nowrap; }
+  .hero-eyebrow { margin: 0 0 14px; font: 600 0.8rem var(--font-body, system-ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+  .hero-h.hero-h2 { font-size: clamp(2.2rem, 4.6vw, 3.7rem); line-height: 1.04; letter-spacing: -0.03em; max-width: 15ch; }
+  .live-goals { display: flex; flex-wrap: wrap; gap: 6px; }
+  .live-goals .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink, #fff); border-color: var(--accent); }
+  .rank { margin: 56px 0 8px; }
+  .rank-head { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; margin-bottom: 18px; }
+  .rank-sub { margin: 6px 0 0; color: var(--ink2); max-width: 62ch; }
+  .rank-find input { min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; width: 220px; }
+  .rank-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px 40px; }
+  .rank-cols h3 { margin: 0 0 6px; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); }
+  .rank-list { list-style: none; margin: 0; padding: 0; }
+  .rank-list a { display: grid; grid-template-columns: 2.2em minmax(0, 1fr) 90px 2.2em; gap: 10px; align-items: center; padding: 9px 2px; border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; }
+  .rank-list a:hover { background: var(--surface); }
+  .rk-n { font: 500 0.8rem var(--font-mono); color: var(--ink2); text-align: right; }
+  .rk-c { display: grid; min-width: 0; } .rk-c b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .rk-c span { font-size: 0.8rem; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rk-bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; } .rk-bar i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+  .rk-v { font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+  .rank-all { margin-top: 14px; } .rank-all summary { cursor: pointer; font-weight: 600; color: var(--accent); padding: 8px 0; }
+  .rank-all .rank-list { columns: 2 320px; column-gap: 40px; } .rank-all .rank-list li { break-inside: avoid; }
+  .rk-none { padding: 10px 0; color: var(--ink2); }
+  .rank-note a { color: var(--accent); }
+  .rank-note { margin: 14px 0 0; font-size: 0.82rem; color: var(--ink2); max-width: 80ch; line-height: 1.5; }
+  .who-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 32px; margin-top: 8px; }
+  .who h3 { margin: 0 0 6px; font-size: 1.05rem; } .who p { margin: 0; color: var(--ink2); line-height: 1.5; }
   .viewsw { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 0.8rem; color: var(--ink2); margin: 0 0 4px; }
   .viewsw .chip { min-height: 32px; padding: 4px 12px; font-size: 0.8rem; }
   body.simple .adv { display: none !important; }

@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Threadlands: every city lives on water, farms and wild places</title>
-<meta name="description" content="Threadlands helps planners and communities plan a city together with the land that sustains it, for any place on Earth.">
-<meta property="og:title" content="Threadlands: every city lives on water, farms and wild places">
-<meta property="og:description" content="Threadlands helps planners and communities plan a city together with the land that sustains it, for any place on Earth.">
+<title>Threadlands: see what's coming for your city, and what would fix it</title>
+<meta name="description" content="Threadlands maps heat, flooding, food and nature for any city region, finds the plan that does the most for your goal, and estimates what it costs. Free, for any place on Earth.">
+<meta property="og:title" content="Threadlands: see what's coming for your city, and what would fix it">
+<meta property="og:description" content="Threadlands maps heat, flooding, food and nature for any city region, finds the plan that does the most for your goal, and estimates what it costs. Free, for any place on Earth.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=6">
+<link rel="stylesheet" href="assets/site.css?v=7">
 <script src="assets/i18n.js" defer></script>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">
@@ -36,15 +36,9 @@
 <script src="assets/model.js"></script>
   <div class="hero2">
     <div class="hero-copy">
-      <div class="defn" role="note" aria-label="Definition of Threadlands">
-        <p class="defn-head"><span class="defn-word">thread&middot;lands</span> <span class="defn-ipa">/&#712;&#952;r&#603;d&#716;l&aelig;ndz/</span> <span class="defn-pos">noun</span></p>
-        <ol class="defn-list">
-          <li>The land that ties a city to what keeps it alive: the rivers that water it, the farms that feed it and the wild places that cool and shelter it.</li>
-          <li>A planning tool for seeing those ties and making them stronger.</li>
-        </ol>
-      </div>
-      <h1 class="hero-h" data-tr>Every city lives on <span class="u u-river">water</span>, <span class="u u-farm">farms</span> and <span class="u u-forest">wild places</span>.</h1>
-      <p class="hero-sub">Plan a city together with the land it depends on. See how heat, floods, food and wildlife connect, then test your plan against 2050. Free, for any place on&nbsp;Earth.</p>
+      <p class="hero-eyebrow">Planning for cities and the land around them</p>
+      <h1 class="hero-h hero-h2">See what&rsquo;s coming for your city, and what would fix it.</h1>
+      <p class="hero-sub">Threadlands maps heat, flooding, food and nature for any city region, finds the plan that does the most for your goal, and estimates what it would cost. Free, for any place on&nbsp;Earth.</p>
       <form class="search" id="search-home" role="search">
         <label class="sr-only" for="q-home">Search for a place</label>
         <input id="q-home" type="search" placeholder="Type a city, town or postal code" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sugg-home" aria-autocomplete="list">
@@ -75,12 +69,33 @@
         <p class="live-loading" id="live-loading">Loading the map&hellip;</p>
       </div>
       <div class="live-ctl">
-        <label for="live-range"><b>Pull the threads.</b> <span id="live-what">Drag to plant street trees, restore wetlands, link habitat, farm for living soil and grow compactly.</span></label>
-        <input type="range" id="live-range" min="0" max="100" step="1" value="0">
+        <div class="live-goals" role="group" aria-label="Try a plan">
+          <button type="button" class="chip" data-goal="none" aria-pressed="true">Today</button>
+          <button type="button" class="chip" data-goal="heat" aria-pressed="false">Cool the streets</button>
+          <button type="button" class="chip" data-goal="flood" aria-pressed="false">Keep homes dry</button>
+          <button type="button" class="chip" data-goal="all" aria-pressed="false">Balanced plan</button>
+        </div>
+        <input type="range" id="live-range" min="0" max="100" step="1" value="0" hidden>
       </div>
-      <figcaption id="live-cap"><span id="live-msg">Each hex is about half a square kilometer of real land, from satellite data.</span> <a href="explore/#milan" id="live-open">Open Milan in the full tool &rarr;</a></figcaption>
+      <figcaption id="live-cap"><span id="live-msg">Real land cover, people and heat for the whole city region, from open satellite data.</span> <a href="explore/#milan" id="live-open">Find the best plan in Explore &rarr;</a></figcaption>
     </figure>
   </div>
+
+  <section class="rank" id="rank" aria-labelledby="rank-h" hidden>
+    <div class="rank-head">
+      <div>
+        <h2 class="sect-h" id="rank-h">How resilient are cities today?</h2>
+        <p class="rank-sub" id="rank-sub">The Threadlands resilience index for every place in the library, 0 to 100.</p>
+      </div>
+      <label class="rank-find"><span class="sr-only">Find a city in the ranking</span><input type="search" id="rank-q" placeholder="Find a city"></label>
+    </div>
+    <div class="rank-cols">
+      <div><h3>Most resilient</h3><ol class="rank-list" id="rank-top"></ol></div>
+      <div><h3>Most at risk</h3><ol class="rank-list" id="rank-bot"></ol></div>
+    </div>
+    <details class="rank-all"><summary id="rank-all-s">See all places</summary><ol class="rank-list" id="rank-all"></ol></details>
+    <p class="rank-note" id="rank-note">A screening index from open data: heat, flood exposure, connected nature, local food, low-carbon travel and three stress tests, each modeled for the whole city region. It changes when the data is rebuilt. Some places are outlined larger than the city itself, and flood and travel are not yet comparable between places, so read the ranking as a first look, not a verdict. <a href="how-it-works/">How it works</a></p>
+  </section>
 
   <section class="now" id="now" aria-labelledby="now-h" hidden>
     <h2 class="sect-h" id="now-h">Right now, from space</h2>
@@ -95,8 +110,17 @@
     <article class="city-card"><span class="eyebrow">Bangkok, Thailand</span><div class="mini"><img src="assets/card-bangkok.webp" width="396" height="211" alt="Regional map around Bangkok"></div><span class="city-num">144,000 km&sup2;</span><p>of river basin drains down through Bangkok, from the mountains of northern Thailand to the Gulf.</p><a class="btn ghost" href="explore/#bangkok">Open Bangkok</a></article>
   </div>
 
+  <section class="story" aria-labelledby="who-h">
+    <h2 id="who-h">Who uses it</h2>
+    <div class="who-grid">
+      <div class="who"><h3>City and resilience teams</h3><p>See where heat and flooding hit hardest, compare plans, and take a costed decision brief to council or funders.</p></div>
+      <div class="who"><h3>Consultants and engineers</h3><p>Screen a site or a whole region in minutes, then export the map and plan to QGIS or ArcGIS for detailed work.</p></div>
+      <div class="who"><h3>Funders and NGOs</h3><p>Compare places side by side, see who carries each risk, and find where nature-based projects do the most.</p></div>
+    </div>
+  </section>
+
   <section class="story" aria-labelledby="do-h" style="margin-top:24px">
-    <h2 id="do-h">What would you like to do?</h2>
+    <h2 id="do-h">Three ways in</h2>
     <div class="do-grid">
       <a class="do-card" href="explore/"><span class="do-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></span><b>Explore a place</b><span>See a city and the land around it, test it against heat, floods and 2050, and find where to act first.</span><span class="do-go">Open Explore &rarr;</span></a>
       <a class="do-card" href="studio/"><span class="do-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V10l8-6 8 6v11"/><path d="M12 21v-6"/><path d="M8 13h8"/></svg></span><b>Design in Studio</b><span>Build urban farms, parks, ponds, sea walls and homes on real streets, in 3D, with real local costs.</span><span class="do-go">Open Studio &rarr;</span></a>
@@ -104,15 +128,6 @@
     </div>
   </section>
 
-  <section class="story" aria-labelledby="threads-h">
-    <h2 id="threads-h">What each thread carries</h2>
-    <div class="threads">
-      <div class="thread"><span class="eyebrow">Water</span><h3>Flood or supply</h3><p>Upstream rain arrives as a flood or a steady supply. Wetlands and trees decide which.</p></div>
-      <div class="thread"><span class="eyebrow">Heat</span><h3>Stored or released</h3><p>Pavement holds heat all night. Shade, water and green pull it back out.</p></div>
-      <div class="thread"><span class="eyebrow">Food</span><h3>Buffer or exposure</h3><p>Farms close by are a buffer when supply chains break.</p></div>
-      <div class="thread"><span class="eyebrow">Habitat</span><h3>Islands or network</h3><p>A park and a forest stay islands until a corridor joins them.</p></div>
-    </div>
-  </section>
 
   <section class="story" aria-labelledby="lib-h">
     <h2 id="lib-h">A growing library of places</h2>
@@ -196,7 +211,30 @@
   function mixc(a, b, t) { return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ',' + Math.round(a[1] + (b[1] - a[1]) * t) + ',' + Math.round(a[2] + (b[2] - a[2]) * t) + ')'; }
   function ramp(st, t) { t = Math.max(0, Math.min(1, t)); return t < 0.5 ? mixc(st[0], st[1], t * 2) : mixc(st[1], st[2], (t - 0.5) * 2); }
   var URB = { core: 1, mid: 1, suburb: 1, greenway: 1 };
-  function levers(t) { var L = {}; for (var k in BAL) L[k] = Math.round(BAL[k] * t); return L; }
+  var GOALMIX = { none: { canopy: 0, corridors: 0, wetlands: 0, regen: 0, compact: 0 }, all: BAL,
+    heat: { canopy: 100, corridors: 30, wetlands: 60, regen: 10, compact: 25 }, flood: { canopy: 70, corridors: 10, wetlands: 100, regen: 90, compact: 0 } };
+  LIVE.L = GOALMIX.none; LIVE.goal = 'none';
+  function levers() { return LIVE.L; }
+  // A continuous surface: each pixel a smooth blend of nearby area centres, so no hexagons show
+  function field(P, R, G, B, A, minx, miny, maxx, maxy) {
+    if (!P.hexKmF) { var ar = 0, cc = P.place.cells; for (var q0 = 0; q0 < P.N; q0++) ar += +cc.area[q0] || 0; P.hexKmF = Math.sqrt(Math.max(1e-6, ar / P.N) / 2.598); }
+    var sp = P.hexKmF * Math.sqrt(3), pad = sp, x0 = minx - pad, y0 = miny - pad, w = maxx - minx + 2 * pad, h = maxy - miny + 2 * pad;
+    var px = Math.max(sp / 2.5, Math.max(w, h) / 520), nx = Math.ceil(w / px), ny = Math.ceil(h / px);
+    var gs = sp, gx = Math.ceil(w / gs) + 1, gy = Math.ceil(h / gs) + 1, head = new Int32Array(gx * gy).fill(-1), next = new Int32Array(P.N);
+    for (var i = 0; i < P.N; i++) { var cx = Math.floor((P.X[i] - x0) / gs), cy = Math.floor((P.Y[i] - y0) / gs); if (cx < 0 || cy < 0 || cx >= gx || cy >= gy) { next[i] = -1; continue; } var k = cy * gx + cx; next[i] = head[k]; head[k] = i; }
+    var sig2 = 2 * Math.pow(0.55 * sp, 2), R2 = Math.pow(1.6 * sp, 2), cv2 = document.createElement('canvas'); cv2.width = nx; cv2.height = ny;
+    var c2 = cv2.getContext('2d'), img = c2.createImageData(nx, ny), d = img.data, sw = new Float32Array(nx * ny), Wref = 0, acc = new Float32Array(nx * ny * 4);
+    for (var yy = 0; yy < ny; yy++) { var wy = y0 + (yy + 0.5) * px, cyy = Math.floor((wy - y0) / gs);
+      for (var xx = 0; xx < nx; xx++) { var wx = x0 + (xx + 0.5) * px, cxx = Math.floor((wx - x0) / gs), W0 = 0, r = 0, g = 0, b = 0, a = 0;
+        for (var oy = -2; oy <= 2; oy++) { var ry = cyy + oy; if (ry < 0 || ry >= gy) continue;
+          for (var ox = -2; ox <= 2; ox++) { var rx = cxx + ox; if (rx < 0 || rx >= gx) continue;
+            for (var j = head[ry * gx + rx]; j >= 0; j = next[j]) { var dx = P.X[j] - wx, dy = P.Y[j] - wy, dd = dx * dx + dy * dy; if (dd > R2) continue; var wt = Math.exp(-dd / sig2); W0 += wt; r += wt * R[j]; g += wt * G[j]; b += wt * B[j]; a += wt * A[j]; } } }
+        var o = yy * nx + xx; sw[o] = W0; if (W0 > 0) { acc[o * 4] = r / W0; acc[o * 4 + 1] = g / W0; acc[o * 4 + 2] = b / W0; acc[o * 4 + 3] = a / W0; if (W0 > Wref) Wref = W0; } } }
+    Wref *= 0.75;
+    for (var q = 0; q < nx * ny; q++) { if (!(sw[q] > 0)) continue; var cvr = Math.min(1, sw[q] / Wref); d[q * 4] = acc[q * 4]; d[q * 4 + 1] = acc[q * 4 + 1]; d[q * 4 + 2] = acc[q * 4 + 2]; d[q * 4 + 3] = Math.round(255 * acc[q * 4 + 3] * cvr * cvr * (3 - 2 * cvr)); }
+    c2.putImageData(img, 0, 0);
+    return { cv: cv2, x0: x0, y0: y0, w: nx * px, h: ny * px };
+  }
   function draw() {
     var P = LIVE.P, res = LIVE.res;
     if (!P || !res) return;
@@ -213,10 +251,10 @@
       wetland: css('--m-wet'), water: css('--m-water'), park: css('--m-park'), open: css('--m-open'), barren: css('--m-barren'), corridor: css('--m-corr'),
       canopy: css('--m-canopy'), dim: css('--m-dim'), surface: css('--surface'), f0: css('--f0') };
     var heat = [css('--h0'), css('--h1'), css('--h2')].map(rgb), flood = [css('--f0'), css('--f1'), css('--f2')].map(rgb);
-    var t = Number($('#live-range').value) / 100, canopy = 1 - Math.pow(1 - BAL.canopy * t / 100, 1.8), keep = 1 - res.retention;
+    var canopy = 1 - Math.pow(1 - LIVE.L.canopy / 100, 1.8), keep = 1 - res.retention;
+    var R = new Float32Array(P.N), G = new Float32Array(P.N), B = new Float32Array(P.N), A = new Float32Array(P.N);
+    function toRGB(c) { var m = /^rgba?\(([^)]+)\)/.exec(c); if (m) { var v = m[1].split(',').map(Number); return v; } return rgb(c || '#888888'); }
     for (var i = 0; i < P.N; i++) {
-      var p = P.POLY[i];
-      if (!p || p.length < 6) continue;
       var cov = res.cover[i], fill = C[cov] || C.open, alpha = 1;
       if (cov === 'greenway') fill = C.corridor;
       if (LIVE.show === 'heat') { if (URB[cov]) fill = ramp(heat, res.heat[i] / 1.4); else if (cov === 'water') { fill = C.water; alpha = 0.5; } else { fill = C.dim; alpha = 0.55; } }
@@ -224,35 +262,54 @@
         if (URB[cov]) { if (res.floodExp[i] > 0) fill = ramp(flood, Math.sqrt(res.floodExp[i] * keep / P.maxFloodExp)); else { fill = C.dim; alpha = 0.45; } }
         else if (cov !== 'wetland' && cov !== 'water') { fill = C.dim; alpha = 0.45; }
       }
-      ctx.beginPath();
-      for (var j = 0; j + 1 < p.length; j += 2) { var x = p[j] * S + OX, y = p[j + 1] * S + OY; if (j) ctx.lineTo(x, y); else ctx.moveTo(x, y); }
-      ctx.closePath();
-      ctx.globalAlpha = alpha; ctx.fillStyle = fill; ctx.fill();
-      if (LIVE.show === 'land' && canopy > 0 && URB[cov]) { ctx.globalAlpha = 0.6 * canopy; ctx.fillStyle = C.canopy; ctx.fill(); }
-      if (!P.inside[i]) { ctx.globalAlpha = 0.38; ctx.fillStyle = C.surface; ctx.fill(); }
+      var c3 = toRGB(fill);
+      if (LIVE.show === 'land' && canopy > 0 && URB[cov]) { var k3 = toRGB(C.canopy), u = 0.6 * canopy; c3 = [c3[0] + (k3[0] - c3[0]) * u, c3[1] + (k3[1] - c3[1]) * u, c3[2] + (k3[2] - c3[2]) * u]; }
+      if (!P.inside[i]) { var s3 = toRGB(C.surface); c3 = [c3[0] + (s3[0] - c3[0]) * 0.38, c3[1] + (s3[1] - c3[1]) * 0.38, c3[2] + (s3[2] - c3[2]) * 0.38]; }
+      R[i] = c3[0]; G[i] = c3[1]; B[i] = c3[2]; A[i] = alpha;
     }
+    var F = field(P, R, G, B, A, minx, miny, maxx, maxy);
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(F.cv, F.x0 * S + OX, F.y0 * S + OY, F.w * S, F.h * S);
     ctx.globalAlpha = 1;
   }
   function update() {
     var P = LIVE.P;
     if (!P) return;
-    var t = Number($('#live-range').value) / 100;
-    LIVE.res = P.evaluate(levers(t));
+    LIVE.res = P.evaluate(levers());
     var now = Math.round(LIVE.res.index), base = Math.round(P.BAU.index), d = now - base;
     $('#live-score').textContent = now;
-    $('#live-delta').textContent = d ? (d > 0 ? '+' : '−') + Math.abs(d) : '';
-    var name = P.place.name || 'this city';
-    $('#live-msg').textContent = t === 0 ? name + ' as it is today, with the land around it faded. Drag the slider to change it.'
-      : (LIVE.show === 'heat' ? 'Street trees and cool neighbors pull heat out of ' + name + '’s busiest blocks.'
-        : LIVE.show === 'flood' ? 'Restored wetlands upstream soak up water before it reaches homes.'
-        : 'New wetlands, corridors and living farmland reconnect ' + name + ' with its wild land.') + ' Index ' + base + ' → ' + now + '.';
+    $('#live-delta').textContent = d ? (d > 0 ? '+' : '\u2212') + Math.abs(d) : '';
+    var name = P.place.name || 'this city', g = LIVE.goal, msg;
+    if (g === 'none') msg = name + ' today: resilience index ' + base + ' of 100. Pick a plan to see what changes.';
+    else {
+      var r = LIVE.res, b0 = P.BAU, hb = 0, ha = 0, fb = 0, fa = 0, c = P.place.cells;
+      for (var i = 0; i < P.N; i++) { var pp = +c.pop[i] || 0; if (b0.heat[i] > 0) { hb += pp * b0.heat[i]; ha += pp * r.heat[i]; } if (b0.floodExp[i] > 0) { fb += b0.floodExp[i]; fa += r.floodExp[i]; } }
+      var hc = hb > 0 ? Math.round(100 * (1 - ha / hb)) : 0, fc = fb > 0 ? Math.round(100 * (1 - fa * (1 - r.retention) / (fb * (1 - b0.retention)))) : 0;
+      msg = (g === 'heat' ? 'Street trees and green where people live: ' + hc + '% less heat for residents'
+        : g === 'flood' ? 'Wetlands and living farmland that hold water: ' + fc + '% less flood exposure for homes'
+        : 'Trees, wetlands, corridors and compact growth together: ' + hc + '% less heat, ' + fc + '% less flood exposure') + '. Index ' + base + ' \u2192 ' + now + '.';
+    }
+    $('#live-msg').textContent = msg;
     draw();
   }
+  function animateTo(goal) {
+    var from = LIVE.L, to = GOALMIX[goal], t0 = performance.now(), dur = 900;
+    LIVE.goal = goal;
+    document.querySelectorAll('[data-goal]').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.goal === goal ? 'true' : 'false'); });
+    if (goal === 'heat' && LIVE.show !== 'heat') setShow('heat'); else if (goal === 'flood' && LIVE.show !== 'flood') setShow('flood');
+    (function step(t) {
+      var k = Math.min(1, (t - t0) / dur), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2, L = {};
+      for (var key in to) L[key] = Math.round(from[key] + (to[key] - from[key]) * e);
+      LIVE.L = L; update();
+      if (k < 1) setTimeout(function () { requestAnimationFrame(step); }, 40);
+    })(t0);
+  }
+  function setShow(v) { LIVE.show = v; document.querySelectorAll('[data-show]').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.show === v ? 'true' : 'false'); }); }
   function load(slug) {
     LIVE.slug = slug;
     document.querySelectorAll('[data-city]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.city === slug ? 'true' : 'false'); });
     var name = { 'san-francisco': 'San Francisco', 'mexico-city': 'Mexico City', 'montreal': 'Montreal', 'bologna': 'Bologna', 'bangkok': 'Bangkok' }[slug] || slug;
-    $('#live-open').href = 'explore/#' + slug; $('#live-open').textContent = 'Open ' + name + ' in the full tool →';
+    $('#live-open').href = 'explore/#' + slug; $('#live-open').textContent = 'Find the best plan for ' + name + ' \u2192';
     if (LIVE.cache[slug]) { LIVE.P = LIVE.cache[slug]; update(); return; }
     $('#live-loading').hidden = false;
     fetch('data/places/' + slug + '.json').then(function (r) { return r.json(); }).then(function (d) {
@@ -262,7 +319,7 @@
       LIVE.P = P; $('#live-loading').hidden = true; update();
     }).catch(function () { $('#live-loading').textContent = 'The map could not be loaded.'; });
   }
-  $('#live-range').addEventListener('input', update);
+  document.querySelector('.live-goals').addEventListener('click', function (e) { var b = e.target.closest('[data-goal]'); if (b && LIVE.P) animateTo(b.dataset.goal); });
   document.querySelector('.live-cities').addEventListener('click', function (e) { var b = e.target.closest('[data-city]'); if (b && b.dataset.city !== LIVE.slug) load(b.dataset.city); });
   document.querySelector('.live-layers').addEventListener('click', function (e) {
     var b = e.target.closest('[data-show]'); if (!b) return;
@@ -295,6 +352,30 @@
     $('#now-sub').textContent = 'Surface heat from the latest clear satellite pass over each of ' + rows.length + ' places, compared with the same weeks in earlier years. Updated twice a week.';
     $('#now').hidden = false;
   }).catch(function () { /* readings not published yet */ });
+  // ---- Resilience ranking of every place in the library
+  var PRESS = { heat: 'heat', flood: 'flooding', grey: 'little green', crowd: 'crowding', trees: 'few trees', food: 'food from far away' };
+  fetch('data/ranking.json').then(function (r) { return r.json(); }).then(function (rk) {
+    var all = (rk.places || []).filter(function (p) { return p && p.slug; }), n = all.length;
+    if (n < 10) return;
+    var hi = all[0].index, lo = all[n - 1].index;
+    function row(p, k) {
+      var w = Math.max(4, Math.round(100 * (p.index - lo + 2) / (hi - lo + 2)));
+      return '<li><a href="explore/#' + p.slug + '"><span class="rk-n">' + (k + 1) + '</span><span class="rk-c"><b>' + esc(p.name) + '</b><span>' + esc(p.country) + (p.top ? ' · ' + (PRESS[p.top] || '') : '') + '</span></span>' +
+        '<span class="rk-bar" aria-hidden="true"><i style="width:' + w + '%"></i></span><span class="rk-v">' + Math.round(p.index) + '</span></a></li>';
+    }
+    $('#rank-top').innerHTML = all.slice(0, 5).map(function (p, k) { return row(p, k); }).join('');
+    $('#rank-bot').innerHTML = all.slice(-5).reverse().map(function (p, k) { return row(p, n - 1 - k); }).join('');
+    function renderAll(q) {
+      q = norm(q || '');
+      $('#rank-all').innerHTML = all.map(function (p, k) { return { p: p, k: k }; }).filter(function (x) { return !q || norm(x.p.name + ' ' + x.p.country).indexOf(q) >= 0; })
+        .map(function (x) { return row(x.p, x.k); }).join('') || '<li class="rk-none">No place matches. Search above to build it.</li>';
+    }
+    renderAll('');
+    $('#rank-all-s').textContent = 'See all ' + n + ' places';
+    $('#rank-q').addEventListener('input', function () { renderAll(this.value); document.querySelector('.rank-all').open = !!this.value.trim(); });
+    $('#rank-sub').textContent = 'The Threadlands resilience index for all ' + n + ' places in the library, 0 to 100, as of ' + new Date(rk.updated + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + '. Higher is better prepared for heat, floods and drought.';
+    $('#rank').hidden = false;
+  }).catch(function () { /* the ranking is optional */ });
 })();
 
 </script>
