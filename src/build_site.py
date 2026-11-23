@@ -581,7 +581,7 @@ def footer(base):
     col = lambda items: "".join(f'<a href="{base}{p}">{n}</a>' for p, n in items)
     return (f'<footer class="site-foot2">\n  <div class="wrap foot-grid">\n'
             f'    <div class="foot-brand"><a class="wordmark foot-wm" href="{base}" translate="no">Threadlands</a>'
-            '<p>See what&rsquo;s coming for your city, and what would fix it. Free, for any place on Earth.</p></div>\n'
+            '<p>Know your city, and help make it ready for what&rsquo;s coming. Free, for any place on Earth.</p></div>\n'
             f'    <nav aria-label="Places"><h2>Places</h2>{col([("", "My places"), ("cities/", "Cities"), ("projects/", "Projects")])}</nav>\n'
             f'    <nav aria-label="The Lab"><h2>The Lab</h2>{col([("lab/", "Overview"), ("explore/", "Explore"), ("studio/", "Studio")])}</nav>\n'
             f'    <nav aria-label="About"><h2>About</h2>{col([("how-it-works/", "How it works"), ("about/", "About")])}</nav>\n'
