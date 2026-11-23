@@ -78,6 +78,10 @@
       out.push({ key: k, score: s, pct: p, rank: p !== null ? p : s * 100 });
     });
     out.sort(function (a, b) { return b.rank - a.rank; });
+    // Only pressures that stand out: worse than most places (when the library spread is known) and not near zero
+    var strong = out.filter(function (o) { return o.score > 0.02 && (o.pct === null ? o.score >= 0.15 : o.pct >= 50); });
+    if (!strong.length) strong = out.slice(0, 1);
+    out = strong;
     return { m: m, top: out.slice(0, 3).map(function (o) { var d = describe(o.key, m); d.key = o.key; d.pct = o.pct; return d; }) };
   }
   // Headline facts about a place, computed the same way everywhere so any place can be ranked against the library.

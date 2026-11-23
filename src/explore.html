@@ -225,7 +225,7 @@
   .badge-num { font: 800 1.9rem/1 var(--font-display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
   .badge-d { font: 500 0.8rem var(--font-mono); font-variant-numeric: tabular-nums; }
   .layers { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 10px; }
-  .jump { position: sticky; top: 0; z-index: 4; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; padding: 8px 0; margin: 0 0 10px; background: var(--bg); border-bottom: 1px solid var(--line); font-size: 0.875rem; }
+  .jump { position: static; top: 0; z-index: 4; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; padding: 8px 0; margin: 0 0 10px; background: var(--bg); border-bottom: 1px solid var(--line); font-size: 0.875rem; }
   .jump span { font: 500 0.75rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink2); }
   .jump a { color: var(--ink); text-decoration: none; } .jump a:hover { color: var(--accent); text-decoration: underline; }
   #mapwrap, #lab-h, #scores-h, #costs-h, #start-h, #reg-h { scroll-margin-top: 52px; }
@@ -421,7 +421,7 @@
   .ptab[aria-selected="true"] span { background: var(--accent); border-color: var(--accent); color: var(--accent-ink, #fff); }
   .ptab:hover { color: var(--ink); }
   .ptab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-  @media (min-width: 960px) { .ptabs { position: sticky; } .stage { position: sticky; } }
+  @media (min-width: 960px) { .ptabs { position: sticky; } .stage { position: sticky; } .jump { position: sticky; } }
   .tpanel { display: grid; gap: 6px; align-content: start; }
   .tpanel[hidden] { display: none; }
   .psum { flex-wrap: wrap; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-radius: 14px; background: var(--surface); margin: 0 0 10px; }
@@ -432,9 +432,17 @@
   .ps-vs { display: block; font-size: 0.75rem; color: var(--ink2); margin-top: 2px; }
   .ps-rng { font-size: 0.85rem; color: var(--ink2); text-align: right; }
   .tgo { justify-self: start; margin-top: 14px; }
-  .tnext { margin-top: 10px; font-weight: 600; }
+  .tnext { margin-top: 10px; font-weight: 600; color: var(--accent); }
   .studio-cta { display: flex; align-items: center; justify-content: center; min-height: 50px; margin-top: 18px; border-radius: 12px; background: var(--accent); color: var(--accent-ink, #fff); font-weight: 600; text-decoration: none; }
   .studio-cta:hover { filter: brightness(1.08); }
+  .takeaway { margin-top: 26px; display: grid; gap: 6px; }
+  .take-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .take { text-align: left; display: grid; gap: 4px; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; }
+  .take b { font-size: 1rem; } .take span { font-size: 0.85rem; color: var(--ink2); line-height: 1.4; }
+  .take:hover { border-color: var(--accent); } .take:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .viewsw { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 0.8rem; color: var(--ink2); margin: 0 0 4px; }
+  .viewsw .chip { min-height: 32px; padding: 4px 12px; font-size: 0.8rem; }
+  body.simple .adv, body.simple .adv-wrap { display: none !important; }
 </style>
 
 <!--NAV-->
@@ -457,7 +465,7 @@
       <div class="req" id="req-bar" hidden></div>
       <div class="presets" role="group" aria-label="Example places" id="examples" style="margin-top:0"></div>
       <input class="file-input" type="file" id="file" accept=".json,application/json">
-      <label class="btn" for="file">Load a place file</label>
+      <label class="btn adv" for="file">Load a place file</label>
       <button class="btn ghost" type="button" id="reopen" hidden></button>
     </div>
   </div>
@@ -500,7 +508,7 @@
       </div>
       <div class="layers" role="group" aria-label="Map layer">
         <button class="chip" type="button" data-layer="land" aria-pressed="true">Land</button>
-        <button class="chip chip-threads" type="button" data-layer="threads" aria-pressed="false">Threads</button>
+        <button class="chip chip-threads adv" type="button" data-layer="threads" aria-pressed="false">Threads</button>
         <button class="chip" type="button" data-layer="heat" aria-pressed="false">Heat</button>
         <button class="chip" type="button" data-layer="flood" aria-pressed="false">Flood</button>
         <button class="chip" type="button" data-layer="habitat" aria-pressed="false">Habitat</button>
@@ -508,10 +516,6 @@
         <button class="chip" type="button" data-layer="now" aria-pressed="false" id="now-chip" hidden>This week</button>
       </div>
       <section class="dir" id="dir" aria-labelledby="dir-h" hidden></section>
-      <div class="gis-row">
-        <button class="chip" type="button" id="gis-dl">Download GIS layers</button>
-        <span class="gis-note">One GeoJSON file for QGIS or ArcGIS: every hex with its land cover, people, elevation, heat, flooding and habitat, for the current plan and climate.</span>
-      </div>
       <div class="sketchbar">
         <button class="chip sk-on" type="button" id="sk-toggle" aria-pressed="false">Sketch a plan</button>
         <div class="sk-tools" id="sk-tools" role="group" aria-label="Sketch tool" hidden>
@@ -524,11 +528,16 @@
         </div>
       </div>
       <p class="sk-sum" id="sk-sum" hidden></p>
-      <p class="readout" id="readout">Tap or hover a hex to inspect it.</p>
+      <p class="readout" id="readout">Tap or hover the map to see what is there.</p>
       <ul class="key legend-wide" id="legend-wide"></ul>
     </div>
 
     <div class="panel">
+      <div class="viewsw" role="group" aria-label="How much detail">
+        <span>Detail</span>
+        <button type="button" class="chip" id="vw-simple" aria-pressed="true">Simple</button>
+        <button type="button" class="chip" id="vw-detail" aria-pressed="false">Detailed</button>
+      </div>
       <div class="ptabs" role="tablist" aria-label="Steps">
         <button type="button" role="tab" class="ptab" id="ptab-understand" aria-controls="tp-understand" aria-selected="true"><span>1</span>Understand</button>
         <button type="button" role="tab" class="ptab" id="ptab-plan" aria-controls="tp-plan" aria-selected="false" tabindex="-1"><span>2</span>Plan</button>
@@ -542,7 +551,7 @@
       <div class="tpanel" role="tabpanel" id="tp-understand" aria-labelledby="ptab-understand">
       <section class="press" id="press" hidden>
         <h2>Biggest pressures here</h2>
-        <p class="hint" id="press-note">Measured from this place's own data. Environmental and social together: each pressure says who carries it.</p>
+        <p class="hint adv" id="press-note">Measured from this place's own data. Environmental and social together: each pressure says who carries it.</p>
         <ol class="press-list" id="press-list"></ol>
       </section>
       <section class="live" id="live-now" hidden>
@@ -552,15 +561,15 @@
           <div class="live-t" id="lv-air"><span class="eyebrow">Air</span><b>…</b><span></span></div>
           <div class="live-t" id="lv-bio"><span class="eyebrow">Wildlife</span><b>…</b><span></span></div>
         </div>
-        <p class="hint">Fetched live when you open a place, never stored. Forecast and air quality from <a href="https://open-meteo.com/" rel="noopener" target="_blank">Open-Meteo</a>; species records from <a href="https://www.gbif.org/" rel="noopener" target="_blank">GBIF</a>.</p>
+        <p class="hint adv">Fetched live when you open a place, never stored. Forecast and air quality from <a href="https://open-meteo.com/" rel="noopener" target="_blank">Open-Meteo</a>; species records from <a href="https://www.gbif.org/" rel="noopener" target="_blank">GBIF</a>.</p>
       </section>
-      <div id="hc-wrap" hidden>
+      <div id="hc-wrap" class="adv-wrap" hidden>
         <h2>Satellite heat check</h2>
         <div id="hc-body"></div>
       </div>
 
-      <h2>About this place's data</h2>
-      <ul class="datalist" id="datalist"></ul>
+      <div class="adv"><h2>About this place's data</h2>
+      <ul class="datalist" id="datalist"></ul></div>
 
       <details class="legend-narrow">
         <summary>Map key</summary>
@@ -571,7 +580,8 @@
       </div>
       <div class="tpanel" role="tabpanel" id="tp-plan" aria-labelledby="ptab-plan" hidden>
       <h2 id="lab-h">Pull the threads</h2>
-      <p class="hint">Drag a lever. The map and every score update together. Effort is capped, so the levers compete with each other.</p>
+      <p class="hint">Pick a starting plan or drag a slider. The map and every score update together.</p>
+      <p class="hint adv">Effort is capped, so the levers compete with each other.</p>
       <p class="clim-note" id="clim-note" hidden></p>
       <div class="budget">
         <div class="budget-row"><span class="eyebrow">Effort used</span><span class="mono" id="budget-txt"></span></div>
@@ -588,13 +598,13 @@
       <div id="levers"></div>
 
       <h2 id="start-h">Where to start</h2>
-      <p class="hint">The specific places where each action pays off most, ranked on today's map before any lever changes. Select a place to see it on the map.</p>
+      <p class="hint">The best places to act first. Select one to see it on the map.</p>
       <div class="wts-actions" role="group" aria-label="Action to rank" id="wts-actions"></div>
       <p class="msub" id="wts-intro" style="margin-top:8px"></p>
       <ol class="wts" id="wts-list"></ol>
       <div class="wts-tools">
         <button class="btn" type="button" id="wts-add" hidden>Add these to my sketch</button>
-        <button class="btn ghost" type="button" id="wts-copy">Copy this list</button>
+        <button class="btn ghost adv" type="button" id="wts-copy">Copy this list</button>
         <button class="btn ghost" type="button" id="wts-hide" hidden>Hide from map</button>
         <span class="msub" id="wts-copied" aria-live="polite"></span>
       </div>
@@ -604,18 +614,20 @@
       </div>
       <div class="tpanel" role="tabpanel" id="tp-compare" aria-labelledby="ptab-compare" hidden>
       <h2 id="scores-h">Scores</h2>
-      <p class="hint">Each bar runs 0 to 100. The dark tick marks business as usual for this place.</p>
+      <p class="hint adv">Each bar runs 0 to 100. The dark tick marks business as usual for this place.</p>
       <div id="metrics"></div>
 
+      <div class="adv">
       <h2>Stress tests</h2>
       <p class="hint">The same map, hit three ways. Select one to see where it bites.</p>
       <div id="tests"></div>
-      <p class="hint" id="rng-note" hidden>Gray bands and “likely” ranges show how far each gain could move if the model’s assumptions are off: 30 runs varying how much trees cool, how much water wetlands and farms hold, how fast storms and heat harm grow, how much each land cover supports wildlife, and regenerative yields. The range covers the middle 80% of runs.</p>
+      </div>
+      <p class="hint adv" id="rng-note" hidden>Gray bands and “likely” ranges show how far each gain could move if the model’s assumptions are off: 30 runs varying how much trees cool, how much water wetlands and farms hold, how fast storms and heat harm grow, how much each land cover supports wildlife, and regenerative yields. The range covers the middle 80% of runs.</p>
 
       <h2 id="costs-h">Rough costs and benefits</h2>
-      <p class="hint" id="cost-hint">What this plan might cost and return across the whole map, city and surrounding land, at US prices. A first-pass estimate for comparing plans, not a budget.</p>
+      <p class="hint adv" id="cost-hint">What this plan might cost and return across the whole map, city and surrounding land, at US prices. A first-pass estimate for comparing plans, not a budget.</p>
       <div class="tablewrap"><table class="costs" id="costs"></table></div>
-      <details class="cost-src"><summary>Sources and assumptions</summary>
+      <details class="cost-src adv"><summary>Sources and assumptions</summary>
         <ul>
           <li><b>Street trees:</b> about US$1,400 to $2,700 to plant one street tree, including two years of contractor care, in New York City (2015 and 2019 to 2020, <a href="https://www.amny.com/new-york/more-green-for-less-green-nyc-tree-planting-programs-slows-due-to-rising-costs/" target="_blank" rel="noopener">amNY</a>). Yearly care US$13 to $65 and yearly benefits US$31 to $89 per tree, from shade, energy savings, cleaner air, stormwater and property value, across five US cities (<a href="https://sheppard.ltrr.arizona.edu/envirothon/McPhersonetal2005UrbanForestBenefitsCosts.pdf" target="_blank" rel="noopener">McPherson and others, 2005</a>). The street-tree lever at 100 adds about 850 trees per km&sup2; of built-up land, roughly New York City&rsquo;s street-tree density.</li>
           <li><b>Wetlands:</b> about US$19,000 to $23,000 per acre (US$47,000 to $57,000 per hectare) to restore, in US Army Corps districts, and over US$100,000 per acre in the largest coastal cities (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9769130" target="_blank" rel="noopener">2022 review of Environmental Law Institute survey data</a>). Inland wetlands provide on average about US$25,700 per hectare per year in flood control, water supply, habitat and other services, with a very wide range between sites (<a href="https://www.commonland.com/wp-content/uploads/2019/09/2013DeGrootBlignautetalConsBiol_18614.pdf" target="_blank" rel="noopener">de Groot and others, 2013</a>). Salt marshes cut flood damage by about 18% on average in one New Jersey county (<a href="https://bio4climate.org/article/the-value-of-coastal-wetlands-for-flood-damage-reduction-in-the-northeastern-usa-narayan-et-al-2017/" target="_blank" rel="noopener">Narayan and others, 2017</a>). Costs here assume the whole hex is restored, so they are an upper bound.</li>
@@ -627,6 +639,15 @@
         </ul>
       </details>
 
+        <section class="takeaway" aria-labelledby="take-h">
+          <h2 id="take-h">Take it with you</h2>
+          <p class="hint">Share the plan with people who decide, or open it in your own mapping software.</p>
+          <div class="take-grid">
+            <button type="button" class="take" id="dl-brief"><b>Decision brief</b><span>A short report for councils, funders and teams: the problem, the plan, the results and costs. Print it or save it as a PDF.</span></button>
+            <button type="button" class="take" id="dl-geo"><b>Map file (GeoJSON)</b><span>Every hex, today and with your plan. Opens in QGIS, ArcGIS and most mapping tools.</span></button>
+            <button type="button" class="take adv" id="dl-csv"><b>Data table (CSV)</b><span>The same numbers as a spreadsheet.</span></button>
+          </div>
+        </section>
       </div>
       <a class="studio-cta" id="studio-cta" href="../studio/">Design it on real streets in Studio &rarr;</a>
     </div>
@@ -656,7 +677,7 @@
   var $ = function (s, el) { return (el || document).querySelector(s); };
 
   var LEVERS = [
-    { key: 'canopy', name: 'Street trees and shade', desc: 'Shade and cooler streets in every built-up hex.', trade: 'Uses little land. Does not link habitats on its own.' },
+    { key: 'canopy', name: 'Street trees and shade', desc: 'Shade and cooler streets in every built-up neighborhood.', trade: 'Uses little land. Does not link habitats on its own.' },
     { key: 'corridors', name: 'Wildlife corridors', desc: 'Greenways grow from the largest natural area toward the city parks.', trade: 'Takes some farmland. Habitat jumps when the last gap closes.' },
     { key: 'wetlands', name: 'Floodplain wetlands', desc: 'Restores wetlands on flood-prone farmland and open land, wettest first.', trade: 'Takes farmland. Holds water for floods and for drought.' },
     { key: 'regen', name: 'Regenerative farming', desc: 'Cover crops and living soil on more of the farmland.', trade: 'Slightly lower yield in a good year, much better in a drought.' },
@@ -711,7 +732,7 @@
   var WTS_ACTIONS = [
     { key: 'canopy', name: 'Street trees', intro: 'Plant shade first in the hottest, most crowded blocks.', none: 'No built-up blocks were found to shade.' },
     { key: 'wetlands', name: 'Wetlands', intro: 'Restore low floodplain land with the most people in flood-prone homes nearby.', none: 'No flood-prone farmland or open land was found.' },
-    { key: 'corridors', name: 'Corridors', intro: 'Link parks that are cut off from the wild land, starting with short links near many people. The outlined hexes are the corridor route.', none: 'No corridor routes were found for this place.' },
+    { key: 'corridors', name: 'Corridors', intro: 'Link parks that are cut off from the wild land, starting with short links near many people. The outlined areas are the corridor route.', none: 'No corridor routes were found for this place.' },
     { key: 'regen', name: 'Regenerative farming', intro: 'Start on farmland in the floodplain or next to habitat, where living soil does double duty.', none: 'No farmland sits in the floodplain or next to habitat.' },
     { key: 'compact', name: 'Compact growth', intro: 'Pull back the outermost sprawl first, and flood-prone sprawl sooner.', none: 'No sprawl edge was found.' }
   ];
@@ -801,7 +822,7 @@
       '<output id="out-' + L.key + '" for="in-' + L.key + '">' + state[L.key] + '</output></div>' +
       '<input type="range" id="in-' + L.key + '" min="0" max="100" step="5" value="' + state[L.key] + '">' +
       '<p id="desc-' + L.key + '">' + L.desc + '</p>' +
-      '<p><span class="eyebrow">Trade-off</span> ' + L.trade + '<span class="mono cost eyebrow">effort ×' + TM.COST[L.key] + '</span></p>' +
+      '<p class="adv"><span class="eyebrow">Trade-off</span> ' + L.trade + '<span class="mono cost eyebrow">effort ×' + TM.COST[L.key] + '</span></p>' +
       '</div>';
   }).join('');
   function renderPresets() {
@@ -842,7 +863,7 @@
     var grad = function (a, b, vs) {
       return '<li class="grad"><span>' + a + '</span><i style="background:linear-gradient(90deg,var(' + vs[0] + '),var(' + vs[1] + '),var(' + vs[2] + '))"></i><span>' + b + '</span></li>';
     };
-    var faded = P && P.inside.some(function (x) { return !x; }) ? '<li>Faded hexes are the surrounding land added around ' + esc(P.place.name) + '</li>' : '';
+    var faded = P && P.inside.some(function (x) { return !x; }) ? '<li>The faded area is the surrounding land added around ' + esc(P.place.name) + '</li>' : '';
     if (P && P.hasRivers && (layer === 'land' || layer === 'flood')) {
       faded = '<li><i style="background:var(--m-water);height:5px;width:18px;border:0"></i>River</li>' +
         (layer === 'land' ? '<li><i style="background:var(--m-water);opacity:0.5;height:2px;width:18px;border:0"></i>Canal or stream</li>' : '') + faded;
@@ -862,7 +883,7 @@
     return sw('Dense core', '--m-core') + sw('Mid-density', '--m-mid') + sw('Sprawl edge', '--m-sub') + sw('Farmland', '--m-farm') +
       sw('Regenerative farm', '--m-regen') + sw('Forest', '--m-forest') + sw('Grassland and scrub', '--m-open') + sw('Bare ground', '--m-barren') +
       sw('Wetland', '--m-wet') + sw('Water', '--m-water') + sw('Park (ringed)', '--m-park') + sw('Corridor and greenway', '--m-corr') +
-      '<li>Green tint on built-up hexes marks street trees</li>' + faded;
+      '<li>Green tint on built-up areas marks street trees</li>' + faded;
   }
   function renderLegend() { var h = legendHTML(); $('#legend-wide').innerHTML = h; $('#legend-narrow').innerHTML = h; }
 
@@ -1379,7 +1400,7 @@
   function describe() {
     var el = $('#readout');
     if (layer === 'threads' && res && P) { el.innerHTML = (sel < 0 ? 'Showing the busiest spot. Hover or tap anywhere to see its threads. ' : '') + threadsText(); return; }
-    if (sel < 0 || !res || !P) { el.textContent = 'Tap or hover a hex to inspect it.'; return; }
+    if (sel < 0 || !res || !P) { el.textContent = 'Tap or hover the map to see what is there.'; return; }
     var c = P.place.cells, cov = res.cover[sel], txt = BLURB[cov] || '';
     if (cov === 'park') txt = res.comp[sel] === res.lcc ? 'Joined to the main habitat network.' : 'A habitat island until a corridor reaches it.';
     var bits = [];
@@ -1477,7 +1498,7 @@
     a.href = URL.createObjectURL(blob); a.download = 'threadlands-' + slugify(P.place.name) + '.geojson';
     document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   }
-  $('#gis-dl').addEventListener('click', downloadGIS);
+  var gisBtn = $('#gis-dl'); if (gisBtn) gisBtn.addEventListener('click', downloadGIS);
   $('#z-in').addEventListener('click', function () { zoomAt(2); });
   $('#z-out').addEventListener('click', function () { zoomAt(0.5); });
   $('#z-grid').addEventListener('click', function () { GRID = !GRID; this.setAttribute('aria-pressed', GRID ? 'true' : 'false'); draw(); });
@@ -1486,6 +1507,19 @@
   ['pointerup', 'pointercancel'].forEach(function (ev) {
     cv.addEventListener(ev, function () { if (painting) { painting = false; lastPainted = -1; saveSketch(); } });
   });
+
+  function hexKm2Now() { var c = P && P.place.cells; if (!c || !c.area || !c.area.length) return 0; var t = 0; for (var i = 0; i < c.area.length; i++) t += +c.area[i] || 0; return t / c.area.length; }
+  // ---- Simple or detailed view: technical detail only when asked for
+  function setView(v) {
+    var simple = v !== 'detail';
+    document.body.classList.toggle('simple', simple);
+    $('#vw-simple').setAttribute('aria-pressed', simple ? 'true' : 'false');
+    $('#vw-detail').setAttribute('aria-pressed', simple ? 'false' : 'true');
+    try { localStorage.setItem('threadlands:view', simple ? 'simple' : 'detail'); } catch (e) { /* ignore */ }
+  }
+  $('#vw-simple').addEventListener('click', function () { setView('simple'); });
+  $('#vw-detail').addEventListener('click', function () { setView('detail'); });
+  (function () { var v = null; try { v = localStorage.getItem('threadlands:view'); } catch (e) { /* ignore */ } setView(v === 'detail' ? 'detail' : 'simple'); })();
 
   // ---- Panel tabs: Understand, Plan, Compare
   var TAB = 'understand';
@@ -1523,6 +1557,76 @@
   });
   try { var t0 = localStorage.getItem('threadlands:tab'); if (t0 === 'plan' || t0 === 'compare') showTab(t0); } catch (e) { /* ignore */ }
 
+  // ---- Take it with you: map file, data table, decision brief
+  var LASTR = null;
+  function download(name, text, type) {
+    var blob = new Blob([text], { type: type }), a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  function slugName() { return (current || (P && P.place.name) || 'place').toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+  function hexRows() {
+    var c = P.place.cells, t = P.BAU_TODAY, rows = [];
+    function r3(v) { return v == null || !isFinite(v) ? null : Math.round(v * 1000) / 1000; }
+    for (var i = 0; i < P.N; i++) rows.push({
+      id: c.id ? c.id[i] : i, lat: r3(c.lat[i]), lng: r3(c.lng[i]), inside_city: P.inside[i] ? 1 : 0, area_km2: r3(c.area[i]), people: Math.round(+c.pop[i] || 0),
+      elevation_m: c.elev ? Math.round(+c.elev[i] || 0) : null, flood_prone: r3(c.flood[i]), surface_heat_c: c.lst_rel && c.lst_rel[i] != null ? r3(+c.lst_rel[i]) : null,
+      tree_share: r3(c.tree[i]), built_share: r3(c.built[i]), crop_share: r3(c.crop[i]), wetland_share: r3(c.wetland[i]),
+      cover_today: t.cover[i], cover_plan: res.cover[i], heat_load_today: r3(t.heat[i]), heat_load_plan: r3(res.heat[i]),
+      flood_exposure_today: r3(t.floodExp[i]), flood_exposure_plan: r3(res.floodExp[i])
+    });
+    return rows;
+  }
+  function planMeta() {
+    var lev = {}; LEVERS.forEach(function (L) { lev[L.key] = state[L.key]; });
+    return { place: P.place.name, made_with: 'Threadlands (threadlands.org)', generated: new Date().toLocaleDateString('en-CA'),
+      climate: P.climate ? P.climate.name : 'Today', plan_levers_percent: lev, resilience_index_today: Math.round(P.BAU.index), resilience_index_plan: Math.round(res.index),
+      sources: 'ESA WorldCover, Copernicus DEM, WorldPop, Landsat, HydroBASINS, OpenStreetMap', note: 'Modeled screening estimates, not engineering results.' };
+  }
+  $('#dl-geo').addEventListener('click', function () { downloadGIS(); });
+  $('#dl-csv').addEventListener('click', function () {
+    if (!P) return;
+    var rows = hexRows(), cols = Object.keys(rows[0]);
+    var esc2 = function (v) { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    download('threadlands-' + slugName() + '.csv', [cols.join(',')].concat(rows.map(function (r) { return cols.map(function (k) { return esc2(r[k]); }).join(','); })).join('\n'), 'text/csv');
+  });
+  $('#dl-brief').addEventListener('click', function () {
+    if (!P) return;
+    var w = window.open('', '_blank'); if (!w) { alert('Allow pop-ups for this site to open the brief.'); return; }
+    w.document.open(); w.document.write(briefHTML()); w.document.close();
+  });
+  function briefHTML() {
+    var name = esc(P.place.name || 'This place'), bau = P.BAU, today = P.BAU_TODAY, meta = planMeta();
+    var pr = null; try { pr = TLProfile.profile(P._raw || P.place, PDIST); } catch (e) { pr = null; }
+    function dl(x) { x = Math.round(x); return x > 0 ? '+' + x : x < 0 ? '−' + Math.abs(x) : '±0'; }
+    function rng(k, t) { var r = LASTR && (t ? LASTR.tests[k] : LASTR.metrics[k]); if (!r || r[1] - r[0] < 1) return ''; return ' <span class="r">likely ' + dl(r[0]) + ' to ' + dl(r[1]) + '</span>'; }
+    var levers = LEVERS.filter(function (L) { return state[L.key] > 0; }).map(function (L) { return '<li><b>' + esc(L.name) + '</b> at ' + state[L.key] + '% of what is possible. ' + esc(L.desc) + '</li>'; }).join('');
+    var press = pr && pr.top.length ? '<ol>' + pr.top.map(function (t) { return '<li><b>' + esc(t.t) + '</b>' + (t.pct !== null ? ' (worse than ' + Math.min(99, t.pct) + '% of places in the Threadlands library)' : '') + '. ' + esc(t.what) + (t.who ? ' ' + esc(t.who) : '') + '</li>'; }).join('') + '</ol>' : '';
+    var rows = METRICS.map(function (m) { return '<tr><td>' + esc(m.name) + '</td><td>' + Math.round(bau.metrics[m.k]) + '</td><td>' + Math.round(res.metrics[m.k]) + '</td><td>' + dl(res.metrics[m.k] - bau.metrics[m.k]) + rng(m.k) + '</td></tr>'; }).join('') +
+      TESTS.map(function (t) { return '<tr><td>' + esc(t.name) + ' (stress test)</td><td>' + Math.round(bau.tests[t.k]) + '</td><td>' + Math.round(res.tests[t.k]) + '</td><td>' + dl(res.tests[t.k] - bau.tests[t.k]) + rng(t.k, 1) + '</td></tr>'; }).join('');
+    var costs = $('#costs') ? $('#costs').outerHTML : '';
+    var wts = Array.prototype.slice.call(document.querySelectorAll('#wts-list li')).slice(0, 5).map(function (li) { var parts = []; li.querySelectorAll('*').forEach(function (el) { if (!el.children.length && el.tagName !== 'A' && el.textContent.trim()) parts.push(el.textContent.replace(/\s+/g, ' ').trim()); }); return '<li>' + esc((parts.length ? parts.join('. ') : li.textContent).replace(/\.\./g, '.')) + '</li>'; }).join('');
+    var ir = LASTR && LASTR.index[1] - LASTR.index[0] >= 1 ? ' (likely ' + dl(LASTR.index[0]) + ' to ' + dl(LASTR.index[1]) + ')' : '';
+    return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + name + ': decision brief</title>' +
+      '<style>body{margin:0;background:#eceee9;font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;color:#1d2523}.pg{max-width:820px;margin:24px auto;background:#fff;padding:48px 56px;box-shadow:0 2px 12px rgba(0,0,0,.08)}' +
+      'h1{font-size:30px;margin:0 0 4px;color:#123B38}h2{font-size:18px;margin:28px 0 8px;color:#123B38;border-bottom:2px solid #123B38;padding-bottom:4px}.meta{color:#5a6662;font-size:13px;margin:0 0 18px}' +
+      '.big{display:flex;gap:24px;flex-wrap:wrap;background:#eef3f1;border-radius:10px;padding:16px 20px}.big b{font-size:28px;color:#123B38;display:block}.big span{font-size:13px;color:#5a6662}' +
+      'table{width:100%;border-collapse:collapse;font-size:13.5px}td,th{text-align:left;padding:6px 8px;border-bottom:1px solid #e1e4de;vertical-align:top}th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#5a6662}.r{color:#5a6662;font-size:12px}' +
+      'li{margin:0 0 6px}.note{font-size:12px;color:#5a6662}.bar{position:sticky;top:0;background:#123B38;color:#fff;padding:10px 16px;display:flex;gap:12px;align-items:center;justify-content:center}.bar button{font:inherit;padding:8px 16px;border-radius:8px;border:0;background:#fff;color:#123B38;font-weight:600;cursor:pointer}' +
+      '@media print{body{background:#fff}.pg{box-shadow:none;margin:0;max-width:none;padding:0 6mm}.bar{display:none}h2{break-after:avoid}tr,li{break-inside:avoid}}</style></head><body>' +
+      '<div class="bar"><span>Decision brief</span><button type="button" onclick="window.print()">Print or save as PDF</button></div><div class="pg">' +
+      '<h1>' + name + ': a resilience plan</h1><p class="meta">Decision brief made with Threadlands (threadlands.org) on ' + meta.generated + ' · Climate: ' + esc(meta.climate) + ' · Screening estimates, not engineering results</p>' +
+      '<div class="big"><div><b>' + Math.round(res.index) + '</b><span>resilience index with this plan</span></div><div><b>' + dl(res.index - bau.index) + '</b><span>vs. business as usual' + ir + '</span></div><div><b>' + Math.round(today.index) + '</b><span>today, before any plan</span></div></div>' +
+      (press ? '<h2>The problem: biggest pressures</h2>' + press : '') +
+      '<h2>The plan</h2>' + (levers ? '<ul>' + levers + '</ul>' : '<p>No actions chosen yet: this shows business as usual.</p>') +
+      '<h2>What it would change</h2><table><thead><tr><th>Measure (0 to 100)</th><th>Without the plan</th><th>With the plan</th><th>Change</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<p class="note">Ranges show how far each change could move if the model’s assumptions are off (middle 80% of 30 runs).</p>' +
+      (costs ? '<h2>Rough costs and benefits</h2>' + costs : '') +
+      (wts ? '<h2>Where to start</h2><ol>' + wts + '</ol>' : '') +
+      '<h2>About this brief</h2><p class="note">Built from open data: ' + esc(meta.sources) + '. Threadlands models a whole city region on a hexagon grid and estimates how heat, flooding, habitat, food and travel respond to each action. Treat these as first-pass estimates to decide what to study further, not as designs. Explore and change this plan at threadlands.org.</p>' +
+      '</div></body></html>';
+  }
+
   // ---- Uncertainty ranges: re-run the plan under varied assumptions, a moment after the last change
   var rangeTimer = 0, rangeCancel = null;
   function fmtR(x) { x = Math.round(x); return x > 0 ? '+' + x : x < 0 ? '\u2212' + Math.abs(x) : '0'; }
@@ -1536,12 +1640,12 @@
   }
   function clearRanges() {
     document.querySelectorAll('.rng').forEach(function (e) { e.textContent = ''; e.classList.remove('stale'); });
-    $('#ps-rng').textContent = '';
+    $('#ps-rng').textContent = ''; LASTR = null;
     document.querySelectorAll('.bar .band').forEach(function (e) { e.style.width = '0'; e.classList.remove('stale'); });
     $('#rng-note').hidden = true;
   }
   function showRanges(r) {
-    rangeCancel = null;
+    rangeCancel = null; LASTR = r;
     var bau = P.BAU;
     function put(txt, band, base, now, lohi) {
       var lo = Math.min(lohi[0], now - base), hi = Math.max(lohi[1], now - base);
@@ -1710,7 +1814,7 @@
     try { renderEmblem(); } catch (err) { /* the emblem is decoration */ }
     $('#place-tag').textContent = kind === 'demo' ? 'Demo' : 'Real data';
     var hexKm2 = pl.hex_km2 || (P.hexKm * P.hexKm * 2.598);
-    var meta = [P.N.toLocaleString('en-US') + ' hexes', 'about ' + (hexKm2 >= 10 ? Math.round(hexKm2) : hexKm2.toFixed(2)) + ' km² each', fmtPop(P.totalPop) + ' people'];
+    var meta = [fmtPop(P.totalPop) + ' people in the city and around it'];
     if (pl.buffer_km) meta.push('plus ' + Math.round(pl.buffer_km) + ' km of surrounding land');
     $('#place-meta').textContent = meta.join(' · ');
     var items = [];
@@ -1722,8 +1826,8 @@
     $('#datalist').innerHTML = items.join('');
     var corrNote = P.Lmax > 0 ? 'Greenways grow from the largest natural area toward ' + P.PARKS.length + ' city park' + (P.PARKS.length === 1 ? '' : 's') + '.' : 'No corridor route was found for this place.';
     $('#desc-corridors').textContent = corrNote;
-    $('#desc-wetlands').textContent = P.restorableCount ? 'Restores wetlands on ' + P.restorableCount + ' flood-prone hexes of farmland and open land, wettest first.' : 'No flood-prone farmland or open land was found, so this lever has nothing to restore here.';
-    $('#desc-compact').textContent = P.subCount ? 'Pulls back ' + P.subCount + ' sprawl hexes, outermost first, and houses the same people inside the existing city.' : 'No sprawl edge was found, so this lever only changes travel a little.';
+    $('#desc-wetlands').textContent = P.restorableCount ? 'Restores wetlands on flood-prone farmland and open land (about ' + Math.round(P.restorableCount * hexKm2Now()) + ' km² is suitable), wettest first.' : 'No flood-prone farmland or open land was found, so this lever has nothing to restore here.';
+    $('#desc-compact').textContent = P.subCount ? 'Pulls back the outer sprawl (about ' + Math.round(P.subCount * hexKm2Now()) + ' km²), outermost first, and houses the same people inside the existing city.' : 'No sprawl edge was found, so this lever only changes travel a little.';
   }
 
   // Waterways are stored per hex, so draw each network as a tree (no loops) to keep the lines clean
