@@ -400,7 +400,7 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
 ANALYTICS = ("<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' "
              "data-cf-beacon='{\"token\": \"a92b6704e81e4aaba11a9f8a11832ae1\"}'></script><!-- End Cloudflare Web Analytics -->\n")
 PAGES = [("", "Home"), ("explore/", "Explore"), ("studio/", "Studio"), ("rankings/", "Rankings"), ("projects/", "Projects"), ("library/", "Library"), ("how-it-works/", "How it works"), ("about/", "About")]
-NAV = [p for p in PAGES if p[0] in ("explore/", "studio/", "rankings/", "projects/", "library/")]
+NAV = [p for p in PAGES if p[0] in ("explore/", "studio/", "rankings/", "projects/", "library/", "about/")]
 
 
 def APP(base):
