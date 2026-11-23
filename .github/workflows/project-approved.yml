@@ -26,6 +26,7 @@ jobs:
           keep['id'] = 'v' + os.environ['NUM']
           keep['source'] = {'title': p.get('source_title') or p.get('source_url'), 'url': p.get('source_url')}
           keep['added_by_visitor'] = True
+          import datetime; keep['added'] = datetime.date.today().isoformat()
           d = json.load(open('data/projects.json'))
           d['projects'] = [x for x in d['projects'] if x.get('id') != keep['id']] + [keep]
           json.dump(d, open('data/projects.json', 'w'), indent=2, ensure_ascii=False)
