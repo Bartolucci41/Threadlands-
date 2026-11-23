@@ -28,6 +28,12 @@ TOPICS = {
 }
 # Headlines that match the words but are not about the city's climate or land
 NOISE = r"flood(ing|ed)? (the |international |global )?(market|inbox|zone)|flooded with|stock|shares|crypto|tokyo cement|box office|\bnba\b|\bnfl\b|football|soccer|fútbol|futebol|calcio"
+# Crowds that "flood" a place are not floods
+NOISE += r"|\b(participants|fans|crowds?|people|tourists|visitors|thousands|runners|shoppers|buyers|orders|calls|messages) (flood|flooded)"
+# Places whose name is shared with somewhere else: how to search for them, and headlines that mean the other place
+SEARCH_AS = {"washington-dc": "Washington DC"}
+NOT_HERE = {"washington-dc": r"washington (state|coast)|oregon|seattle|spokane", "porto": r"porto (murtinho|alegre|velho|seguro|rico|nacional)",
+            "santiago": r"santiago de (compostela|cuba|los caballeros|queretaro)", "cordoba": r"cordoba,? spain|andaluc"}
 SKIP_SOURCES = {"facebook", "youtube", "instagram", "x", "tiktok", "reddit", "linkedin"}
 PRIORITY = {"flood": 5, "heat": 5, "fire": 4, "drought": 4, "greening": 3, "water": 3, "climate": 1}
 
@@ -104,7 +110,7 @@ def main():
     cutoff = time.strftime("%Y%m%d", time.gmtime(time.time() - 15 * 86400))
     out, seen = {}, set()
     for n, p in enumerate(places):
-        name = p["name"].split(",")[0].strip()
+        name = SEARCH_AS.get(p["slug"]) or p["name"].split(",")[0].strip()
         cc = (p.get("cc") or "").upper()
         langs = ["en"] + ([LANG_OF[cc]] if cc in LANG_OF else [])
         found, items = 0, []
@@ -119,7 +125,7 @@ def main():
                     continue
                 seen.add(key)
                 ft, fn = fold(a["title"]), fold(name)
-                if fold(a["source"]) in SKIP_SOURCES or re.search(fold(NOISE), ft) or ("new " + fn) in ft:
+                if fold(a["source"]) in SKIP_SOURCES or re.search(fold(NOISE), ft) or ("new " + fn) in ft or re.search(NOT_HERE.get(p["slug"], "$^"), ft):
                     continue
                 topic = next((k for k, rx in TOPICS.items() if re.search(fold(rx), ft)), None)
                 if not topic:
