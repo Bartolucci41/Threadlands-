@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=5">
+<link rel="stylesheet" href="../assets/site.css?v=6">
 <script src="../assets/i18n.js" defer></script>
 <link rel="manifest" href="../manifest.webmanifest">
 <meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">
@@ -105,12 +105,12 @@
         <button type="button" class="chip st-tool" data-shape="rect" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="6" width="16" height="12" rx="1"/></svg><span>Rectangle</span></button>
         <button type="button" class="chip st-tool" data-shape="circle" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg><span>Circle</span></button>
         <button type="button" class="chip st-tool" data-shape="poly" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18l3-12 7 3 6-4-2 13z"/></svg><span>Outline</span></button>
-        <button type="button" class="chip st-tool" data-shape="curve" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16c2-8 6-10 9-7s5 5 7-3"/></svg><span>Curve</span></button>
+        <button type="button" class="chip st-tool adv" data-shape="curve" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16c2-8 6-10 9-7s5 5 7-3"/></svg><span>Curve</span></button>
         <button type="button" class="chip st-tool" data-shape="edit" aria-pressed="false" title="Select a shape to move it, reshape it, resize it, copy it or delete it"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4l6 15 2-6 6-2z"/><rect x="15" y="15" width="5" height="5" rx="1"/></svg><span>Edit</span></button>
-        <button type="button" class="chip st-tool" data-shape="free" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17c3 0 3-6 6-6s2 6 5 6 3-9 7-9"/></svg><span>Freehand</span></button>
+        <button type="button" class="chip st-tool adv" data-shape="free" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17c3 0 3-6 6-6s2 6 5 6 3-9 7-9"/></svg><span>Freehand</span></button>
       </div>
       <div class="st-optrow">
-      <div class="st-dims" id="st-dims" hidden>
+      <div class="st-dims adv" id="st-dims" hidden>
         <span id="st-dims-rect">Exact size: <input id="st-dw" type="number" min="1" step="1" placeholder="width" aria-label="Width in meters"> &times; <input id="st-dh" type="number" min="1" step="1" placeholder="depth" aria-label="Depth in meters"> m</span>
         <span id="st-dims-circ">Exact size: radius <input id="st-dr" type="number" min="1" step="1" placeholder="any" aria-label="Radius in meters"> m</span>
         <span class="st-dims-note">Leave empty to drag any size; with a size set, one click places it.</span>
@@ -129,7 +129,7 @@
           <button type="button" class="chip" id="st-zin" aria-label="Zoom in">+</button>
           <button type="button" class="chip" id="st-zout" aria-label="Zoom out">&minus;</button>
           <button type="button" class="chip st-3d" id="st-3d" aria-pressed="false" title="Show buildings, walls and trees in 3D">3D</button>
-          <button type="button" class="chip st-3d" id="st-grid" aria-pressed="false" title="Show the analysis grid the scores are worked out on">Grid</button>
+          <button type="button" class="chip st-3d adv" id="st-grid" aria-pressed="false" title="Show the analysis grid the scores are worked out on">Grid</button>
         </div>
         <span class="st-mode" id="st-mode">Region view</span>
         <div class="st-guide3d" id="st-guide3d" hidden role="note">
@@ -163,6 +163,11 @@
     </div>
 
     <aside class="st-panel">
+      <div class="viewsw" role="group" aria-label="How much detail">
+        <span>Detail</span>
+        <button type="button" class="chip" id="vw-simple" aria-pressed="true">Simple</button>
+        <button type="button" class="chip" id="vw-detail" aria-pressed="false">Detailed</button>
+      </div>
       <h2 class="st-h">Placing</h2>
       <div class="st-current"><i id="st-cur-dot"></i><b id="st-cur-name"></b><span id="st-cur-price" class="st-price"></span></div>
       <p class="st-tooldesc" id="st-tooldesc"></p>
@@ -170,7 +175,7 @@
         <label for="st-floors" id="st-floors-l">Floors</label><input id="st-floors" type="number" min="1" max="80" step="1" value="6">
         <label for="st-wallh" id="st-wallh-l">Height (m)</label><input id="st-wallh" type="number" min="0.5" max="12" step="0.5" value="2">
       </div>
-      <details class="st-bom" id="st-bom" hidden>
+      <details class="st-bom adv" id="st-bom" hidden>
         <summary>What goes into it</summary>
         <div class="st-sp" id="st-sp" hidden></div>
         <div class="st-bom-opts" id="st-bom-opts" role="radiogroup" aria-label="How it is built"></div>
@@ -184,8 +189,8 @@
         <div class="st-bud-bar"><i id="st-bud-fill"></i></div>
         <div class="st-bud-row"><label for="st-cap">Budget (US$)</label><input id="st-cap" class="st-select small" style="width:9rem;text-align:right" inputmode="decimal" list="st-caps" placeholder="e.g. 50K or 2M" autocomplete="off"><datalist id="st-caps"></datalist></div>
         <p class="hint" style="margin:0">Type any amount, from a $50K grant up: 50K, 2.5M, 1B.</p>
-        <div class="st-bud-row small"><span>Upkeep each year</span><span id="st-upkeep">$0</span></div>
-        <p class="hint" id="st-price"></p>
+        <div class="st-bud-row small adv"><span>Upkeep each year</span><span id="st-upkeep">$0</span></div>
+        <p class="hint adv" id="st-price"></p>
       </div>
 
       <h2 class="st-h">In <span id="st-yr2">2026</span></h2>
@@ -195,8 +200,8 @@
       <h2 class="st-h">Your design</h2>
       <div id="st-design" class="st-extra"></div>
 
-      <p style="margin:0 0 6px"><button type="button" class="chip" id="st-gis">Download design for GIS</button> <button type="button" class="chip" id="st-bomdl">Download bill of materials</button></p>
-      <p class="hint" style="margin:0 0 14px">A GeoJSON file of every element you placed, with its size, cost and settings, ready for QGIS or ArcGIS.</p>
+      <p class="adv" style="margin:0 0 6px"><button type="button" class="chip" id="st-gis">Download design for GIS</button> <button type="button" class="chip" id="st-bomdl">Download bill of materials</button></p>
+      <p class="hint adv" style="margin:0 0 14px">A GeoJSON file of every element you placed, with its size, cost and settings, ready for QGIS or ArcGIS.</p>
 
       <div id="st-board" hidden>
         <h2 class="st-h">Teams</h2>
@@ -207,7 +212,7 @@
       <p class="hint" style="margin:0">Checked in 2050, within the budget.</p>
       <ol class="st-chals" id="st-chals"></ol>
 
-      <details class="cost-src"><summary>Sources and assumptions</summary>
+      <details class="cost-src adv"><summary>Sources and assumptions</summary>
         <ul id="st-sources"></ul>
       </details>
     </aside>
@@ -222,6 +227,17 @@
 
 (function () {
   var $ = function (s) { return document.querySelector(s); };
+  // Simple or detailed view, shared with Explore: technical detail only when asked for
+  function setView(v) {
+    var simple = v !== 'detail';
+    document.body.classList.toggle('simple', simple);
+    $('#vw-simple').setAttribute('aria-pressed', simple ? 'true' : 'false');
+    $('#vw-detail').setAttribute('aria-pressed', simple ? 'false' : 'true');
+    try { localStorage.setItem('threadlands:view', simple ? 'simple' : 'detail'); } catch (e) { /* ignore */ }
+  }
+  $('#vw-simple').addEventListener('click', function () { setView('simple'); });
+  $('#vw-detail').addEventListener('click', function () { setView('detail'); });
+  (function () { var v = null; try { v = localStorage.getItem('threadlands:view'); } catch (e) { /* ignore */ } setView(v === 'detail' ? 'detail' : 'simple'); })();
   function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function css(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
   function rgb(h) { h = h.replace('#', ''); var n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }

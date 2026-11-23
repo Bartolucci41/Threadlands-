@@ -238,6 +238,9 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .lib-zoom .chip:disabled { opacity: 0.45; }
   .lib-tip a { color: var(--bg); text-decoration: underline; }
   .lib-tip { position: absolute; pointer-events: none; padding: 4px 8px; border-radius: 6px; background: var(--ink); color: var(--bg); font: 500 0.8125rem var(--font-body); transform: translate(-50%, -130%); white-space: nowrap; }
+  .viewsw { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 0.8rem; color: var(--ink2); margin: 0 0 4px; }
+  .viewsw .chip { min-height: 32px; padding: 4px 12px; font-size: 0.8rem; }
+  body.simple .adv { display: none !important; }
   .lib-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 24px; }
   .lib-chips .chip span { opacity: 0.6; margin-left: 4px; font-size: 0.8em; }
   .lib-chips .chip.on { background: #123B38; color: #fff; border-color: #123B38; }
@@ -300,7 +303,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=5">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=6">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
