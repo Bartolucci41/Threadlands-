@@ -101,7 +101,7 @@
   function card(slug) {
     var e = D.lib[slug]; if (!e) return '';
     var r = D.rank[slug] || {}, sm = D.summary[slug] || {}, nw = (D.news.places || {})[slug] || [];
-    var top = (sm.pressures || [])[0], lead = nw.filter(function (x) { return x.named; })[0] || nw[0];
+    var top = (sm.pressures || [])[0], lead = nw.filter(function (x) { return x.named !== false; })[0];
     return '<article class="mpc" data-slug="' + esc(slug) + '">' +
       '<a class="mpc-main" href="{B}place/#' + esc(slug) + '">' +
         '<span class="mpc-top"><span><b class="mpc-name">' + esc(e.name) + '</b><span class="mpc-where">' + esc(T.where(e)) + '</span></span>' +

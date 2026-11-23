@@ -138,7 +138,7 @@
   }
   var SCOPE = 'city';
   function renderNews(e) {
-    var nw = D.news || {}, regs = (nw.place_region || {})[SLUG] || [], opts = [['city', e.name, (nw.places || {})[SLUG] || []]];
+    var nw = D.news || {}, regs = (nw.place_region || {})[SLUG] || [], opts = [['city', e.name, ((nw.places || {})[SLUG] || []).filter(function (x) { return x.named !== false; })]];
     regs.forEach(function (r) { var it = (nw.regions || {})[r]; if (it && it.length) opts.push([r, r, it]); });
     $('#pf-scope').hidden = opts.length < 2;
     $('#pf-scope').innerHTML = opts.map(function (o) { return '<button type="button" class="chip" data-scope="' + esc(o[0]) + '" aria-pressed="' + (o[0] === SCOPE) + '">' + esc(o[1]) + '</button>'; }).join('');
