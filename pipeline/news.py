@@ -93,12 +93,13 @@ def fetch(url, tries=3):
                 return r.read()
         except Exception as e:
             print("  retry", k + 1, e, file=sys.stderr)
-            time.sleep(10 * (k + 1))
+            time.sleep(5 * (k + 1))
     return b""
 
 
-def search(name, lang, cc, kind="risk"):
-    q = f'"{name}" {(TERMS if kind == "risk" else BUILD)[lang]} when:14d'
+def search(name, lang, cc):
+    # One search covers risks and building/politics together: half the requests, so the run stays well inside its time
+    q = f'"{name}" ({TERMS[lang][1:-1]} OR {BUILD[lang][1:-1]}) when:14d'
     url = "https://news.google.com/rss/search?" + urllib.parse.urlencode(dict(q=q, **edition(lang, cc)))
     raw = fetch(url)
     try:
@@ -152,9 +153,9 @@ def gather(name, cc, slug, cutoff, seen, extra=()):
     langs = ["en"] + ([LANG_OF[cc]] if cc in LANG_OF else [])
     found, items, fn = 0, [], fold(name)
     names = [fold(x) for x in [name] + LOCAL.get(slug, []) + list(extra)]
-    for kind in ("risk", "build"):
+    for kind in ("both",):
         for lang in langs:
-            arts = search(LOCAL[slug][0] if lang != "en" and slug in LOCAL else name, lang, cc, kind)
+            arts = search(LOCAL[slug][0] if lang != "en" and slug in LOCAL else name, lang, cc)
             found += len(arts)
             for a in arts:
                 if not a["title"] or not a["url"].startswith("http") or (a["date"] and a["date"] < cutoff):
@@ -172,41 +173,62 @@ def gather(name, cc, slug, cutoff, seen, extra=()):
                 seen.add(key)
                 tone = "gain" if re.search(fold(GAIN), ft) else ("concern" if topic in HAZARDS else "update")
                 items.append(dict(a, title=a["title"][:180], topic=topic, tone=tone, named=True))
-            time.sleep(2)
+            time.sleep(1.5)
     items.sort(key=lambda x: x["date"], reverse=True)
     return found, items
 
 
+BUDGET = 40 * 60   # seconds; whatever is not reached today keeps yesterday's headlines and goes first tomorrow
+
+
 def main():
+    start = time.time()
     limit = int(sys.argv[1]) if len(sys.argv) > 1 else 0
     places = json.load(open(os.path.join(ROOT, "data", "index.json")))["places"]
     places = [p for p in places if p.get("slug") and p.get("name")]
     if limit:
         places = places[:limit]
+    try:
+        old = json.load(open(os.path.join(ROOT, "data", "news.json")))
+    except Exception:
+        old = {}
+    # Start where yesterday's run stopped, so every place is refreshed even if one run cannot reach them all
+    first = old.get("next", 0) % max(1, len(places))
+    places = places[first:] + places[:first]
     cutoff = time.strftime("%Y%m%d", time.gmtime(time.time() - 15 * 86400))
-    out, seen, regions, place_region = {}, set(), {}, {}
+    out = {k: [x for x in v if x.get("date", "") >= cutoff] for k, v in (old.get("places") or {}).items()}
+    reg_out = {k: [x for x in v if x.get("date", "") >= cutoff] for k, v in (old.get("regions") or {}).items()}
+    seen, regions, place_region, done = set(), {}, dict(old.get("place_region") or {}), 0
     for n, p in enumerate(places):
+        rs = regions_of(p)
+        if rs:
+            place_region[p["slug"]] = rs
+            for r in rs:
+                regions.setdefault(r, (p.get("cc") or "").upper())
+        if time.time() - start > BUDGET * 0.75:
+            continue                      # out of time: keep what this place had
         name = SEARCH_AS.get(p["slug"]) or p["name"].split(",")[0].strip()
         cc = (p.get("cc") or "").upper()
         found, items = gather(name, cc, p["slug"], cutoff, seen)
         # Keep a mix: the newest concerns and the newest gains and updates
         conc = [x for x in items if x["tone"] == "concern"][:6]
         rest = [x for x in items if x["tone"] != "concern"][:6]
-        mix = sorted(conc + rest, key=lambda x: (x["named"], x["date"]), reverse=True)
+        mix = sorted(conc + rest, key=lambda x: x["date"], reverse=True)
         if mix:
             out[p["slug"]] = mix
-        rs = regions_of(p)
-        if rs:
-            place_region[p["slug"]] = rs
-            for r in rs:
-                regions.setdefault(r, cc)
+        else:
+            out.pop(p["slug"], None)
+        done += 1
         print(f"{n + 1}/{len(places)} {name}: {found} found, {len(mix)} kept", flush=True)
-    reg_out = {}
     for k, (r, cc) in enumerate(regions.items()):
+        if time.time() - start > BUDGET:
+            break
         found, items = gather(REGION_SEARCH.get(r, r), cc, "", cutoff, seen, extra=[r.replace(" County", "").replace(" Parish", "")] if r != "Georgia" else [])
         if items:
             reg_out[r] = items[:8]
         print(f"region {k + 1}/{len(regions)} {r}: {found} found, {len(items[:8])} kept", flush=True)
+    out = {k: v for k, v in out.items() if v}
+    reg_out = {k: v for k, v in reg_out.items() if v}
     # The biggest stories across all places: the city named in the headline, newest first, hazards first; one per place
     top = [dict(it, place=slug) for slug, items in out.items() for it in items if it["named"]]
     top.sort(key=lambda x: (x["date"], PRIORITY.get(x["topic"], 0)), reverse=True)
@@ -219,9 +241,9 @@ def main():
         if len(picked) >= 12:
             break
     data = {"updated": time.strftime("%Y-%m-%d"), "source": "Google News", "top": picked, "places": out,
-            "regions": reg_out, "place_region": place_region}
+            "regions": reg_out, "place_region": place_region, "next": (first + done) % max(1, len(places)) if done < len(places) else 0}
     json.dump(data, open(os.path.join(ROOT, "data", "news.json"), "w"), ensure_ascii=False, separators=(",", ":"))
-    print("news:", len(out), "places with news;", len(reg_out), "regions;", len(picked), "top stories")
+    print("news:", done, "places refreshed;", len(out), "places with news;", len(reg_out), "regions;", len(picked), "top stories")
 
 
 if __name__ == "__main__":
