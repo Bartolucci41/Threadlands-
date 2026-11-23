@@ -123,6 +123,46 @@
     var lo = 0, eq = 0; for (var k = 0; k < list.length; k++) { if (list[k] < v) lo++; else if (list[k] === v) eq++; }
     return Math.max(1, Math.min(99, Math.round(100 * (lo + eq / 2) / list.length)));
   }
-  var api = { measure: measure, profile: profile, KEYS: KEYS, placeStats: placeStats, rankIn: rankIn };
+  // ---- Real projects: what one adds when placed on today's map, and whether it counts toward the index.
+  // Land cover is from 2021 satellite data, so projects built in or before 2021 are taken as already in it.
+  var PTOOL = { wetland: 'wetland', park: 'park', trees: 'park', corridor: 'corridor', river: 'corridor', farm: 'regen' };
+  var LANDCOVER_YEAR = 2021;
+  function projectCounts(p) { return p.status === 'approved' || p.status === 'underway' || (p.status === 'built' && (p.year || 0) > LANDCOVER_YEAR); }
+  function projectEffect(P, p, ZERO) {
+    var c = P.place.cells, d = [], kx = Math.cos(p.lat * Math.PI / 180) * 111.32, people = 0;
+    for (var i = 0; i < P.N; i++) { var dx = (c.lng[i] - p.lng) * kx, dy = (c.lat[i] - p.lat) * 110.57, dd = dx * dx + dy * dy; d.push([dd, i]); if (dd <= 1) people += +c.pop[i] || 0; }
+    d.sort(function (a, b) { return a[0] - b[0]; });
+    var fx = { people: people, index: 0 }, tool = PTOOL[p.kind];
+    if (!tool || !(p.area_km2 > 0) || !d.length || d[0][0] > 4) return fx;
+    var hexA = 0, m = Math.min(50, P.N); for (var k = 0; k < m; k++) hexA += +c.area[k] || 0; hexA /= m;
+    var n = Math.max(1, Math.min(400, Math.round(p.area_km2 / hexA))), save = P.paint;
+    try {
+      P.paint = new Map(); var b = P.evaluate(ZERO);
+      d.slice(0, n).forEach(function (x) { P.paint.set(x[1], tool); });
+      var r = P.evaluate(ZERO);
+      fx.index = r.index - b.index; fx.heat = r.metrics.heat - b.metrics.heat; fx.flood = r.metrics.flood - b.metrics.flood; fx.habitat = r.metrics.habitat - b.metrics.habitat;
+    } finally { P.paint = save; }
+    return fx;
+  }
+  // All counting projects together (painted at once, so overlaps are not double counted)
+  function projectsEffect(P, list, ZERO) {
+    var c = P.place.cells, hexA = 0, m = Math.min(50, P.N), save = P.paint, used = 0;
+    for (var k = 0; k < m; k++) hexA += +c.area[k] || 0; hexA /= m;
+    try {
+      P.paint = new Map(); var b = P.evaluate(ZERO);
+      list.filter(projectCounts).forEach(function (p) {
+        var tool = PTOOL[p.kind]; if (!tool || !(p.area_km2 > 0)) return;
+        var kx = Math.cos(p.lat * Math.PI / 180) * 111.32, d = [];
+        for (var i = 0; i < P.N; i++) { var dx = (c.lng[i] - p.lng) * kx, dy = (c.lat[i] - p.lat) * 110.57; d.push([dx * dx + dy * dy, i]); }
+        d.sort(function (a, b2) { return a[0] - b2[0]; });
+        if (!d.length || d[0][0] > 4) return;
+        d.slice(0, Math.max(1, Math.min(400, Math.round(p.area_km2 / hexA)))).forEach(function (x) { P.paint.set(x[1], tool); });
+        used++;
+      });
+      var r = used ? P.evaluate(ZERO) : b;
+      return { index: r.index - b.index, counted: used };
+    } finally { P.paint = save; }
+  }
+  var api = { measure: measure, profile: profile, KEYS: KEYS, placeStats: placeStats, rankIn: rankIn, projectEffect: projectEffect, projectsEffect: projectsEffect, projectCounts: projectCounts };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.TLProfile = api;
 })(this);

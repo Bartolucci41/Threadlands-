@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=7">
+<link rel="stylesheet" href="../assets/site.css?v=8">
 <script src="../assets/i18n.js" defer></script>
 <link rel="manifest" href="../manifest.webmanifest">
 <meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">
@@ -185,6 +185,7 @@
       <section class="projs" id="projs" hidden aria-labelledby="projs-h">
         <h2 id="projs-h">Real projects here</h2>
         <p class="hint">Parks, wetlands, trees and water projects that are proposed, approved, under way or built, each with a public source. Threadlands estimates what each one adds.</p>
+        <p class="proj-sum" id="proj-sum" hidden></p>
         <ol class="proj-list" id="proj-list"></ol>
         <p class="hint" id="proj-none" hidden>No projects are on the map here yet. Know one? Add it, with a link to a public source.</p>
         <button type="button" class="btn ghost" id="proj-add-btn">Add a real project</button>
@@ -2454,27 +2455,15 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     d.sort(function (a, b) { return a[0] - b[0]; });
     return d.slice(0, n);
   }
-  function projEffect(p) {
-    var c = P.place.cells, near = nearHexes(p.lat, p.lng, 400), people = 0;
-    near.forEach(function (x) { if (x[0] <= 1) people += +c.pop[x[1]] || 0; });
-    var tool = PTOOL[p.kind], fx = { people: people };
-    if (!tool || !(p.area_km2 > 0) || !near.length || near[0][0] > 4) return fx;
-    var hexA = 0; for (var i = 0; i < Math.min(50, P.N); i++) hexA += +c.area[i] || 0; hexA /= Math.min(50, P.N);
-    var n = Math.max(1, Math.min(400, Math.round(p.area_km2 / hexA))), save = P.paint;
-    try {
-      P.paint = new Map(); var b = P.evaluate(TM.ZERO);
-      near.slice(0, n).forEach(function (x) { P.paint.set(x[1], tool); });
-      var r = P.evaluate(TM.ZERO);
-      fx.index = r.index - b.index; fx.heat = r.metrics.heat - b.metrics.heat; fx.flood = r.metrics.flood - b.metrics.flood; fx.habitat = r.metrics.habitat - b.metrics.habitat;
-    } finally { P.paint = save; }
-    return fx;
-  }
+  function projEffect(p) { return TLProfile.projectEffect(P, p, TM.ZERO); }
   function fx1(x) { var v = Math.round(x * 10) / 10; return (v > 0 ? '+' : v < 0 ? '\u2212' : '\u00b1') + Math.abs(v).toFixed(1); }
   $('#rain-show').addEventListener('click', function () { setLayer('flood'); $('#mapwrap').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
   function renderProjects() {
     var box = $('#projs'); if (!P || kind === 'demo') { box.hidden = true; return; }
     var list = placeProjects();
     $('#proj-none').hidden = list.length > 0;
+    var tot = list.length ? TLProfile.projectsEffect(P, list, TM.ZERO) : null, ps = $('#proj-sum');
+    if (tot && Math.abs(tot.index) >= 0.05) { ps.textContent = 'Together, the projects that are approved, under way or built since 2021 add ' + fx1(tot.index) + ' to ' + (P.place.name || 'this place') + '\u2019s resilience index, and count toward its place in the ranking.'; ps.hidden = false; } else ps.hidden = true;
     $('#proj-list').innerHTML = list.map(function (p) {
       var st = PSTAT[p.status] || PSTAT.proposed, fx = projEffect(p), parts = [];
       if (fx.index != null && Math.abs(fx.index) >= 0.05) parts.push(fx1(fx.index) + ' on the resilience index');

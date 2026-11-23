@@ -483,6 +483,8 @@
   .rain-alert { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 10px; padding: 10px 14px; border-radius: 12px; background: #1f4f78; color: #fff; font-size: 0.92rem; }
   .rain-alert[hidden] { display: none; }
   .rain-alert .chip { background: #fff; color: #1f4f78; border-color: #fff; }
+  .proj-sum { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--accent); color: var(--accent-ink, #fff); font-weight: 600; font-size: 0.92rem; }
+  .proj-sum[hidden] { display: none; }
 
   /* Site pages */
   .site-head .topnav a[aria-current="page"] { color: var(--ink); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
@@ -718,6 +720,13 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .rk-none { padding: 10px 0; color: var(--ink2); }
   .rank-note a { color: var(--accent); }
   .rank-note { margin: 14px 0 0; font-size: 0.82rem; color: var(--ink2); max-width: 80ch; line-height: 1.5; }
+  .feed { margin: 56px 0 48px; }
+  .feed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 16px; }
+  .feed-card { display: grid; gap: 6px; align-content: start; padding: 14px 16px; border-radius: 12px; background: var(--surface); border-top: 3px solid var(--pc); color: var(--ink); text-decoration: none; }
+  .feed-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .feed-top { display: flex; justify-content: space-between; gap: 8px; font-size: 0.78rem; }
+  .feed-st { font-weight: 600; color: var(--pc); } .feed-city { color: var(--ink2); }
+  .feed-card b { font-size: 1.02rem; line-height: 1.3; } .feed-sum { font-size: 0.86rem; color: var(--ink2); line-height: 1.45; }
   .who-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 32px; margin-top: 8px; }
   .who h3 { margin: 0 0 6px; font-size: 1.05rem; } .who p { margin: 0; color: var(--ink2); line-height: 1.5; }
   .viewsw { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 0.8rem; color: var(--ink2); margin: 0 0 4px; }

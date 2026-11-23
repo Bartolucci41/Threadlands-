@@ -66,6 +66,12 @@
     <p class="rank-note" id="rank-note">A screening index from open data: heat, flood exposure, connected nature, local food, low-carbon travel and three stress tests, each modeled for the whole city region. It changes when the data is rebuilt. Some places are outlined larger than the city itself, and flood and travel are not yet comparable between places, so read the ranking as a first look, not a verdict. <a href="{B}how-it-works/">How it works</a></p>
   </section>
 
+  <section class="feed" id="feed" aria-labelledby="feed-h" hidden>
+    <h2 class="sect-h" id="feed-h">Real projects, on the map</h2>
+    <p class="rank-sub">Parks, wetlands, trees and water projects in the library's cities, each with a public source. Anyone can add one; each is checked before it appears.</p>
+    <div class="feed-grid" id="feed-grid"></div>
+  </section>
+
   <section class="now" id="now" aria-labelledby="now-h" hidden>
     <h2 class="sect-h" id="now-h">Right now, from space</h2>
     <p class="now-sub" id="now-sub">The latest clear satellite pass over each place, compared with the same weeks in earlier years.</p>
@@ -323,7 +329,7 @@
     var hi = all[0].index, lo = all[n - 1].index;
     function row(p, k) {
       var w = Math.max(4, Math.round(100 * (p.index - lo + 2) / (hi - lo + 2)));
-      return '<li><a href="{B}explore/#' + p.slug + '"><span class="rk-n">' + (k + 1) + '</span><span class="rk-c"><b>' + esc(p.name) + '</b><span>' + esc(p.country) + (p.top ? ' · ' + (PRESS[p.top] || '') : '') + '</span></span>' +
+      return '<li><a href="{B}explore/#' + p.slug + '"><span class="rk-n">' + (k + 1) + '</span><span class="rk-c"><b>' + esc(p.name) + '</b><span>' + esc(p.country) + (p.top ? ' · ' + (PRESS[p.top] || '') : '') + (p.projects && p.projects.add >= 0.05 ? ' · +' + p.projects.add.toFixed(1) + ' from projects' : '') + '</span></span>' +
         '<span class="rk-bar" aria-hidden="true"><i style="width:' + w + '%"></i></span><span class="rk-v">' + Math.round(p.index) + '</span></a></li>';
     }
     $('#rank-top').innerHTML = all.slice(0, 5).map(function (p, k) { return row(p, k); }).join('');
@@ -339,4 +345,18 @@
     $('#rank-sub').textContent = 'The Threadlands resilience index for all ' + n + ' places in the library, 0 to 100, as of ' + new Date(rk.updated + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + '. Higher is better prepared for heat, floods and drought.';
     $('#rank').hidden = false;
   }).catch(function () { /* the ranking is optional */ });
+  // ---- Latest real projects across all cities
+  var FSTAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
+  Promise.all([fetch('{B}data/projects.json').then(function (r) { return r.json(); }), fetch('{B}data/index.json').then(function (r) { return r.json(); })]).then(function (x) {
+    var ps = (x[0].projects || []).slice(), names = {};
+    (x[1].places || []).forEach(function (e) { names[e.slug] = e.name; });
+    if (!ps.length) return;
+    ps.sort(function (a, b) { return String(b.added || '').localeCompare(String(a.added || '')) || (b.year || 0) - (a.year || 0); });
+    $('#feed-grid').innerHTML = ps.slice(0, 6).map(function (p) {
+      var st = FSTAT[p.status] || FSTAT.proposed;
+      return '<a class="feed-card" href="{B}explore/#' + esc(p.place) + '" style="--pc:' + st[1] + '"><span class="feed-top"><span class="feed-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span class="feed-city">' + esc(names[p.place] || p.place) + '</span></span>' +
+        '<b>' + esc(p.name) + '</b><span class="feed-sum">' + esc(String(p.summary || '').split('. ')[0].replace(/\.$/, '')) + '.</span></a>';
+    }).join('');
+    $('#feed').hidden = false;
+  }).catch(function () { /* the feed is optional */ });
 })();
