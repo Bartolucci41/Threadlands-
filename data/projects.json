@@ -1,0 +1,65 @@
+{
+  "note": "Real projects shown on the Threadlands map. Added by the Threadlands team or by visitors, after review. Each has a public source.",
+  "projects": [
+    {
+      "id": "mx-texcoco-park",
+      "place": "mexico-city",
+      "name": "Parque Ecológico Lago de Texcoco",
+      "kind": "wetland",
+      "status": "built",
+      "year": 2024,
+      "lat": 19.49,
+      "lng": -98.99,
+      "area_km2": 140,
+      "who": "Government of Mexico (Conagua)",
+      "summary": "About 14,000 hectares of restored lake, wetland and parkland on the former site of the cancelled airport, east of the city. Opened in September 2024.",
+      "source": { "title": "El Imparcial: AMLO inaugura el Parque Ecológico Lago de Texcoco (2 Sep 2024)", "url": "https://www.elimparcial.com/mexico/2024/09/02/entrada-gratis-y-14000-hectareas-de-naturaleza-amlo-inaugura-el-parque-ecologico-lago-de-texcoco/" },
+      "involved": ""
+    },
+    {
+      "id": "mx-gran-canal",
+      "place": "mexico-city",
+      "name": "Parque Lineal Gran Canal",
+      "kind": "park",
+      "status": "built",
+      "year": 2021,
+      "lat": 19.452,
+      "lng": -99.113,
+      "area_km2": 0.01,
+      "who": "Government of Mexico City",
+      "summary": "A linear park on the bed of the old Gran Canal drain in Venustiano Carranza: 708 new trees and 24 wells that return rainwater to the aquifer. First stage about 840 m, opened 2021.",
+      "source": { "title": "Mexico City tourism: Parque Lineal Gran Canal", "url": "https://mexicocity.cdmx.gob.mx/venues/parque-lineal-gran-canal/" },
+      "involved": ""
+    },
+    {
+      "id": "mx-tlallipan",
+      "place": "mexico-city",
+      "name": "Jardín Flotante Tlallipan",
+      "kind": "corridor",
+      "status": "built",
+      "year": 2026,
+      "lat": 19.417,
+      "lng": -99.134,
+      "area_km2": 0.03,
+      "who": "Government of Mexico City",
+      "summary": "A 1.8 km elevated garden and walking route over Calzada de Tlalpan, between Pino Suárez and Chabacano: 176 trees, thousands of shrubs and more than 80,000 pollinator plants. Opened June 2026.",
+      "source": { "title": "México Desconocido: Jardín Flotante Tlallipan (June 2026)", "url": "https://www.mexicodesconocido.com.mx/jardin-flotante-tlallipan.html" },
+      "involved": ""
+    },
+    {
+      "id": "mx-cosecha-lluvia",
+      "place": "mexico-city",
+      "name": "Cosecha de Lluvia (rain harvesting at home)",
+      "kind": "rain",
+      "status": "underway",
+      "year": 2019,
+      "lat": 19.357,
+      "lng": -99.06,
+      "area_km2": 0,
+      "who": "SEDEMA, Government of Mexico City",
+      "summary": "Free rooftop rainwater systems for homes with poor water service, started in Iztapalapa and Xochimilco: 73,021 systems installed since 2019, about 1.7 billion liters harvested (August 2024).",
+      "source": { "title": "Mexico Business News: SEDEMA installs 73,000 rain harvesting systems (26 Aug 2024)", "url": "https://mexicobusiness.news/agribusiness/news/sedema-installs-73000-rain-harvesting-systems" },
+      "involved": "https://www.sedema.cdmx.gob.mx/"
+    }
+  ]
+}

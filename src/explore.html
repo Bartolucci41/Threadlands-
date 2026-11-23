@@ -464,6 +464,29 @@
   .fixit .btn { background: #fff; color: var(--accent); border-color: #fff; }
   .fixit .btn.ghost { background: transparent; color: inherit; border-color: rgba(255,255,255,0.55); }
   .fixit .btn[aria-pressed="true"] { background: #F3E3C4; color: #3d2c09; border-color: #F3E3C4; }
+  .projs { margin: 0 0 22px; display: grid; gap: 8px; }
+  .projs h2 { margin: 0; font-size: 1.25rem; }
+  .projs[hidden], .proj-form[hidden] { display: none; }
+  .proj-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .proj { background: var(--surface); border-radius: 12px; padding: 12px 14px; display: grid; gap: 4px; border-left: 4px solid var(--pc, var(--accent)); }
+  .proj.hl { outline: 2px solid var(--accent); }
+  .proj-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  .proj-h b { font-size: 1rem; }
+  .proj-st { font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--pc, var(--accent)); color: #fff; }
+  .proj-who { font-size: 0.8rem; color: var(--ink2); }
+  .proj p { margin: 0; font-size: 0.88rem; line-height: 1.45; }
+  .proj-fx { font-size: 0.85rem; color: var(--ink); background: var(--bg); border-radius: 8px; padding: 6px 10px; }
+  .proj-links { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem; }
+  .proj-links a, .proj-links button { color: var(--accent); font-weight: 600; background: none; border: 0; padding: 0; font: inherit; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .proj-form { display: grid; gap: 10px; background: var(--surface); border-radius: 12px; padding: 14px 16px; }
+  .proj-form h3 { margin: 0; } .proj-form label { display: grid; gap: 4px; font-size: 0.85rem; font-weight: 600; }
+  .proj-form input, .proj-form select, .proj-form textarea { font: inherit; font-weight: 400; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); min-height: 40px; }
+  .pf-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; } .pf-row label { flex: 1 1 120px; }
+  .pf-where span { font-size: 0.85rem; color: var(--ink2); }
+  .pf-msg { margin: 0; font-size: 0.9rem; font-weight: 600; }
+  .rain-alert { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 10px; padding: 10px 14px; border-radius: 12px; background: #1f4f78; color: #fff; font-size: 0.92rem; }
+  .rain-alert[hidden] { display: none; }
+  .rain-alert .chip { background: #fff; color: #1f4f78; border-color: #fff; }
 </style>
 
 <!--NAV-->
@@ -526,6 +549,7 @@
           </div>
         </div>
       </section>
+      <div class="rain-alert" id="rain-alert" hidden role="status"><span id="rain-txt"></span> <button type="button" class="chip" id="rain-show">Show where water collects first</button></div>
       <div class="mapwrap" id="mapwrap">
         <canvas id="map" role="img" aria-label="Hex map of the loaded city-region. Colors show land cover, heat, flood exposure or habitat depending on the selected layer."></canvas>
         <div class="mapctl">
@@ -614,6 +638,31 @@
           <div class="live-t" id="lv-bio"><span class="eyebrow">Wildlife</span><b>…</b><span></span></div>
         </div>
         <p class="hint adv">Fetched live when you open a place, never stored. Forecast and air quality from <a href="https://open-meteo.com/" rel="noopener" target="_blank">Open-Meteo</a>; species records from <a href="https://www.gbif.org/" rel="noopener" target="_blank">GBIF</a>.</p>
+      </section>
+      <section class="projs" id="projs" hidden aria-labelledby="projs-h">
+        <h2 id="projs-h">Real projects here</h2>
+        <p class="hint">Parks, wetlands, trees and water projects that are proposed, approved, under way or built, each with a public source. Threadlands estimates what each one adds.</p>
+        <ol class="proj-list" id="proj-list"></ol>
+        <p class="hint" id="proj-none" hidden>No projects are on the map here yet. Know one? Add it, with a link to a public source.</p>
+        <button type="button" class="btn ghost" id="proj-add-btn">Add a real project</button>
+        <form class="proj-form" id="proj-form" hidden novalidate>
+          <h3>Add a real project</h3>
+          <p class="hint">It appears on the map once it has been checked. Only public information, please: no personal details.</p>
+          <label>Project name<input name="name" required maxlength="100"></label>
+          <div class="pf-row">
+            <label>Type<select name="kind"><option value="trees">Trees</option><option value="park">Park</option><option value="wetland">Wetland</option><option value="corridor">Green corridor</option><option value="rain">Rainwater</option><option value="farm">Urban or regenerative farm</option><option value="river">River restoration</option><option value="transit">Transit or cycling</option><option value="other">Other</option></select></label>
+            <label>Status<select name="status"><option value="proposed">Proposed</option><option value="approved">Approved</option><option value="underway">Under way</option><option value="built">Built</option></select></label>
+            <label>Year<input name="year" type="number" min="1990" max="2060"></label>
+            <label>Size (hectares)<input name="ha" type="number" min="0" step="0.1" placeholder="optional"></label>
+          </div>
+          <label>Who is behind it<input name="who" maxlength="100" placeholder="City, NGO, community group, company"></label>
+          <label>What it is, in a sentence or two<textarea name="summary" maxlength="600" rows="3"></textarea></label>
+          <label>Public source (link)<input name="source_url" type="url" required placeholder="https://"></label>
+          <label>Where people can get involved (link, optional)<input name="involved" type="url" placeholder="https://"></label>
+          <div class="pf-row pf-where"><button type="button" class="btn ghost" id="proj-pick">Place it on the map</button><span id="proj-where">Not placed yet</span></div>
+          <div class="pf-row"><button type="submit" class="btn">Send for review</button><button type="button" class="btn ghost" id="proj-cancel">Cancel</button></div>
+          <p class="pf-msg" id="proj-msg" aria-live="polite"></p>
+        </form>
       </section>
       <div id="hc-wrap" class="adv-wrap" hidden>
         <h2>Satellite heat check</h2>
@@ -1130,7 +1179,7 @@
   function scheduleDraw() {
     if (drawQueued) return;
     drawQueued = true;
-    requestAnimationFrame(function () { drawQueued = false; draw(); });
+    requestAnimationFrame(function () { drawQueued = false; draw(); try { if (res && P) { ctx.setTransform(dpr, 0, 0, dpr, 0, 0); drawProjects(); } } catch (e) { /* markers are extra */ } });
   }
 
 
@@ -1986,12 +2035,107 @@
 
   var PDIST = null, PDIST_N = 0, PCTX = null;
   fetch(BASE + 'data/profile-dist.json').then(function (r) { return r.json(); }).then(function (j) { PDIST = j.dist; PDIST_N = j.places; PCTX = j.ctx || null; if (P && P._raw) renderPressures(P._raw); if (P) { renderGlance(); renderCtx(); } }).catch(function () {});
+  // ---- Real projects: on the map, with what each one adds, and a form to propose more (checked before it appears)
+  var PROJECTS = [], PJ = { pick: false, at: null, hl: null };
+  var PSTAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
+  var PTOOL = { wetland: 'wetland', park: 'park', trees: 'park', corridor: 'corridor', river: 'corridor', farm: 'regen' };
+  fetch(BASE + 'data/projects.json').then(function (r) { return r.json(); }).then(function (j) { PROJECTS = j.projects || []; if (P) renderProjects(); }).catch(function () {});
+  function placeProjects() { return P ? PROJECTS.filter(function (p) { return p.place === current; }) : []; }
+  function nearHexes(lat, lng, n) {
+    var c = P.place.cells, d = [], kx = Math.cos(lat * Math.PI / 180) * 111.32;
+    for (var i = 0; i < P.N; i++) { var dx = (c.lng[i] - lng) * kx, dy = (c.lat[i] - lat) * 110.57; d.push([dx * dx + dy * dy, i]); }
+    d.sort(function (a, b) { return a[0] - b[0]; });
+    return d.slice(0, n);
+  }
+  function projEffect(p) {
+    var c = P.place.cells, near = nearHexes(p.lat, p.lng, 400), people = 0;
+    near.forEach(function (x) { if (x[0] <= 1) people += +c.pop[x[1]] || 0; });
+    var tool = PTOOL[p.kind], fx = { people: people };
+    if (!tool || !(p.area_km2 > 0) || !near.length || near[0][0] > 4) return fx;
+    var hexA = 0; for (var i = 0; i < Math.min(50, P.N); i++) hexA += +c.area[i] || 0; hexA /= Math.min(50, P.N);
+    var n = Math.max(1, Math.min(400, Math.round(p.area_km2 / hexA))), save = P.paint;
+    try {
+      P.paint = new Map(); var b = P.evaluate(TM.ZERO);
+      near.slice(0, n).forEach(function (x) { P.paint.set(x[1], tool); });
+      var r = P.evaluate(TM.ZERO);
+      fx.index = r.index - b.index; fx.heat = r.metrics.heat - b.metrics.heat; fx.flood = r.metrics.flood - b.metrics.flood; fx.habitat = r.metrics.habitat - b.metrics.habitat;
+    } finally { P.paint = save; }
+    return fx;
+  }
+  function fx1(x) { var v = Math.round(x * 10) / 10; return (v > 0 ? '+' : v < 0 ? '\u2212' : '\u00b1') + Math.abs(v).toFixed(1); }
+  $('#rain-show').addEventListener('click', function () { setLayer('flood'); $('#mapwrap').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+  function renderProjects() {
+    var box = $('#projs'); if (!P || kind === 'demo') { box.hidden = true; return; }
+    var list = placeProjects();
+    $('#proj-none').hidden = list.length > 0;
+    $('#proj-list').innerHTML = list.map(function (p) {
+      var st = PSTAT[p.status] || PSTAT.proposed, fx = projEffect(p), parts = [];
+      if (fx.index != null && Math.abs(fx.index) >= 0.05) parts.push(fx1(fx.index) + ' on the resilience index');
+      if (fx.habitat != null && Math.abs(fx.habitat) >= 0.5) parts.push(fx1(fx.habitat) + ' habitat');
+      if (fx.flood != null && Math.abs(fx.flood) >= 0.5) parts.push(fx1(fx.flood) + ' flood safety');
+      if (fx.heat != null && Math.abs(fx.heat) >= 0.5) parts.push(fx1(fx.heat) + ' heat relief');
+      var fxt = (parts.length ? 'Modeled effect for the whole region: ' + parts.join(', ') + '. ' : '') + (fx.people ? 'About ' + fmtPop(fx.people) + ' people live within 1 km.' : '');
+      return '<li class="proj" id="pj-' + esc(p.id) + '" style="--pc:' + st[1] + '"><div class="proj-h"><b>' + esc(p.name) + '</b><span class="proj-st">' + st[0] + (p.year ? ' \u00b7 ' + p.year : '') + '</span></div>' +
+        (p.who ? '<span class="proj-who">' + esc(p.who) + (p.added_by_visitor ? ' \u00b7 added by a visitor' : '') + '</span>' : '') +
+        (p.summary ? '<p>' + esc(p.summary) + '</p>' : '') + (fxt ? '<p class="proj-fx">' + esc(fxt) + '</p>' : '') +
+        '<div class="proj-links"><button type="button" data-pjshow="' + esc(p.id) + '">Show on the map</button>' + (p.source && p.source.url ? '<a href="' + esc(p.source.url) + '" target="_blank" rel="noopener">Source</a>' : '') +
+        (p.involved ? '<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Get involved</a>' : '') + '</div></li>';
+    }).join('');
+    box.hidden = false; scheduleDraw();
+  }
+  function llToScreen(lat, lng) { var M = P.MERC; if (!M) return null; var s1 = Math.sin(lat * Math.PI / 180); return [((lng + 180) / 360 - M.mx0) * M.K * S + OX, (0.5 - Math.log((1 + s1) / (1 - s1)) / (4 * Math.PI) - M.my0) * M.K * S + OY]; }
+  function screenToLL(x, y) { var M = P.MERC; if (!M) return null; var mx = (x - OX) / (M.K * S) + M.mx0, my = (y - OY) / (M.K * S) + M.my0; return [Math.atan(Math.sinh(Math.PI * (1 - 2 * my))) * 180 / Math.PI, mx * 360 - 180]; }
+  function drawProjects() {
+    if (!P || !P.MERC || kind === 'demo') return;
+    var pts = placeProjects().map(function (p) { return [p.lat, p.lng, (PSTAT[p.status] || PSTAT.proposed)[1], p.id]; });
+    if (PJ.at) pts.push([PJ.at[0], PJ.at[1], '#C0603A', '_new']);
+    pts.forEach(function (q) {
+      var xy = llToScreen(q[0], q[1]); if (!xy || xy[0] < -20 || xy[1] < -20 || xy[0] > W + 20 || xy[1] > H + 20) return;
+      var r = PJ.hl === q[3] ? 9 : 7;
+      ctx.beginPath(); ctx.arc(xy[0], xy[1], r, 0, 2 * Math.PI); ctx.fillStyle = q[2]; ctx.globalAlpha = 1; ctx.fill();
+      ctx.lineWidth = 2.5; ctx.strokeStyle = '#fff'; ctx.stroke();
+    });
+  }
+  function projAt(x, y) { var hit = null; placeProjects().forEach(function (p) { var xy = llToScreen(p.lat, p.lng); if (xy && Math.hypot(xy[0] - x, xy[1] - y) < 12) hit = p; }); return hit; }
+  cv.addEventListener('click', function (e) {
+    if (!P) return;
+    var rc = cv.getBoundingClientRect(), x = e.clientX - rc.left, y = e.clientY - rc.top;
+    if (PJ.pick) { var ll = screenToLL(x, y); if (ll) { PJ.at = ll; PJ.pick = false; cv.style.cursor = ''; $('#proj-where').textContent = 'Placed at ' + ll[0].toFixed(4) + ', ' + ll[1].toFixed(4); $('#proj-pick').textContent = 'Move it'; scheduleDraw(); } return; }
+    var hit = projAt(x, y);
+    if (hit) { showTab('understand'); PJ.hl = hit.id; var el = document.getElementById('pj-' + hit.id); document.querySelectorAll('.proj.hl').forEach(function (n) { n.classList.remove('hl'); }); if (el) { el.classList.add('hl'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } scheduleDraw(); }
+  }, true);
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-pjshow]'); if (!b || !P) return;
+    var p = PROJECTS.filter(function (x) { return x.id === b.getAttribute('data-pjshow'); })[0]; if (!p) return;
+    PJ.hl = p.id; var M = P.MERC, s1 = Math.sin(p.lat * Math.PI / 180);
+    VIEW.cx = ((p.lng + 180) / 360 - M.mx0) * M.K; VIEW.cy = (0.5 - Math.log((1 + s1) / (1 - s1)) / (4 * Math.PI) - M.my0) * M.K; VIEW.z = Math.max(VIEW.z, 6);
+    applyView(); $('#mapwrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+  $('#proj-add-btn').addEventListener('click', function () { $('#proj-form').hidden = false; this.hidden = true; $('#proj-msg').textContent = ''; var f = $('#proj-form'); f.year.value = new Date().getFullYear(); });
+  $('#proj-cancel').addEventListener('click', function () { $('#proj-form').hidden = true; $('#proj-add-btn').hidden = false; PJ.at = null; PJ.pick = false; scheduleDraw(); });
+  $('#proj-pick').addEventListener('click', function () { PJ.pick = true; cv.style.cursor = 'crosshair'; $('#proj-where').textContent = 'Now click the map where the project is'; $('#mapwrap').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+  $('#proj-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var f = this, msg = $('#proj-msg');
+    if (!f.name.value.trim()) { msg.textContent = 'Add the project\u2019s name.'; return; }
+    if (!/^https:\/\/\S+$/.test(f.source_url.value.trim())) { msg.textContent = 'Add a link to a public source, starting with https://'; return; }
+    if (!PJ.at) { msg.textContent = 'Place the project on the map first.'; return; }
+    if (!REQUEST_URL) { msg.textContent = 'Sending is not set up yet.'; return; }
+    msg.textContent = 'Sending\u2026';
+    fetch(REQUEST_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'project', place: current, name: f.name.value, kind: f.kind.value, status: f.status.value, year: f.year.value,
+      area_km2: (Number(f.ha.value) || 0) / 100, who: f.who.value, summary: f.summary.value, source_url: f.source_url.value.trim(), involved: f.involved.value.trim(), lat: PJ.at[0], lng: PJ.at[1] }) })
+      .then(function (r) { return r.json().then(function (j) { return [r.status, j]; }); })
+      .then(function (x) { if (x[0] === 202) { msg.textContent = 'Thank you. It will appear on the map once it has been checked, usually within a few days.'; f.reset(); PJ.at = null; scheduleDraw(); } else msg.textContent = (x[1] && x[1].error) || 'It could not be sent. Please try again later.'; })
+      .catch(function () { msg.textContent = 'It could not be sent. Please try again later.'; });
+  });
+
   // ---- Right now: today's weather, air and recorded wildlife, fetched live from free open services, never stored
   var LIVE_SEQ = 0;
   function loadLive(data) {
     var box = document.getElementById('live-now'), c = data.cells || {}, seq = ++LIVE_SEQ;
     var la = c.lat || [], lo = c.lng || [], pop = c.pop || [], n = la.length;
     if (!n || !window.fetch) { box.hidden = true; return; }
+    $('#rain-alert').hidden = true;
     var sw = 0, sy = 0, sx = 0, a = 90, b = -90, w = 180, e = -180;
     for (var i = 0; i < n; i++) {
       var p = Math.max(0, +pop[i] || 0) + 1e-6; sw += p; sy += p * la[i]; sx += p * lo[i];
@@ -2007,6 +2151,12 @@
       .then(function (j) {
         var d = j.daily || {}, rain = (d.precipitation_sum || []).reduce(function (s, v) { return s + (+v || 0); }, 0);
         var pmax = Math.max.apply(null, (d.precipitation_probability_max || [0]).map(function (v) { return +v || 0; }));
+        var dmax = 0, dday = 0; (d.precipitation_sum || []).forEach(function (v, k) { if (+v > dmax) { dmax = +v; dday = k; } });
+        if (dmax >= 20 && seq === LIVE_SEQ) {
+          var dn = d.time && d.time[dday] ? new Date(d.time[dday] + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' }) : 'soon';
+          $('#rain-txt').textContent = 'Heavy rain expected: about ' + Math.round(dmax) + ' mm ' + (dday === 0 ? 'today' : 'on ' + dn) + '.';
+          $('#rain-alert').hidden = false;
+        }
         set('wx', Math.round(j.current.temperature_2m) + '°C', 'High today ' + Math.round(d.temperature_2m_max[0]) + '°C · ' +
           (rain >= 1 ? Math.round(rain) + ' mm of rain over 3 days (up to ' + pmax + '% chance)' : 'little or no rain over 3 days'));
       }).catch(function () { fail('wx'); });
@@ -2052,6 +2202,7 @@
     if (fixSearch) { fixSearch.cancel(); fixSearch = null; }
     FIX = null; $('#fixit').hidden = false; $('#fix-name').textContent = (data.name || 'this place').split(',')[0]; fixShow('ask');
     loadLive(data);
+    PJ.at = null; PJ.hl = null; renderProjects();
     WTS.sel = -1; WTS.show = false;
     renderWTS();
     HC = heatCheck(P);
