@@ -6,8 +6,30 @@
   <section class="mp-hero bleed band-deep" aria-labelledby="mp-h">
     <div class="mp-hero-in">
       <p class="hero3-kick">Threadlands</p>
-      <h1 id="mp-h" class="mp-h">Your places, and what&rsquo;s changing in them.</h1>
-      <p class="mp-sub">Weather and warnings, the risks your city faces, the land and water it depends on, and the projects and news that are changing it. Follow as many places as you like.</p>
+      <h1 id="mp-h" class="mp-h">See what&rsquo;s changing where you live, and help change it.</h1>
+      <div class="doors">
+        <a class="door door-places" href="#mine-h" id="door-places">
+          <span class="door-k">My places</span>
+          <b class="door-t">Follow your city</b>
+          <span class="door-d">Weather and warnings, the risks your city faces, the land and water it depends on, and the projects and news changing it.</span>
+          <span class="door-go">Add your places <span aria-hidden="true">&darr;</span></span>
+        </a>
+        <a class="door door-lab" href="{B}lab/">
+          <span class="door-k">The Lab</span>
+          <b class="door-t">Work on the response</b>
+          <span class="door-d">Model heat, floods, food and nature for a whole region, find the plan that does the most, design it on real streets and cost it.</span>
+          <span class="door-go">Open the Lab <span aria-hidden="true">&rarr;</span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="sect mp" aria-labelledby="mine-h">
+    <div class="sect-top">
+      <div><h2 id="mine-h" tabindex="-1">My places</h2><p id="mine-sub">Saved on this device. Tap a place to see its full profile.</p></div>
+      <div class="mp-units" role="group" aria-label="Temperature units"><button type="button" class="chip" data-u="c">&deg;C</button><button type="button" class="chip" data-u="f">&deg;F</button></div>
+    </div>
+    <div class="mp-add">
       <form class="search mp-search" id="mp-form" role="search">
         <label class="sr-only" for="mp-q">Add a place</label>
         <input id="mp-q" type="search" placeholder="Add a city or town" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="mp-sugg" aria-autocomplete="list">
@@ -15,13 +37,6 @@
         <ul class="sugg" id="mp-sugg" role="listbox" hidden></ul>
       </form>
       <p class="mp-near"><button type="button" class="linkbtn" id="mp-loc">Use my location</button><span id="mp-loc-msg" aria-live="polite"></span></p>
-    </div>
-  </section>
-
-  <section class="sect mp" aria-labelledby="mine-h">
-    <div class="sect-top">
-      <div><h2 id="mine-h">My places</h2><p id="mine-sub">Saved on this device. Tap a place to see its full profile.</p></div>
-      <div class="mp-units" role="group" aria-label="Temperature units"><button type="button" class="chip" data-u="c">&deg;C</button><button type="button" class="chip" data-u="f">&deg;F</button></div>
     </div>
     <div class="mp-grid" id="mp-grid"></div>
     <div class="mp-empty" id="mp-empty" hidden>
@@ -60,11 +75,11 @@
   <section class="sect bleed band-deep pro-band" aria-labelledby="pro-h">
     <div class="pro-band-in">
       <div>
-        <p class="hero3-kick">For professionals</p>
-        <h2 id="pro-h">Planning the response?</h2>
-        <p>City teams, consultants, researchers and funders use the same data in depth: model heat, floods and food for a whole region, find the plan that does the most, design it on real streets and take a costed brief to council.</p>
+        <p class="hero3-kick">The Lab</p>
+        <h2 id="pro-h">Want to work on the response?</h2>
+        <p>The Lab is where the planning happens, open to anyone: city teams, researchers, students, neighbourhood groups. Use the same data in depth to model heat, floods and food for a whole region, find the plan that does the most, design it on real streets and take a costed brief to council.</p>
       </div>
-      <a class="btn" href="{B}pro/">Threadlands for professionals &rarr;</a>
+      <a class="btn" href="{B}lab/">Open the Lab &rarr;</a>
     </div>
   </section>
 </main>
@@ -72,10 +87,11 @@
 (function () {
   // Old shared links such as threadlands.org/#lagos now open that city's profile
   var h = location.hash.replace('#', '');
-  if (h && !/^(top|mine-h|news-h|rank-h)$/.test(h)) { location.replace('{B}place/#' + h); return; }
+  if (h && !/^(top|mine-h|news-h|rank-h|feed-h|pro-h)$/.test(h)) { location.replace('{B}place/#' + h); return; }
   var T = window.TLP, $ = function (s) { return document.querySelector(s); }, esc = T.esc;
   T.setBase('{B}');
   var D = null;
+  $('#door-places').addEventListener('click', function (ev) { ev.preventDefault(); document.getElementById('mine-h').scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(function () { $('#mp-q').focus({ preventScroll: true }); }, 450); });
   var POPULAR = ['mexico-city', 'new-york', 'sao-paulo', 'london', 'mumbai', 'tokyo', 'lagos', 'paris'];
 
   function unitsUI() { document.querySelectorAll('[data-u]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.u === T.units() ? 'true' : 'false'); }); }

@@ -405,13 +405,26 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .btn.ghost-inv { background: transparent; color: #fff; border-color: rgba(255,255,255,0.5); }
   .btn.ghost-inv:hover { border-color: #fff; }
   /* ---- My places */
-  .mp-hero { padding-block: 44px 40px; }
-  .mp-hero-in { max-width: 46rem; }
+  .mp-hero { padding-block: 44px 48px; }
+  .mp-hero-in { max-width: 72rem; }
+  .mp-h { max-width: 18ch; }
   .mp-h { color: #fff; font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.04; letter-spacing: -0.03em; margin: 0; }
   .mp-sub { margin: 16px 0 22px; font-size: 1.08rem; line-height: 1.55; color: #cfe0da; max-width: 52ch; }
-  .mp-search input { background: #fff; border-color: #fff; min-width: 0; flex: 1 1 auto; }
-  .mp-search .btn { background: #8fd3bf; color: #0b2624; border-color: #8fd3bf; }
-  .mp-near { margin: 12px 0 0; font-size: 0.9rem; color: #a9c6bd; } .mp-near .linkbtn { color: #fff; font-weight: 600; } .mp-near a { color: #fff; }
+  .doors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 30px; }
+  @media (max-width: 720px) { .doors { grid-template-columns: 1fr; gap: 12px; } }
+  .door { display: grid; gap: 8px; align-content: start; padding: 26px 28px 24px; border-radius: 22px; text-decoration: none; min-height: 210px; box-sizing: border-box; transition: transform .15s, box-shadow .15s; }
+  .door:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(0,0,0,0.28); }
+  .door:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { .door, .door:hover { transition: none; transform: none; } }
+  .band-deep a.door-places { background: #8fd3bf; color: #0b2624; }
+  .band-deep a.door-lab { background: #F3F4EF; color: #12231E; }
+  .door-k { font: 600 0.75rem var(--font-body); letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.75; }
+  .door-t { font: 800 clamp(1.7rem, 3.6vw, 2.4rem)/1.05 var(--font-display); letter-spacing: -0.025em; }
+  .door-d { font-size: 1rem; line-height: 1.5; opacity: 0.85; max-width: 40ch; }
+  .door-go { margin-top: auto; padding-top: 10px; font: 700 1rem var(--font-body); }
+  .mp-add { margin: 0 0 20px; } .mp-search { max-width: 34rem; }
+  .mp-near { margin: 10px 0 0; font-size: 0.9rem; color: var(--ink2); } .mp-near .linkbtn { color: var(--accent); font-weight: 600; } .mp-near a { color: var(--accent); }
+  #mine-h:focus { outline: none; }
   .mp { padding-top: 40px; }
   .mp-units { display: inline-flex; gap: 6px; } .mp-units .chip { min-height: 32px; padding: 0 12px; font-size: 0.85rem; }
   .mp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
@@ -450,7 +463,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .nw2-h { font: 700 1.05rem/1.32 var(--font-display); color: var(--ink); text-decoration: none; } .nw2-h:hover { text-decoration: underline; }
   .nw2-m { font-size: 0.8rem; color: var(--ink2); } .nw2-m a { color: var(--accent); font-weight: 600; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tone-gain .nw2-tag b { color: #7fd39b; } :root:not([data-theme="light"]) .tone-update .nw2-tag b { color: #8cc3e6; } }
-  /* ---- For professionals band */
+  /* ---- The Lab band */
   .pro-band-in { display: flex; flex-wrap: wrap; gap: 20px 40px; align-items: end; justify-content: space-between; }
   .pro-band-in > div:first-child { max-width: 44rem; } .pro-band h2 { font-size: clamp(1.7rem, 4vw, 2.4rem); margin: 0 0 10px; }
   .pro-band p { color: #cfe0da; margin: 0; line-height: 1.55; }
@@ -515,11 +528,11 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
 ANALYTICS = ("<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' "
              "data-cf-beacon='{\"token\": \"a92b6704e81e4aaba11a9f8a11832ae1\"}'></script><!-- End Cloudflare Web Analytics -->\n")
 PAGES = [("", "My places"), ("place/", "City"), ("cities/", "Cities"), ("projects/", "Projects"), ("about/", "About"),
-         ("pro/", "Professionals"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")]
+         ("lab/", "The Lab"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")]
 # Two faces: everyone's side, and the professional side with the tools
 NAV = [("", "My places"), ("cities/", "Cities"), ("projects/", "Projects"), ("about/", "About")]
 NAV_PRO = [("explore/", "Explore"), ("studio/", "Studio"), ("cities/", "Cities"), ("how-it-works/", "Method")]
-PRO_PAGES = ("pro/", "explore/", "studio/", "how-it-works/")
+PRO_PAGES = ("lab/", "explore/", "studio/", "how-it-works/")
 
 
 def APP(base):
@@ -551,10 +564,10 @@ def nav(base, here):
     pro = here in PRO_PAGES
     links = "".join(f'<a href="{base}{p}"' + (' aria-current="page"' if p == here else "") + f'>{n}</a>'
                     for p, n in (NAV_PRO if pro else NAV))
-    switch = (f'<a class="side-sw" href="{base}"><span class="sw-l">Everyone&rsquo;s site</span><span class="sw-s">Public</span></a>' if pro else
-              f'<a class="side-sw" href="{base}pro/"><span class="sw-l">For professionals</span><span class="sw-s">Pro</span></a>')
-    tag = '<span class="wm-pro">Pro</span>' if pro else ''
-    home = f"{base}pro/" if pro else base
+    switch = (f'<a class="side-sw" href="{base}"><span class="sw-l">My places</span><span class="sw-s">Places</span></a>' if pro else
+              f'<a class="side-sw" href="{base}lab/"><span class="sw-l">Open the Lab</span><span class="sw-s">Lab</span></a>')
+    tag = '<span class="wm-pro">Lab</span>' if pro else ''
+    home = f"{base}lab/" if pro else base
     return (f'<header class="wrap site-head{" is-pro" if pro else ""}" id="top">\n  <div class="topbar">\n    <a class="wordmark" href="{home}" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="28" height="28" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#123B38" stroke="none"/></svg><span>Threadlands</span>{tag}</a>\n'
             f'    <div class="topright"><nav class="topnav" aria-label="Site">{links}</nav>{switch}'
             '<label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>\n  </div>\n</header>\n')
@@ -565,8 +578,8 @@ def footer(base):
     return (f'<footer class="site-foot2">\n  <div class="wrap foot-grid">\n'
             f'    <div class="foot-brand"><a class="wordmark foot-wm" href="{base}" translate="no">Threadlands</a>'
             '<p>See what&rsquo;s coming for your city, and what would fix it. Free, for any place on Earth.</p></div>\n'
-            f'    <nav aria-label="For everyone"><h2>For everyone</h2>{col([("", "My places"), ("cities/", "Cities"), ("projects/", "Projects")])}</nav>\n'
-            f'    <nav aria-label="For professionals"><h2>For professionals</h2>{col([("pro/", "Overview"), ("explore/", "Explore"), ("studio/", "Studio")])}</nav>\n'
+            f'    <nav aria-label="Places"><h2>Places</h2>{col([("", "My places"), ("cities/", "Cities"), ("projects/", "Projects")])}</nav>\n'
+            f'    <nav aria-label="The Lab"><h2>The Lab</h2>{col([("lab/", "Overview"), ("explore/", "Explore"), ("studio/", "Studio")])}</nav>\n'
             f'    <nav aria-label="About"><h2>About</h2>{col([("how-it-works/", "How it works"), ("about/", "About")])}</nav>\n'
             '  </div>\n  <div class="wrap foot-small">\n'
             '    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>\n'
@@ -596,7 +609,7 @@ for i, sc in enumerate(re.findall(r"<script>(.*?)</script>", doc, re.S)):
     write(f"src/.check/explore{i}.js", sc)
 
 # ---- The other pages
-for name in ("home", "place", "pro", "studio", "cities", "projects", "how-it-works", "about"):
+for name in ("home", "place", "lab", "studio", "cities", "projects", "how-it-works", "about"):
     spec = read(SRC, "pages", name + ".html")
     meta = dict(re.findall(r"<!--\s*(\w+):\s*(.*?)\s*-->", spec.split("\n\n", 1)[0]))
     content = spec.split("\n\n", 1)[1]
@@ -609,9 +622,9 @@ for name in ("home", "place", "pro", "studio", "cities", "projects", "how-it-wor
     if len(parts) > 1:
         write(f"src/.check/{name}.js", parts[1])
 # Old addresses: Library and Rankings became Cities
-for old in ("library", "rankings"):
-    write(f"{old}/index.html", '<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8"><title>Cities | Threadlands</title>'
-          '<link rel="canonical" href="../cities/"><meta http-equiv="refresh" content="0; url=../cities/">'
-          "<script>location.replace('../cities/' + location.search + location.hash);</script></head>"
-          '<body><p><a href="../cities/">Threadlands cities</a></p></body></html>\n')
+for old, new in (("library", "cities"), ("rankings", "cities"), ("pro", "lab")):
+    write(f"{old}/index.html", '<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8"><title>Threadlands</title>'
+          f'<link rel="canonical" href="../{new}/"><meta http-equiv="refresh" content="0; url=../{new}/">'
+          f"<script>location.replace('../{new}/' + location.search + location.hash);</script></head>"
+          f'<body><p><a href="../{new}/">Threadlands</a></p></body></html>\n')
 print("built: index.html, explore/, library/, how-it-works/, about/, assets/site.css")

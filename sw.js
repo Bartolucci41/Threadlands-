@@ -2,7 +2,7 @@
 // Pages and data: network first, so updates show at once; the saved copy is used only when offline.
 // Styles, scripts and images: served from the saved copy, refreshed in the background.
 var VERSION = 'tl-v11';
-var CORE = ['/', '/explore/', '/studio/', '/cities/', '/place/', '/pro/', '/assets/public.js', '/data/summary.json', '/data/ranking.json', '/how-it-works/', '/about/', '/assets/site.css',
+var CORE = ['/', '/explore/', '/studio/', '/cities/', '/place/', '/lab/', '/assets/public.js', '/data/summary.json', '/data/ranking.json', '/how-it-works/', '/about/', '/assets/site.css',
   '/data/index.json', '/data/price-levels.json', '/data/materials.json', '/data/trees.json', '/manifest.webmanifest'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(VERSION).then(function (c) { return Promise.all(CORE.map(function (u) { return c.add(u).catch(function () {}); })); }).then(function () { return self.skipWaiting(); }));
