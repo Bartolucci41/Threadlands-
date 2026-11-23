@@ -85,15 +85,24 @@ def fold(t):
     return unicodedata.normalize("NFD", t or "").encode("ascii", "ignore").decode().lower()
 
 
+FAILS = [0]   # failed requests in a row; when Google News keeps refusing, stop asking and keep yesterday's headlines
+
+
 def fetch(url, tries=3):
+    if FAILS[0] >= 6:
+        return b""
     for k in range(tries):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Threadlands news; threadlands.org)"})
             with urllib.request.urlopen(req, timeout=30) as r:
+                FAILS[0] = 0
                 return r.read()
         except Exception as e:
             print("  retry", k + 1, e, file=sys.stderr)
             time.sleep(5 * (k + 1))
+    FAILS[0] += 1
+    if FAILS[0] == 6:
+        print("Google News is refusing requests; keeping the earlier headlines for the rest of this run", flush=True)
     return b""
 
 
@@ -173,7 +182,7 @@ def gather(name, cc, slug, cutoff, seen, extra=()):
                 seen.add(key)
                 tone = "gain" if re.search(fold(GAIN), ft) else ("concern" if topic in HAZARDS else "update")
                 items.append(dict(a, title=a["title"][:180], topic=topic, tone=tone, named=True))
-            time.sleep(1.5)
+            time.sleep(3)
     items.sort(key=lambda x: x["date"], reverse=True)
     return found, items
 
@@ -214,6 +223,8 @@ def main():
         conc = [x for x in items if x["tone"] == "concern"][:6]
         rest = [x for x in items if x["tone"] != "concern"][:6]
         mix = sorted(conc + rest, key=lambda x: x["date"], reverse=True)
+        if FAILS[0] >= 6:
+            continue                      # the search was refused: keep what this place had
         if mix:
             out[p["slug"]] = mix
         else:
