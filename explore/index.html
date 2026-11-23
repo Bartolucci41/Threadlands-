@@ -182,6 +182,11 @@
         </div>
         <p class="hint adv">Fetched live when you open a place, never stored. Forecast and air quality from <a href="https://open-meteo.com/" rel="noopener" target="_blank">Open-Meteo</a>; species records from <a href="https://www.gbif.org/" rel="noopener" target="_blank">GBIF</a>.</p>
       </section>
+      <section class="pnews" id="pnews" hidden aria-labelledby="pnews-h">
+        <h2 id="pnews-h">In the news</h2>
+        <ol class="pnews-list" id="pnews-list"></ol>
+        <p class="hint adv">Headlines from the last two weeks, gathered daily from world news by the GDELT Project. Each links to the original story.</p>
+      </section>
       <section class="projs" id="projs" hidden aria-labelledby="projs-h">
         <h2 id="projs-h">Real projects here</h2>
         <p class="hint">Parks, wetlands, trees and water projects that are proposed, approved, under way or built, each with a public source. Threadlands estimates what each one adds.</p>
@@ -2465,6 +2470,18 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
   function projEffect(p) { return TLProfile.projectEffect(P, p, TM.ZERO); }
   function fx1(x) { var v = Math.round(x * 10) / 10; return (v > 0 ? '+' : v < 0 ? '\u2212' : '\u00b1') + Math.abs(v).toFixed(1); }
   $('#rain-show').addEventListener('click', function () { setLayer('flood'); $('#mapwrap').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+  var NEWS = null;
+  fetch(BASE + 'data/news.json').then(function (r) { return r.json(); }).then(function (j) { NEWS = j; if (P) renderNews(); }).catch(function () {});
+  function renderNews() {
+    var box = $('#pnews'), items = NEWS && NEWS.places && NEWS.places[current] || [];
+    if (!P || kind === 'demo' || !items.length) { box.hidden = true; return; }
+    var T = { flood: 'Flooding', heat: 'Heat', drought: 'Drought', fire: 'Fire', greening: 'Greening' };
+    $('#pnews-list').innerHTML = items.slice(0, 4).map(function (it) {
+      var d = it.date || '', ds = d.length >= 8 ? new Date(d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6, 8) + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+      return '<li><span class="pn-t">' + (T[it.topic] || '') + '</span><a href="' + esc(it.url) + '" target="_blank" rel="noopener">' + esc(it.title) + '</a><span class="pn-m">' + esc(it.source) + (ds ? ' · ' + ds : '') + '</span></li>';
+    }).join('');
+    box.hidden = false;
+  }
   function renderProjects() {
     var box = $('#projs'); if (!P || kind === 'demo') { box.hidden = true; return; }
     var list = placeProjects();
@@ -2606,6 +2623,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     FIX = null; $('#fixit').hidden = false; $('#fix-name').textContent = (data.name || 'this place').split(',')[0]; fixShow('ask');
     loadLive(data);
     PJ.at = null; PJ.hl = null; renderProjects();
+    renderNews();
     if (/[?&]add=1/.test(location.search) && kind !== 'demo') { setTimeout(function () { showTab('understand'); $('#proj-add-btn').click(); $('#projs').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 400); try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) { /* ignore */ } }
     WTS.sel = -1; WTS.show = false;
     renderWTS();

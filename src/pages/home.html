@@ -58,6 +58,14 @@
     </div>
   </section>
 
+  <section class="sect news" id="news" aria-labelledby="news-h" hidden>
+    <div class="sect-top">
+      <div><h2 id="news-h">In the news</h2><p id="news-sub">The latest flood, heat, drought and city-greening stories from places in the library, updated every day.</p></div>
+    </div>
+    <ol class="news-list" id="news-list"></ol>
+    <p class="news-note">Headlines gathered automatically from world news by the <a href="https://www.gdeltproject.org/" target="_blank" rel="noopener">GDELT Project</a>. Each links to the original story; Threadlands does not write or check them.</p>
+  </section>
+
   <section class="sect" id="rank" aria-labelledby="rank-h" hidden>
     <div class="sect-top">
       <div><h2 id="rank-h">How prepared are cities?</h2><p id="rank-sub">The Threadlands resilience index, 0 to 100, with real projects counted in.</p></div>
@@ -351,4 +359,18 @@
     }).join('');
     $('#feed').hidden = false;
   }).catch(function () { /* the feed is optional */ });
+  // ---- In the news: the biggest flood, heat, drought, fire and greening headlines, refreshed daily
+  var NTOPIC = { flood: 'Flooding', heat: 'Heat', drought: 'Drought', fire: 'Fire', greening: 'Greening' };
+  function ndate(d) { if (!d || d.length < 8) return ''; var dt = new Date(d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6, 8) + 'T12:00:00'); return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+  Promise.all([fetch('{B}data/news.json').then(function (r) { return r.json(); }), fetch('{B}data/index.json').then(function (r) { return r.json(); })]).then(function (x) {
+    var top = (x[0].top || []).slice(0, 8), names = {};
+    (x[1].places || []).forEach(function (e) { names[e.slug] = e.name; });
+    if (!top.length) return;
+    $('#news-list').innerHTML = top.map(function (it) {
+      return '<li class="nw nw-' + esc(it.topic) + '"><span class="nw-t">' + (NTOPIC[it.topic] || '') + '</span><a class="nw-h" href="' + esc(it.url) + '" target="_blank" rel="noopener">' + esc(it.title) + '</a>' +
+        '<span class="nw-m"><a href="{B}explore/#' + esc(it.place) + '">' + esc(names[it.place] || it.place) + '</a> · ' + esc(it.source) + ' · ' + ndate(it.date) + '</span></li>';
+    }).join('');
+    $('#news-sub').textContent = 'The latest flood, heat, drought and city-greening stories from places in the library. Updated ' + ndate((x[0].updated || '').replace(/-/g, '')) + '.';
+    $('#news').hidden = false;
+  }).catch(function () { /* news is optional */ });
 })();

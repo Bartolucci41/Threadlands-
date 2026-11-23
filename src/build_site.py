@@ -352,6 +352,13 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .band-deep h2 { color: #fff; }
   .lib-line { margin: 18px 0 0; color: var(--ink2); }
   @media (max-width: 900px) { .hero3-in { grid-template-columns: 1fr; } .hero3 { padding-top: 32px; } }
+  .news-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0 32px; border-top: 2px solid var(--ink); }
+  .nw { display: grid; gap: 4px; padding: 16px 0; border-bottom: 1px solid var(--line); align-content: start; }
+  .nw-t { font: 700 0.72rem var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--warm, #C0603A); }
+  .nw-flood .nw-t { color: #1f5f9e; } .nw-greening .nw-t { color: #2f7a4a; } .nw-drought .nw-t { color: #a16207; }
+  .nw-h { font: 700 1.08rem/1.3 var(--font-display); color: var(--ink); text-decoration: none; } .nw-h:hover { text-decoration: underline; }
+  .nw-m { font-size: 0.8rem; color: var(--ink2); } .nw-m a { color: var(--accent); font-weight: 600; }
+  .news-note { margin: 14px 0 0; font-size: 0.8rem; color: var(--ink2); } .news-note a { color: var(--accent); }
   .viewsw { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 0.8rem; color: var(--ink2); margin: 0 0 4px; }
   .viewsw .chip { min-height: 32px; padding: 4px 12px; font-size: 0.8rem; }
   body.simple .adv { display: none !important; }

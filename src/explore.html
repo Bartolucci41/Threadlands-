@@ -492,6 +492,13 @@
   .rain-alert .chip { background: #fff; color: #1f4f78; border-color: #fff; }
   .proj-sum { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--accent); color: var(--accent-ink, #fff); font-weight: 600; font-size: 0.92rem; }
   .proj-sum[hidden] { display: none; }
+  .pnews { margin: 0 0 22px; display: grid; gap: 8px; } .pnews[hidden] { display: none; }
+  .pnews h2 { margin: 0; font-size: 1.25rem; }
+  .pnews-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
+  .pnews-list li { display: grid; gap: 2px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .pnews-list a { color: var(--ink); font-weight: 600; text-decoration: none; line-height: 1.35; } .pnews-list a:hover { text-decoration: underline; }
+  .pn-t { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--warm, #C0603A); }
+  .pn-m { font-size: 0.78rem; color: var(--ink2); }
 </style>
 
 <!--NAV-->
@@ -643,6 +650,11 @@
           <div class="live-t" id="lv-bio"><span class="eyebrow">Wildlife</span><b>…</b><span></span></div>
         </div>
         <p class="hint adv">Fetched live when you open a place, never stored. Forecast and air quality from <a href="https://open-meteo.com/" rel="noopener" target="_blank">Open-Meteo</a>; species records from <a href="https://www.gbif.org/" rel="noopener" target="_blank">GBIF</a>.</p>
+      </section>
+      <section class="pnews" id="pnews" hidden aria-labelledby="pnews-h">
+        <h2 id="pnews-h">In the news</h2>
+        <ol class="pnews-list" id="pnews-list"></ol>
+        <p class="hint adv">Headlines from the last two weeks, gathered daily from world news by the GDELT Project. Each links to the original story.</p>
       </section>
       <section class="projs" id="projs" hidden aria-labelledby="projs-h">
         <h2 id="projs-h">Real projects here</h2>
@@ -2056,6 +2068,18 @@
   function projEffect(p) { return TLProfile.projectEffect(P, p, TM.ZERO); }
   function fx1(x) { var v = Math.round(x * 10) / 10; return (v > 0 ? '+' : v < 0 ? '\u2212' : '\u00b1') + Math.abs(v).toFixed(1); }
   $('#rain-show').addEventListener('click', function () { setLayer('flood'); $('#mapwrap').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+  var NEWS = null;
+  fetch(BASE + 'data/news.json').then(function (r) { return r.json(); }).then(function (j) { NEWS = j; if (P) renderNews(); }).catch(function () {});
+  function renderNews() {
+    var box = $('#pnews'), items = NEWS && NEWS.places && NEWS.places[current] || [];
+    if (!P || kind === 'demo' || !items.length) { box.hidden = true; return; }
+    var T = { flood: 'Flooding', heat: 'Heat', drought: 'Drought', fire: 'Fire', greening: 'Greening' };
+    $('#pnews-list').innerHTML = items.slice(0, 4).map(function (it) {
+      var d = it.date || '', ds = d.length >= 8 ? new Date(d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6, 8) + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+      return '<li><span class="pn-t">' + (T[it.topic] || '') + '</span><a href="' + esc(it.url) + '" target="_blank" rel="noopener">' + esc(it.title) + '</a><span class="pn-m">' + esc(it.source) + (ds ? ' · ' + ds : '') + '</span></li>';
+    }).join('');
+    box.hidden = false;
+  }
   function renderProjects() {
     var box = $('#projs'); if (!P || kind === 'demo') { box.hidden = true; return; }
     var list = placeProjects();
@@ -2197,6 +2221,7 @@
     FIX = null; $('#fixit').hidden = false; $('#fix-name').textContent = (data.name || 'this place').split(',')[0]; fixShow('ask');
     loadLive(data);
     PJ.at = null; PJ.hl = null; renderProjects();
+    renderNews();
     if (/[?&]add=1/.test(location.search) && kind !== 'demo') { setTimeout(function () { showTab('understand'); $('#proj-add-btn').click(); $('#projs').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 400); try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) { /* ignore */ } }
     WTS.sel = -1; WTS.show = false;
     renderWTS();
