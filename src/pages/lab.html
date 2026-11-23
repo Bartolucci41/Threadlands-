@@ -184,10 +184,10 @@
   function field(P, R, G, B, A, minx, miny, maxx, maxy) {
     if (!P.hexKmF) { var ar = 0, cc = P.place.cells; for (var q0 = 0; q0 < P.N; q0++) ar += +cc.area[q0] || 0; P.hexKmF = Math.sqrt(Math.max(1e-6, ar / P.N) / 2.598); }
     var sp = P.hexKmF * Math.sqrt(3), pad = sp, x0 = minx - pad, y0 = miny - pad, w = maxx - minx + 2 * pad, h = maxy - miny + 2 * pad;
-    var px = Math.max(sp / 2.5, Math.max(w, h) / 520), nx = Math.ceil(w / px), ny = Math.ceil(h / px);
+    var px = Math.max(sp / 7, Math.max(w, h) / 1000), nx = Math.ceil(w / px), ny = Math.ceil(h / px);
     var gs = sp, gx = Math.ceil(w / gs) + 1, gy = Math.ceil(h / gs) + 1, head = new Int32Array(gx * gy).fill(-1), next = new Int32Array(P.N);
     for (var i = 0; i < P.N; i++) { var cx = Math.floor((P.X[i] - x0) / gs), cy = Math.floor((P.Y[i] - y0) / gs); if (cx < 0 || cy < 0 || cx >= gx || cy >= gy) { next[i] = -1; continue; } var k = cy * gx + cx; next[i] = head[k]; head[k] = i; }
-    var sig2 = 2 * Math.pow(0.55 * sp, 2), R2 = Math.pow(1.6 * sp, 2), cv2 = document.createElement('canvas'); cv2.width = nx; cv2.height = ny;
+    var sig2 = 2 * Math.pow(0.45 * sp, 2), R2 = Math.pow(1.4 * sp, 2), cv2 = document.createElement('canvas'); cv2.width = nx; cv2.height = ny;
     var c2 = cv2.getContext('2d'), img = c2.createImageData(nx, ny), d = img.data, sw = new Float32Array(nx * ny), Wref = 0, acc = new Float32Array(nx * ny * 4);
     for (var yy = 0; yy < ny; yy++) { var wy = y0 + (yy + 0.5) * px, cyy = Math.floor((wy - y0) / gs);
       for (var xx = 0; xx < nx; xx++) { var wx = x0 + (xx + 0.5) * px, cxx = Math.floor((wx - x0) / gs), W0 = 0, r = 0, g = 0, b = 0, a = 0;
