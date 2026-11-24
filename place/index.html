@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=14">
+<link rel="stylesheet" href="../assets/site.css?v=15">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <link rel="manifest" href="../manifest.webmanifest">
@@ -111,7 +111,7 @@
     </section>
 
     <section class="sect pf-sec" id="ready" aria-labelledby="ready-h">
-      <div class="sect-top"><div><h2 id="ready-h">How ready is it?</h2><p>The Threadlands resilience index and three stress tests, from 0 to 100. Higher is better prepared.</p></div><a class="more" id="pf-cities" href="../places/">Compare every place &rarr;</a></div>
+      <div class="sect-top"><div><h2 id="ready-h">How ready is it?</h2><p>The Threadlands resilience index and three stress tests, from 0 to 100. Higher is better prepared.</p></div><a class="more" id="pf-cities" href="../places/">Compare scores across places &rarr;</a></div>
       <div class="pf-ready" id="pf-ready"></div>
     </section>
 
@@ -278,10 +278,10 @@
     if (r.index == null) { $('#pf-ready').innerHTML = '<p class="pf-none">This place has not been scored yet.</p>'; return; }
     var t = sm.tests || {};
     $('#pf-ready').innerHTML = '<div class="pfr-score"><span class="eyebrow">Resilience index</span><b>' + Math.round(r.index) + '</b><span>#' + r.rank + ' of ' + D.rankN + ' cities</span>' +
-      (r.projects && r.projects.add >= 0.05 ? '<span class="rk-pj">+' + r.projects.add.toFixed(1) + ' from real projects</span>' : '') + '</div>' +
+      (r.projects && r.projects.add >= 0.05 ? '<span class="rk-pj">+' + r.projects.add.toFixed(1) + ' from real projects</span>' : '') + '<p class="pfr-note">A screening score from the Threadlands model, not a grade: no place scores near 100, and a few points between cities means little because study areas and some inputs differ. It is most useful in ThreadLab, for comparing plans for this same place.</p></div>' +
       '<div class="pfr-bars">' + (t.heatwave != null ? bar(t.heatwave, 'A heatwave') : '') + (t.flood != null ? bar(t.flood, 'A river flood') : '') + (t.drought != null ? bar(t.drought, 'A drought year') : '') +
       (r.heat != null ? bar(r.heat, 'Heat relief today') : '') + (r.habitat != null ? bar(r.habitat, 'Connected nature') : '') + '</div>' + studyArea(e, sm.study);
-    $('#pf-cities').href = '../places/?q=' + encodeURIComponent(e.name);
+    $('#pf-cities').href = '../places/?sort=index';
   }
   function renderProjects(e) {
     var STAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };

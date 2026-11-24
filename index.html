@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=14">
+<link rel="stylesheet" href="assets/site.css?v=15">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="assets/i18n.js" defer></script>
 <link rel="manifest" href="manifest.webmanifest">
@@ -73,17 +73,6 @@
     <p class="news-note">Headlines gathered automatically from <a href="https://news.google.com/" target="_blank" rel="noopener">Google News</a> searches. Each links to the original story; Threadlands does not write or check them.</p>
   </section>
 
-  <section class="sect" id="rank" aria-labelledby="rank-h" hidden>
-    <div class="sect-top">
-      <div><h2 id="rank-h">How prepared are cities?</h2><p id="rank-sub">The Threadlands resilience index, out of 100, with real projects counted in.</p></div>
-      <a class="more" href="places/">See every place &rarr;</a>
-    </div>
-    <div class="rank-cols">
-      <div><h3>Best prepared</h3><ol class="rank-list" id="rank-top"></ol></div>
-      <div><h3>Most at risk</h3><ol class="rank-list" id="rank-bot"></ol></div>
-    </div>
-  </section>
-
   <section class="sect bleed band-deep pro-band" aria-labelledby="pro-h">
     <div class="pro-band-in">
       <div>
@@ -112,7 +101,7 @@
 (function () {
   // Old shared links such as threadlands.org/#lagos now open that city's profile
   var h = location.hash.replace('#', '');
-  if (h && !/^(top|news-h|rank-h|pro-h)$/.test(h)) { location.replace('place/#' + h); return; }
+  if (h && !/^(top|news-h|pro-h)$/.test(h)) { location.replace('place/#' + h); return; }
   var T = window.TLP, $ = function (s) { return document.querySelector(s); }, esc = T.esc;
   T.setBase('');
   // ---- Find your place: search the library; anything else is built in Explore
@@ -157,19 +146,6 @@
       $('#news-list').innerHTML = top.map(function (it) { return T.headline(it, names, ccs); }).join('');
       if (d.news.updated) $('#news-sub').textContent = 'Risks, progress and decisions in cities around the world. Updated ' + T.ndate(d.news.updated.replace(/-/g, '')) + '.';
       $('#news').hidden = false;
-    }
-    // Best and least prepared
-    var all = Object.keys(d.rank).map(function (k) { return d.rank[k]; }).sort(function (a, b) { return b.index - a.index; }), n = all.length;
-    if (n >= 10) {
-      var hi = all[0].index, lo = all[n - 1].index;
-      var row = function (p, k) {
-        var w = Math.max(1, Math.min(100, Math.round(p.index)));
-        return '<li><a href="place/' + (p.top && T.PRESS[p.top] ? '?show=' + p.top : '') + '#' + p.slug + '"><span class="rk-n">' + (k + 1) + '</span><span class="rk-c"><b>' + esc(p.name) + '</b><span>' + T.flag(p.cc) + esc(p.country) + (p.top && T.PRESS[p.top] ? ' · stands out: ' + T.PRESS[p.top].toLowerCase() : '') + '</span></span>' +
-          '<span class="rk-bar" aria-hidden="true"><i style="width:' + w + '%"></i></span><span class="rk-v">' + Math.round(p.index) + '</span></a></li>';
-      };
-      $('#rank-top').innerHTML = all.slice(0, 3).map(function (p, k) { return row(p, k); }).join('');
-      $('#rank-bot').innerHTML = all.slice(-3).reverse().map(function (p, k) { return row(p, n - 1 - k); }).join('');
-      $('#rank').hidden = false;
     }
   }).catch(function () { /* the sections stay hidden */ });
 })();
