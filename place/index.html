@@ -34,6 +34,8 @@
   </div>
 </header>
 <main class="wrap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="../assets/public.js"></script>
   <div class="pf-missing" id="pf-missing" hidden></div>
   <article class="pf" id="pf" hidden>
@@ -61,10 +63,36 @@
       <ol class="pf-week" id="pf-week" aria-label="Seven-day forecast"></ol>
     </section>
 
-    <div class="pf-alerts" id="pf-alerts"></div>
+    <div class="pf-alerts" id="pf-alerts" hidden></div>
+
+    <section class="today" aria-labelledby="today-h">
+      <h2 id="today-h">Today in <span id="today-name" translate="no"></span></h2>
+      <div class="today-grid">
+        <div class="td-c" id="td-wx"><span class="td-k">Weather and warnings</span><p class="td-none">Loading&hellip;</p></div>
+        <div class="td-c" id="td-news"><span class="td-k">What&rsquo;s happening</span></div>
+        <div class="td-c" id="td-ev"><span class="td-k">Coming up</span><p class="td-none">No public meetings or events listed here yet.</p><button type="button" class="linkbtn td-add" data-add-kind="other">Know of one? Add it on the map</button></div>
+      </div>
+    </section>
+
+    <section class="sect pf-sec here" id="here" aria-labelledby="here-h">
+      <div class="sect-top"><div><h2 id="here-h">What&rsquo;s here?</h2><p>Tap any spot on the map to see what the data says about the area around it, the projects nearby, and what you can do.</p></div></div>
+      <div class="here-layers filters" role="group" aria-label="Map layer">
+        <button type="button" class="chip" data-ly="heat" aria-pressed="true">Heat</button>
+        <button type="button" class="chip" data-ly="flood" aria-pressed="false">Flooding</button>
+        <button type="button" class="chip" data-ly="green" aria-pressed="false">Green and nature</button>
+        <button type="button" class="chip" data-ly="none" aria-pressed="false">Streets only</button>
+      </div>
+      <div class="here-grid">
+        <div class="here-map" id="here-map" role="region" aria-label="Map of the place, tap a spot to see what is there"></div>
+        <aside class="here-card" id="here-card" aria-live="polite">
+          <p class="here-hint">Tap the map anywhere. You&rsquo;ll see what the data says about that area, projects nearby, and a way to add what you know.</p>
+          <div class="here-key" id="here-key"></div>
+        </aside>
+      </div>
+    </section>
 
     <nav class="pf-jump" aria-label="On this page">
-      <a href="#pressing">What&rsquo;s pressing</a><a href="#tied">What it depends on</a><a href="#ready">How ready</a><a href="#changing">What&rsquo;s changing</a><a href="#pf-news-h">News</a>
+      <a href="#here">What&rsquo;s here</a><a href="#pressing">What&rsquo;s pressing</a><a href="#tied">What it depends on</a><a href="#ready">How ready</a><a href="#changing">What&rsquo;s changing</a><a href="#pf-news-h">News</a>
     </nav>
 
     <section class="sect pf-sec" id="pressing" aria-labelledby="pressing-h">
@@ -174,9 +202,12 @@
       $('#pf-week').innerHTML = (d.time || []).map(function (t, k) {
         return '<li><span class="pw-d">' + (k === 0 ? 'Today' : T.day(t)) + '</span>' + T.icon(d.weather_code[k], 24) + '<span class="pw-t"><b>' + T.temp(d.temperature_2m_max[k]) + '</b> ' + T.temp(d.temperature_2m_min[k]) + '</span><span class="pw-r">' + (d.precipitation_sum[k] >= 1 ? T.rain(d.precipitation_sum[k]) : '') + '</span></li>';
       }).join('');
+      var al = T.alerts(w), d0 = d.time ? 0 : -1;
+      $('#td-wx').innerHTML = '<span class="td-k">Weather and warnings</span><p class="td-big">' + T.icon(c.weather_code, 22) + ' ' + T.temp(c.temperature_2m) + ' \u00b7 ' + esc(T.sky(c.weather_code)[0]) + (d0 >= 0 ? ' \u00b7 high ' + T.temp(d.temperature_2m_max[0]) : '') + '</p>' +
+        (al.length ? al.map(function (a) { var ly = a.kind === 'heat' ? 'heat' : 'flood'; return '<p class="td-al al-' + a.kind + '">' + esc(a.text) + ' <button type="button" class="linkbtn" data-goto-ly="' + ly + '">' + (ly === 'flood' ? 'See where water collects' : 'See the hottest areas') + ' &rarr;</button></p>'; }).join('') : '<p class="td-none">No warnings for the next few days.</p>');
       $('#pf-alerts').innerHTML = T.alerts(w).map(function (a) { return '<p class="pf-alert al-' + a.kind + '"><b>' + (a.kind === 'rain' ? 'Rain warning' : a.kind === 'heat' ? 'Heat warning' : 'Storms') + '</b> ' + esc(a.text) + '</p>'; }).join('');
       T.air(e.lat, e.lng).then(function (a) { if (a.us_aqi != null) $('#pf-aqi').textContent = ' · Air ' + Math.round(a.us_aqi) + ' (' + T.aqiWord(a.us_aqi).toLowerCase() + ')'; }).catch(function () {});
-    }).catch(function () { $('#pf-now').innerHTML = '<p class="pf-wait">The weather could not be loaded right now.</p>'; });
+    }).catch(function () { $('#pf-now').innerHTML = '<p class="pf-wait">The weather could not be loaded right now.</p>'; $('#td-wx').innerHTML = '<span class="td-k">Weather and warnings</span><p class="td-none">The weather could not be loaded right now.</p>'; });
   }
   $('#pf-now').addEventListener('click', function (ev) { var b = ev.target.closest('[data-u]'); if (!b) return; T.setUnits(b.dataset.u); renderWeather(D.lib[SLUG]); });
 
@@ -262,6 +293,143 @@
   }
   $('#pf-scope').addEventListener('click', function (ev) { var b = ev.target.closest('[data-scope]'); if (!b) return; SCOPE = b.dataset.scope; renderNews(D.lib[SLUG]); });
 
+  function renderToday(e) {
+    $('#today-name').textContent = e.name;
+    var items = (((D.news || {}).places || {})[SLUG] || []).filter(function (x) { return x.named !== false; }).slice(0, 2);
+    $('#td-news').innerHTML = '<span class="td-k">What&rsquo;s happening</span>' + (items.length ? items.map(function (it) {
+      var ly = it.topic === 'flood' || it.topic === 'water' ? 'flood' : it.topic === 'heat' ? 'heat' : it.topic === 'greening' ? 'green' : '';
+      return '<p class="td-n"><span class="td-t">' + esc(T.TONE[it.tone] || 'News') + (T.TOPIC[it.topic] ? ' \u00b7 ' + T.TOPIC[it.topic] : '') + '</span><a translate="no" href="' + esc(it.url) + '" target="_blank" rel="noopener">' + esc(it.title) + '</a>' +
+        (ly ? '<button type="button" class="linkbtn" data-goto-ly="' + ly + '">See it on the map &rarr;</button>' : '') + '</p>';
+    }).join('') : '<p class="td-none">No headlines about ' + esc(e.name) + ' in the last two weeks.</p>');
+  }
+
+  // ---- What's here? The place's own data on a real map: tap a spot to see the area around it, nearby projects and what to do
+  var HM = null, HLAYER = null, HCELLS = null, HPIN = null, HDATA = null, LY = 'heat', OBSV = [];
+  var KIND_OBS = { heat: 'Too hot here', water: 'Water collects here', shade: 'Needs shade or trees', green: 'Green space matters here', change: 'Something is changing here', idea: 'An idea for this spot', other: 'Something else' };
+  function pctOf(arr, v) { var n = 0, k = 0; for (var i = 0; i < arr.length; i++) { if (arr[i] == null) continue; n++; if (arr[i] <= v) k++; } return n ? k / n : null; }
+  function cellVals(c) {
+    var N = c.lat.length, heat = [], flood = [], green = [];
+    for (var i = 0; i < N; i++) {
+      var built = +c.built[i] || 0;
+      heat.push(c.lst_rel && c.lst_rel[i] != null ? +c.lst_rel[i] : null);
+      flood.push(c.flood[i] != null ? +c.flood[i] : null);
+      green.push((+c.tree[i] || 0) + (+c.grass[i] || 0) + (+c.shrub[i] || 0) + (+c.wetland[i] || 0) + (+c.crop[i] || 0) * 0.5);
+    }
+    return { heat: heat, flood: flood, green: green };
+  }
+  function colorFor(ly, v, lo, hi) {
+    if (v == null) return null;
+    var t = Math.max(0, Math.min(1, (v - lo) / ((hi - lo) || 1)));
+    if (ly === 'heat') return 'hsl(' + (48 - 44 * t) + ', ' + (70 + 20 * t) + '%, ' + (82 - 34 * t) + '%)';
+    if (ly === 'flood') return 'hsl(' + (205 + 10 * t) + ', ' + (40 + 45 * t) + '%, ' + (86 - 44 * t) + '%)';
+    return 'hsl(' + (90 + 40 * t) + ', ' + (25 + 40 * t) + '%, ' + (86 - 46 * t) + '%)';
+  }
+  function range(a) { var v = a.filter(function (x) { return x != null; }).sort(function (x, y) { return x - y; }); return v.length ? [v[Math.floor(v.length * 0.05)], v[Math.floor(v.length * 0.95)]] : [0, 1]; }
+  function drawLayer() {
+    if (!HM || !HDATA) return;
+    if (HLAYER) { HM.removeLayer(HLAYER); HLAYER = null; }
+    document.querySelectorAll('[data-ly]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.ly === LY ? 'true' : 'false'); });
+    var keyTxt = { heat: ['Cooler', 'Hotter', 'Measured surface heat from Landsat, compared across the region. Grey: no reading.'], flood: ['Lower', 'Higher', 'Flood exposure: low ground near rivers, lakes or the sea, where water collects first.'], green: ['Little', 'Lots', 'Share of trees, grass, wetland and farmland.'] };
+    if (LY === 'none') { $('#here-key').innerHTML = ''; return; }
+    var c = HDATA.place.cells, vals = HCELLS[LY], r = range(vals), group = [];
+    var rend = L.canvas({ padding: 0.3 });
+    for (var i = 0; i < c.lat.length; i++) {
+      var col = colorFor(LY, vals[i], r[0], r[1]), pl = c.poly[i]; if (!pl) continue;
+      var ll = []; for (var k = 0; k < pl.length; k += 2) ll.push([pl[k], pl[k + 1]]);
+      group.push(L.polygon(ll, { renderer: rend, stroke: false, fillColor: col || '#c9ccc5', fillOpacity: col ? 0.55 : 0.25, interactive: false }));
+    }
+    HLAYER = L.layerGroup(group).addTo(HM);
+    var kt = keyTxt[LY];
+    $('#here-key').innerHTML = '<div class="hk-bar hk-' + LY + '"></div><div class="hk-l"><span>' + kt[0] + '</span><span>' + kt[1] + '</span></div><p class="hk-n">' + kt[2] + ' Each patch is about 1 km\u00b2.</p>';
+  }
+  function setLayer(ly) { LY = ly; drawLayer(); }
+  document.querySelector('.here-layers').addEventListener('click', function (ev) { var b = ev.target.closest('[data-ly]'); if (b) setLayer(b.dataset.ly); });
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-goto-ly]'); if (!b) return;
+    setLayer(b.dataset.gotoLy); document.getElementById('here').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  function nearestCell(lat, lng) {
+    var c = HDATA.place.cells, best = -1, bd = Infinity, k = Math.cos(lat * Math.PI / 180);
+    for (var i = 0; i < c.lat.length; i++) { var dx = (c.lng[i] - lng) * k, dy = c.lat[i] - lat, d2 = dx * dx + dy * dy; if (d2 < bd) { bd = d2; best = i; } }
+    return Math.sqrt(bd) * 111 < 1.5 ? best : -1;
+  }
+  function kmBetween(a, b, c2, d) { var k = Math.cos(a * Math.PI / 180), dx = (d - b) * k, dy = c2 - a; return Math.sqrt(dx * dx + dy * dy) * 111; }
+  // Plain words for a share of the region, said only as precisely as the data allows
+  function standing(p, w) {
+    if (p == null) return null;
+    if (p >= 0.9) return 'among the ' + w[0] + ' tenth of the modeled region';
+    if (p >= 0.75) return w[1] + ' than three quarters of the modeled region';
+    if (p <= 0.1) return 'among the ' + w[2] + ' tenth of the modeled region';
+    if (p <= 0.25) return w[3] + ' than three quarters of the modeled region';
+    return 'around the middle for the modeled region';
+  }
+  function whatsHere(lat, lng) {
+    if (HPIN) HM.removeLayer(HPIN);
+    HPIN = L.circleMarker([lat, lng], { radius: 9, color: '#fff', weight: 3, fillColor: '#123B38', fillOpacity: 1 }).addTo(HM);
+    var i = nearestCell(lat, lng), out = [];
+    if (i < 0) { $('#here-card').innerHTML = '<p class="here-hint">That spot is outside the area Threadlands models for ' + esc(D.lib[SLUG].name) + '. Tap inside the colored area.</p>' + $('#here-key').outerHTML; return; }
+    var c = HDATA.place.cells, hp = HCELLS.heat[i] != null ? pctOf(HCELLS.heat, HCELLS.heat[i]) : null, fp = pctOf(HCELLS.flood, HCELLS.flood[i]), gp = pctOf(HCELLS.green, HCELLS.green[i]);
+    var hs = standing(hp, ['hottest', 'hotter', 'coolest', 'cooler']), fs = (+c.flood[i] || 0) > 0 ? standing(fp, ['most flood-exposed', 'more flood-exposed', 'least flood-exposed', 'less flood-exposed']) : null, gs = standing(gp, ['greenest', 'greener', 'least green', 'less green']);
+    if (hs) out.push('<li><b>Heat:</b> this area is ' + hs + ', from satellite readings of surface heat.</li>');
+    out.push('<li><b>Flooding:</b> ' + (fs ? 'this area is ' + fs + '.' + ((+c.water_km[i] || 99) < 1 ? ' Water is less than 1 km away.' : '') : 'little flood exposure here: it sits away from or above nearby water.') + '</li>');
+    out.push('<li><b>Green:</b> ' + Math.round(100 * Math.min(1, HCELLS.green[i])) + '% trees, grass, wetland or farmland; ' + gs + '.</li>');
+    if (+c.pop[i]) out.push('<li><b>People:</b> about ' + T.fmtN(+c.pop[i]) + ' live in this patch.</li>');
+    var near = D.projects.filter(function (p) { return p.place === SLUG && isFinite(p.lat); }).map(function (p) { return [kmBetween(lat, lng, p.lat, p.lng), p]; }).filter(function (x) { return x[0] < 5; }).sort(function (a, b) { return a[0] - b[0]; }).slice(0, 3);
+    var obs = OBSV.filter(function (o) { return o.place === SLUG; }).map(function (o) { return [kmBetween(lat, lng, o.lat, o.lng), o]; }).filter(function (x) { return x[0] < 2; }).sort(function (a, b) { return a[0] - b[0]; }).slice(0, 3);
+    var goal = hp != null && hp >= 0.75 ? 'heat' : fp >= 0.75 && (+c.flood[i] || 0) > 0 ? 'flood' : gp <= 0.25 ? 'habitat' : 'heat';
+    var gw = { heat: 'cool this area', flood: 'keep this area dry', habitat: 'bring nature back here' };
+    $('#here-card').innerHTML = '<h3>About this area</h3><p class="here-scale">The area of about 1 km\u00b2 around the spot you tapped. For what happens on a single street or corner, local knowledge is what the map needs.</p><ul class="here-facts">' + out.join('') + '</ul>' +
+      '<h4>Nearby projects</h4>' + (near.length ? '<ul class="here-pj">' + near.map(function (x) { var p = x[1]; return '<li><a href="#pj-' + esc(p.id) + '" translate="no">' + esc(p.name) + '</a><span>' + (x[0] < 1 ? 'under 1 km' : x[0].toFixed(1) + ' km') + ' away</span></li>'; }).join('') + '</ul>' : '<p class="here-none">No projects within 5 km on the map yet.</p>') +
+      (obs.length ? '<h4>What people have noticed nearby</h4><ul class="here-pj">' + obs.map(function (x) { var o = x[1]; return '<li><span class="ob-k">' + esc(KIND_OBS[o.kind] || 'Note') + '</span> ' + esc(o.text) + '<span class="ob-r">' + (o.review === 'corroborated' ? 'Corroborated by a local partner' : 'Location and source checked') + '</span></li>'; }).join('') + '</ul>' : '') +
+      '<div class="here-acts"><button type="button" class="btn" id="here-add">Add what you know here</button><a class="btn ghost" href="../explore/?goal=' + goal + '#' + esc(SLUG) + '">Explore how to ' + gw[goal] + ' in ThreadLab &rarr;</a></div>' +
+      '<form class="here-form" id="here-form" hidden>' +
+        '<p class="here-fq">What have you noticed here?</p><div class="here-kinds">' + Object.keys(KIND_OBS).map(function (k, j) { return '<label><input type="radio" name="ok" value="' + k + '"' + (j === 0 ? ' checked' : '') + '> ' + KIND_OBS[k] + '</label>'; }).join('') + '</div>' +
+        '<label class="here-l">In your own words<textarea id="here-txt" maxlength="500" rows="3" placeholder="For example: the school pickup line on this corner has no shade." required></textarea></label>' +
+        '<label class="here-l">A link that backs it up (optional)<input type="url" id="here-src" placeholder="https://"></label>' +
+        '<p class="here-fn">It is reviewed before it appears. The review says what it confirms: the location and source, or a local partner. Please leave out names and personal details.</p>' +
+        '<div class="here-acts"><button type="submit" class="btn">Send for review</button><button type="button" class="btn ghost" id="here-cancel">Cancel</button></div><p class="here-msg" id="here-msg" aria-live="polite"></p></form>';
+    HERE_LL = [lat, lng];
+  }
+  var HERE_LL = null, PRESET = null;
+  document.addEventListener('click', function (ev) {
+    if (ev.target.closest('#here-add')) { $('#here-form').hidden = false; if (PRESET) { var r = document.querySelector('#here-form input[value="' + PRESET + '"]'); if (r) r.checked = true; PRESET = null; } $('#here-txt').focus(); }
+    if (ev.target.closest('#here-cancel')) $('#here-form').hidden = true;
+    var ad = ev.target.closest('[data-add-kind]');
+    if (ad) { PRESET = ad.dataset.addKind; document.getElementById('here').scrollIntoView({ behavior: 'smooth' }); var hint = document.querySelector('.here-hint'); if (hint) hint.innerHTML = '<b>Tap the map where it is</b>, then choose \u201cAdd what you know here\u201d.'; }
+  });
+  document.addEventListener('submit', function (ev) {
+    if (ev.target.id !== 'here-form') return; ev.preventDefault();
+    var msg = $('#here-msg'), kind = (document.querySelector('#here-form input[name="ok"]:checked') || {}).value || 'other';
+    msg.textContent = 'Sending\u2026';
+    fetch('https://threadlands-relay.rob41pitt.workers.dev/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'observation', place: SLUG, kind: kind, text: $('#here-txt').value, source_url: $('#here-src').value, lat: HERE_LL[0], lng: HERE_LL[1] }) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'failed'); }); })
+      .then(function () { $('#here-form').innerHTML = '<p class="here-ok"><b>Thank you.</b> Your note is waiting for review. Once it is checked it appears on this map for everyone, with what the review confirmed.</p>'; })
+      .catch(function (e) { msg.textContent = (e && e.message && !/fetch/i.test(e.message) ? e.message : 'It could not be sent right now. Please try again later.'); });
+  });
+  function loadMap(e) {
+    if (!window.L) { $('#here-map').innerHTML = '<p class="here-none" style="padding:16px">The map could not be loaded.</p>'; return; }
+    if (!HM) {
+      HM = L.map('here-map', { scrollWheelZoom: false, zoomControl: true });
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' }).addTo(HM);
+      HM.on('click', function (ev) { if (HDATA) whatsHere(ev.latlng.lat, ev.latlng.lng); });
+    }
+    HM.setView([e.lat, e.lng], 10);
+    if (HLAYER) { HM.removeLayer(HLAYER); HLAYER = null; } if (HPIN) { HM.removeLayer(HPIN); HPIN = null; }
+    HDATA = null;
+    var url = (window.TL_DATA ? window.TL_DATA.replace(/\/$/, '') + '/' : '../data/') + 'places/' + SLUG + '.json', want = SLUG;
+    var get = function (u) { return fetch(u).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); };
+    get(url).catch(function () { return get('../data/places/' + want + '.json'); }).then(function (d) {
+      if (want !== SLUG) return;
+      HDATA = { place: d }; HCELLS = cellVals(d.cells);
+      var c = d.cells, la = c.lat.filter(isFinite), ln = c.lng.filter(isFinite);
+      HM.fitBounds([[Math.min.apply(null, la), Math.min.apply(null, ln)], [Math.max.apply(null, la), Math.max.apply(null, ln)]], { padding: [10, 10] });
+      drawLayer();
+      D.projects.filter(function (p) { return p.place === SLUG && isFinite(p.lat); }).forEach(function (p) {
+        L.circleMarker([p.lat, p.lng], { radius: 7, color: '#fff', weight: 2, fillColor: '#C0603A', fillOpacity: 1 }).bindTooltip(p.name).addTo(HM);
+      });
+    }).catch(function () { $('#here-map').insertAdjacentHTML('beforeend', '<p class="here-none here-err">This place&rsquo;s map data could not be loaded.</p>'); });
+  }
+
   function open() {
     SLUG = decodeURIComponent(location.hash.replace('#', '')).trim(); SCOPE = 'city';
     var e = D.lib[SLUG];
@@ -278,9 +446,11 @@
     followUI(); $('#pf-tie').hidden = true; $('#pf-standers').hidden = true;
     T.standers(SLUG).then(showStanders).catch(function () {});
     var r = D.rank[SLUG] || {}, sm = D.summary[SLUG] || {};
-    renderWeather(e); renderPressures(sm); renderTied(e, sm); renderReady(e, r, sm); renderProjects(e); renderNews(e);
+    renderWeather(e); renderToday(e); renderPressures(sm); renderTied(e, sm); renderReady(e, r, sm); renderProjects(e); renderNews(e);
+    try { loadMap(e); } catch (err) { /* the map is extra */ }
     window.scrollTo(0, 0);
   }
+  fetch('../data/observations.json').then(function (r) { return r.json(); }).then(function (j) { OBSV = j.observations || []; }).catch(function () {});
   T.all().then(function (d) { D = d; open(); }).catch(function () { $('#pf-missing').hidden = false; $('#pf-missing').innerHTML = '<p class="page-lede">This profile could not be loaded. Check your connection and refresh.</p>'; });
   window.addEventListener('hashchange', function () { if (D) open(); });
 })();

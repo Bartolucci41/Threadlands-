@@ -1,0 +1,45 @@
+name: Observation reviewed
+# When an observation issue gets "checked" or "corroborated", publish it in data/observations.json with that review level.
+on:
+  issues:
+    types: [labeled]
+permissions:
+  contents: write
+  issues: write
+jobs:
+  publish:
+    if: (github.event.label.name == 'checked' || github.event.label.name == 'corroborated') && contains(github.event.issue.labels.*.name, 'observation')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add the observation
+        env:
+          BODY: ${{ github.event.issue.body }}
+          NUM: ${{ github.event.issue.number }}
+          LABEL: ${{ github.event.label.name }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re, datetime
+          m = re.search(r'```json\s*(\{.*?\})\s*```', os.environ['BODY'], re.S)
+          o = json.loads(m.group(1))
+          keep = {k: o.get(k) for k in ['place', 'kind', 'text', 'source_url', 'lat', 'lng']}
+          keep['id'] = 'o' + os.environ['NUM']
+          keep['review'] = os.environ['LABEL']
+          keep['added'] = datetime.date.today().isoformat()
+          path = 'data/observations.json'
+          d = json.load(open(path)) if os.path.exists(path) else {'observations': []}
+          d['observations'] = [x for x in d['observations'] if x.get('id') != keep['id']] + [keep]
+          json.dump(d, open(path, 'w'), indent=1, ensure_ascii=False)
+          PY
+      - name: Commit
+        run: |
+          git config user.name "threadlands-bot"
+          git config user.email "threadlands-bot@users.noreply.github.com"
+          git add data/observations.json
+          git commit -m "Add observation from issue #${{ github.event.issue.number }}" || exit 0
+          git pull --rebase origin main && git push
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body: 'Published on the Threadlands map. Thank you!' });
+            await github.rest.issues.update({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, state: 'closed' });

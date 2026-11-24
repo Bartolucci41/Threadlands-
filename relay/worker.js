@@ -58,6 +58,29 @@ async function project(b, request, env, origin) {
   return reply({ ok: true }, 202, origin);
 }
 
+// "Add what you know": an observation pinned on the map (too hot here, water collects here, a proposal...).
+// It opens a GitHub issue for review; nothing appears on the map until it is checked (see observation-reviewed.yml).
+const OBS = ['heat', 'water', 'shade', 'green', 'change', 'idea', 'other'];
+async function observation(b, request, env, origin) {
+  const o = {
+    place: String(b.place || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 80),
+    kind: OBS.includes(b.kind) ? b.kind : 'other', text: text(b.text, 500), source_url: url(b.source_url),
+    lat: Math.round(Number(b.lat) * 1e5) / 1e5, lng: Math.round(Number(b.lng) * 1e5) / 1e5,
+  };
+  if (!o.place || !o.text || !isFinite(o.lat) || !isFinite(o.lng) || Math.abs(o.lat) > 90 || Math.abs(o.lng) > 180) return reply({ error: 'Say what you noticed and tap the map where it is.' }, 400, origin);
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown', now = Date.now();
+  const times = (recent.get('o' + ip) || []).filter((t) => now - t < 3600e3);
+  if (times.length >= 10) return reply({ error: 'You have sent several notes in the last hour. Please try again later.' }, 429, origin);
+  times.push(now); recent.set('o' + ip, times);
+  const r = await fetch(`https://api.github.com/repos/${env.REPO || 'Bartolucci41/Threadlands-'}/dispatches`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${env.GITHUB_TOKEN}`, 'Accept': 'application/vnd.github+json', 'User-Agent': 'threadlands-relay', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ event_type: 'observation-submitted', client_payload: { observation: o } }),
+  });
+  if (r.status !== 204) return reply({ error: 'Your note could not be sent right now.', status: r.status }, 502, origin);
+  return reply({ ok: true }, 202, origin);
+}
+
 // "Back this project": one count per project, one back per visitor per project.
 // Counts live in a single KV entry so the website can read them all at once. Visitors are remembered only as a
 // one-way fingerprint (a hash of their network address, the project and a secret salt), never the address itself.
@@ -144,6 +167,7 @@ export default {
     if (b.type === 'project') return project(b, request, env, origin);
     if (b.type === 'back') return back(b, request, env, origin);
     if (b.type === 'stand') return stand(b, request, env, origin);
+    if (b.type === 'observation') return observation(b, request, env, origin);
     const osm = String(b.osm || '');
     const name = String(b.name || '').slice(0, 80);
     const country = String(b.country || '').slice(0, 60);

@@ -1,0 +1,36 @@
+name: Observation submitted
+# A visitor added what they know on the map. The relay sends it here; this opens an issue for review.
+# Nothing appears on the map until the issue gets a review label (see observation-reviewed.yml).
+on:
+  repository_dispatch:
+    types: [observation-submitted]
+permissions:
+  issues: write
+jobs:
+  open-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const o = context.payload.client_payload.observation || {};
+            const body = [
+              '**A visitor added what they know on the Threadlands map.**',
+              '',
+              `- Place: ${o.place} · Kind: ${o.kind}`,
+              `- Where: ${o.lat}, ${o.lng} (https://www.openstreetmap.org/?mlat=${o.lat}&mlon=${o.lng}#map=17/${o.lat}/${o.lng})`,
+              `- Source: ${o.source_url || 'none given'}`,
+              '',
+              '> ' + String(o.text || '').replace(/\n/g, '\n> '),
+              '',
+              'Review it, then add ONE label to publish it with what the review confirms:',
+              '- **checked**: the location makes sense and the source (if any) supports it',
+              '- **corroborated**: a local partner confirmed it',
+              'To leave it off the map, close the issue. Edit the JSON below first if a detail needs fixing (never publish personal details).',
+              '',
+              '```json',
+              JSON.stringify(o, null, 2),
+              '```'
+            ].join('\n');
+            await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo,
+              title: `Observation: ${String(o.text || '').slice(0, 60)} (${o.place})`, body, labels: ['observation'] });
