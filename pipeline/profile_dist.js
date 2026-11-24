@@ -62,7 +62,7 @@ for (const r of ranking) {
     const share = f => f && f.pop > 0 ? Math.min(100, Math.round(100 * f.crop_km2 / (f.pop * need))) : null;
     const PP = TM.prepare(data), st = T.placeStats(PP);
     summary[r.slug] = {
-      pressures: (pr && pr.top || []).slice(0, 3).map(t => ({ key: t.key, t: t.t, what: t.what, who: t.who, pct: t.pct })),
+      pressures: (pr && pr.top || []).slice(0, 3).map(t => ({ key: t.key, t: t.t, f: t.f, layer: t.layer, what: t.what, who: t.who, pct: t.pct })),
       threads: { basin_km2: bs.area_km2 || null, basin_built: bs.shares && bs.shares.built != null ? Math.round(100 * bs.shares.built) : null,
         basin_forest: bs.shares ? Math.round(100 * ((bs.shares.forest || 0) + (bs.shares.wetland || 0))) : null,
         food50: share(fs50), food250: share(fs250), wild_km: st.wild != null ? +st.wild.toFixed(1) : null, natural: st.natural != null ? Math.round(100 * st.natural) : null },

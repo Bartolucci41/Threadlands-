@@ -76,7 +76,8 @@
   function day(iso, long) { var dt = new Date(iso + 'T12:00:00'); return dt.toLocaleDateString('en-US', { weekday: long ? 'long' : 'short' }); }
 
   // Plain words
-  var PRESS = { heat: 'Heat', flood: 'Flooding', grey: 'Little green', crowd: 'Crowding', trees: 'Few trees', food: 'Food from far away' };
+  var PRESS = { heat: 'Heat', flood: 'Flooding', grey: 'Trees & green space', trees: 'Trees & green space', food: 'Food' };
+  var PRESS_F = { heat: 'High surface temperatures', flood: 'High modeled exposure', grey: 'Limited green cover', trees: 'Low tree cover', food: 'Limited nearby farmland' };
   var TOPIC = { flood: 'Flooding', heat: 'Heat', drought: 'Drought', fire: 'Fire', water: 'Rain and storms', greening: 'Green space', infrastructure: 'Infrastructure', policy: 'Policy', climate: 'Climate' };
   var TONE = { concern: 'Risk', gain: 'Progress', update: 'Update' };
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -163,5 +164,5 @@
 
   window.TLP = { follows: follows, follow: follow, unfollow: unfollow, isFollowed: isFollowed, setFollows: setFollows, units: units, setUnits: setUnits, temp: temp, rain: rain,
     setBase: setBase, data: data, all: all, weather: weather, air: air, aqiWord: aqiWord, alerts: alerts, sky: sky, icon: icon, day: day,
-    PRESS: PRESS, TOPIC: TOPIC, TONE: TONE, esc: esc, norm: norm, ndate: ndate, fmtN: fmtN, where: where, headline: headline, flag: flag, matches: matches, nearest: nearest, support: support, relayData: relayData, TIES: TIES, TIE_SHORT: TIE_SHORT, ties: ties, tieOf: tieOf, standWith: standWith, stepBack: stepBack, standers: standers, backProject: backProject, wireBacking: wireBacking, backed: backed };
+    PRESS: PRESS, PRESS_F: PRESS_F, TOPIC: TOPIC, TONE: TONE, esc: esc, norm: norm, ndate: ndate, fmtN: fmtN, where: where, headline: headline, flag: flag, matches: matches, nearest: nearest, support: support, relayData: relayData, TIES: TIES, TIE_SHORT: TIE_SHORT, ties: ties, tieOf: tieOf, standWith: standWith, stepBack: stepBack, standers: standers, backProject: backProject, wireBacking: wireBacking, backed: backed };
 })();

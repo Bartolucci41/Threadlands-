@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=12">
+<link rel="stylesheet" href="assets/site.css?v=13">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="assets/i18n.js" defer></script>
 <link rel="manifest" href="manifest.webmanifest">
@@ -75,7 +75,7 @@
 
   <section class="sect" id="rank" aria-labelledby="rank-h" hidden>
     <div class="sect-top">
-      <div><h2 id="rank-h">How prepared are cities?</h2><p id="rank-sub">The Threadlands resilience index, 0 to 100, with real projects counted in.</p></div>
+      <div><h2 id="rank-h">How prepared are cities?</h2><p id="rank-sub">The Threadlands resilience index, out of 100, with real projects counted in.</p></div>
       <a class="more" href="places/">See every place &rarr;</a>
     </div>
     <div class="rank-cols">
@@ -163,8 +163,8 @@
     if (n >= 10) {
       var hi = all[0].index, lo = all[n - 1].index;
       var row = function (p, k) {
-        var w = Math.max(4, Math.round(100 * (p.index - lo + 2) / (hi - lo + 2)));
-        return '<li><a href="place/#' + p.slug + '"><span class="rk-n">' + (k + 1) + '</span><span class="rk-c"><b>' + esc(p.name) + '</b><span>' + T.flag(p.cc) + esc(p.country) + (p.top ? ' · ' + (T.PRESS[p.top] || '').toLowerCase() : '') + '</span></span>' +
+        var w = Math.max(1, Math.min(100, Math.round(p.index)));
+        return '<li><a href="place/' + (p.top && T.PRESS[p.top] ? '?show=' + p.top : '') + '#' + p.slug + '"><span class="rk-n">' + (k + 1) + '</span><span class="rk-c"><b>' + esc(p.name) + '</b><span>' + T.flag(p.cc) + esc(p.country) + (p.top && T.PRESS[p.top] ? ' · stands out: ' + T.PRESS[p.top].toLowerCase() : '') + '</span></span>' +
           '<span class="rk-bar" aria-hidden="true"><i style="width:' + w + '%"></i></span><span class="rk-v">' + Math.round(p.index) + '</span></a></li>';
       };
       $('#rank-top').innerHTML = all.slice(0, 3).map(function (p, k) { return row(p, k); }).join('');

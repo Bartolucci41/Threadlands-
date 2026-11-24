@@ -83,7 +83,7 @@
         '<span class="mpc-wx" id="wx-' + esc(slug) + '"><span class="mpc-t">&ndash;</span></span></span>' +
         '<span class="mpc-alert" id="al-' + esc(slug) + '" hidden></span>' +
         '<span class="mpc-stats">' + (r.index != null ? '<span><i>Resilience</i><b>' + Math.round(r.index) + '</b><small>#' + r.rank + ' of ' + D.rankN + '</small></span>' : '') +
-          (top ? '<span><i>Biggest pressure</i><b class="mpc-press">' + esc(top.t) + '</b></span>' : '') + '</span>' +
+          (top ? '<span><i>What stands out</i><b class="mpc-press">' + esc(top.t) + (top.f ? ' \u00b7 ' + esc(top.f) : '') + '</b></span>' : '') + '</span>' +
         (lead ? '<span class="mpc-news"><i>' + esc(T.TONE[lead.tone] || 'News') + '</i><span translate="no">' + esc(lead.title) + '</span></span>' : '') +
       '</a>' +
       '<label class="mpc-tie"><span class="sr-only">How you are connected to ' + esc(e.name) + '</span><select data-tie="' + esc(slug) + '">' + '<option value=""' + (!T.tieOf(slug) ? ' selected' : '') + '>Following</option>' + Object.keys(T.TIES).map(function (k) { return '<option value="' + k + '"' + (k === T.tieOf(slug) ? ' selected' : '') + '>Standing with: ' + T.TIES[k].charAt(0).toLowerCase() + T.TIES[k].slice(1) + '</option>'; }).join('') + '</select></label>' +

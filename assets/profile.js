@@ -16,15 +16,15 @@
       if (fl >= 0.5) floodP += p;
       if (green < 0.1) greyP += p;
       if (dens >= 15000) crowdP += p;
-      rows.push({ p: p, dens: dens, tree: tree, lst: typeof lst === 'number' ? lst : null });
+      rows.push({ p: p, dens: dens, tree: tree, fl: fl >= 0.5 ? 1 : 0, lst: typeof lst === 'number' ? lst : null });
     }
     if (!P) return null;
     // The most crowded fifth of residents vs the rest: who carries the load
     rows.sort(function (x, y) { return y.dens - x.dens; });
-    var acc = 0, top = { p: 0, tree: 0, lst: 0, lp: 0 }, rest = { p: 0, tree: 0, lst: 0, lp: 0 };
+    var acc = 0, top = { p: 0, tree: 0, fl: 0, lst: 0, lp: 0 }, rest = { p: 0, tree: 0, fl: 0, lst: 0, lp: 0 };
     rows.forEach(function (r) {
       var g = acc < P * 0.2 ? top : rest; acc += r.p;
-      g.p += r.p; g.tree += r.p * r.tree; if (r.lst !== null) { g.lst += r.p * r.lst; g.lp += r.p; }
+      g.p += r.p; g.tree += r.p * r.tree; g.fl += r.p * r.fl; if (r.lst !== null) { g.lst += r.p * r.lst; g.lp += r.p; }
     });
     var fs = (R.foodshed || []).filter(function (f) { return f && f.km === 50; })[0] || (R.foodshed || [])[0];
     var need = num(R.need_km2_per_person), food = fs && need ? Math.min(2, num(fs.crop_km2) / Math.max(1, num(fs.pop) * need)) : null;
@@ -36,7 +36,7 @@
       crowd: crowdP / P,
       trees: treeW / P,
       food: food,
-      dense: { tree: top.p ? top.tree / top.p : 0, treeRest: rest.p ? rest.tree / rest.p : 0,
+      dense: { tree: top.p ? top.tree / top.p : 0, treeRest: rest.p ? rest.tree / rest.p : 0, fl: top.p ? top.fl / top.p : 0, flRest: rest.p ? rest.fl / rest.p : 0,
                lst: top.lp ? top.lst / top.lp : null, lstRest: rest.lp ? rest.lst / rest.lp : null }
     };
   }
@@ -55,24 +55,25 @@
   function describe(key, m) {
     var d = m.dense, ppl = function (s) { var v = s * m.pop; return v >= 1e6 ? (v / 1e6).toFixed(1) + ' million' : v >= 1e3 ? Math.round(v / 1e3) + ',000' : Math.round(v); };
     switch (key) {
-      case 'heat': return { t: 'Heat', what: ppl(m.heat) + ' people (' + pctTxt(m.heat) + ') live where the ground runs at least 2°C hotter than is typical for the region.',
-        who: d.lst !== null && d.lstRest !== null ? 'The most crowded fifth of residents average ' + deg(d.lst - d.lstRest) + ' compared with everyone else, with ' + pctTxt(d.tree) + ' tree cover against ' + pctTxt(d.treeRest) + '.' : '' };
-      case 'flood': return { t: 'Flooding', what: ppl(m.flood) + ' people (' + pctTxt(m.flood) + ') live on low ground close to rivers or the sea, where water collects first.',
-        who: 'Flooding hits hardest where homes are informal or below street level, and where families cannot afford to move or rebuild.' };
-      case 'grey': return { t: 'No green nearby', what: ppl(m.grey) + ' people (' + pctTxt(m.grey) + ') live where less than a tenth of the ground is trees, grass or wetland.',
-        who: 'Little green means more heat, more runoff and worse air, and it usually tracks lower incomes.' };
-      case 'crowd': return { t: 'Crowding', what: pctTxt(m.crowd) + ' of people live at more than 15,000 per km².',
-        who: 'Dense neighborhoods have the least room for parks, drainage or trees, so every other pressure lands on them harder.' };
-      case 'trees': return { t: 'Few trees', what: 'The average resident has ' + pctTxt(m.trees) + ' tree cover around them.',
-        who: d.treeRest > d.tree ? 'The most crowded fifth of residents get ' + pctTxt(d.tree) + ', against ' + pctTxt(d.treeRest) + ' for everyone else.' : 'Trees are spread fairly evenly between crowded and open neighborhoods.' };
-      case 'food': return { t: 'Food from far away', what: 'Farmland within 50 km could feed ' + (m.food < 0.01 ? 'less than 1%' : 'about ' + pctTxt(Math.min(1, m.food))) + ' of the region’s people.',
-        who: 'Food that travels far costs more when prices or supply lines break, and poorer households feel it first.' };
+      case 'heat': return { t: 'Heat', f: 'High surface temperatures', layer: 'heat', what: ppl(m.heat) + ' people (' + pctTxt(m.heat) + ') live where satellites measure the ground at least 2°C hotter than is typical for the region.',
+        who: d.lst !== null && d.lstRest !== null ? 'The most densely populated fifth of residents average ' + deg(d.lst - d.lstRest) + ' compared with everyone else, with ' + pctTxt(d.tree) + ' tree cover against ' + pctTxt(d.treeRest) + '.' : '' };
+      case 'flood': return { t: 'Flooding', f: 'High modeled exposure', layer: 'flood', what: 'The model places ' + ppl(m.flood) + ' people (' + pctTxt(m.flood) + ') on low ground close to rivers or the sea, where water collects first.',
+        who: d.fl > d.flRest * 1.2 && d.fl >= 0.05 ? 'High population density adds to the exposure: ' + pctTxt(d.fl) + ' of the most densely populated fifth of residents live on that low ground, against ' + pctTxt(d.flRest) + ' of everyone else.' : 'The model works at about 1 km², so it shows where water tends to collect, not which streets flood.' };
+      case 'grey': return { t: 'Trees & green space', f: 'Limited green cover', layer: 'green', what: ppl(m.grey) + ' people (' + pctTxt(m.grey) + ') live where less than a tenth of the ground is trees, grass, shrubs or wetland.',
+        who: 'Little green ground usually means more heat and more runoff.' };
+      case 'crowd': return { t: 'Population', f: 'High population density', layer: null, what: pctTxt(m.crowd) + ' of people live at more than 15,000 per km².',
+        who: 'Dense neighborhoods have the least room for parks, drainage or trees.' };
+      case 'trees': return { t: 'Trees & green space', f: 'Low tree cover', layer: 'green', what: 'The average resident has ' + pctTxt(m.trees) + ' tree cover around them.',
+        who: d.treeRest > d.tree ? 'The most densely populated fifth of residents get ' + pctTxt(d.tree) + ', against ' + pctTxt(d.treeRest) + ' for everyone else.' : 'Trees are spread fairly evenly between dense and open neighborhoods.' };
+      case 'food': return { t: 'Food', f: 'Limited nearby farmland', layer: null, what: 'Farmland within 50 km could feed ' + (m.food < 0.01 ? 'less than 1%' : 'about ' + pctTxt(Math.min(1, m.food))) + ' of the region’s people.',
+        who: 'This measures farmland capacity nearby, not where the city’s food actually comes from.' };
     }
   }
   function profile(data, dist) {
     var m = measure(data); if (!m) return null;
     var out = [];
     Object.keys(KEYS).forEach(function (k) {
+      if (k === 'crowd') return;
       var s = KEYS[k](m); if (s === null || s === undefined) return;
       var p = dist ? pct(s, dist[k]) : null;
       out.push({ key: k, score: s, pct: p, rank: p !== null ? p : s * 100 });

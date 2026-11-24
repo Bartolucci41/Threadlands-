@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=12">
+<link rel="stylesheet" href="../assets/site.css?v=13">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <link rel="manifest" href="../manifest.webmanifest">
@@ -173,8 +173,8 @@
           <div class="glance-grid" id="glance-grid"></div>
         </section>
       <section class="press" id="press" hidden>
-        <h2>Biggest pressures here</h2>
-        <p class="hint adv" id="press-note">Measured from this place's own data. Environmental and social together: each pressure says who carries it.</p>
+        <h2>What stands out</h2>
+        <p class="hint adv" id="press-note">Measured from this place's own data. A standout is a measure that stood out in Threadlands' data, not necessarily the biggest risk.</p>
         <ol class="press-list" id="press-list"></ol>
       </section>
       <section class="live" id="live-now" hidden>
@@ -2215,7 +2215,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     var fresh = LASTR && !($('#idxr') && $('#idxr').classList.contains('stale'));
     function rng(k, t) { var r = fresh && (t ? LASTR.tests[k] : LASTR.metrics[k]); if (!r || r[1] - r[0] < 1) return ''; return ' <span class="r">likely ' + dl(r[0]) + ' to ' + dl(r[1]) + '</span>'; }
     var levers = LEVERS.filter(function (L) { return state[L.key] > 0; }).map(function (L) { return '<li><b>' + esc(L.name) + '</b> at ' + state[L.key] + '% of what is possible. ' + esc(L.desc) + '</li>'; }).join('');
-    var press = pr && pr.top.length ? '<ol>' + pr.top.map(function (t) { return '<li><b>' + esc(t.t) + '</b>' + (t.pct !== null ? ' (worse than ' + Math.min(99, t.pct) + '% of places in the Threadlands library)' : '') + '. ' + esc(t.what) + (t.who ? ' ' + esc(t.who) : '') + '</li>'; }).join('') + '</ol>' : '';
+    var press = pr && pr.top.length ? '<ol>' + pr.top.map(function (t) { return '<li><b>' + esc(t.t) + ' \u00b7 ' + esc(t.f) + '</b>' + (t.pct !== null ? ' (stands out against ' + Math.min(99, t.pct) + '% of places in Threadlands)' : '') + '. ' + esc(t.what) + (t.who ? ' ' + esc(t.who) : '') + '</li>'; }).join('') + '</ol>' : '';
     var rows = METRICS.map(function (m) { return '<tr><td>' + esc(m.name) + '</td><td>' + Math.round(bau.metrics[m.k]) + '</td><td>' + Math.round(res.metrics[m.k]) + '</td><td>' + dl(res.metrics[m.k] - bau.metrics[m.k]) + rng(m.k) + '</td></tr>'; }).join('') +
       TESTS.map(function (t) { return '<tr><td>' + esc(t.name) + ' (stress test)</td><td>' + Math.round(bau.tests[t.k]) + '</td><td>' + Math.round(res.tests[t.k]) + '</td><td>' + dl(res.tests[t.k] - bau.tests[t.k]) + rng(t.k, 1) + '</td></tr>'; }).join('');
     var costs = $('#costs') ? $('#costs').outerHTML : '';
@@ -2232,7 +2232,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
       '<h1>' + name + ': a resilience plan</h1><p class="meta">Decision brief made with Threadlands (threadlands.org) on ' + meta.generated + ' · Climate: ' + esc(meta.climate) + ' · Screening estimates, not engineering results</p>' +
       '<p class="meta"><b>Scenario:</b> ' + esc(scn.line) + '</p>' +
       '<div class="big"><div><b>' + Math.round(res.index) + '</b><span>resilience index with this plan</span></div><div><b>' + dl(Math.round(res.index) - Math.round(bau.index)) + '</b><span>vs. business as usual' + ir + '</span></div><div><b>' + Math.round(today.index) + '</b><span>today, before any plan</span></div></div>' +
-      (press ? '<h2>The problem: biggest pressures</h2>' + press : '') +
+      (press ? '<h2>What stands out in the data</h2>' + press : '') +
       '<h2>The plan</h2>' + (levers ? '<ul>' + levers + '</ul>' : '<p>No actions chosen yet: this shows business as usual.</p>') +
       '<h2>What it would change</h2><table><thead><tr><th>Measure (0 to 100)</th><th>Without the plan</th><th>With the plan</th><th>Change</th></tr></thead><tbody>' + rows + '</tbody></table>' +
       '<p class="note">Ranges show how far each change could move if the model’s assumptions are off (middle 80% of 30 runs).</p>' +
@@ -2628,9 +2628,9 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     var pr = null; try { pr = window.TLProfile && TLProfile.profile(data, PDIST); } catch (e) { pr = null; }
     if (!pr || !pr.top.length || !data.cells || !data.cells.pop) { box.hidden = true; return; }
     document.getElementById('press-list').innerHTML = pr.top.map(function (t) {
-      return '<li><div class="press-h"><strong>' + t.t + '</strong>' + (t.pct !== null ? '<span class="press-b">Worse than ' + Math.min(99, t.pct) + '% of places</span>' : '') + '</div><p>' + t.what + '</p>' + (t.who ? '<p class="press-who">' + t.who + '</p>' : '') + '</li>';
+      return '<li><div class="press-h"><strong>' + t.t + ' \u00b7 ' + t.f + '</strong>' + (t.pct !== null ? '<span class="press-b">Stands out against ' + Math.min(99, t.pct) + '% of places</span>' : '') + '</div><p>' + t.what + '</p>' + (t.who ? '<p class="press-who">' + t.who + '</p>' : '') + '</li>';
     }).join('');
-    document.getElementById('press-note').textContent = 'Measured from this place\u2019s own data' + (PDIST_N ? ' and compared with all ' + PDIST_N + ' places in the library' : '') + '. Environmental and social together: each pressure says who carries it.';
+    document.getElementById('press-note').textContent = 'Measured from this place\u2019s own data' + (PDIST_N ? ' and compared with all ' + PDIST_N + ' places in the library' : '') + '. A standout is a measure that stood out in Threadlands\u2019 data, not necessarily the biggest risk.';
     box.hidden = false;
   }
   function setPlace(data, k) {

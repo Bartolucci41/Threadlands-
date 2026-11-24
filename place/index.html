@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=12">
+<link rel="stylesheet" href="../assets/site.css?v=13">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <link rel="manifest" href="../manifest.webmanifest">
@@ -97,11 +97,11 @@
     </section>
 
     <nav class="pf-jump" aria-label="On this page">
-      <a href="#here">What&rsquo;s here</a><a href="#pressing">What&rsquo;s pressing</a><a href="#tied">What it depends on</a><a href="#ready">How ready</a><a href="#changing">What&rsquo;s changing</a><a href="#pf-news-h">News</a>
+      <a href="#here">What&rsquo;s here</a><a href="#pressing">What stands out</a><a href="#tied">What it depends on</a><a href="#ready">How ready</a><a href="#changing">What&rsquo;s changing</a><a href="#pf-news-h">News</a>
     </nav>
 
     <section class="sect pf-sec" id="pressing" aria-labelledby="pressing-h">
-      <div class="sect-top"><div><h2 id="pressing-h">What&rsquo;s pressing here</h2><p>The pressures that stand out most for this place, compared with every other city in Threadlands.</p></div></div>
+      <div class="sect-top"><div><h2 id="pressing-h">What stands out</h2><p>The measures that stood out most in Threadlands&rsquo; data for this place, compared with every other place. A standout is not necessarily the city&rsquo;s biggest risk; each one links to the map so you can see where and why.</p></div></div>
       <div class="pf-press" id="pf-press"></div>
     </section>
 
@@ -158,7 +158,7 @@
   var T = window.TLP, $ = function (s) { return document.querySelector(s); }, esc = T.esc;
   T.setBase('../');
   var D = null, SLUG = '';
-  function pctWord(p) { return p >= 50 ? 'More pressing than in ' + p + '% of cities' : ''; }
+  function pctWord(p) { return p >= 50 ? 'Stands out against ' + p + '% of places' : ''; }
   function bar(v, label, sub) {
     var w = Math.max(2, Math.min(100, Math.round(v)));
     return '<div class="pf-bar"><span class="pf-bar-l">' + label + '</span><span class="pf-bar-t" aria-hidden="true"><i style="width:' + w + '%"></i></span><b>' + Math.round(v) + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>';
@@ -232,17 +232,18 @@
     out.push('<a href="../explore/?goal=' + goal + '#' + esc(SLUG) + '">Test ' + WORD[goal] + ' scenarios in ThreadLab &rarr;</a>');
     return '<p class="nx"><span class="nx-k">Next step</span>' + out.join('') + '</p>';
   }
+  var PRESS_NOW = [];
   function renderPressures(sm) {
-    var ps = sm.pressures || [];
+    var ps = sm.pressures || []; PRESS_NOW = ps;
     $('#pf-press').innerHTML = ps.length ? ps.map(function (p) {
-      return '<article class="pfp pfp-' + esc(p.key) + '"><span class="pfp-k">' + esc(pctWord(p.pct)) + '</span><h3>' + esc(p.t) + '</h3><p class="pfp-what">' + esc(p.what) + '</p><p class="pfp-who">' + esc(p.who) + '</p>' + nextSteps(GOAL_OF[p.key]) + '</article>';
+      return '<article class="pfp pfp-' + esc(p.key) + '"><span class="pfp-k">' + esc(pctWord(p.pct)) + '</span><h3>' + esc(p.t) + '</h3>' + (p.f ? '<p class="pfp-f">' + esc(p.f) + '</p>' : '') + '<p class="pfp-what">' + esc(p.what) + '</p><p class="pfp-who">' + esc(p.who) + '</p>' + (p.layer ? '<p class="pfp-map"><a href="#here" data-goto-ly="' + esc(p.layer) + '" data-why="' + esc(p.key) + '">See where on the map &rarr;</a></p>' : p.key === 'food' ? '<p class="pfp-map"><a href="#tied">See the farmland around it &rarr;</a></p>' : '') + nextSteps(GOAL_OF[p.key]) + '</article>';
     }).join('') : '<p class="pf-none">No pressure stands out here compared with other cities.</p>';
   }
   function renderTied(e, sm) {
     var t = sm.threads || {}, out = [], n = esc(e.name);
     if (t.basin_km2) out.push(['Water', 'water', t.basin_km2 >= 10000 ? T.fmtN(t.basin_km2) + ' km²' : t.basin_km2.toLocaleString('en-US') + ' km²',
       'of river basin drains through ' + n + '.' + (t.basin_built != null ? ' ' + t.basin_built + '% of it is built over' + (t.basin_built >= 25 ? ', so rain runs off fast instead of soaking in.' : '.') : '') + (t.basin_forest ? ' ' + t.basin_forest + '% is still forest or wetland, which holds water back.' : '')]);
-    if (t.food50 != null) out.push(['Food', 'food', (t.food50 < 1 ? 'Under 1' : t.food50) + '%', 'of the people within 50 km could be fed from the farmland within 50 km.' + (t.food250 != null ? ' Widen the circle to 250 km and it is ' + (t.food250 < 1 ? 'under 1' : t.food250) + '%.' : '') + (t.food50 < 20 ? ' Most food travels far to get here.' : '')]);
+    if (t.food50 != null) out.push(['Food', 'food', (t.food50 < 1 ? 'Under 1' : t.food50) + '%', 'of the people within 50 km could be fed from the farmland within 50 km.' + (t.food250 != null ? ' Widen the circle to 250 km and it is ' + (t.food250 < 1 ? 'under 1' : t.food250) + '%.' : '') + (t.food50 < 20 ? ' Most of the food the region needs would have to come from farther away.' : '')]);
     if (t.wild_km != null) out.push(['Nature', 'nature', t.wild_km < 1 ? 'Under 1 km' : t.wild_km + ' km', 'from the center to the nearest forest or wetland.' + (t.natural != null ? ' ' + t.natural + '% of the surrounding region is still forest, wetland or open land.' : '')]);
     $('#pf-tied').innerHTML = out.length ? out.map(function (o) { return '<article class="pft"><span class="eyebrow">' + o[0] + '</span><b class="pft-n">' + o[2] + '</b><p>' + o[3] + '</p>' + nextSteps(GOAL_OF[o[1]]) + '</article>'; }).join('') : '<p class="pf-none">The regional data for this place is still being built.</p>';
   }
@@ -351,8 +352,15 @@
   document.querySelector('.here-layers').addEventListener('click', function (ev) { var b = ev.target.closest('[data-ly]'); if (b) setLayer(b.dataset.ly); });
   document.addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-goto-ly]'); if (!b) return;
-    setLayer(b.dataset.gotoLy); document.getElementById('here').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (b.tagName === 'A') ev.preventDefault();
+    setLayer(b.dataset.gotoLy); if (b.dataset.why) showWhy(b.dataset.why); document.getElementById('here').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
+  // Why a measure stood out: said plainly as a finding from the data, not as the city's biggest risk
+  function showWhy(key) {
+    var p = PRESS_NOW.filter(function (x) { return x.key === key; })[0]; if (!p) return;
+    $('#here-card').innerHTML = '<div class="here-why"><span class="pfp-k">Why this stands out</span><b>' + esc(p.t) + (p.f ? ' \u00b7 ' + esc(p.f) : '') + '</b><p>' + esc(p.what) + '</p><p class="hw-n">This measure stood out in Threadlands&rsquo; data compared with other places' + (p.pct ? ' (more than ' + p.pct + '% of them)' : '') + '. It is not necessarily ' + esc(D.lib[SLUG].name) + '&rsquo;s biggest risk.</p></div><p class="here-hint">Tap the map anywhere to see what the data says about that area.</p><div class="here-key" id="here-key"></div>';
+    drawLayer();
+  }
   function nearestCell(lat, lng) {
     var c = HDATA.place.cells, best = -1, bd = Infinity, k = Math.cos(lat * Math.PI / 180);
     for (var i = 0; i < c.lat.length; i++) { var dx = (c.lng[i] - lng) * k, dy = c.lat[i] - lat, d2 = dx * dx + dy * dy; if (d2 < bd) { bd = d2; best = i; } }
@@ -571,7 +579,7 @@
     followUI(); $('#pf-tie').hidden = true; $('#pf-standers').hidden = true;
     T.standers(SLUG).then(showStanders).catch(function () {});
     var r = D.rank[SLUG] || {}, sm = D.summary[SLUG] || {};
-    renderWeather(e); renderToday(e); renderPressures(sm); renderTied(e, sm); renderReady(e, r, sm); renderProjects(e); renderNews(e);
+    renderWeather(e); renderToday(e); renderPressures(sm); renderTied(e, sm); setTimeout(function () { var sh = new URLSearchParams(location.search).get('show'), p = sh && PRESS_NOW.filter(function (x) { return x.key === sh; })[0]; if (!p) return; if (p.layer) { setLayer(p.layer); showWhy(p.key); document.getElementById('here').scrollIntoView({ block: 'start' }); } else { var t = document.getElementById(p.key === 'food' ? 'tied' : 'pressing'); if (t) t.scrollIntoView({ block: 'start' }); } }, 0); renderReady(e, r, sm); renderProjects(e); renderNews(e);
     try { loadMap(e); } catch (err) { /* the map is extra */ }
     window.scrollTo(0, 0);
   }

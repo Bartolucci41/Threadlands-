@@ -22,6 +22,7 @@
   <div class="filters" id="rk-regions" role="group" aria-label="Region"></div>
   <div class="filters"><label><span class="sr-only">Find a city</span><input type="search" id="rk-q" placeholder="Find a city or country"></label><span class="rk-count" id="rk-count"></span></div>
 
+  <div class="rk-head" aria-hidden="true"><span></span><span>Place</span><span>What stands out <i>in Threadlands&rsquo; data</i></span><span>Projects</span><span id="rk-scale">Score, out of 100</span><span></span></div>
   <ol class="rk-table" id="rk-table"><li class="rk-none">Loading the places&hellip;</li></ol>
 
   <section class="rk-method" aria-labelledby="rk-m-h">
@@ -161,7 +162,7 @@
   function where(e) { var ps = String(e.display || '').split(', '), st = ps.length >= 3 ? ps[ps.length - 2] : (/^New York/.test(e.name) ? 'New York' : ''); return (/^(US|CA|AU)$/.test(e.cc) && st && st !== e.name ? st + ' \u00b7 ' : '') + e.country; }
   function fmtN(n) { return n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : Math.round(n / 1e3) + 'K'; }
   function fmtPop(e) { var c = e.city_pop, r = e.pop; if (!r) return ''; if (!c || c >= r * 0.9) return fmtN(r) + ' people'; return fmtN(c) + ' in the city, ' + fmtN(r) + ' in the region'; }
-  var PRESS = { heat: 'Heat', flood: 'Flooding', grey: 'Little green', crowd: 'Crowding', trees: 'Few trees', food: 'Food from far away' };
+  var PRESS = { heat: ['Heat', 'High surface temperatures'], flood: ['Flooding', 'High modeled exposure'], grey: ['Trees & green space', 'Limited green cover'], trees: ['Trees & green space', 'Low tree cover'], food: ['Food', 'Limited nearby farmland'] };
   var SORT = 'index', REGION = 'All', LASTKEY = '';
   function val(p) { return SORT === 'pop' ? (p.city_pop || p.pop || 0) : (p[SORT] == null ? -1 : p[SORT]); }
   function render() {
@@ -174,11 +175,11 @@
     var nc = {}; shown.forEach(function (p) { nc[p.country] = 1; });
     $('#rk-count').textContent = shown.length + ' of ' + LIB.length + ' places in ' + Object.keys(nc).length + ' countries';
     $('#rk-table').innerHTML = shown.map(function (p) {
-      var v = p[key], has = v != null, w = has ? Math.max(3, Math.round(100 * (v - lo + 1) / (hi - lo + 1))) : 0;
+      var v = p[key], has = v != null, w = has ? Math.max(1, Math.min(100, Math.round(v))) : 0, pr = p.top && PRESS[p.top];
       var pj = p.projects && p.projects.add >= 0.05 ? '<span class="rk-pj">+' + p.projects.add.toFixed(1) + ' from projects</span>' : (p.projects ? '<span class="rk-pj rk-pj0">' + p.projects.n + ' project' + (p.projects.n > 1 ? 's' : '') + ' on the map</span>' : '');
       var num = SORT === 'name' ? '' : SORT === 'pop' ? p._rank : (has ? p._rank : '');
-      return '<li' + (p.requested ? ' class="vis"' : '') + '><a href="{B}place/#' + esc(p.slug) + '"><span class="rt-n">' + num + '</span><span class="rt-c"><b>' + esc(p.name) + '</b><span>' + flag(p.cc) + esc(where(p)) + (fmtPop(p) ? ' \u00b7 ' + fmtPop(p) : '') + '</span>' + (p.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</span>' +
-        '<span class="rt-p">' + (p.top ? esc(PRESS[p.top] || '') : '') + '</span><span class="rt-j">' + pj + '</span>' +
+      return '<li' + (p.requested ? ' class="vis"' : '') + '><a href="{B}place/' + (pr ? '?show=' + p.top : '') + '#' + esc(p.slug) + '"><span class="rt-n">' + num + '</span><span class="rt-c"><b>' + esc(p.name) + '</b><span>' + flag(p.cc) + esc(where(p)) + (fmtPop(p) ? ' \u00b7 ' + fmtPop(p) : '') + '</span>' + (p.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</span>' +
+        '<span class="rt-p">' + (pr ? '<b>' + esc(pr[0]) + '</b> \u00b7 ' + esc(pr[1]) : '') + '</span><span class="rt-j">' + pj + '</span>' +
         '<span class="rt-bar" aria-hidden="true">' + (has ? '<i style="width:' + w + '%"></i>' : '') + '</span><span class="rt-v">' + (has ? Math.round(v) : '<small>new</small>') + '</span></a></li>';
     }).join('') || '<li class="rk-none">No place matches. <a href="{B}explore/?q=' + encodeURIComponent($('#rk-q').value.trim()) + '">Search everywhere for it</a> and build it.</li>';
     var k2 = REGION + '|' + q; if (k2 !== LASTKEY) { LASTKEY = k2; fitTo(shown); } else drawMap();
