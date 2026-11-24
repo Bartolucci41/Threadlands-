@@ -1905,6 +1905,8 @@
     });
     var idx = Math.round(res.index), bidx = Math.round(bau.index);
     try { $('#ps-scn').textContent = scenario().line; } catch (e) { /* summary line is optional */ }
+    // What this plan changes here, against doing nothing in the same climate (not a ranking against other cities)
+    var pcx = $('#ps-ctx'); if (pcx) pcx.textContent = idx !== bidx ? (idx > bidx ? '+' : '\u2212') + Math.abs(idx - bidx) + ' points vs. business as usual under the same climate scenario' : '';
     $('#idx').textContent = idx;
     $('#ps-idx').textContent = idx; var psd = $('#ps-d'); psd.textContent = fmtDelta(idx - bidx); psd.style.color = idx - bidx > 0 ? 'var(--pos)' : idx - bidx < 0 ? 'var(--neg)' : 'var(--ink2)';
     $('#psum').hidden = TAB === 'understand';
@@ -2310,7 +2312,6 @@
       el.innerHTML = r === null ? '' : '<span class="cx-bar" aria-hidden="true"><i style="left:' + r + '%"></i></span>Today, better than ' + r + '% of the ' + list.length + ' places in the library';
     }
     METRICS.forEach(function (m) { var el = $('#mc-' + m.k); if (el) line(el, ok ? P.BAU_TODAY.metrics[m.k] : null, ok ? PCTX['m_' + m.k] : null); });
-    var pi = $('#ps-ctx'); if (pi) line(pi, ok ? P.BAU_TODAY.index : null, ok ? PCTX.index : null);
   }
   function renderGlance() {
     var box = $('#glance');
