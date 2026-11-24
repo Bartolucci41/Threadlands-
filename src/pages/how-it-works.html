@@ -23,6 +23,7 @@
       <div><dt>Population</dt><dd>WorldPop 2020, about 1 km resolution, counted country by country.</dd></div>
       <div><dt>River basins</dt><dd>HydroBASINS from WWF HydroSHEDS. Threadlands follows every sub-basin upstream of the city to outline the land that drains toward it.</dd></div>
       <div><dt>Surface heat</dt><dd>Landsat 8 and 9 Collection 2 surface temperature from USGS and NASA, 2021 to 2025, clear skies only.</dd></div>
+      <div id="hot-spot"><dt>Local heat hot spot</dt><dd>&ldquo;Typical&rdquo; is the median daytime surface temperature of all land in the place&rsquo;s modeled region on the same day. For each clear Landsat pass (about 10:30 in the morning, up to 20 passes from 2021 to 2025, in the three hottest months, or all year in the tropics), every patch of about 1 km&sup2; is compared with that regional median, and the middle value across passes is kept. A patch at least 2&deg;C above it is a local heat hot spot. Because each region is compared with itself, a hot-climate region can have few hot spots, and a cool one can have many. It measures ground temperature, not air temperature or health risk.</dd></div>
       <div><dt>This week</dt><dd>Twice a week, a robot finds the latest clear Landsat pass over every place in the library, from the past six weeks, and compares its surface temperature with passes in the same weeks of up to six earlier years. Landsat crosses each place about every eight days at mid-morning, so a reading can be a few days old, and clouds can hide a place for weeks.</dd></div>
       <div><dt>Climate</dt><dd>The IPCC Sixth Assessment Report for warming, heavy rain and sea level; Zhao and others, 2017, for crop yields under heat.</dd></div>
     </dl>
@@ -100,3 +101,9 @@
     </details>
   </section>
 </main>
+<!--SCRIPT-->
+(function () {
+  // A link such as how-it-works/#hot-spot opens the section that holds it
+  function openHash() { var el = location.hash && document.getElementById(location.hash.slice(1)); if (!el) return; var d = el.closest('details'); if (d) d.open = true; el.scrollIntoView(); }
+  openHash(); window.addEventListener('hashchange', openHash);
+})();

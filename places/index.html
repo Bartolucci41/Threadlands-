@@ -217,7 +217,7 @@
   var MEAS = {
     tree: { h: 'Tree cover around residents', up: true, u: '%', note: 'Average tree cover around where people live, from 2021 satellite land cover (ESA WorldCover). Highest first: places to learn from about shade.' },
     green_low: { h: 'Residents with little green nearby', up: false, u: '%', note: 'Share of residents living where less than a tenth of the ground is trees, grass, shrubs or wetland. Lowest first.' },
-    heat: { h: 'Residents in local heat hot spots (%)', up: false, u: '%', note: 'A local heat hot spot is ground that satellites (Landsat) measure at least 2\u00b0C hotter than is typical for its own region. This shows the share of residents living in the hottest parts of their region. It does not show who is exposed to dangerous heat: a place with few hot spots can still have a very hot climate. Lowest share first.' },
+    heat: { h: 'Residents in local heat hot spots (%)', up: false, u: '%', note: 'A local heat hot spot is ground that satellites (Landsat) measure at least 2\u00b0C hotter than is typical for its own region. This shows the share of residents living in the hottest parts of their region. It does not show who is exposed to dangerous heat: a place with few hot spots can still have a very hot climate. Lowest share first.', more: 'hot-spot', moreTxt: 'How typical is worked out' },
     farm: { h: 'Fed by farmland within 50 km', up: true, u: '%', note: 'Share of people within 50 km who the farmland within 50 km could feed. It measures capacity, not where food actually comes from. Highest first.' },
     wild_km: { h: 'Nearest forest or wetland', up: false, u: ' km', max: 40, note: 'Distance from the center of where people live to the nearest forest or wetland in the model (patches of about 1 km²). Nearest first.' },
     index: { h: 'Overall index, out of 100', up: true, u: '', note: 'A first look only. The overall index combines heat, flooding, nature, food and travel from the Threadlands model. It is not a grade: no place scores near 100, study areas differ, and flood and travel are not yet fully comparable between places, so a few points apart means little. It is most useful in ThreadLab, for comparing plans for the same place.' }
@@ -229,7 +229,7 @@
     var list = LIB.slice().sort(SORT === 'name' ? function (a, b) { return a.name.localeCompare(b.name); } : function (a, b) { return val(b) - val(a); });
     list.forEach(function (p, k) { p._rank = k + 1; });
     var CMP = !!MEAS[SORT], M = MEAS[SORT];
-    $('#rk-table').classList.toggle('cmp', CMP); $('#rk-head').className = 'rk-head' + (CMP ? ' cmp' : ''); $('#rk-cmp-note').hidden = !CMP; if (CMP) $('#rk-cmp-note').textContent = M.note;
+    $('#rk-table').classList.toggle('cmp', CMP); $('#rk-head').className = 'rk-head' + (CMP ? ' cmp' : ''); $('#rk-cmp-note').hidden = !CMP; if (CMP) $('#rk-cmp-note').innerHTML = M.note + (M.more ? ' <a href="../how-it-works/#' + M.more + '">' + M.moreTxt + ' &rarr;</a>' : '');
     $('#rk-head').innerHTML = '<span></span><span>Place</span><span>What stands out <i>in Threadlands&rsquo; data</i></span><span>Projects</span>' + (CMP ? '<span>' + M.h + '</span><span></span>' : '');
     shown = list.filter(function (p) { return (REGION === 'All' || (REGION === VIS ? p.requested : regionOf(p) === REGION)) && (!q || norm(p.name + ' ' + p.country + ' ' + (p.display || '')).indexOf(q) >= 0); });
     var nc = {}; shown.forEach(function (p) { nc[p.country] = 1; });
