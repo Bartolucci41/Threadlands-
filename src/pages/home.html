@@ -76,7 +76,7 @@
       var hi = all[0].index, lo = all[n - 1].index;
       var row = function (p, k) {
         var w = Math.max(4, Math.round(100 * (p.index - lo + 2) / (hi - lo + 2)));
-        return '<li><a href="{B}place/#' + p.slug + '"><span class="rk-n">' + (k + 1) + '</span><span class="rk-c"><b>' + esc(p.name) + '</b><span>' + esc(p.country) + (p.top ? ' · ' + (T.PRESS[p.top] || '').toLowerCase() : '') + '</span></span>' +
+        return '<li><a href="{B}place/#' + p.slug + '"><span class="rk-n">' + (k + 1) + '</span><span class="rk-c"><b>' + esc(p.name) + '</b><span>' + T.flag(p.cc) + esc(p.country) + (p.top ? ' · ' + (T.PRESS[p.top] || '').toLowerCase() : '') + '</span></span>' +
           '<span class="rk-bar" aria-hidden="true"><i style="width:' + w + '%"></i></span><span class="rk-v">' + Math.round(p.index) + '</span></a></li>';
       };
       $('#rank-top').innerHTML = all.slice(0, 3).map(function (p, k) { return row(p, k); }).join('');

@@ -157,6 +157,7 @@
   var ORDER = ['Africa', 'Asia', 'Europe', 'Latin America', 'Middle East', 'North America', 'Oceania'], CC2R = {}, VIS = 'Added by visitors';
   ORDER.forEach(function (r) { REG[r].split(' ').forEach(function (c) { CC2R[c] = r; }); });
   function regionOf(e) { return CC2R[e.cc] || (e.lng < -30 ? (e.lat > 15 ? 'North America' : 'Latin America') : e.lng < 50 ? (e.lat > 35 ? 'Europe' : 'Africa') : e.lat < -10 ? 'Oceania' : 'Asia'); }
+  function flag(cc) { return /^[A-Za-z]{2}$/.test(cc || '') ? '<span class="fi fi-' + String(cc).toLowerCase() + ' tl-flag" aria-hidden="true"></span>' : ''; }
   function where(e) { var ps = String(e.display || '').split(', '), st = ps.length >= 3 ? ps[ps.length - 2] : (/^New York/.test(e.name) ? 'New York' : ''); return (/^(US|CA|AU)$/.test(e.cc) && st && st !== e.name ? st + ' \u00b7 ' : '') + e.country; }
   function fmtN(n) { return n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : Math.round(n / 1e3) + 'K'; }
   function fmtPop(e) { var c = e.city_pop, r = e.pop; if (!r) return ''; if (!c || c >= r * 0.9) return fmtN(r) + ' people'; return fmtN(c) + ' in the city, ' + fmtN(r) + ' in the region'; }
@@ -176,7 +177,7 @@
       var v = p[key], has = v != null, w = has ? Math.max(3, Math.round(100 * (v - lo + 1) / (hi - lo + 1))) : 0;
       var pj = p.projects && p.projects.add >= 0.05 ? '<span class="rk-pj">+' + p.projects.add.toFixed(1) + ' from projects</span>' : (p.projects ? '<span class="rk-pj rk-pj0">' + p.projects.n + ' project' + (p.projects.n > 1 ? 's' : '') + ' on the map</span>' : '');
       var num = SORT === 'name' ? '' : SORT === 'pop' ? p._rank : (has ? p._rank : '');
-      return '<li' + (p.requested ? ' class="vis"' : '') + '><a href="{B}place/#' + esc(p.slug) + '"><span class="rt-n">' + num + '</span><span class="rt-c"><b>' + esc(p.name) + '</b><span>' + esc(where(p)) + (fmtPop(p) ? ' \u00b7 ' + fmtPop(p) : '') + '</span>' + (p.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</span>' +
+      return '<li' + (p.requested ? ' class="vis"' : '') + '><a href="{B}place/#' + esc(p.slug) + '"><span class="rt-n">' + num + '</span><span class="rt-c"><b>' + esc(p.name) + '</b><span>' + flag(p.cc) + esc(where(p)) + (fmtPop(p) ? ' \u00b7 ' + fmtPop(p) : '') + '</span>' + (p.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</span>' +
         '<span class="rt-p">' + (p.top ? esc(PRESS[p.top] || '') : '') + '</span><span class="rt-j">' + pj + '</span>' +
         '<span class="rt-bar" aria-hidden="true">' + (has ? '<i style="width:' + w + '%"></i>' : '') + '</span><span class="rt-v">' + (has ? Math.round(v) : '<small>new</small>') + '</span></a></li>';
     }).join('') || '<li class="rk-none">No place matches. <a href="{B}explore/?q=' + encodeURIComponent($('#rk-q').value.trim()) + '">Search everywhere for it</a> and build it.</li>';

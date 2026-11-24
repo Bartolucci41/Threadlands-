@@ -59,7 +59,7 @@
   function show() {
     var q = input.value.trim(); if (!q) { close(); return; }
     items = T.matches(LIST, q, 7);
-    list.innerHTML = items.map(function (e, k) { return '<li role="option" data-slug="' + e.slug + '" aria-selected="' + (k === active) + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + esc(T.where(e)) + '</span></li>'; }).join('') +
+    list.innerHTML = items.map(function (e, k) { return '<li role="option" data-slug="' + e.slug + '" aria-selected="' + (k === active) + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + T.flag(e.cc) + esc(T.where(e)) + '</span></li>'; }).join('') +
       '<li role="option" data-world="1"><span class="s-world">Search everywhere for “' + esc(q) + '”</span></li>';
     list.hidden = false; input.setAttribute('aria-expanded', 'true');
   }

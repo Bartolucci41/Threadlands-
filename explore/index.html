@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="../assets/site.css?v=10">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <link rel="manifest" href="../manifest.webmanifest">
 <meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">
@@ -3439,7 +3440,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
       var q = input.value.trim();
       if (!q) { close(); return; }
       var html = items.map(function (e, k) {
-        return '<li role="option" id="' + listId.slice(1) + '-' + k + '" data-slug="' + e.slug + '" aria-selected="' + (k === active ? 'true' : 'false') + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + esc(e.country) + '</span></li>';
+        return '<li role="option" id="' + listId.slice(1) + '-' + k + '" data-slug="' + e.slug + '" aria-selected="' + (k === active ? 'true' : 'false') + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + (/^[A-Za-z]{2}$/.test(e.cc || '') ? '<span class="fi fi-' + e.cc.toLowerCase() + ' tl-flag" aria-hidden="true"></span>' : '') + esc(e.country) + '</span></li>';
       }).join('');
       if (world && world.q === q) {
         if (world.loading) html += '<li class="s-none">Searching everywhere…</li>';

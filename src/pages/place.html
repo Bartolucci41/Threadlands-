@@ -159,7 +159,7 @@
     $('#pf-missing').hidden = true; $('#pf').hidden = false;
     document.title = e.name + ' | Threadlands';
     $('#pf-name').textContent = e.name;
-    $('#pf-where').textContent = T.where(e) + (e.city_pop ? ' · ' + T.fmtN(e.city_pop) + ' people in the city' : '') + (e.pop && (!e.city_pop || e.pop > e.city_pop * 1.1) ? ', ' + T.fmtN(e.pop) + ' in the region' : '');
+    $('#pf-where').innerHTML = T.flag(e.cc) + esc(T.where(e) + (e.city_pop ? ' · ' + T.fmtN(e.city_pop) + ' people in the city' : '') + (e.pop && (!e.city_pop || e.pop > e.city_pop * 1.1) ? ', ' + T.fmtN(e.pop) + ' in the region' : ''));
     $('#pf-explore').href = '{B}explore/#' + SLUG; $('#pf-studio').href = '{B}studio/#' + SLUG;
     followUI();
     var r = D.rank[SLUG] || {}, sm = D.summary[SLUG] || {};

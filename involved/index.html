@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="../assets/site.css?v=10">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <link rel="manifest" href="../manifest.webmanifest">
 <meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">
@@ -108,7 +109,7 @@
     var top = (sm.pressures || [])[0], lead = nw.filter(function (x) { return x.named !== false; })[0];
     return '<article class="mpc" data-slug="' + esc(slug) + '">' +
       '<a class="mpc-main" href="../place/#' + esc(slug) + '">' +
-        '<span class="mpc-top"><span><b class="mpc-name">' + esc(e.name) + '</b><span class="mpc-where">' + esc(T.where(e)) + '</span></span>' +
+        '<span class="mpc-top"><span><b class="mpc-name">' + esc(e.name) + '</b><span class="mpc-where">' + T.flag(e.cc) + esc(T.where(e)) + '</span></span>' +
         '<span class="mpc-wx" id="wx-' + esc(slug) + '"><span class="mpc-t">&ndash;</span></span></span>' +
         '<span class="mpc-alert" id="al-' + esc(slug) + '" hidden></span>' +
         '<span class="mpc-stats">' + (r.index != null ? '<span><i>Resilience</i><b>' + Math.round(r.index) + '</b><small>#' + r.rank + ' of ' + D.rankN + '</small></span>' : '') +
@@ -144,7 +145,7 @@
   function show() {
     var q = input.value.trim(); if (!q || !D) { close(); return; }
     items = T.matches(D.list, q, 7);
-    list.innerHTML = items.map(function (e, k) { return '<li role="option" data-slug="' + e.slug + '" aria-selected="' + (k === active) + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + esc(T.where(e)) + '</span></li>'; }).join('') +
+    list.innerHTML = items.map(function (e, k) { return '<li role="option" data-slug="' + e.slug + '" aria-selected="' + (k === active) + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + T.flag(e.cc) + esc(T.where(e)) + '</span></li>'; }).join('') +
       '<li role="option" data-world="1"><span class="s-world">Not listed? Build “' + esc(q) + '” in Explore (about ten minutes)</span></li>';
     list.hidden = false; input.setAttribute('aria-expanded', 'true');
   }

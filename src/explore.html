@@ -3037,7 +3037,7 @@
       var q = input.value.trim();
       if (!q) { close(); return; }
       var html = items.map(function (e, k) {
-        return '<li role="option" id="' + listId.slice(1) + '-' + k + '" data-slug="' + e.slug + '" aria-selected="' + (k === active ? 'true' : 'false') + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + esc(e.country) + '</span></li>';
+        return '<li role="option" id="' + listId.slice(1) + '-' + k + '" data-slug="' + e.slug + '" aria-selected="' + (k === active ? 'true' : 'false') + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + (/^[A-Za-z]{2}$/.test(e.cc || '') ? '<span class="fi fi-' + e.cc.toLowerCase() + ' tl-flag" aria-hidden="true"></span>' : '') + esc(e.country) + '</span></li>';
       }).join('');
       if (world && world.q === q) {
         if (world.loading) html += '<li class="s-none">Searching everywhere…</li>';

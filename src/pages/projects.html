@@ -42,12 +42,12 @@
   function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   var STAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
   var KIND = { trees: 'Trees', park: 'Park', wetland: 'Wetland', corridor: 'Green corridor', rain: 'Rainwater', farm: 'Farm', river: 'River', transit: 'Transit or cycling', other: 'Other' };
-  var ALL = [], NAMES = {}, FILTER = 'all', MAP = null, MARK = {};
+  var ALL = [], NAMES = {}, CC = {}, FILTER = 'all', MAP = null, MARK = {};
   function cards() {
     var list = ALL.filter(function (p) { return FILTER === 'all' || p.status === FILTER; });
     $('#pj-list').innerHTML = list.map(function (p) {
       var st = STAT[p.status] || STAT.proposed;
-      return '<li class="pjc" id="pjc-' + esc(p.id) + '" style="--pc:' + st[1] + '"><button type="button" class="pjc-go" data-id="' + esc(p.id) + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span>' + esc(NAMES[p.place] || p.place) + ' · ' + (KIND[p.kind] || 'Other') + '</span></span>' +
+      return '<li class="pjc" id="pjc-' + esc(p.id) + '" style="--pc:' + st[1] + '"><button type="button" class="pjc-go" data-id="' + esc(p.id) + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span>' + (window.TLP ? TLP.flag(CC[p.place]) : '') + esc(NAMES[p.place] || p.place) + ' · ' + (KIND[p.kind] || 'Other') + '</span></span>' +
         '<b translate="no">' + esc(p.name) + '</b><span class="pjc-sum">' + esc(p.summary || '') + '</span></button>' +
         '<span class="pjc-links"><a href="../place/#' + esc(p.place) + '">' + esc(NAMES[p.place] || 'The city') + '</a><a href="../explore/#' + esc(p.place) + '">See it in Explore</a>' + (p.source && p.source.url ? '<a href="' + esc(p.source.url) + '" target="_blank" rel="noopener">Source</a>' : '') +
         (p.involved ? '<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Get involved</a>' : '') + '</span>' +
@@ -66,7 +66,7 @@
   $('#pj-status').addEventListener('click', function (e) { var b = e.target.closest('[data-st]'); if (!b) return; FILTER = b.dataset.st; document.querySelectorAll('[data-st]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); cards(); });
   $('#pj-add-f').addEventListener('submit', function (e) { e.preventDefault(); var c = $('#pj-city').value; if (c) location.href = '../explore/?add=1#' + c; });
   Promise.all([fetch('../data/projects.json').then(function (r) { return r.json(); }), fetch('../data/index.json').then(function (r) { return r.json(); })]).then(function (x) {
-    (x[1].places || []).forEach(function (e) { NAMES[e.slug] = e.name; });
+    (x[1].places || []).forEach(function (e) { NAMES[e.slug] = e.name; CC[e.slug] = e.cc; });
     ALL = (x[0].projects || []).slice().sort(function (a, b) { return String(b.added || '').localeCompare(String(a.added || '')) || (b.year || 0) - (a.year || 0); });
     $('#pj-city').innerHTML = '<option value="">Choose a city</option>' + (x[1].places || []).slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).map(function (e) { return '<option value="' + esc(e.slug) + '">' + esc(e.name) + ', ' + esc(e.country) + '</option>'; }).join('');
     if (window.L) {

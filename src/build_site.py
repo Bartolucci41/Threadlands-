@@ -394,6 +394,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
 
   /* ---- Two faces: the side switch in the top bar */
   .topnav .nav-home { margin-right: 5px; vertical-align: -2px; }
+  .tl-flag { display: inline-block; width: 1.2em; height: 0.9em; margin-right: 0.4em; border-radius: 2px; vertical-align: -0.06em; box-shadow: 0 0 0 1px rgba(0,0,0,0.08); background-size: cover; flex: none; }
   .topnav a.nav-lab { position: relative; display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px 8px; border-radius: 999px; color: #fff; font-weight: 700; letter-spacing: 0.01em; text-decoration: none;
     background: linear-gradient(180deg, #2a7a70 0%, #165049 55%, #0f3b36 100%);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.25), 0 3px 0 #0a2a26, 0 6px 14px rgba(18,59,56,0.35), 0 0 0 1px #0d3330;
@@ -611,7 +612,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=10">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=10">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

@@ -83,6 +83,7 @@
   function norm(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
   function ndate(d) { if (!d || d.length < 8) return ''; var dt = new Date(d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6, 8) + 'T12:00:00'); return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
   function fmtN(n) { return n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(Math.round(n)); }
+  function flag(cc) { return /^[A-Za-z]{2}$/.test(cc || '') ? '<span class="fi fi-' + String(cc).toLowerCase() + ' tl-flag" aria-hidden="true"></span>' : ''; }
   function where(e) {
     var ps = String(e.display || '').split(', '), st = ps.length >= 3 ? ps[ps.length - 2] : '';
     if (/region|región/i.test(st) || st === e.name) st = '';
@@ -141,5 +142,5 @@
 
   window.TLP = { follows: follows, follow: follow, unfollow: unfollow, isFollowed: isFollowed, setFollows: setFollows, units: units, setUnits: setUnits, temp: temp, rain: rain,
     setBase: setBase, data: data, all: all, weather: weather, air: air, aqiWord: aqiWord, alerts: alerts, sky: sky, icon: icon, day: day,
-    PRESS: PRESS, TOPIC: TOPIC, TONE: TONE, esc: esc, norm: norm, ndate: ndate, fmtN: fmtN, where: where, headline: headline, matches: matches, nearest: nearest, support: support, backProject: backProject, wireBacking: wireBacking, backed: backed };
+    PRESS: PRESS, TOPIC: TOPIC, TONE: TONE, esc: esc, norm: norm, ndate: ndate, fmtN: fmtN, where: where, headline: headline, flag: flag, matches: matches, nearest: nearest, support: support, backProject: backProject, wireBacking: wireBacking, backed: backed };
 })();
