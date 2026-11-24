@@ -1256,5 +1256,15 @@
 "delle persone all'interno {0} km potrebbe essere alimentato dal terreno agricolo entro {1} km. Pulire il cerchio a {2} km ed è {3}. La maggior parte del cibo che la regione ha bisogno dovrebbe venire da lontano.",
 "Misurato dai propri dati di questo luogo e rispetto a tutti i {0} posti nella libreria. Uno standout è una misura che si distingue nei dati di Threadlands, non necessariamente il rischio più grande.",
 "Alberi e spazio verde · Copertura bassa albero",
-"Cibo · Terreno agricolo nelle vicinanze limitato"
+"Cibo · Terreno agricolo nelle vicinanze limitato",
+"Ogni luogo, e ciò che si distingue nei suoi dati.",
+"Ogni luogo in Threadlands, con la misura che si distingueva maggiormente nei suoi dati. Aprire un posto per vedere dove sulla mappa e perché. Non vedi la tua città?",
+"Confronta i punteggi",
+"Vista di confronto. Questi sono punteggi di screening su {0} dal modello Threadlands. Non sono gradi: nessun punteggio di posto vicino {1} aree di studio differiscono in dimensioni, e l'alluvione e i viaggi non sono ancora completamente paragonabili tra i luoghi, quindi pochi punti a parte significa poco. Gli punteggi sono più utili in ThreadLab, per confrontare i piani per lo stesso posto.",
+"· Capacità agricola nelle vicinanze limitata",
+"Informazioni sui punteggi di confronto",
+"Capacità agricola nelle vicinanze limitata",
+"Confronta i punteggi tra i luoghi →",
+"Un punteggio di screening dal modello Threadlands, non un grado: nessun punteggio di posto vicino {0} e alcuni punti tra le città significa poco perché le aree di studio e alcuni input differiscono. È più utile in ThreadLab, per confrontare i piani per questo stesso posto.",
+"Cibo · Capacità agricola nelle vicinanze limitata"
 ]

@@ -1256,5 +1256,15 @@
 "de la gente dentro {0} km podría ser alimentado desde la granja en {1} km. Agrandar el círculo a {2} km y es {3}. La mayoría de los alimentos que necesita la región tendrían que venir más lejos.",
 "Medido de los propios datos de este lugar y comparado con todos los {0} lugares en la biblioteca. Una postura es una medida que se destacó en los datos de Threadlands, no necesariamente el mayor riesgo.",
 "Árboles &amp; espacio verde · Bajo cubierta de árboles",
-"Alimentación · Zonas agrícolas cercanas"
+"Alimentación · Zonas agrícolas cercanas",
+"Cada lugar, y lo que destaca en sus datos.",
+"Cada lugar en Threadlands, con la medida que destacaba más en sus datos. Abra un lugar para ver dónde en el mapa y por qué. ¿No ves tu ciudad?",
+"Comparar resultados",
+"Vista de comparación. Estas son puntuaciones de proyección de {0} del modelo Threadlands. No son calificaciones: ninguna puntuación de lugar cerca de {1} áreas de estudio difieren en tamaño, y las inundaciones y los viajes todavía no son totalmente comparables entre lugares, por lo que unos pocos puntos aparte significa poco. Las puntuaciones son más útiles en ThreadLab, para comparar planes para el mismo lugar.",
+"· Capacidad limitada de tierras agrícolas cercanas",
+"Sobre las puntuaciones de comparación",
+"Capacidad de tierras agrícolas cercanas",
+"Comparar resultados en todos los lugares →",
+"Un puntaje de selección del modelo Threadlands, no un grado: ningún lugar marca cerca {0} y algunos puntos entre ciudades significa poco porque las áreas de estudio y algunas entradas difieren. Es muy útil en ThreadLab, para comparar planes para este mismo lugar.",
+"Alimentación · Capacidad de tierras agrícolas cercanas"
 ]

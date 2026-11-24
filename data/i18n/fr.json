@@ -1256,5 +1256,15 @@
 "des gens à moins de {0} km pourraient être alimentés à partir des terres agricoles à moins de {1} km. Élargir le cercle à {2} km et il est {3}. La plupart des aliments dont la région a besoin devraient venir de plus loin.",
 "Mesuré à partir de ce lieu, ses propres données et comparé avec tous les {0} places dans la bibliothèque. Un point fort est une mesure qui s'est distinguée dans les données de Threadlands, pas nécessairement le plus grand risque.",
 "Arbres et espace vert · Faible couverture arborescente",
-"Alimentation · Exploitations agricoles limitées à proximité"
+"Alimentation · Exploitations agricoles limitées à proximité",
+"Chaque endroit, et ce qui se distingue dans ses données.",
+"Chaque endroit dans les Threadlands, avec la mesure qui se distingue le plus dans ses données. Ouvrez un endroit pour voir où et pourquoi sur la carte. Tu ne vois pas ta ville ?",
+"Comparer les scores",
+"Vue de comparaison. Ce sont des scores de dépistage de {0} du modèle Threadlands. Ce ne sont pas des notes : pas de scores {1} les zones d'étude diffèrent en taille, et les inondations et les déplacements ne sont pas encore complètement comparables entre les endroits, donc quelques points séparés signifient peu. Les partitions sont les plus utiles dans ThreadLab, pour comparer les plans pour le même endroit.",
+"· Capacité agricole limitée à proximité",
+"A propos des scores de comparaison",
+"Capacité limitée des terres agricoles à proximité",
+"Comparer les scores entre les endroits →",
+"Une note de dépistage du modèle Threadlands, pas une note : aucune note de place près de {0} et quelques points entre les villes signifie peu parce que les zones d'étude et certains intrants diffèrent. Il est le plus utile dans ThreadLab, pour comparer les plans pour ce même endroit.",
+"Alimentation · Capacité agricole limitée à proximité"
 ]

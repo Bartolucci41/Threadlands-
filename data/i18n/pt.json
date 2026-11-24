@@ -1256,5 +1256,15 @@
 "das pessoas dentro de {0} km podem ser alimentadas a partir das terras agrícolas dentro de {1} km. Alarga o círculo para {2} km e é {3}. A maior parte dos alimentos de que a região precisa teria de vir de mais longe.",
 "Medido a partir dos dados deste local e comparado com todos os lugares {0} na biblioteca. Um destaque é uma medida que se destacou nos dados da Threadlands, não necessariamente o maior risco.",
 "Árvores e espaço verde · Cobertura baixa da árvore",
-"Comida · Terrenos agrícolas próximos limitados"
+"Comida · Terrenos agrícolas próximos limitados",
+"Cada lugar, e o que se destaca em seus dados.",
+"Cada lugar em Threadlands, com a medida que mais se destacou em seus dados. Abra um lugar para ver onde no mapa e porquê. Não vê a sua cidade?",
+"Comparar as pontuações",
+"Vista comparativa. Estas são pontuações de rastreio de {0} do modelo Threadlands. Não são notas: nenhuma pontuação de lugar perto de {1} áreas de estudo diferem em tamanho, e inundação e viagens ainda não são totalmente comparáveis entre os lugares, então alguns pontos separados significa pouco. As pontuações são mais úteis no ThreadLab, para comparar planos para o mesmo lugar.",
+"· Limitada capacidade agrícola próxima",
+"Sobre os escores de comparação",
+"Capacidade limitada das terras agrícolas nas proximidades",
+"Compare as pontuações entre os lugares →",
+"Uma pontuação de triagem do modelo Threadlands, não uma nota: nenhuma pontuação de lugar perto de {0} e alguns pontos entre as cidades significam pouco porque as áreas de estudo e alguns insumos diferem. É mais útil no ThreadLab, para comparar planos para este mesmo lugar.",
+"Alimentação · Limitada capacidade agrícola próxima"
 ]
