@@ -24,7 +24,7 @@ jobs:
               '> ' + String(o.text || '').replace(/\n/g, '\n> '),
               '',
               'Review it, then add ONE label to publish it with what the review confirms:',
-              '- **checked**: the location makes sense and the source (if any) supports it',
+              '- **checked**: the location makes sense, and the source supports it if one was given. It shows as "Location and source checked" with a source link, or "Location checked" for a firsthand note without one',
               '- **corroborated**: a local partner confirmed it',
               'To leave it off the map, close the issue. Edit the JSON below first if a detail needs fixing (never publish personal details).',
               '',
