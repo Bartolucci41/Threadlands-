@@ -5,14 +5,14 @@
 (function () {
   var LANGS = [
     ['en', 'English'], ['zh', '中文'], ['hi', 'हिन्दी'], ['es', 'Español'], ['ar', 'العربية'],
-    ['fr', 'Français'], ['bn', 'বাংলা'], ['pt', 'Português'], ['ru', 'Русский'], ['ur', 'اردو'], ['it', 'Italiano']
+    ['fr', 'Français'], ['pt', 'Português'], ['ru', 'Русский'], ['it', 'Italiano']
   ];
   // Languages appear in the menu once their translation file is in data/i18n
-  var READY = ['en', 'zh', 'hi', 'es', 'ar', 'fr', 'bn', 'pt', 'ru', 'ur', 'it'];
+  var READY = ['en', 'zh', 'hi', 'es', 'ar', 'fr', 'pt', 'ru', 'it'];
   LANGS = LANGS.filter(function (l) { return READY.indexOf(l[0]) >= 0; });
-  var RTL = { ar: 1, ur: 1 };
-  var FONTS = { zh: 'Noto+Sans+SC:wght@400;600;800', hi: 'Noto+Sans+Devanagari:wght@400;600;800', bn: 'Noto+Sans+Bengali:wght@400;600;800',
-    ar: 'Noto+Sans+Arabic:wght@400;600;800', ur: 'Noto+Nastaliq+Urdu:wght@400;600' };
+  var RTL = { ar: 1 };
+  var FONTS = { zh: 'Noto+Sans+SC:wght@400;600;800', hi: 'Noto+Sans+Devanagari:wght@400;600;800',
+    ar: 'Noto+Sans+Arabic:wght@400;600;800' };
   var NUM = /[-−+]?[$€£]?\d[\d,]*(?:\.\d+)?(?:\s?[KMB%])?/g;
   var base = (document.currentScript && document.currentScript.src.replace(/assets\/i18n\.js.*$/, '')) || '/';
   var KEYS = null, DICT = null, lang = 'en', ORIG = new WeakMap(), SET = new WeakMap(), AORIG = new WeakMap(), REGIONS = null;

@@ -69,7 +69,7 @@
         '<span class="mpc-alert" id="al-' + esc(slug) + '" hidden></span>' +
         '<span class="mpc-stats">' + (r.index != null ? '<span><i>Resilience</i><b>' + Math.round(r.index) + '</b><small>#' + r.rank + ' of ' + D.rankN + '</small></span>' : '') +
           (top ? '<span><i>Biggest pressure</i><b class="mpc-press">' + esc(top.t) + '</b></span>' : '') + '</span>' +
-        (lead ? '<span class="mpc-news"><i>' + esc(T.TONE[lead.tone] || 'News') + '</i>' + esc(lead.title) + '</span>' : '') +
+        (lead ? '<span class="mpc-news"><i>' + esc(T.TONE[lead.tone] || 'News') + '</i><span translate="no">' + esc(lead.title) + '</span></span>' : '') +
       '</a>' +
       '<button type="button" class="mpc-x" data-rm="' + esc(slug) + '" aria-label="Stop following ' + esc(e.name) + '" title="Stop following">&times;</button>' +
     '</article>';
@@ -146,7 +146,7 @@
       $('#feed-grid').innerHTML = ps.slice(0, 6).map(function (p) {
         var st = FSTAT[p.status] || FSTAT.proposed;
         return '<a class="feed-card" href="{B}place/#' + esc(p.place) + '" style="--pc:' + st[1] + '"><span class="feed-top"><span class="feed-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span class="feed-city">' + esc(names[p.place] || p.place) + '</span></span>' +
-          '<b>' + esc(p.name) + '</b><span class="feed-sum">' + esc(String(p.summary || '').split('. ')[0].replace(/\.$/, '')) + '.</span></a>';
+          '<b translate="no">' + esc(p.name) + '</b><span class="feed-sum">' + esc(String(p.summary || '').split('. ')[0].replace(/\.$/, '')) + '.</span></a>';
       }).join('');
       $('#feed').hidden = false;
     }

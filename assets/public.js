@@ -91,7 +91,7 @@
   function headline(it, names) {
     var tone = it.tone || (/(flood|heat|drought|fire|water)/.test(it.topic) ? 'concern' : 'update');
     return '<li class="nw2 tone-' + tone + '"><span class="nw2-tag"><b>' + (TONE[tone] || '') + '</b>' + (TOPIC[it.topic] ? ' · ' + TOPIC[it.topic] : '') + '</span>' +
-      '<a class="nw2-h" href="' + esc(it.url) + '" target="_blank" rel="noopener">' + esc(it.title) + '</a>' +
+      '<a class="nw2-h" translate="no" href="' + esc(it.url) + '" target="_blank" rel="noopener">' + esc(it.title) + '</a>' +
       '<span class="nw2-m">' + (names && it.place ? '<a href="' + BASE + 'place/#' + esc(it.place) + '">' + esc(names[it.place] || it.place) + '</a> · ' : '') + esc(it.source) + (it.date ? ' · ' + ndate(it.date) : '') + '</span></li>';
   }
   // Library search: names first, then anything in the address
