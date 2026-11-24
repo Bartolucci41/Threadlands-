@@ -8,16 +8,18 @@
     <section class="pf-head bleed band-deep" aria-labelledby="pf-name">
       <div class="pf-head-in">
         <div class="pf-id">
-          <a class="pf-back" href="{B}involved/">&larr; Places you stand with</a>
+          <a class="pf-back" href="{B}involved/">&larr; Your places</a>
           <h1 id="pf-name" class="pf-h"></h1>
           <p class="pf-where" id="pf-where"></p>
           <div class="pf-actions">
-            <button type="button" class="btn" id="pf-follow" aria-pressed="false" aria-expanded="false" aria-controls="pf-tie">Stand with</button>
+            <button type="button" class="btn" id="pf-save" aria-pressed="false">Follow this place</button>
+            <button type="button" class="btn ghost-inv" id="pf-follow" aria-pressed="false" aria-expanded="false" aria-controls="pf-tie">Stand with</button>
             <button type="button" class="btn ghost-inv" id="pf-share">Share</button>
           </div>
           <div class="pf-tie" id="pf-tie" role="group" aria-labelledby="pf-tie-q" hidden>
             <p id="pf-tie-q">How are you connected to <span class="pf-tie-name"></span>?</p>
             <div class="pf-tie-opts"><button type="button" class="chip" data-tie="live">I live here</button><button type="button" class="chip" data-tie="from">I&rsquo;m from here</button><button type="button" class="chip" data-tie="work">I work or study here</button><button type="button" class="chip" data-tie="care">I care about it</button></div>
+            <p class="pf-tie-how"><b>How support is counted:</b> once per phone or computer. This page shows only totals, how many people stand with <span class="pf-tie-name"></span> and how many of them live here. No names are shown or shared. City teams and funders see the same totals.</p>
             <button type="button" class="linkbtn pf-tie-off" id="pf-tie-off" hidden>Step back from <span class="pf-tie-name"></span></button>
           </div>
           <p class="pf-standers" id="pf-standers" hidden></p>
@@ -91,7 +93,11 @@
     document.querySelectorAll('.pf-tie-name').forEach(function (n) { n.textContent = name; });
     document.querySelectorAll('[data-tie]').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.tie === tie ? 'true' : 'false'); });
     $('#pf-tie-off').hidden = !tie;
+    var f = T.isFollowed(SLUG), sb = $('#pf-save');
+    sb.setAttribute('aria-pressed', f ? 'true' : 'false'); sb.textContent = f ? 'Following \u2713' : 'Follow this place';
   }
+  // Follow: save the place and keep up with it. Stepping back from standing with it keeps it followed.
+  $('#pf-save').addEventListener('click', function () { if (T.isFollowed(SLUG)) { if (T.tieOf(SLUG) && T.ties()[SLUG]) T.stepBack(SLUG).then(fromReply); T.unfollow(SLUG); } else T.follow(SLUG); followUI(); });
   function showStanders(c) {
     var el = $('#pf-standers');
     if (!c || !c.total) { el.hidden = true; return; }
@@ -106,7 +112,7 @@
     var c = ev.target.closest('[data-tie]'); if (!c) return;
     T.standWith(SLUG, c.dataset.tie).then(fromReply); followUI(); $('#pf-tie').hidden = true; $('#pf-follow').setAttribute('aria-expanded', 'false');
   });
-  $('#pf-tie-off').addEventListener('click', function () { T.stepBack(SLUG).then(fromReply); followUI(); $('#pf-tie').hidden = true; $('#pf-follow').setAttribute('aria-expanded', 'false'); });
+  $('#pf-tie-off').addEventListener('click', function () { T.stepBack(SLUG).then(fromReply); T.follow(SLUG); followUI(); $('#pf-tie').hidden = true; $('#pf-follow').setAttribute('aria-expanded', 'false'); });
   $('#pf-share').addEventListener('click', function () {
     var e = D.lib[SLUG], data = { title: e.name + ' on Threadlands', text: 'What’s changing in ' + e.name + ': risks, projects and news.', url: location.href };
     if (navigator.share) navigator.share(data).catch(function () {});
@@ -129,19 +135,54 @@
   }
   $('#pf-now').addEventListener('click', function (ev) { var b = ev.target.closest('[data-u]'); if (!b) return; T.setUnits(b.dataset.u); renderWeather(D.lib[SLUG]); });
 
+  // What to do about it: a relevant project here, a way to weigh in, and the same question tested in ThreadLab
+  var GOAL_OF = { heat: 'heat', grey: 'heat', trees: 'heat', crowd: 'heat', flood: 'flood', food: 'food', water: 'flood', nature: 'habitat' };
+  var KINDS = { heat: ['trees', 'park', 'corridor'], flood: ['wetland', 'rain', 'river', 'park'], food: ['farm'], habitat: ['corridor', 'wetland', 'park', 'trees'] };
+  var WORD = { heat: 'heat', flood: 'flood', food: 'food', habitat: 'nature' };
+  var RANK = { proposed: 0, approved: 1, underway: 2, built: 3 };
+  function nextSteps(goal) {
+    if (!goal) return '';
+    var ps = D.projects.filter(function (p) { return p.place === SLUG && KINDS[goal].indexOf(p.kind) >= 0; }).sort(function (a, b) { return (RANK[a.status] || 0) - (RANK[b.status] || 0); });
+    var p = ps[0], out = [];
+    if (p) {
+      out.push('<a href="#pj-' + esc(p.id) + '">' + (p.status === 'built' ? 'See' : 'Back') + ' <span translate="no">' + esc(p.name) + '</span></a>');
+      if (p.involved) out.push('<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Weigh in</a>');
+    } else out.push('<a href="{B}explore/?add=1#' + esc(SLUG) + '">Add a project that tackles this</a>');
+    out.push('<a href="{B}explore/?goal=' + goal + '#' + esc(SLUG) + '">Test ' + WORD[goal] + ' scenarios in ThreadLab &rarr;</a>');
+    return '<p class="nx"><span class="nx-k">Next step</span>' + out.join('') + '</p>';
+  }
   function renderPressures(sm) {
     var ps = sm.pressures || [];
     $('#pf-press').innerHTML = ps.length ? ps.map(function (p) {
-      return '<article class="pfp pfp-' + esc(p.key) + '"><span class="pfp-k">' + esc(pctWord(p.pct)) + '</span><h3>' + esc(p.t) + '</h3><p class="pfp-what">' + esc(p.what) + '</p><p class="pfp-who">' + esc(p.who) + '</p></article>';
+      return '<article class="pfp pfp-' + esc(p.key) + '"><span class="pfp-k">' + esc(pctWord(p.pct)) + '</span><h3>' + esc(p.t) + '</h3><p class="pfp-what">' + esc(p.what) + '</p><p class="pfp-who">' + esc(p.who) + '</p>' + nextSteps(GOAL_OF[p.key]) + '</article>';
     }).join('') : '<p class="pf-none">No pressure stands out here compared with other cities.</p>';
   }
   function renderTied(e, sm) {
     var t = sm.threads || {}, out = [], n = esc(e.name);
-    if (t.basin_km2) out.push(['Water', t.basin_km2 >= 10000 ? T.fmtN(t.basin_km2) + ' km²' : t.basin_km2.toLocaleString('en-US') + ' km²',
+    if (t.basin_km2) out.push(['Water', 'water', t.basin_km2 >= 10000 ? T.fmtN(t.basin_km2) + ' km²' : t.basin_km2.toLocaleString('en-US') + ' km²',
       'of river basin drains through ' + n + '.' + (t.basin_built != null ? ' ' + t.basin_built + '% of it is built over' + (t.basin_built >= 25 ? ', so rain runs off fast instead of soaking in.' : '.') : '') + (t.basin_forest ? ' ' + t.basin_forest + '% is still forest or wetland, which holds water back.' : '')]);
-    if (t.food50 != null) out.push(['Food', (t.food50 < 1 ? 'Under 1' : t.food50) + '%', 'of the people within 50 km could be fed from the farmland within 50 km.' + (t.food250 != null ? ' Widen the circle to 250 km and it is ' + (t.food250 < 1 ? 'under 1' : t.food250) + '%.' : '') + (t.food50 < 20 ? ' Most food travels far to get here.' : '')]);
-    if (t.wild_km != null) out.push(['Nature', t.wild_km < 1 ? 'Under 1 km' : t.wild_km + ' km', 'from the center to the nearest forest or wetland.' + (t.natural != null ? ' ' + t.natural + '% of the surrounding region is still forest, wetland or open land.' : '')]);
-    $('#pf-tied').innerHTML = out.length ? out.map(function (o) { return '<article class="pft"><span class="eyebrow">' + o[0] + '</span><b class="pft-n">' + o[1] + '</b><p>' + o[2] + '</p></article>'; }).join('') : '<p class="pf-none">The regional data for this place is still being built.</p>';
+    if (t.food50 != null) out.push(['Food', 'food', (t.food50 < 1 ? 'Under 1' : t.food50) + '%', 'of the people within 50 km could be fed from the farmland within 50 km.' + (t.food250 != null ? ' Widen the circle to 250 km and it is ' + (t.food250 < 1 ? 'under 1' : t.food250) + '%.' : '') + (t.food50 < 20 ? ' Most food travels far to get here.' : '')]);
+    if (t.wild_km != null) out.push(['Nature', 'nature', t.wild_km < 1 ? 'Under 1 km' : t.wild_km + ' km', 'from the center to the nearest forest or wetland.' + (t.natural != null ? ' ' + t.natural + '% of the surrounding region is still forest, wetland or open land.' : '')]);
+    $('#pf-tied').innerHTML = out.length ? out.map(function (o) { return '<article class="pft"><span class="eyebrow">' + o[0] + '</span><b class="pft-n">' + o[2] + '</b><p>' + o[3] + '</p>' + nextSteps(GOAL_OF[o[1]]) + '</article>'; }).join('') : '<p class="pf-none">The regional data for this place is still being built.</p>';
+  }
+  // Which area and how many people every number refers to, on a small map, and the evidence behind the scores
+  function studyArea(e, st) {
+    var ev = '<div class="pfs-ev"><h3>The evidence behind these scores</h3><ul>' +
+      '<li><b>Sources:</b> land cover 2021 (ESA WorldCover), population 2020 (WorldPop), elevation (Copernicus), surface heat from Landsat 8 and 9.</li>' +
+      '<li><b>Most consequential assumption:</b> how much shade and green cool a street. Explore shows likely ranges when it is varied.</li>' +
+      '<li><b>Comparing places:</b> heat, nature and food compare well between places. Flood and travel are not yet fully comparable, so read the overall rank as a first look.</li>' +
+      '</ul><a href="{B}how-it-works/">How the scores are worked out &rarr;</a></div>';
+    if (!st || !st.region || st.region.length < 3) return '<div class="pfs">' + ev + '</div>';
+    var all = st.region.concat(st.city || []), lat0 = e.lat * Math.PI / 180, k = Math.cos(lat0);
+    var xs = all.map(function (p) { return p[0] * k; }), ys = all.map(function (p) { return p[1]; });
+    var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+    var S = 150 / Math.max(x1 - x0, y1 - y0, 1e-6), W = 170, H = 170, ox = (W - (x1 - x0) * S) / 2, oy = (H - (y1 - y0) * S) / 2;
+    var path = function (pts) { return pts.map(function (p, i) { return (i ? 'L' : 'M') + (ox + (p[0] * k - x0) * S).toFixed(1) + ' ' + (oy + (y1 - p[1]) * S).toFixed(1); }).join('') + 'Z'; };
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="150" height="150" role="img" aria-label="The modeled region and the city inside it"><path d="' + path(st.region) + '" class="pfs-r"/>' + (st.city && st.city.length > 2 ? '<path d="' + path(st.city) + '" class="pfs-c"/>' : '') + '</svg>';
+    return '<div class="pfs"><div class="pfs-map">' + svg + '<div class="pfs-key"><h3>What these numbers cover</h3>' +
+      '<p><i class="k-r"></i><b>Modeled region</b> ' + st.km2_region.toLocaleString('en-US') + ' km\u00b2 \u00b7 ' + T.fmtN(st.pop_region) + ' people' + (st.buffer_km ? ' \u00b7 the city plus about ' + st.buffer_km + ' km of land around it' : '') + '</p>' +
+      (st.pop_city ? '<p><i class="k-c"></i><b>' + esc(e.name) + '</b> ' + st.km2_city.toLocaleString('en-US') + ' km\u00b2 \u00b7 ' + T.fmtN(st.pop_city) + ' people</p>' : '') +
+      '<p class="pfs-n">Every score on this page covers the whole modeled region, not just the city.</p></div></div>' + ev + '</div>';
   }
   function renderReady(e, r, sm) {
     if (r.index == null) { $('#pf-ready').innerHTML = '<p class="pf-none">This place has not been scored yet.</p>'; return; }
@@ -149,7 +190,7 @@
     $('#pf-ready').innerHTML = '<div class="pfr-score"><span class="eyebrow">Resilience index</span><b>' + Math.round(r.index) + '</b><span>#' + r.rank + ' of ' + D.rankN + ' cities</span>' +
       (r.projects && r.projects.add >= 0.05 ? '<span class="rk-pj">+' + r.projects.add.toFixed(1) + ' from real projects</span>' : '') + '</div>' +
       '<div class="pfr-bars">' + (t.heatwave != null ? bar(t.heatwave, 'A heatwave') : '') + (t.flood != null ? bar(t.flood, 'A river flood') : '') + (t.drought != null ? bar(t.drought, 'A drought year') : '') +
-      (r.heat != null ? bar(r.heat, 'Heat relief today') : '') + (r.habitat != null ? bar(r.habitat, 'Connected nature') : '') + '</div>';
+      (r.heat != null ? bar(r.heat, 'Heat relief today') : '') + (r.habitat != null ? bar(r.habitat, 'Connected nature') : '') + '</div>' + studyArea(e, sm.study);
     $('#pf-cities').href = '{B}places/?q=' + encodeURIComponent(e.name);
   }
   function renderProjects(e) {
@@ -157,7 +198,7 @@
     var mine = D.projects.filter(function (p) { return p.place === SLUG; });
     $('#pf-proj').innerHTML = mine.length ? mine.map(function (p) {
       var st = STAT[p.status] || STAT.proposed;
-      return '<article class="pjc" style="--pc:' + st[1] + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span>' + (p.added_by_visitor ? '<span>Added by a visitor</span>' : '') + '</span><b translate="no">' + esc(p.name) + '</b><span class="pjc-sum">' + esc(p.summary || '') + '</span>' +
+      return '<article class="pjc" id="pj-' + esc(p.id) + '" style="--pc:' + st[1] + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span>' + (p.added_by_visitor ? '<span>Added by a visitor</span>' : '') + '</span><b translate="no">' + esc(p.name) + '</b><span class="pjc-sum">' + esc(p.summary || '') + '</span>' +
         '<span class="pjc-back"><button type="button" class="btn back-btn" data-back="' + esc(p.id) + '" aria-pressed="false" hidden>Back this</button><span class="back-n" data-backn="' + esc(p.id) + '"></span></span>' +
         '<span class="pjc-links">' + (p.involved ? '<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Get involved</a>' : '') + (p.source && p.source.url ? '<a href="' + esc(p.source.url) + '" target="_blank" rel="noopener">Source</a>' : '') + '<a href="{B}explore/#' + esc(SLUG) + '">See it on the map</a></span></article>';
     }).join('') : '<p class="pf-none">No projects here yet. Be the first to add one.</p>';

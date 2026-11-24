@@ -31,6 +31,27 @@ ranking.forEach(r => { r.base = r.index; if (r.projects && r.projects.add) r.ind
 ranking.sort((a, b) => b.index - a.index);
 // re-rank pressures now that the library spread is known
 const D = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'profile-dist.json'))).dist;
+// The study boundary for the profile's small map: the modeled region and the city inside it, as simple outlines,
+// with the people and area each figure refers to
+function hull(pts) {
+  pts = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  if (pts.length < 3) return pts;
+  const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lo = [], up = [];
+  for (const p of pts) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+  for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); }
+  return lo.slice(0, -1).concat(up.slice(0, -1)).map((p) => [+p[0].toFixed(3), +p[1].toFixed(3)]);
+}
+function study(data) {
+  const c = data.cells || {}, n = (c.lat || []).length, all = [], city = [];
+  let popR = 0, popC = 0, kmR = 0, kmC = 0;
+  for (let i = 0; i < n; i++) {
+    const p = [+c.lng[i], +c.lat[i]], pop = +c.pop[i] || 0, a = +(c.area || [])[i] || 0;
+    all.push(p); popR += pop; kmR += a;
+    if (+(c.inside || [])[i]) { city.push(p); popC += pop; kmC += a; }
+  }
+  return { region: hull(all), city: hull(city), pop_region: Math.round(popR), pop_city: Math.round(popC), km2_region: Math.round(kmR), km2_city: Math.round(kmC), buffer_km: data.buffer_km ? Math.round(data.buffer_km) : null };
+}
 for (const r of ranking) {
   try {
     const data = JSON.parse(fs.readFileSync(path.join(dir, r.slug + '.json'))), pr = T.profile(data, D);
@@ -45,7 +66,8 @@ for (const r of ranking) {
       threads: { basin_km2: bs.area_km2 || null, basin_built: bs.shares && bs.shares.built != null ? Math.round(100 * bs.shares.built) : null,
         basin_forest: bs.shares ? Math.round(100 * ((bs.shares.forest || 0) + (bs.shares.wetland || 0))) : null,
         food50: share(fs50), food250: share(fs250), wild_km: st.wild != null ? +st.wild.toFixed(1) : null, natural: st.natural != null ? Math.round(100 * st.natural) : null },
-      tests: { heatwave: Math.round(st.t_heatwave), flood: Math.round(st.t_flood), drought: Math.round(st.t_drought) }
+      tests: { heatwave: Math.round(st.t_heatwave), flood: Math.round(st.t_flood), drought: Math.round(st.t_drought) },
+      study: study(data)
     };
   } catch (e) { console.error('summary', r.slug, e.message); }
 }

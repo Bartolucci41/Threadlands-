@@ -37,19 +37,19 @@
 <script src="../assets/public.js"></script>
   <header class="page-head">
     <p class="page-kicker">Get involved</p>
-    <h1>Stand with your places. Help shape what happens next.</h1>
-    <p class="page-lead">Stand with the places you live in, come from, or care about: the city you&rsquo;d fight for first, and any others close to your heart. Every person who stands with a place shows city teams and funders that its people are paying attention.</p>
+    <h1>Follow your places. Help shape what happens next.</h1>
+    <p class="page-lead">Follow the places you live in, come from, or care about to keep up with them. When you want to be counted, stand with a place: every person who does shows city teams and funders that its people are paying attention.</p>
     <ol class="ladder" aria-label="Ways to take part">
-      <li><b>Stand with</b><span>a place, and get its warnings and news</span></li>
+      <li><b>Follow</b><span>a place to keep up with its warnings, news and projects</span></li>
+      <li><b>Stand with</b><span>a place to be counted as one of its supporters</span></li>
       <li><b>Back</b><span>the projects you want to see happen</span></li>
-      <li><b>Add</b><span>what you know: a project, a problem, an event</span></li>
-      <li><b>Lead</b><span>look after a place and check what others add (coming soon)</span></li>
+      <li><b>Add</b><span>what you know: a project or a sourced update</span></li>
     </ol>
   </header>
 
   <section class="sect mp inv-first" aria-labelledby="mine-h">
     <div class="sect-top">
-      <div><h2 id="mine-h" tabindex="-1">Places you stand with</h2><p id="mine-sub">Saved on this device. Tap a place to see its full profile.</p></div>
+      <div><h2 id="mine-h" tabindex="-1">Your places</h2><p id="mine-sub">Saved on this device. Tap a place to see its full profile.</p></div>
       <div class="mp-units" role="group" aria-label="Temperature units"><button type="button" class="chip" data-u="c">&deg;C</button><button type="button" class="chip" data-u="f">&deg;F</button></div>
     </div>
     <div class="mp-add">
@@ -63,7 +63,7 @@
     </div>
     <div class="mp-grid" id="mp-grid"></div>
     <div class="mp-empty" id="mp-empty" hidden>
-      <p>You aren&rsquo;t standing with any places yet. Add your city above, or start with one of these:</p>
+      <p>You aren&rsquo;t following any places yet. Add your city above, or start with one of these:</p>
       <div class="mp-pop" id="mp-pop"></div>
     </div>
   </section>
@@ -122,8 +122,8 @@
           (top ? '<span><i>Biggest pressure</i><b class="mpc-press">' + esc(top.t) + '</b></span>' : '') + '</span>' +
         (lead ? '<span class="mpc-news"><i>' + esc(T.TONE[lead.tone] || 'News') + '</i><span translate="no">' + esc(lead.title) + '</span></span>' : '') +
       '</a>' +
-      '<label class="mpc-tie"><span class="sr-only">How you are connected to ' + esc(e.name) + '</span><select data-tie="' + esc(slug) + '">' + Object.keys(T.TIES).map(function (k) { return '<option value="' + k + '"' + (k === (T.tieOf(slug) || 'care') ? ' selected' : '') + '>' + T.TIES[k] + '</option>'; }).join('') + '</select></label>' +
-      '<button type="button" class="mpc-x" data-rm="' + esc(slug) + '" aria-label="Step back from ' + esc(e.name) + '" title="Step back">&times;</button>' +
+      '<label class="mpc-tie"><span class="sr-only">How you are connected to ' + esc(e.name) + '</span><select data-tie="' + esc(slug) + '">' + '<option value=""' + (!T.tieOf(slug) ? ' selected' : '') + '>Following</option>' + Object.keys(T.TIES).map(function (k) { return '<option value="' + k + '"' + (k === T.tieOf(slug) ? ' selected' : '') + '>Standing with: ' + T.TIES[k].charAt(0).toLowerCase() + T.TIES[k].slice(1) + '</option>'; }).join('') + '</select></label>' +
+      '<button type="button" class="mpc-x" data-rm="' + esc(slug) + '" aria-label="Stop following ' + esc(e.name) + '" title="Stop following">&times;</button>' +
     '</article>';
   }
   function cards() {
@@ -142,9 +142,9 @@
       }).catch(function () { /* weather is optional */ });
     });
   }
-  function add(slug) { T.standWith(slug, 'care'); cards(); var c = document.querySelector('.mpc[data-slug="' + slug + '"]'); if (c) { c.classList.add('mpc-new'); c.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } }
-  $('#mp-grid').addEventListener('click', function (e) { var b = e.target.closest('[data-rm]'); if (!b) return; T.stepBack(b.dataset.rm); cards(); });
-  $('#mp-grid').addEventListener('change', function (e) { var sel = e.target.closest('[data-tie]'); if (sel) T.standWith(sel.dataset.tie, sel.value); });
+  function add(slug) { T.follow(slug); cards(); var c = document.querySelector('.mpc[data-slug="' + slug + '"]'); if (c) { c.classList.add('mpc-new'); c.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } }
+  $('#mp-grid').addEventListener('click', function (e) { var b = e.target.closest('[data-rm]'); if (!b) return; if (T.tieOf(b.dataset.rm)) T.stepBack(b.dataset.rm); T.unfollow(b.dataset.rm); cards(); });
+  $('#mp-grid').addEventListener('change', function (e) { var sel = e.target.closest('[data-tie]'); if (!sel) return; if (sel.value) T.standWith(sel.dataset.tie, sel.value); else T.stepBack(sel.dataset.tie); });
   $('#mp-pop').addEventListener('click', function (e) { var b = e.target.closest('[data-add]'); if (b) add(b.dataset.add); });
 
   // Add a place: the library first; anything else is built in Explore

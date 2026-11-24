@@ -567,6 +567,21 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .back-btn { min-height: 36px; padding: 0 16px; font-size: 0.88rem; }
   .back-btn[aria-pressed="true"] { background: transparent; color: var(--accent); border-color: var(--accent); }
   .back-n { font-size: 0.82rem; color: var(--ink2); }
+  .nx { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line); font-size: 0.88rem; }
+  .nx-k { font: 600 0.68rem var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); width: 100%; }
+  .nx a { color: var(--accent); font-weight: 600; text-underline-offset: 3px; }
+  .pf-tie-how { margin: 12px 0 0 !important; font-weight: 400 !important; font-size: 0.85rem; color: #cfe0da !important; line-height: 1.5; } .pf-tie-how b { color: #fff; }
+  .pf-actions .btn.ghost-inv[aria-pressed="true"] { background: #8fd3bf; color: #0b2624; border-color: #8fd3bf; }
+  .pfs { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px 32px; margin-top: 8px; padding-top: 20px; border-top: 1px solid var(--line); }
+  @media (max-width: 760px) { .pfs { grid-template-columns: 1fr; } }
+  .pfs h3 { font-size: 1rem; margin: 0 0 8px; }
+  .pfs-map { display: flex; gap: 16px; align-items: flex-start; } .pfs-map svg { flex: none; }
+  .pfs-r { fill: var(--surface2); stroke: var(--ink2); stroke-width: 1.2; } .pfs-c { fill: var(--accent); fill-opacity: 0.28; stroke: var(--accent); stroke-width: 1.5; }
+  .pfs-key p { margin: 0 0 6px; font-size: 0.88rem; color: var(--ink2); line-height: 1.45; } .pfs-key b { color: var(--ink); }
+  .pfs-key i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; } .k-r { background: var(--surface2); border: 1.2px solid var(--ink2); } .k-c { background: rgba(14,124,102,0.3); border: 1.5px solid var(--accent); }
+  .pfs-n { font-size: 0.82rem !important; }
+  .pfs-ev ul { margin: 0 0 8px; padding-left: 1.1rem; font-size: 0.88rem; color: var(--ink2); line-height: 1.5; } .pfs-ev li { margin-bottom: 4px; } .pfs-ev b { color: var(--ink); }
+  .pfs-ev a { font-size: 0.88rem; font-weight: 600; color: var(--accent); }
   .pf-none { color: var(--ink2); grid-column: 1 / -1; margin: 0; }
   #pf-scope { margin-bottom: 4px; }
   .pf-missing { padding: 48px 0; }

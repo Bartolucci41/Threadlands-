@@ -2650,6 +2650,12 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     renderPressures(data);
     if (fixSearch) { fixSearch.cancel(); fixSearch = null; }
     FIX = null; $('#fixit').hidden = false; $('#fix-name').textContent = (data.name || 'this place').split(',')[0]; fixShow('ask');
+    // A link such as explore/?goal=flood#lima opens the Plan step and tests that goal for this place
+    var wantGoal = new URLSearchParams(location.search).get('goal');
+    if (wantGoal && GOALS[wantGoal] && kind !== 'demo' && !GOAL_DONE) {
+      GOAL_DONE = true;
+      setTimeout(function () { showTab('plan'); var gb = document.querySelector('.fix-goal[data-goal="' + wantGoal + '"]'); if (gb) gb.click(); }, 400);
+    }
     loadLive(data);
     PJ.at = null; PJ.hl = null; renderProjects();
     renderNews();
@@ -2962,7 +2968,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     });
   });
   // ---- Fix it: pick a goal, Threadlands searches the plans, applies the best one and shows what it changes
-  var FIX = null, fixSearch = null;
+  var FIX = null, fixSearch = null, GOAL_DONE = false;
   var GOALS = {
     heat: { name: 'cooler streets', layer: 'heat', score: function (r) { return r.metrics.heat + 0.1 * r.index; } },
     flood: { name: 'homes kept dry', layer: 'flood', score: function (r) { return r.metrics.flood + 0.1 * r.index; } },

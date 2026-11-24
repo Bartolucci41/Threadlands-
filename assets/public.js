@@ -122,7 +122,7 @@
   var TIES = { live: 'I live here', from: 'I\u2019m from here', work: 'I work or study here', care: 'I care about it' };
   var TIE_SHORT = { live: 'You live here', from: 'You\u2019re from here', work: 'You work or study here', care: 'You care about it' };
   function ties() { try { var o = JSON.parse(store(TIES_KEY) || '{}'); return o && typeof o === 'object' ? o : {}; } catch (e) { return {}; } }
-  function tieOf(slug) { return ties()[slug] || (isFollowed(slug) ? 'care' : null); }
+  function tieOf(slug) { return ties()[slug] || null; }
   function post(body) { return fetch(RELAY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }).catch(function () { return null; }); }
   function standWith(slug, tie) {
     tie = TIES[tie] ? tie : 'care';
@@ -130,7 +130,7 @@
     return post({ type: 'stand', place: slug, tie: tie });
   }
   function stepBack(slug) {
-    var o = ties(); delete o[slug]; store(TIES_KEY, JSON.stringify(o)); unfollow(slug);
+    var o = ties(); delete o[slug]; store(TIES_KEY, JSON.stringify(o));
     return post({ type: 'stand', place: slug, on: false });
   }
   function standers(slug) {
