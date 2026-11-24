@@ -466,6 +466,12 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .door-t { font: 800 clamp(1.7rem, 3.6vw, 2.4rem)/1.05 var(--font-display); letter-spacing: -0.025em; }
   .door-d { font-size: 1rem; line-height: 1.5; opacity: 0.85; max-width: 40ch; }
   .door-go { margin-top: auto; padding-top: 10px; font: 700 1rem var(--font-body); }
+  .home-search { max-width: 40rem; margin-top: 4px; } .home-search input { font-size: 1.05rem; min-height: 54px; }
+  .hs-try { margin: 12px 0 0; color: #a9c6bd; font-size: 0.9rem; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+  .hs-tl { color: #fff; font-weight: 600; }
+  .hs-chip { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.35); color: #fff !important; text-decoration: none; margin-right: 6px; }
+  .hs-chip:hover { background: rgba(255,255,255,0.12); }
+  .doors-link { margin: 16px 0 0; color: #cfe0da; font-size: 0.95rem; max-width: 60rem; } .doors-link span { color: #8fd3bf; font-size: 1.1rem; margin-right: 6px; }
   .mp-add { margin: 0 0 20px; } .mp-search { max-width: 34rem; }
   .mp-near { margin: 10px 0 0; font-size: 0.9rem; color: var(--ink2); } .mp-near .linkbtn { color: var(--accent); font-weight: 600; } .mp-near a { color: var(--accent); }
   #mine-h:focus { outline: none; }

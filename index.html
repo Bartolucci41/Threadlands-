@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Threadlands: know your city, help shape it</title>
-<meta name="description" content="Stand with the cities you care about: live weather and warnings, the risks they face, the land and water they depend on, real projects and the latest news. For any place on Earth.">
+<meta name="description" content="Start with a place you care about: see its local risks, what the surrounding region provides, projects you can act on, and compare climate responses in ThreadLab.">
 <meta property="og:title" content="Threadlands: know your city, help shape it">
-<meta property="og:description" content="Stand with the cities you care about: live weather and warnings, the risks they face, the land and water they depend on, real projects and the latest news. For any place on Earth.">
+<meta property="og:description" content="Start with a place you care about: see its local risks, what the surrounding region provides, projects you can act on, and compare climate responses in ThreadLab.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
@@ -39,20 +39,29 @@
     <div class="mp-hero-in">
       <p class="hero3-kick">Threadlands</p>
       <h1 id="mp-h" class="mp-h">Know your city. Help shape it.</h1>
+      <p class="mp-sub">Start with a place you care about.</p>
+      <form class="search mp-search home-search" id="hs-form" role="search">
+        <label class="sr-only" for="hs-q">Find your place</label>
+        <input id="hs-q" type="search" placeholder="Find your place: a city, town or region" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="hs-sugg" aria-autocomplete="list">
+        <button class="btn" type="submit">Find</button>
+        <ul class="sugg" id="hs-sugg" role="listbox" hidden></ul>
+      </form>
+      <p class="hs-try" aria-live="polite"><span id="hs-count"></span> <span class="hs-tl">Try</span> <span id="hs-ex"></span></p>
       <div class="doors">
-        <a class="door door-places" href="involved/">
-          <span class="door-k">Get involved</span>
-          <b class="door-t">Stand with your city</b>
-          <span class="door-d">Weather and warnings, the risks your city faces, the land and water it depends on, and the projects and news changing it.</span>
-          <span class="door-go">Stand with your places <span aria-hidden="true">&rarr;</span></span>
+        <a class="door door-places" href="#hs-q" id="door-find">
+          <span class="door-k">Find your place</span>
+          <b class="door-t">See what your place faces</b>
+          <span class="door-d">See local risks, understand what the surrounding region provides, and find projects you can act on.</span>
+          <span class="door-go">Search above <span aria-hidden="true">&uarr;</span></span>
         </a>
         <a class="door door-lab" href="lab/">
           <span class="door-k">ThreadLab</span>
-          <b class="door-t">Work on the response</b>
-          <span class="door-d">Model heat, floods, food and nature for a whole region, find the plan that does the most, design it on real streets and cost it.</span>
+          <b class="door-t">Compare climate responses</b>
+          <span class="door-d">Open ThreadLab and test what different interventions could change, for the same place, on the same data.</span>
           <span class="door-go">Open ThreadLab <span aria-hidden="true">&rarr;</span></span>
         </a>
       </div>
+      <p class="doors-link"><span aria-hidden="true">&#8644;</span> The two meet on every place&rsquo;s page: what you learn there links straight to projects you can back and to scenarios you can test in ThreadLab.</p>
     </div>
   </section>
 
@@ -106,7 +115,41 @@
   if (h && !/^(top|news-h|rank-h|pro-h)$/.test(h)) { location.replace('place/#' + h); return; }
   var T = window.TLP, $ = function (s) { return document.querySelector(s); }, esc = T.esc;
   T.setBase('');
+  // ---- Find your place: search the library; anything else is built in Explore
+  var LIST = [], form = $('#hs-form'), input = $('#hs-q'), list = $('#hs-sugg'), items = [], active = -1;
+  function close() { list.hidden = true; input.setAttribute('aria-expanded', 'false'); active = -1; }
+  function show() {
+    var q = input.value.trim(); if (!q) { close(); return; }
+    items = T.matches(LIST, q, 7);
+    list.innerHTML = items.map(function (e, k) { return '<li role="option" data-slug="' + e.slug + '" aria-selected="' + (k === active) + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + T.flag(e.cc) + esc(T.where(e)) + '</span></li>'; }).join('') +
+      '<li role="option" data-world="1"><span class="s-world">Not listed? Build \u201c' + esc(q) + '\u201d in about ten minutes</span></li>';
+    list.hidden = false; input.setAttribute('aria-expanded', 'true');
+  }
+  function go(slug) { location.href = slug ? 'place/#' + slug : 'explore/?q=' + encodeURIComponent(input.value.trim()); }
+  input.addEventListener('input', function () { active = -1; show(); });
+  input.addEventListener('keydown', function (ev) {
+    if (ev.key === 'ArrowDown' && items.length) { active = Math.min(items.length - 1, active + 1); show(); ev.preventDefault(); }
+    else if (ev.key === 'ArrowUp' && items.length) { active = Math.max(0, active - 1); show(); ev.preventDefault(); }
+    else if (ev.key === 'Escape') close();
+  });
+  form.addEventListener('submit', function (ev) { ev.preventDefault(); if (!input.value.trim()) return; items = T.matches(LIST, input.value, 7); go(active >= 0 && items[active] ? items[active].slug : items[0] ? items[0].slug : ''); });
+  list.addEventListener('mousedown', function (ev) { var li = ev.target.closest('[data-slug],[data-world]'); if (!li) return; ev.preventDefault(); go(li.dataset.slug || ''); });
+  input.addEventListener('blur', function () { setTimeout(close, 120); });
+  $('#door-find').addEventListener('click', function (ev) { ev.preventDefault(); input.focus(); input.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+  // A few places from different parts of the world, changing every few seconds
+  var POOL = ['lagos', 'bologna', 'lima', 'jakarta', 'montreal', 'nairobi', 'hanoi', 'mexico-city', 'sao-paulo', 'oslo', 'dhaka', 'cairo', 'melbourne', 'bogota', 'seoul', 'lisbon', 'johannesburg', 'chennai'];
+  function examples() {
+    var have = POOL.filter(function (sl) { return LIST.some(function (e) { return e.slug === sl; }); }), pick = [];
+    while (have.length && pick.length < 3) pick.push(have.splice(Math.floor(Math.random() * have.length), 1)[0]);
+    $('#hs-ex').innerHTML = pick.map(function (sl) { var e = LIST.filter(function (x) { return x.slug === sl; })[0]; return '<a class="hs-chip" href="place/#' + sl + '">' + T.flag(e.cc) + esc(e.name) + '</a>'; }).join('');
+  }
+  var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   T.all().then(function (d) {
+    LIST = d.list.filter(function (e) { return e && e.slug; });
+    var nc = {}; LIST.forEach(function (e) { nc[e.country] = 1; });
+    $('#hs-count').textContent = LIST.length + ' places in ' + Object.keys(nc).length + ' countries, and any other can be added.';
+    examples(); if (!still) setInterval(function () { if (document.activeElement !== input) examples(); }, 5000);
     var names = {}, ccs = {}; d.list.forEach(function (e) { names[e.slug] = e.name; ccs[e.slug] = e.cc; });
     // Across the world: the biggest headlines, one per city
     var top = (d.news.top || []).slice(0, 8);
