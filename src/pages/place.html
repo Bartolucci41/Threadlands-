@@ -464,7 +464,7 @@
       body = (pj.length ? '<p>Projects here that give water room or slow it down:</p><ul class="here-pj">' + pj.map(function (p) { return '<li><a href="#pj-' + esc(p.id) + '" translate="no">' + esc(p.name) + '</a><span>' + ({ proposed: 'Proposed', approved: 'Approved', underway: 'Under way', built: 'Built' }[p.status] || '') + (p.year ? ' \u00b7 ' + p.year : '') + '</span></li>'; }).join('') + '</ul>' : '<p>No projects on the map here yet that deal with rain and flooding.</p>') +
         (obs.length ? '<p>' + obs.length + ' note' + (obs.length > 1 ? 's' : '') + ' from people who have seen water collect (small blue dots).</p>' : '') +
         '<div class="q-primary"><p><b>You know your street better than this map does.</b> Where have you seen water collect after rain?</p><button type="button" class="btn" data-mark="water">Show where you&rsquo;ve seen water collect</button></div>' +
-        '<div class="here-acts q-more"><a class="linkbtn" href="{B}explore/?goal=flood#' + esc(SLUG) + '">Test what would keep homes dry in ThreadLab &rarr;</a><a class="linkbtn" href="{B}explore/?add=1#' + esc(SLUG) + '">Add a project you know about</a></div>';
+        '<div class="here-acts q-more"><a class="linkbtn" href="{B}explore/?goal=flood#' + esc(SLUG) + '">Test ways to reduce flood exposure in ThreadLab &rarr;</a><a class="linkbtn" href="{B}explore/?add=1#' + esc(SLUG) + '">Add a project you know about</a></div>';
     }
     var dots = ''; for (var s2 = 0; s2 < steps; s2++) dots += '<i' + (s2 === Q.step ? ' class="on"' : '') + '></i>';
     $('#here-card').innerHTML = '<p class="q-kick">Where does the rain go from here? <span class="q-dots" aria-label="Step ' + (Q.step + 1) + ' of ' + steps + '">' + dots + '</span></p><h3>' + title + '</h3>' + body +

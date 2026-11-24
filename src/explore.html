@@ -452,7 +452,11 @@
   .fixit { background: var(--accent); color: var(--accent-ink, #fff); border-radius: 16px; padding: 18px 20px; margin: 0 0 14px; display: grid; gap: 12px; }
   .fixit[hidden], .fixit [hidden] { display: none !important; }
   .fixit h2 { margin: 0 0 10px; font-size: 1.35rem; color: inherit; }
-  .fix-goals { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+  .fix-goals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 720px) { .fix-goals { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .fixit h2 + .fix-sub { margin: -4px 0 12px; opacity: 0.85; }
+  .fix-bal { margin: 12px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; } .fix-bal span { font-size: 0.88rem; opacity: 0.85; }
+  .fixit .fix-goal-bal { display: inline; min-height: 0; padding: 0; border: 0; background: none; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; } .fixit .fix-goal-bal:hover { background: none; transform: none; }
   .fix-goal { text-align: left; display: grid; gap: 3px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.28); background: rgba(255,255,255,0.1); color: inherit; font: inherit; cursor: pointer; min-height: 72px; transition: background .15s, transform .15s; }
   .fix-goal:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
   .fix-goal:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
@@ -535,14 +539,15 @@
     <div class="stage">
       <section class="fixit" id="fixit" aria-labelledby="fix-h" hidden>
         <div class="fix-ask" id="fix-ask">
-          <h2 id="fix-h">Where should <span id="fix-name">this place</span> build resilience first?</h2>
+          <h2 id="fix-h">What do you want to improve in <span id="fix-name">this place</span>?</h2>
+          <p class="fix-sub">Pick a goal to see what a plan focused on it could change.</p>
           <div class="fix-goals" role="group" aria-label="Goals">
             <button type="button" class="fix-goal" data-goal="heat"><b>Cool the hottest streets</b><span>Shade and green where people swelter</span></button>
-            <button type="button" class="fix-goal" data-goal="flood"><b>Keep homes dry</b><span>Room for water before it reaches houses</span></button>
+            <button type="button" class="fix-goal" data-goal="flood"><b>Reduce flood exposure</b><span>Room for water before it reaches homes</span></button>
             <button type="button" class="fix-goal" data-goal="food"><b>Grow food nearby</b><span>Farmland that feeds the city, even in drought</span></button>
-            <button type="button" class="fix-goal" data-goal="habitat"><b>Bring nature back</b><span>Connected wild places, parks included</span></button>
-            <button type="button" class="fix-goal" data-goal="all"><b>All of it, balanced</b><span>The strongest overall plan</span></button>
+            <button type="button" class="fix-goal" data-goal="habitat"><b>Reconnect habitat</b><span>Link wild places and parks so nature can move</span></button>
           </div>
+          <p class="fix-bal"><button type="button" class="fix-goal fix-goal-bal" data-goal="all">Try a balanced plan &rarr;</button> <span>See how a plan that considers all four goals performs.</span></p>
         </div>
         <div class="fix-run" id="fix-run" hidden aria-live="polite">
           <p class="fix-status" id="fix-status">Testing plans…</p>
@@ -2569,9 +2574,9 @@
   var FIX = null, fixSearch = null, GOAL_DONE = false;
   var GOALS = {
     heat: { name: 'cooler streets', layer: 'heat', score: function (r) { return r.metrics.heat + 0.1 * r.index; } },
-    flood: { name: 'homes kept dry', layer: 'flood', score: function (r) { return r.metrics.flood + 0.1 * r.index; } },
+    flood: { name: 'reduced flood exposure', layer: 'flood', score: function (r) { return r.metrics.flood + 0.1 * r.index; } },
     food: { name: 'food grown nearby', layer: 'land', score: function (r) { return 0.5 * (r.metrics.food + r.metrics.foodDry) + 0.1 * r.index; } },
-    habitat: { name: 'nature brought back', layer: 'habitat', score: function (r) { return r.metrics.habitat + 0.1 * r.index; } },
+    habitat: { name: 'reconnected habitat', layer: 'habitat', score: function (r) { return r.metrics.habitat + 0.1 * r.index; } },
     all: { name: 'a balanced plan', layer: 'land', score: function (r) { return r.index; } }
   };
   function fixShow(which) { ['ask', 'run', 'done'].forEach(function (k) { $('#fix-' + k).hidden = k !== which; }); }
