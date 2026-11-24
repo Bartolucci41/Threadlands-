@@ -5,10 +5,10 @@
 (function () {
   var LANGS = [
     ['en', 'English'], ['zh', '中文'], ['hi', 'हिन्दी'], ['es', 'Español'], ['ar', 'العربية'],
-    ['fr', 'Français'], ['bn', 'বাংলা'], ['pt', 'Português'], ['ru', 'Русский'], ['ur', 'اردو']
+    ['fr', 'Français'], ['bn', 'বাংলা'], ['pt', 'Português'], ['ru', 'Русский'], ['ur', 'اردو'], ['it', 'Italiano']
   ];
   // Languages appear in the menu once their translation file is in data/i18n
-  var READY = ['en', 'zh', 'hi', 'es', 'ar', 'fr', 'bn', 'pt', 'ru', 'ur'];
+  var READY = ['en', 'zh', 'hi', 'es', 'ar', 'fr', 'bn', 'pt', 'ru', 'ur', 'it'];
   LANGS = LANGS.filter(function (l) { return READY.indexOf(l[0]) >= 0; });
   var RTL = { ar: 1, ur: 1 };
   var FONTS = { zh: 'Noto+Sans+SC:wght@400;600;800', hi: 'Noto+Sans+Devanagari:wght@400;600;800', bn: 'Noto+Sans+Bengali:wght@400;600;800',
