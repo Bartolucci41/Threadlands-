@@ -191,7 +191,7 @@
     $('#rk-count').textContent = shown.length + ' of ' + LIB.length + ' places in ' + Object.keys(nc).length + ' countries';
     $('#rk-table').innerHTML = shown.map(function (p) {
       var v = CMP ? mv(p) : null, has = v != null, w = has ? Math.max(1, Math.min(100, Math.round(100 * v / (M.max || 100)))) : 0, pr = p.top && PRESS[p.top];
-      var pj = p.projects && p.projects.add >= 0.05 ? '<span class="rk-pj">+' + p.projects.add.toFixed(1) + ' from projects</span>' : (p.projects ? '<span class="rk-pj rk-pj0">' + p.projects.n + ' project' + (p.projects.n > 1 ? 's' : '') + ' on the map</span>' : '');
+      var pj = p.projects ? '<span class="rk-pj">' + p.projects.n + ' project' + (p.projects.n > 1 ? 's' : '') + ' on the map</span>' : '<span class="rk-pj0n">None added yet</span>';
       var num = CMP && has ? p._rank : '';
       return '<li' + (p.requested ? ' class="vis"' : '') + '><a href="{B}place/' + (pr ? '?show=' + p.top : '') + '#' + esc(p.slug) + '"><span class="rt-n">' + num + '</span><span class="rt-c"><b>' + esc(p.name) + '</b><span>' + flag(p.cc) + esc(where(p)) + (fmtPop(p) ? ' \u00b7 ' + fmtPop(p) : '') + '</span>' + (p.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</span>' +
         '<span class="rt-p">' + (pr ? '<b>' + esc(pr[0]) + '</b> \u00b7 ' + esc(pr[1]) : '') + '</span><span class="rt-j">' + pj + '</span>' +

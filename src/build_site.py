@@ -308,6 +308,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .rt-c { display: grid; min-width: 0; } .rt-c b { font: 700 1.15rem var(--font-display); letter-spacing: -0.01em; } .rt-c span { font-size: 0.82rem; color: var(--ink2); }
   .rt-p { font-size: 0.85rem; color: var(--ink2); }
   .rk-pj { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink, #fff); }
+  .rk-pj0n { font-size: 0.8rem; color: var(--ink2); opacity: 0.7; }
   .rk-pj0 { background: transparent; color: var(--ink2); border: 1px solid var(--line); font-weight: 500; }
   .rt-bar { height: 8px; border-radius: 4px; background: var(--surface2); overflow: hidden; } .rt-bar i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
   .rt-v { font: 800 1.35rem var(--font-display); text-align: right; font-variant-numeric: tabular-nums; }
@@ -727,7 +728,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=17">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=18">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
