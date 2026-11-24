@@ -65,7 +65,7 @@
         who: 'Dense neighborhoods have the least room for parks, drainage or trees.' };
       case 'trees': return { t: 'Trees & green space', f: 'Low tree cover', layer: 'green', what: 'The average resident has ' + pctTxt(m.trees) + ' tree cover around them.',
         who: d.treeRest > d.tree ? 'The most densely populated fifth of residents get ' + pctTxt(d.tree) + ', against ' + pctTxt(d.treeRest) + ' for everyone else.' : 'Trees are spread fairly evenly between dense and open neighborhoods.' };
-      case 'food': return { t: 'Food', f: 'Limited nearby farmland', layer: null, what: 'Farmland within 50 km could feed ' + (m.food < 0.01 ? 'less than 1%' : 'about ' + pctTxt(Math.min(1, m.food))) + ' of the region’s people.',
+      case 'food': return { t: 'Food', f: 'Limited nearby farmland capacity', layer: null, what: 'Farmland within 50 km could feed ' + (m.food < 0.01 ? 'less than 1%' : 'about ' + pctTxt(Math.min(1, m.food))) + ' of the region’s people.',
         who: 'This measures farmland capacity nearby, not where the city’s food actually comes from.' };
     }
   }

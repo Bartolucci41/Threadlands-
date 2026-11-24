@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=13">
+<link rel="stylesheet" href="../assets/site.css?v=14">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <link rel="manifest" href="../manifest.webmanifest">
@@ -233,10 +233,18 @@
     return '<p class="nx"><span class="nx-k">Next step</span>' + out.join('') + '</p>';
   }
   var PRESS_NOW = [];
+  // Findings that share a topic (low tree cover and limited green cover) sit together in one card
+  function grouped(ps) {
+    var out = [], at = {};
+    ps.forEach(function (p) { var k = p.t; if (at[k] !== undefined) out[at[k]].items.push(p); else { at[k] = out.length; out.push({ t: p.t, items: [p] }); } });
+    return out;
+  }
   function renderPressures(sm) {
     var ps = sm.pressures || []; PRESS_NOW = ps;
-    $('#pf-press').innerHTML = ps.length ? ps.map(function (p) {
-      return '<article class="pfp pfp-' + esc(p.key) + '"><span class="pfp-k">' + esc(pctWord(p.pct)) + '</span><h3>' + esc(p.t) + '</h3>' + (p.f ? '<p class="pfp-f">' + esc(p.f) + '</p>' : '') + '<p class="pfp-what">' + esc(p.what) + '</p><p class="pfp-who">' + esc(p.who) + '</p>' + (p.layer ? '<p class="pfp-map"><a href="#here" data-goto-ly="' + esc(p.layer) + '" data-why="' + esc(p.key) + '">See where on the map &rarr;</a></p>' : p.key === 'food' ? '<p class="pfp-map"><a href="#tied">See the farmland around it &rarr;</a></p>' : '') + nextSteps(GOAL_OF[p.key]) + '</article>';
+    $('#pf-press').innerHTML = ps.length ? grouped(ps).map(function (g) {
+      var p = g.items[0], keys = g.items.map(function (x) { return x.key; }).join(','), pct = Math.max.apply(null, g.items.map(function (x) { return x.pct || 0; }));
+      var body = g.items.map(function (x) { return (x.f ? '<p class="pfp-f">' + esc(x.f) + '</p>' : '') + '<p class="pfp-what">' + esc(x.what) + '</p><p class="pfp-who">' + esc(x.who) + '</p>'; }).join('<hr class="pfp-sep">');
+      return '<article class="pfp pfp-' + esc(p.key) + '"><span class="pfp-k">' + esc(pctWord(pct)) + '</span><h3>' + esc(p.t) + '</h3>' + body + (p.layer ? '<p class="pfp-map"><a href="#here" data-goto-ly="' + esc(p.layer) + '" data-why="' + esc(keys) + '">See where on the map &rarr;</a></p>' : p.key === 'food' ? '<p class="pfp-map"><a href="#tied">See the farmland around it &rarr;</a></p>' : '') + nextSteps(GOAL_OF[p.key]) + '</article>';
     }).join('') : '<p class="pf-none">No pressure stands out here compared with other cities.</p>';
   }
   function renderTied(e, sm) {
@@ -357,8 +365,9 @@
   });
   // Why a measure stood out: said plainly as a finding from the data, not as the city's biggest risk
   function showWhy(key) {
-    var p = PRESS_NOW.filter(function (x) { return x.key === key; })[0]; if (!p) return;
-    $('#here-card').innerHTML = '<div class="here-why"><span class="pfp-k">Why this stands out</span><b>' + esc(p.t) + (p.f ? ' \u00b7 ' + esc(p.f) : '') + '</b><p>' + esc(p.what) + '</p><p class="hw-n">This measure stood out in Threadlands&rsquo; data compared with other places' + (p.pct ? ' (more than ' + p.pct + '% of them)' : '') + '. It is not necessarily ' + esc(D.lib[SLUG].name) + '&rsquo;s biggest risk.</p></div><p class="here-hint">Tap the map anywhere to see what the data says about that area.</p><div class="here-key" id="here-key"></div>';
+    var first = PRESS_NOW.filter(function (x) { return key.split(',').indexOf(x.key) >= 0; })[0]; if (!first) return;
+    var items = PRESS_NOW.filter(function (x) { return x.t === first.t; }), pct = Math.max.apply(null, items.map(function (x) { return x.pct || 0; }));
+    $('#here-card').innerHTML = '<div class="here-why"><span class="pfp-k">Why this stands out</span><b>' + esc(first.t) + '</b>' + items.map(function (p) { return '<p><b class="hw-f">' + esc(p.f || '') + '.</b> ' + esc(p.what) + '</p>'; }).join('') + '<p class="hw-n">' + (items.length > 1 ? 'These measures' : 'This measure') + ' stood out in Threadlands&rsquo; data compared with other places' + (pct ? ' (more than ' + pct + '% of them)' : '') + '. ' + (items.length > 1 ? 'They are' : 'It is') + ' not necessarily ' + esc(D.lib[SLUG].name) + '&rsquo;s biggest risk.</p></div><p class="here-hint">Tap the map anywhere to see what the data says about that area.</p><div class="here-key" id="here-key"></div>';
     drawLayer();
   }
   function nearestCell(lat, lng) {

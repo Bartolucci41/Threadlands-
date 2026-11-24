@@ -318,6 +318,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .rt-p b { color: var(--ink); font-weight: 600; }
   @media (max-width: 760px) { .rk-head { grid-template-columns: 2.2rem minmax(0, 1fr) 64px 2.4rem; } .rk-head span:nth-child(3), .rk-head span:nth-child(4) { display: none; } }
   .pfp-f { margin: -4px 0 8px; font-weight: 600; color: var(--warm, #C0603A); }
+  .pfp-sep { border: 0; border-top: 1px solid var(--line); margin: 12px 0; } .here-why .hw-f { font: inherit; font-weight: 600; }
   .pfp-map { margin: 10px 0 0; font-size: 0.92rem; } .pfp-map a { font-weight: 600; color: var(--accent); }
   .here-why { display: grid; gap: 6px; padding: 0 0 14px; margin: 0 0 12px; border-bottom: 1px solid var(--line); }
   .here-why b { font: 700 1.1rem var(--font-display); } .here-why p { margin: 0; line-height: 1.5; } .here-why .hw-n { color: var(--ink2); font-size: 0.88rem; }
@@ -725,7 +726,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=13">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=14">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
