@@ -643,6 +643,13 @@
   "status": "built with heat",
   "when": "2026-11-14T01:02:11Z"
  },
+ "queen-creek-united-states-r110824": {
+  "minutes": 1.6,
+  "query": "osm:R110824",
+  "slug": "queen-creek-united-states-r110824",
+  "status": "built with heat",
+  "when": "2026-11-24T03:45:46Z"
+ },
  "quito": {
   "minutes": 1.2,
   "query": "Quito, Ecuador",
