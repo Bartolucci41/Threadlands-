@@ -47,6 +47,11 @@
     </ol>
   </header>
 
+  <section class="inv-now" aria-labelledby="now-h">
+    <h2 id="now-h" class="sr-only">Something you can do today</h2>
+    <div class="inv-now-grid" id="inv-now"></div>
+  </section>
+
   <section class="sect mp inv-first" aria-labelledby="mine-h">
     <div class="sect-top">
       <div><h2 id="mine-h" tabindex="-1">Your places</h2><p id="mine-sub">Saved on this device. Tap a place to see its full profile.</p></div>
@@ -61,6 +66,10 @@
       </form>
       <p class="mp-near"><button type="button" class="linkbtn" id="mp-loc">Use my location</button><span id="mp-loc-msg" aria-live="polite"></span></p>
     </div>
+    <section class="chg" id="chg" aria-labelledby="chg-h" hidden>
+      <h3 id="chg-h">What changed in your places</h3>
+      <ol class="chg-list" id="chg-list"></ol>
+    </section>
     <div class="mp-grid" id="mp-grid"></div>
     <div class="mp-empty" id="mp-empty" hidden>
       <p>You aren&rsquo;t following any places yet. Add your city above, or start with one of these:</p>
@@ -81,7 +90,7 @@
     <div class="inv-ways">
       <a class="inv-way" href="../projects/#pj-add-h"><b>Add a project</b><span>A new park, wetland, tree drive, flood barrier or bike lane, with a link to a public source.</span></a>
       <a class="inv-way" href="../explore/"><b>Add your place</b><span>Not in Threadlands yet? Search for it and it is built in about ten minutes, then it is here for everyone.</span></a>
-      <div class="inv-way inv-soon"><b>Coming next</b><span>Phone alerts for heavy rain, heat and big news in your places, and local events and volunteer days.</span></div>
+      <div class="inv-way inv-soon"><b>Coming next</b><span>A short update on what changed in your places, by email or phone, only in weeks when there is something worth opening. Then local events and volunteer days.</span></div>
     </div>
   </section>
 </main>
@@ -192,6 +201,41 @@
   T.all().then(function (d) {
     D = d; cards();
     var names = {}, ccs = {}; d.list.forEach(function (e) { names[e.slug] = e.name; ccs[e.slug] = e.cc; });
+    var mine = T.follows().filter(function (s) { return d.lib[s]; });
+    // ---- One concrete thing to do today: back a project that is still being decided, have your say, or add a sourced update
+    var OPEN = { proposed: 0, approved: 1, underway: 2 };
+    var open = d.projects.filter(function (p) { return p.status in OPEN; }).sort(function (a, b) {
+      return (mine.indexOf(b.place) >= 0) - (mine.indexOf(a.place) >= 0) || OPEN[a.status] - OPEN[b.status] || String(b.added || '').localeCompare(String(a.added || ''));
+    });
+    var bp = open[0], say = open.filter(function (p) { return p.involved && p !== bp; })[0];
+    var STW = { proposed: 'Proposed', approved: 'Approved', underway: 'Under way' };
+    var now = [];
+    if (bp) now.push('<article class="now-c"><span class="now-k">Back a project</span><b translate="no">' + esc(bp.name) + '</b><span class="now-m">' + T.flag(ccs[bp.place]) + esc(names[bp.place] || bp.place) + ' \u00b7 ' + STW[bp.status] + (bp.year ? ' ' + bp.year : '') + '</span>' +
+      '<span class="pjc-back"><button type="button" class="btn back-btn" data-back="' + esc(bp.id) + '" aria-pressed="false" hidden>Back this</button><span class="back-n" data-backn="' + esc(bp.id) + '"></span></span><a href="../place/#' + esc(bp.place) + '">Read about it in its place</a></article>');
+    if (say) now.push('<article class="now-c"><span class="now-k">Have your say</span><b translate="no">' + esc(say.name) + '</b><span class="now-m">' + T.flag(ccs[say.place]) + esc(names[say.place] || say.place) + '</span><a href="' + esc(say.involved) + '" target="_blank" rel="noopener">Where to take part &rarr;</a></article>');
+    now.push('<article class="now-c"><span class="now-k">Add a sourced update</span><b>Know something we don&rsquo;t?</b><span class="now-m">A new project, a decision or a change on the ground, with a link to a public source.</span><a href="../projects/#pj-add-h">Add it &rarr;</a></article>');
+    $('#inv-now').innerHTML = now.join(''); T.wireBacking($('#inv-now'));
+    // ---- What changed in your places: specific changes from the last two weeks, newest first, each with its source
+    var since = new Date(Date.now() - 15 * 864e5).toISOString().slice(0, 10).replace(/-/g, ''), chg = [];
+    d.projects.forEach(function (p) {
+      if (mine.indexOf(p.place) < 0 || !p.added) return;
+      var day = String(p.added).replace(/-/g, ''); if (day < since) return;
+      chg.push({ date: day, place: p.place, kind: 'New on Threadlands', text: p.name, url: p.source && p.source.url, act: STW[p.status] ? ['Back it', '../place/#' + p.place] : null });
+    });
+    mine.forEach(function (sl) {
+      ((d.news.places || {})[sl] || []).filter(function (x) { return x.named !== false && (x.tone === 'gain' || x.topic === 'policy' || x.topic === 'infrastructure'); }).slice(0, 2).forEach(function (x) {
+        chg.push({ date: x.date, place: sl, kind: x.tone === 'gain' ? 'Progress' : 'Decision or update', text: x.title, url: x.url, src: x.source, act: ['See its profile', '../place/#' + sl] });
+      });
+    });
+    chg.sort(function (a, b) { return String(b.date).localeCompare(String(a.date)); });
+    if (mine.length) {
+      $('#chg').hidden = false;
+      $('#chg-list').innerHTML = chg.length ? chg.slice(0, 8).map(function (c) {
+        return '<li><span class="chg-m">' + T.flag(ccs[c.place]) + esc(names[c.place]) + ' \u00b7 ' + c.kind + (c.date ? ' \u00b7 ' + T.ndate(c.date) : '') + '</span>' +
+          (c.url ? '<a class="chg-t" translate="no" href="' + esc(c.url) + '" target="_blank" rel="noopener">' + esc(c.text) + '</a>' : '<span class="chg-t" translate="no">' + esc(c.text) + '</span>') +
+          (c.src ? '<span class="chg-s">' + esc(c.src) + '</span>' : '') + (c.act ? '<a class="chg-a" href="' + c.act[1] + '">' + c.act[0] + ' &rarr;</a>' : '') + '</li>';
+      }).join('') : '<li class="chg-none">Nothing new in your places in the last two weeks. Their warnings and news are on each card below.</li>';
+    }
     // Latest real projects
     var FSTAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
     var ps = d.projects.slice().sort(function (a, b) { return String(b.added || '').localeCompare(String(a.added || '')) || (b.year || 0) - (a.year || 0); });

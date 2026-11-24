@@ -888,6 +888,20 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
     .lab-tabs { gap: 4px 16px; } .lab-tabs-k { display: none; }
   }
   /* Get involved */
+  .inv-now { margin: 28px 0 0; }
+  .inv-now-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+  .now-c { display: grid; gap: 6px; align-content: start; padding: 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+  .now-c:first-child { border: 2px solid var(--accent); }
+  .now-k { font: 600 0.7rem var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+  .now-c b { font: 700 1.1rem/1.3 var(--font-display); } .now-m { font-size: 0.85rem; color: var(--ink2); line-height: 1.45; }
+  .now-c a { font-weight: 600; color: var(--accent); font-size: 0.9rem; } .now-c .pjc-back { padding: 4px 0 0; }
+  .chg { margin: 0 0 20px; padding: 18px 20px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+  .chg h3 { margin: 0 0 8px; font-size: 1.15rem; }
+  .chg-list { list-style: none; margin: 0; padding: 0; }
+  .chg-list li { display: grid; gap: 3px; padding: 10px 0; border-top: 1px solid var(--line); } .chg-list li:first-child { border-top: 0; }
+  .chg-m { font-size: 0.78rem; color: var(--ink2); } .chg-t { font-weight: 600; color: var(--ink); text-decoration: none; line-height: 1.35; } a.chg-t:hover { text-decoration: underline; }
+  .chg-s { font-size: 0.78rem; color: var(--ink2); } .chg-a { font-size: 0.85rem; font-weight: 600; color: var(--accent); }
+  .chg-none { color: var(--ink2); font-size: 0.92rem; }
   .ladder { list-style: none; margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; counter-reset: lad; max-width: 60rem; }
   @media (max-width: 760px) { .ladder { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .ladder li { counter-increment: lad; display: grid; gap: 2px; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); font-size: 0.88rem; color: var(--ink2); line-height: 1.4; }
