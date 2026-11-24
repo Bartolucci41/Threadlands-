@@ -414,13 +414,13 @@
       }
       qAdd(L.layerGroup(lines));
       var t = trace(Q.start), pl = t.path.map(function (j) { return [c.lat[j], c.lng[j]]; });
-      if (pl.length > 1) { var tl = qAdd(L.polyline(pl, { color: '#123B38', weight: 5, opacity: 0.95, dashArray: '2 8', lineCap: 'round' })); HM.flyToBounds(tl.getBounds().pad(0.6), { duration: 1.2, maxZoom: 13 }); }
+      if (pl.length > 1) { var tl = qAdd(L.polyline(pl, { color: '#123B38', weight: 5, opacity: 0.95, dashArray: '2 8', lineCap: 'round' })); tl.bindTooltip('Likely downhill route across this area. Street drains and canals can change where water goes.', { permanent: true, direction: 'top', className: 'q-linelabel', offset: [0, -6] }); HM.flyToBounds(tl.getBounds().pad(0.6), { duration: 1.2, maxZoom: 13 }); }
       else HM.flyTo(sLL, 12, { duration: 1.2 });
       var endNear = (+c.water_km[t.end] || 99) < 1;
       qAdd(L.circleMarker([c.lat[t.end], c.lng[t.end]], { radius: 9, color: '#fff', weight: 3, fillColor: '#2E6E8E', fillOpacity: 1 }));
       body = '<p>Water runs downhill. The blue lines are the paths most of it follows across the region, thicker where more land drains into them.</p>' +
-        (pl.length > 1 ? '<p>From ' + from + ', rain flows <b>' + (t.km < 1 ? 'less than 1 km' : 'about ' + Math.round(t.km) + ' km') + '</b> downhill and ends up in ' + (endNear ? 'a low spot next to a river or lake' : 'a low spot where it pools') + ' (the blue dot).</p>' : '<p>' + from.charAt(0).toUpperCase() + from.slice(1) + ' sits in a low spot already: water from around it flows here.</p>') +
-        '<p class="q-note">Worked out from ground height in patches of about 1 km\u00b2. Drains, pipes and canals change the real path on each street, which is where local knowledge helps.</p>';
+        (pl.length > 1 ? '<p>The dotted line is the <b>likely downhill route across this area</b>, not the path from one street. From ' + from + ', it runs <b>' + (t.km < 1 ? 'less than 1 km' : 'about ' + Math.round(t.km) + ' km') + '</b> to ' + (endNear ? 'a low spot next to a river or lake' : 'a low spot where it pools') + ' (the blue dot).</p><p>Street drains, pipes and canals can change where water actually goes. If you know where it goes or collects on your street, that is exactly what the map can&rsquo;t see at this scale.</p>' : '<p>' + from.charAt(0).toUpperCase() + from.slice(1) + ' sits in a low spot already: water from around it flows here.</p>') +
+        '<p class="q-note">Worked out from ground height in patches of about 1 km\u00b2.</p>';
     } else if (Q.step === 2) {
       // Where it collects: the most flood-exposed areas and who lives there
       title = 'Where it collects';
@@ -445,8 +445,8 @@
       if (pj.length) HM.flyToBounds(L.featureGroup(pj.map(function (p) { return L.marker([p.lat, p.lng]); })).getBounds().pad(0.5), { duration: 1.2, maxZoom: 13 });
       body = (pj.length ? '<p>Projects here that give water room or slow it down:</p><ul class="here-pj">' + pj.map(function (p) { return '<li><a href="#pj-' + esc(p.id) + '" translate="no">' + esc(p.name) + '</a><span>' + ({ proposed: 'Proposed', approved: 'Approved', underway: 'Under way', built: 'Built' }[p.status] || '') + (p.year ? ' \u00b7 ' + p.year : '') + '</span></li>'; }).join('') + '</ul>' : '<p>No projects on the map here yet that deal with rain and flooding.</p>') +
         (obs.length ? '<p>' + obs.length + ' note' + (obs.length > 1 ? 's' : '') + ' from people who have seen water collect (small blue dots).</p>' : '') +
-        '<div class="here-acts"><button type="button" class="btn" data-add-kind="water">Seen water collect? Add it on the map</button><a class="btn ghost" href="{B}explore/?goal=flood#' + esc(SLUG) + '">Test what would keep homes dry in ThreadLab &rarr;</a>' +
-        (pj.length ? '' : '<a class="btn ghost" href="{B}explore/?add=1#' + esc(SLUG) + '">Add a project you know about</a>') + '</div>';
+        '<div class="q-primary"><p><b>You know your street better than this map does.</b> Where have you seen water collect after rain?</p><button type="button" class="btn" data-mark="water">Show where you&rsquo;ve seen water collect</button></div>' +
+        '<div class="here-acts q-more"><a class="linkbtn" href="{B}explore/?goal=flood#' + esc(SLUG) + '">Test what would keep homes dry in ThreadLab &rarr;</a><a class="linkbtn" href="{B}explore/?add=1#' + esc(SLUG) + '">Add a project you know about</a></div>';
     }
     var dots = ''; for (var s2 = 0; s2 < steps; s2++) dots += '<i' + (s2 === Q.step ? ' class="on"' : '') + '></i>';
     $('#here-card').innerHTML = '<p class="q-kick">Where does the rain go from here? <span class="q-dots" aria-label="Step ' + (Q.step + 1) + ' of ' + steps + '">' + dots + '</span></p><h3>' + title + '</h3>' + body +
@@ -465,6 +465,12 @@
     var ad = ev.target.closest('[data-add-kind]');
     if (ad) { PRESET = ad.dataset.addKind; document.getElementById('here').scrollIntoView({ behavior: 'smooth' }); var hint = document.querySelector('.here-hint'); if (hint) hint.innerHTML = '<b>Tap the map where it is</b>, then choose \u201cAdd what you know here\u201d.'; else if (Q) { $('#here-card').insertAdjacentHTML('beforeend', '<p class="here-hint q-tap"><b>Now tap the map where you saw it.</b></p>'); } }
   });
+  var MARK = null;
+  document.addEventListener('click', function (ev) {
+    var mk = ev.target.closest('[data-mark]'); if (!mk) return;
+    MARK = mk.dataset.mark; document.getElementById('here-map').classList.add('marking');
+    mk.outerHTML = '<p class="q-tapnow"><b>Now tap the map where you saw it.</b> Zoom in to find the exact spot.</p>';
+  });
   document.addEventListener('submit', function (ev) {
     if (ev.target.id !== 'here-form') return; ev.preventDefault();
     var msg = $('#here-msg'), kind = (document.querySelector('#here-form input[name="ok"]:checked') || {}).value || 'other';
@@ -479,7 +485,12 @@
     if (!HM) {
       HM = L.map('here-map', { scrollWheelZoom: false, zoomControl: true });
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' }).addTo(HM);
-      HM.on('click', function (ev) { if (!HDATA) return; if (Q) { qClear(); Q = null; } whatsHere(ev.latlng.lat, ev.latlng.lng); });
+      HM.on('click', function (ev) {
+        if (!HDATA) return; if (Q) { qClear(); Q = null; }
+        var mark = MARK; MARK = null; document.getElementById('here-map').classList.remove('marking');
+        whatsHere(ev.latlng.lat, ev.latlng.lng);
+        if (mark) { var r = document.querySelector('#here-form input[value="' + mark + '"]'); if (r) r.checked = true; $('#here-form').hidden = false; $('#here-txt').placeholder = 'For example: after heavy rain, water stands knee-deep at this corner for hours.'; $('#here-txt').focus(); }
+      });
     }
     HM.setView([e.lat, e.lng], 10);
     if (HLAYER) { HM.removeLayer(HLAYER); HLAYER = null; } if (HPIN) { HM.removeLayer(HPIN); HPIN = null; }

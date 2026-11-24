@@ -1091,6 +1091,13 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .q-kick { display: flex; justify-content: space-between; gap: 8px; margin: 0 0 6px; font: 600 0.72rem var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: #2E6E8E; }
   .q-dots { display: inline-flex; gap: 4px; } .q-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); } .q-dots i.on { background: #2E6E8E; }
   .here-card p { line-height: 1.5; } .q-note { font-size: 0.8rem; color: var(--ink2); }
+  .q-linelabel { background: #123B38; color: #fff; border: 0; border-radius: 8px; padding: 6px 10px; font: 500 12px/1.35 var(--font-body); max-width: 230px; white-space: normal; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .q-linelabel::before { border-top-color: #123B38 !important; }
+  .q-primary { margin-top: 14px; padding: 14px; border-radius: 14px; background: #D7E7F3; color: #0f2f57; } .q-primary p { margin: 0 0 10px; }
+  .q-primary .btn { background: #2E6E8E; border-color: #2E6E8E; color: #fff; }
+  .q-tapnow { margin: 0; font-size: 0.95rem; }
+  .q-more { gap: 6px 16px; } .q-more .linkbtn { color: var(--accent); font-weight: 600; font-size: 0.88rem; }
+  .here-map.marking { outline: 3px solid #2E6E8E; outline-offset: -3px; cursor: crosshair; }
   .q-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
   .q-nav .linkbtn { color: var(--ink2); font-size: 0.85rem; }
   .here-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); gap: 16px; align-items: start; }
