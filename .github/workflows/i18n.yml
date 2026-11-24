@@ -26,18 +26,23 @@ jobs:
           npm install --no-save playwright@1.48.2
           npx playwright install --with-deps chromium
           pip install argostranslate==1.9.6
-      - name: Find new text on the site
-        run: |
-          python3 -I src/build_site.py
-          (python3 -m http.server 8765 >/dev/null 2>&1 &)
-          sleep 2
-          node pipeline/i18n_extract.js http://localhost:8765
-      - name: Translate what is missing
-        run: python3 pipeline/i18n_translate.py
-      - name: Commit
+      - name: Find new text, translate it and save it
+        # If another run saved translations first, start again from the newest version
+        # (only text still missing is translated, so a second pass is quick).
         run: |
           git config user.name "threadlands-bot"
           git config user.email "threadlands-bot@users.noreply.github.com"
-          git add data/i18n
-          git commit -m "Translations: fill in new text" || exit 0
-          git pull --rebase origin main && git push
+          (python3 -m http.server 8765 >/dev/null 2>&1 &)
+          for try in 1 2 3; do
+            python3 -I src/build_site.py
+            sleep 2
+            node pipeline/i18n_extract.js http://localhost:8765
+            python3 pipeline/i18n_translate.py
+            git add data/i18n
+            git commit -q -m "Translations: fill in new text" || { echo "Nothing new to translate."; exit 0; }
+            if git pull -q --rebase origin main && git push -q; then echo "Saved."; exit 0; fi
+            echo "Someone saved first (try $try). Starting again from the newest version."
+            git rebase --abort 2>/dev/null || true
+            git fetch -q origin main && git reset -q --hard origin/main
+          done
+          echo "Could not save after three tries."; exit 1
