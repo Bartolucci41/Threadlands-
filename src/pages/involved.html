@@ -138,14 +138,14 @@
 
   T.all().then(function (d) {
     D = d; cards();
-    var names = {}; d.list.forEach(function (e) { names[e.slug] = e.name; });
+    var names = {}, ccs = {}; d.list.forEach(function (e) { names[e.slug] = e.name; ccs[e.slug] = e.cc; });
     // Latest real projects
     var FSTAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
     var ps = d.projects.slice().sort(function (a, b) { return String(b.added || '').localeCompare(String(a.added || '')) || (b.year || 0) - (a.year || 0); });
     if (ps.length) {
       $('#feed-grid').innerHTML = ps.slice(0, 6).map(function (p) {
         var st = FSTAT[p.status] || FSTAT.proposed;
-        return '<a class="feed-card" href="{B}place/#' + esc(p.place) + '" style="--pc:' + st[1] + '"><span class="feed-top"><span class="feed-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span class="feed-city">' + esc(names[p.place] || p.place) + '</span></span>' +
+        return '<a class="feed-card" href="{B}place/#' + esc(p.place) + '" style="--pc:' + st[1] + '"><span class="feed-top"><span class="feed-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span class="feed-city">' + T.flag(ccs[p.place]) + esc(names[p.place] || p.place) + '</span></span>' +
           '<b translate="no">' + esc(p.name) + '</b><span class="feed-sum">' + esc(String(p.summary || '').split('. ')[0].replace(/\.$/, '')) + '.</span></a>';
       }).join('');
       $('#feed').hidden = false;

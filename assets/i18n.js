@@ -8,7 +8,7 @@
     ['fr', 'Français'], ['pt', 'Português'], ['ru', 'Русский'], ['it', 'Italiano']
   ];
   // Languages appear in the menu once their translation file is in data/i18n
-  var READY = ['en', 'zh', 'hi', 'es', 'ar', 'fr', 'pt', 'ru', 'it'];
+  var READY = ['en', 'es', 'it'];   // the others are kept up to date in data/i18n; add a code here to show it
   LANGS = LANGS.filter(function (l) { return READY.indexOf(l[0]) >= 0; });
   var RTL = { ar: 1 };
   var FONTS = { zh: 'Noto+Sans+SC:wght@400;600;800', hi: 'Noto+Sans+Devanagari:wght@400;600;800',

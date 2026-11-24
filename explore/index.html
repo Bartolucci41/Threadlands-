@@ -2408,7 +2408,8 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
   }
   function renderPlaceInfo() {
     var pl = P.place;
-    $('#place-name').textContent = pl.name || 'Unnamed place';
+    var fcc = String(pl.country_code || '').toLowerCase();
+    $('#place-name').innerHTML = (/^[a-z]{2}$/.test(fcc) ? '<span class="fi fi-' + fcc + ' tl-flag" aria-hidden="true"></span>' : '') + esc(pl.name || 'Unnamed place');
     try { renderEmblem(); } catch (err) { /* the emblem is decoration */ }
     $('#place-tag').textContent = kind === 'demo' ? 'Demo' : 'Real data';
     var hexKm2 = pl.hex_km2 || (P.hexKm * P.hexKm * 2.598);

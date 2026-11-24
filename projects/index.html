@@ -120,7 +120,7 @@
       ALL.forEach(function (p) {
         var st = STAT[p.status] || STAT.proposed;
         var m = L.circleMarker([p.lat, p.lng], { radius: 8, color: '#fff', weight: 2.5, fillColor: st[1], fillOpacity: 1 })
-          .bindPopup('<b translate="no">' + esc(p.name) + '</b><br>' + st[0] + (p.year ? ' · ' + p.year : '') + ' · ' + esc(NAMES[p.place] || p.place) + '<br><a href="../place/#' + esc(p.place) + '">City profile</a> · <a href="../explore/#' + esc(p.place) + '">Explore</a>');
+          .bindPopup('<b translate="no">' + esc(p.name) + '</b><br>' + st[0] + (p.year ? ' · ' + p.year : '') + ' · ' + (window.TLP ? TLP.flag(CC[p.place]) : '') + esc(NAMES[p.place] || p.place) + '<br><a href="../place/#' + esc(p.place) + '">City profile</a> · <a href="../explore/#' + esc(p.place) + '">Explore</a>');
         m.on('click', function () { focus(p.id); });
         MARK[p.id] = { m: m, p: p };
       });
