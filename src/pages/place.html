@@ -44,15 +44,16 @@
 
     <section class="sect pf-sec here" id="here" aria-labelledby="here-h">
       <div class="sect-top"><div><h2 id="here-h">What&rsquo;s here?</h2><p>Tap any spot on the map to see what the data says about the area around it, the projects nearby, and what you can do.</p></div></div>
+      <div class="qs" id="qs" role="group" aria-label="Questions to explore on the map">
+        <span class="qs-k">Start with a question</span>
+        <button type="button" class="q-btn q-lead" data-q="rain">Where does the rain go from here? <span aria-hidden="true">&rarr;</span></button>
+        <span class="qs-or">or tap any spot on the map</span>
+      </div>
       <div class="here-layers filters" role="group" aria-label="Map layer">
         <button type="button" class="chip" data-ly="heat" aria-pressed="true">Heat</button>
         <button type="button" class="chip" data-ly="flood" aria-pressed="false">Flooding</button>
         <button type="button" class="chip" data-ly="green" aria-pressed="false">Green and nature</button>
         <button type="button" class="chip" data-ly="none" aria-pressed="false">Streets only</button>
-      </div>
-      <div class="qs" id="qs" role="group" aria-label="Questions to explore on the map">
-        <span class="qs-k">Explore a question</span>
-        <button type="button" class="q-btn" data-q="rain">Where does the rain go from here?</button>
       </div>
       <div class="here-grid">
         <div class="here-map" id="here-map" role="region" aria-label="Map of the place, tap a spot to see what is there"></div>

@@ -485,6 +485,9 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .hs-tl { color: #fff; font-weight: 600; }
   .hs-chip { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.35); color: #fff !important; text-decoration: none; margin-right: 6px; }
   .hs-chip:hover { background: rgba(255,255,255,0.12); }
+  @media (max-width: 560px) { .band-deep .doors a.door-places { display: none; } .door { min-height: 0; } }
+  .q-lead { font-size: 1.05rem; padding: 14px 20px; box-shadow: 0 2px 0 rgba(15,47,87,0.18); }
+  .qs-or { color: var(--ink2); font-size: 0.9rem; }
   .doors-link { margin: 16px 0 0; color: #cfe0da; font-size: 0.95rem; max-width: 60rem; } .doors-link span { color: #8fd3bf; font-size: 1.1rem; margin-right: 6px; }
   .mp-add { margin: 0 0 20px; } .mp-search { max-width: 34rem; }
   .mp-near { margin: 10px 0 0; font-size: 0.9rem; color: var(--ink2); } .mp-near .linkbtn { color: var(--accent); font-weight: 600; } .mp-near a { color: var(--accent); }
@@ -590,7 +593,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   @media (max-width: 760px) { .pfs { grid-template-columns: 1fr; } }
   .pfs h3 { font-size: 1rem; margin: 0 0 8px; }
   .pfs-map { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; } .pfs-map svg { flex: none; } .pfs-key { flex: 1 1 220px; }
-  .pf-nm { margin-left: 0.3em; }
+  .btn .pf-nm { margin-left: -4px; }
   .pfs-r { fill: var(--surface2); stroke: var(--ink2); stroke-width: 1.2; } .pfs-c { fill: var(--accent); fill-opacity: 0.28; stroke: var(--accent); stroke-width: 1.5; }
   .pfs-key p { margin: 0 0 6px; font-size: 0.88rem; color: var(--ink2); line-height: 1.45; } .pfs-key b { color: var(--ink); }
   .pfs-key i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; } .k-r { background: var(--surface2); border: 1.2px solid var(--ink2); } .k-c { background: rgba(14,124,102,0.3); border: 1.5px solid var(--accent); }
@@ -713,7 +716,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=11">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=12">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
