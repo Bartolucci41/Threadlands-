@@ -15,20 +15,22 @@
     <button type="button" class="chip" data-sort="pop" aria-pressed="true">Population</button>
     <button type="button" class="chip" data-sort="name" aria-pressed="false">A&ndash;Z</button>
     <span class="eyebrow" style="margin:0 4px 0 12px">Compare scores</span>
-    <button type="button" class="chip" data-sort="index" aria-pressed="false">Resilience</button>
-    <button type="button" class="chip" data-sort="heat" aria-pressed="false">Heat relief</button>
-    <button type="button" class="chip" data-sort="habitat" aria-pressed="false">Habitat</button>
-    <button type="button" class="chip" data-sort="food" aria-pressed="false">Local food</button>
+    <button type="button" class="chip" data-sort="tree" aria-pressed="false">Tree cover</button>
+    <button type="button" class="chip" data-sort="green_low" aria-pressed="false">Green space</button>
+    <button type="button" class="chip" data-sort="heat" aria-pressed="false">Heat hot spots</button>
+    <button type="button" class="chip" data-sort="farm" aria-pressed="false">Nearby farmland</button>
+    <button type="button" class="chip" data-sort="wild_km" aria-pressed="false">Nearest wild place</button>
+    <button type="button" class="chip" data-sort="index" aria-pressed="false">Overall index</button>
   </div>
   <div class="filters" id="rk-regions" role="group" aria-label="Region"></div>
   <div class="filters"><label><span class="sr-only">Find a city</span><input type="search" id="rk-q" placeholder="Find a city or country"></label><span class="rk-count" id="rk-count"></span></div>
 
-  <p class="rk-cmp-note" id="rk-cmp-note" hidden>Comparison view. These are screening scores out of 100 from the Threadlands model. They are not grades: no place scores near 100, study areas differ in size, and flood and travel are not yet fully comparable between places, so a few points apart means little. Scores are most useful in ThreadLab, for comparing plans for the same place.</p>
+  <p class="rk-cmp-note" id="rk-cmp-note" hidden></p>
   <div class="rk-head" id="rk-head" aria-hidden="true"></div>
   <ol class="rk-table" id="rk-table"><li class="rk-none">Loading the places&hellip;</li></ol>
 
   <section class="rk-method" aria-labelledby="rk-m-h">
-    <h2 id="rk-m-h">About the comparison scores</h2>
+    <h2 id="rk-m-h">About the comparisons</h2>
     <div class="rk-m-grid">
       <div><h3>What goes in</h3><p>Heat relief, flood exposure, connected nature, local food and low-carbon travel, plus three stress tests (a heatwave, a river flood and a drought year). Each is modeled for the whole city region from open satellite, land cover and population data.</p></div>
       <div><h3>Real projects</h3><p>Parks, wetlands and other projects with a public source are placed on the map. Those approved, under way or built since 2021 count toward the score. Older ones already show in the 2021 land cover.</p></div>
@@ -166,26 +168,34 @@
   function fmtPop(e) { var c = e.city_pop, r = e.pop; if (!r) return ''; if (!c || c >= r * 0.9) return fmtN(r) + ' people'; return fmtN(c) + ' in the city, ' + fmtN(r) + ' in the region'; }
   var PRESS = { heat: ['Heat', 'High surface temperatures'], flood: ['Flooding', 'High modeled exposure'], grey: ['Trees & green space', 'Limited green cover'], trees: ['Trees & green space', 'Low tree cover'], food: ['Food', 'Limited nearby farmland capacity'] };
   var SORT = 'pop', REGION = 'All', LASTKEY = '';
-  function val(p) { return SORT === 'pop' ? (p.city_pop || p.pop || 0) : (p[SORT] == null ? -1 : p[SORT]); }
+  // Measured values, each in its own units, ordered so the end worth learning from comes first
+  var MEAS = {
+    tree: { h: 'Tree cover around residents', up: true, u: '%', note: 'Average tree cover around where people live, from 2021 satellite land cover (ESA WorldCover). Highest first: places to learn from about shade.' },
+    green_low: { h: 'Residents with little green nearby', up: false, u: '%', note: 'Share of residents living where less than a tenth of the ground is trees, grass, shrubs or wetland. Lowest first.' },
+    heat: { h: 'Residents in heat hot spots', up: false, u: '%', note: 'Share of residents living where satellites measure the ground at least 2\u00b0C hotter than is typical for their own region (Landsat). It compares hot spots within each region, not how hot the climate is. Lowest first.' },
+    farm: { h: 'Fed by farmland within 50 km', up: true, u: '%', note: 'Share of people within 50 km who the farmland within 50 km could feed. It measures capacity, not where food actually comes from. Highest first.' },
+    wild_km: { h: 'Nearest forest or wetland', up: false, u: ' km', max: 40, note: 'Distance from the center of where people live to the nearest forest or wetland in the model (patches of about 1 km²). Nearest first.' },
+    index: { h: 'Overall index, out of 100', up: true, u: '', note: 'A first look only. The overall index combines heat, flooding, nature, food and travel from the Threadlands model. It is not a grade: no place scores near 100, study areas differ, and flood and travel are not yet fully comparable between places, so a few points apart means little. It is most useful in ThreadLab, for comparing plans for the same place.' }
+  };
+  function mv(p) { return SORT === 'index' ? p.index : p.vals ? p.vals[SORT] : null; }
+  function val(p) { if (SORT === 'pop') return p.city_pop || p.pop || 0; var v = mv(p); if (v == null) return -Infinity; return MEAS[SORT].up ? v : -v; }
   function render() {
     var q = norm($('#rk-q').value.trim());
     var list = LIB.slice().sort(SORT === 'name' ? function (a, b) { return a.name.localeCompare(b.name); } : function (a, b) { return val(b) - val(a); });
     list.forEach(function (p, k) { p._rank = k + 1; });
-    var CMP = /^(index|heat|habitat|food)$/.test(SORT);
-    $('#rk-table').classList.toggle('cmp', CMP); $('#rk-head').className = 'rk-head' + (CMP ? ' cmp' : ''); $('#rk-cmp-note').hidden = !CMP;
-    $('#rk-head').innerHTML = '<span></span><span>Place</span><span>What stands out <i>in Threadlands&rsquo; data</i></span><span>Projects</span>' + (CMP ? '<span>Score, out of 100</span><span></span>' : '');
+    var CMP = !!MEAS[SORT], M = MEAS[SORT];
+    $('#rk-table').classList.toggle('cmp', CMP); $('#rk-head').className = 'rk-head' + (CMP ? ' cmp' : ''); $('#rk-cmp-note').hidden = !CMP; if (CMP) $('#rk-cmp-note').textContent = M.note;
+    $('#rk-head').innerHTML = '<span></span><span>Place</span><span>What stands out <i>in Threadlands&rsquo; data</i></span><span>Projects</span>' + (CMP ? '<span>' + M.h + '</span><span></span>' : '');
     shown = list.filter(function (p) { return (REGION === 'All' || (REGION === VIS ? p.requested : regionOf(p) === REGION)) && (!q || norm(p.name + ' ' + p.country + ' ' + (p.display || '')).indexOf(q) >= 0); });
-    var scored = list.filter(function (p) { return p.index != null; }), key = SORT === 'name' || SORT === 'pop' ? 'index' : SORT;
-    var hi = Math.max.apply(null, scored.map(function (p) { return p[key]; }).concat([1])), lo = Math.min.apply(null, scored.map(function (p) { return p[key]; }).concat([0]));
     var nc = {}; shown.forEach(function (p) { nc[p.country] = 1; });
     $('#rk-count').textContent = shown.length + ' of ' + LIB.length + ' places in ' + Object.keys(nc).length + ' countries';
     $('#rk-table').innerHTML = shown.map(function (p) {
-      var v = p[key], has = v != null, w = has ? Math.max(1, Math.min(100, Math.round(v))) : 0, pr = p.top && PRESS[p.top];
+      var v = CMP ? mv(p) : null, has = v != null, w = has ? Math.max(1, Math.min(100, Math.round(100 * v / (M.max || 100)))) : 0, pr = p.top && PRESS[p.top];
       var pj = p.projects && p.projects.add >= 0.05 ? '<span class="rk-pj">+' + p.projects.add.toFixed(1) + ' from projects</span>' : (p.projects ? '<span class="rk-pj rk-pj0">' + p.projects.n + ' project' + (p.projects.n > 1 ? 's' : '') + ' on the map</span>' : '');
       var num = CMP && has ? p._rank : '';
       return '<li' + (p.requested ? ' class="vis"' : '') + '><a href="{B}place/' + (pr ? '?show=' + p.top : '') + '#' + esc(p.slug) + '"><span class="rt-n">' + num + '</span><span class="rt-c"><b>' + esc(p.name) + '</b><span>' + flag(p.cc) + esc(where(p)) + (fmtPop(p) ? ' \u00b7 ' + fmtPop(p) : '') + '</span>' + (p.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</span>' +
         '<span class="rt-p">' + (pr ? '<b>' + esc(pr[0]) + '</b> \u00b7 ' + esc(pr[1]) : '') + '</span><span class="rt-j">' + pj + '</span>' +
-        (CMP ? '<span class="rt-bar" aria-hidden="true">' + (has ? '<i style="width:' + w + '%"></i>' : '') + '</span><span class="rt-v">' + (has ? Math.round(v) : '<small>new</small>') + '</span>' : '') + '</a></li>';
+        (CMP ? '<span class="rt-bar" aria-hidden="true">' + (has ? '<i style="width:' + w + '%"></i>' : '') + '</span><span class="rt-v">' + (has ? (M.u === ' km' ? v.toFixed(v < 10 ? 1 : 0) : Math.round(v)) + '<small>' + M.u + '</small>' : '<small>n/a</small>') + '</span>' : '') + '</a></li>';
     }).join('') || '<li class="rk-none">No place matches. <a href="{B}explore/?q=' + encodeURIComponent($('#rk-q').value.trim()) + '">Search everywhere for it</a> and build it.</li>';
     var k2 = REGION + '|' + q; if (k2 !== LASTKEY) { LASTKEY = k2; fitTo(shown); } else drawMap();
   }
@@ -204,7 +214,7 @@
   Promise.all([fetch('{B}data/index.json').then(function (r) { return r.json(); }), fetch('{B}data/ranking.json').then(function (r) { return r.json(); }).catch(function () { return { places: [] }; })]).then(function (x) {
     var RK = {}; (x[1].places || []).forEach(function (p) { if (p && p.slug) RK[p.slug] = p; });
     LIB = (x[0].places || []).filter(function (e) { return e && e.slug && isFinite(e.lat) && isFinite(e.lng); }).map(function (e) {
-      var r = RK[e.slug] || {}; return Object.assign({}, e, { index: r.index, heat: r.heat, habitat: r.habitat, food: r.food, top: r.top, projects: r.projects });
+      var r = RK[e.slug] || {}; return Object.assign({}, e, { index: r.index, vals: r.vals, top: r.top, projects: r.projects });
     });
     if (x[1].updated) $('#rk-updated').textContent = 'Updated ' + new Date(x[1].updated + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + '. The ranking refreshes whenever a place is built or a project is approved.';
     regions(); render();

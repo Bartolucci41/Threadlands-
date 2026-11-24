@@ -60,7 +60,9 @@ for (const r of ranking) {
     const reg = data.regional || {}, bs = typeof reg.basin === 'string' ? JSON.parse(reg.basin) : (reg.basin || {}), need = reg.need_km2_per_person || 0.0019;
     const fs50 = (reg.foodshed || []).find(f => f.km === 50), fs250 = (reg.foodshed || []).find(f => f.km === 250);
     const share = f => f && f.pop > 0 ? Math.min(100, Math.round(100 * f.crop_km2 / (f.pop * need))) : null;
-    const PP = TM.prepare(data), st = T.placeStats(PP);
+    const PP = TM.prepare(data), st = T.placeStats(PP), mm = T.measure(data);
+    // Measured values people can compare directly, each in its own units
+    if (mm) r.vals = { tree: Math.round(100 * mm.trees), green_low: Math.round(100 * mm.grey), heat: mm.heat == null ? null : Math.round(100 * mm.heat), flood: Math.round(100 * mm.flood), farm: share(fs50), wild_km: st.wild != null ? +st.wild.toFixed(1) : null };
     summary[r.slug] = {
       pressures: (pr && pr.top || []).slice(0, 3).map(t => ({ key: t.key, t: t.t, f: t.f, layer: t.layer, what: t.what, who: t.who, pct: t.pct })),
       threads: { basin_km2: bs.area_km2 || null, basin_built: bs.shares && bs.shares.built != null ? Math.round(100 * bs.shares.built) : null,

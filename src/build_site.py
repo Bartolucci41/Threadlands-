@@ -313,13 +313,14 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .rt-v { font: 800 1.35rem var(--font-display); text-align: right; font-variant-numeric: tabular-nums; }
   @media (max-width: 760px) { .rk-table a { grid-template-columns: 2.2rem minmax(0, 1fr) 64px 2.4rem; } .rt-p, .rt-j { display: none; } }
   .rk-head { display: grid; grid-template-columns: 1rem minmax(0, 2.2fr) minmax(0, 1.6fr) minmax(0, 1fr); gap: 14px; padding: 18px 4px 8px; font: 600 0.72rem var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink2); }
-  .rk-head.cmp, .rk-table.cmp a { grid-template-columns: 3rem minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.2fr) minmax(80px, 1fr) 3rem; }
+  .rk-head.cmp, .rk-table.cmp a { grid-template-columns: 3rem minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(80px, 1fr) 4.6rem; }
+  .rt-v small { font-size: 0.6em; font-weight: 700; margin-left: 1px; }
   .rk-table:not(.cmp) a { grid-template-columns: 1rem minmax(0, 2.2fr) minmax(0, 1.6fr) minmax(0, 1fr); }
   .rk-cmp-note { margin: 4px 0 0; padding: 12px 16px; border-radius: 12px; background: var(--surface); color: var(--ink2); font-size: 0.9rem; line-height: 1.5; max-width: 60rem; }
   .rk-head i { font-style: normal; text-transform: none; letter-spacing: 0; font-weight: 500; display: block; }
   .rk-head + .rk-table { margin-top: 0; }
   .rt-p b { color: var(--ink); font-weight: 600; }
-  @media (max-width: 760px) { .rk-head.cmp, .rk-table.cmp a { grid-template-columns: 2.2rem minmax(0, 1fr) 64px 2.4rem; } .rk-head.cmp span:nth-child(3), .rk-head.cmp span:nth-child(4), .rk-table.cmp .rt-p, .rk-table.cmp .rt-j { display: none; } .rk-head:not(.cmp), .rk-table:not(.cmp) a { grid-template-columns: 0 minmax(0, 1fr); } .rk-head:not(.cmp) span:nth-child(n+3), .rk-table:not(.cmp) .rt-j { display: none; } .rk-table:not(.cmp) .rt-p { display: block; grid-column: 2; } }
+  @media (max-width: 760px) { .rk-head.cmp, .rk-table.cmp a { grid-template-columns: 2.2rem minmax(0, 1fr) 56px 3.6rem; } .rk-head.cmp span:nth-child(3), .rk-head.cmp span:nth-child(4), .rk-table.cmp .rt-p, .rk-table.cmp .rt-j { display: none; } .rk-head:not(.cmp), .rk-table:not(.cmp) a { grid-template-columns: 0 minmax(0, 1fr); } .rk-head:not(.cmp) span:nth-child(n+3), .rk-table:not(.cmp) .rt-j { display: none; } .rk-table:not(.cmp) .rt-p { display: block; grid-column: 2; } }
   .pfp-f { margin: -4px 0 8px; font-weight: 600; color: var(--warm, #C0603A); }
   .pfr-note { flex-basis: 100%; margin: 6px 0 0; color: var(--ink2); font-size: 0.85rem; line-height: 1.5; max-width: 44ch; }
   .pfp-sep { border: 0; border-top: 1px solid var(--line); margin: 12px 0; } .here-why .hw-f { font: inherit; font-weight: 600; }
@@ -730,7 +731,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=15">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=16">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
