@@ -612,6 +612,15 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .td-t { font-size: 0.72rem; color: var(--ink2); text-transform: uppercase; letter-spacing: 0.05em; }
   .td-n .linkbtn, .td-add { justify-self: start; color: var(--accent); font-weight: 600; font-size: 0.85rem; }
   .here-layers { margin-bottom: 12px; }
+  .qs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 12px; }
+  .qs-k { font: 600 0.7rem var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); }
+  .q-btn { font: 600 0.95rem var(--font-body); padding: 10px 16px; border-radius: 999px; border: 0; background: #D7E7F3; color: #0f2f57; cursor: pointer; }
+  .q-btn:hover, .q-btn.on { background: #2E6E8E; color: #fff; }
+  .q-kick { display: flex; justify-content: space-between; gap: 8px; margin: 0 0 6px; font: 600 0.72rem var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: #2E6E8E; }
+  .q-dots { display: inline-flex; gap: 4px; } .q-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); } .q-dots i.on { background: #2E6E8E; }
+  .here-card p { line-height: 1.5; } .q-note { font-size: 0.8rem; color: var(--ink2); }
+  .q-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .q-nav .linkbtn { color: var(--ink2); font-size: 0.85rem; }
   .here-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); gap: 16px; align-items: start; }
   @media (max-width: 860px) { .here-grid { grid-template-columns: 1fr; } }
   .here-map { position: relative; height: 520px; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: var(--surface2); }

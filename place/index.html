@@ -82,6 +82,10 @@
         <button type="button" class="chip" data-ly="green" aria-pressed="false">Green and nature</button>
         <button type="button" class="chip" data-ly="none" aria-pressed="false">Streets only</button>
       </div>
+      <div class="qs" id="qs" role="group" aria-label="Questions to explore on the map">
+        <span class="qs-k">Explore a question</span>
+        <button type="button" class="q-btn" data-q="rain">Where does the rain go from here?</button>
+      </div>
       <div class="here-grid">
         <div class="here-map" id="here-map" role="region" aria-label="Map of the place, tap a spot to see what is there"></div>
         <aside class="here-card" id="here-card" aria-live="polite">
@@ -204,7 +208,7 @@
       }).join('');
       var al = T.alerts(w), d0 = d.time ? 0 : -1;
       $('#td-wx').innerHTML = '<span class="td-k">Weather and warnings</span><p class="td-big">' + T.icon(c.weather_code, 22) + ' ' + T.temp(c.temperature_2m) + ' \u00b7 ' + esc(T.sky(c.weather_code)[0]) + (d0 >= 0 ? ' \u00b7 high ' + T.temp(d.temperature_2m_max[0]) : '') + '</p>' +
-        (al.length ? al.map(function (a) { var ly = a.kind === 'heat' ? 'heat' : 'flood'; return '<p class="td-al al-' + a.kind + '">' + esc(a.text) + ' <button type="button" class="linkbtn" data-goto-ly="' + ly + '">' + (ly === 'flood' ? 'See where water collects' : 'See the hottest areas') + ' &rarr;</button></p>'; }).join('') : '<p class="td-none">No warnings for the next few days.</p>');
+        (al.length ? al.map(function (a) { var ly = a.kind === 'heat' ? 'heat' : 'flood'; return '<p class="td-al al-' + a.kind + '">' + esc(a.text) + ' ' + (ly === 'flood' ? '<button type="button" class="linkbtn" data-q="rain">Where does the rain go from here? &rarr;</button>' : '<button type="button" class="linkbtn" data-goto-ly="heat">See the hottest areas &rarr;</button>') + '</p>'; }).join('') : '<p class="td-none">No warnings for the next few days.</p>');
       $('#pf-alerts').innerHTML = T.alerts(w).map(function (a) { return '<p class="pf-alert al-' + a.kind + '"><b>' + (a.kind === 'rain' ? 'Rain warning' : a.kind === 'heat' ? 'Heat warning' : 'Storms') + '</b> ' + esc(a.text) + '</p>'; }).join('');
       T.air(e.lat, e.lng).then(function (a) { if (a.us_aqi != null) $('#pf-aqi').textContent = ' · Air ' + Math.round(a.us_aqi) + ' (' + T.aqiWord(a.us_aqi).toLowerCase() + ')'; }).catch(function () {});
     }).catch(function () { $('#pf-now').innerHTML = '<p class="pf-wait">The weather could not be loaded right now.</p>'; $('#td-wx').innerHTML = '<span class="td-k">Weather and warnings</span><p class="td-none">The weather could not be loaded right now.</p>'; });
@@ -391,11 +395,120 @@
     HERE_LL = [lat, lng];
   }
   var HERE_LL = null, PRESET = null;
+
+  // ---- One question at a time: "Where does the rain go from here?"
+  // The map pulls back from a spot to the river basin, follows the water downhill, shows where it collects,
+  // and ends with what is being done nearby and one thing to do. Each step shows one relationship.
+  var Q = null, QL = [];
+  function qClear() { QL.forEach(function (l) { HM.removeLayer(l); }); QL = []; }
+  function qAdd(l) { l.addTo(HM); QL.push(l); return l; }
+  function adjacency(c) {
+    var n = c.lat.length, adj = []; for (var i = 0; i < n; i++) adj.push([]);
+    for (var j = 0; j < n; j++) (c.nb[j] || []).forEach(function (k) { if (k >= 0 && k < n && adj[j].indexOf(k) < 0) { adj[j].push(k); adj[k].push(j); } });
+    return adj;
+  }
+  function drainage() {
+    if (HDATA.flow) return HDATA.flow;
+    var c = HDATA.place.cells, n = c.lat.length, adj = adjacency(c), down = new Int32Array(n).fill(-1), acc = new Float64Array(n), order = [];
+    for (var i = 0; i < n; i++) {
+      var e0 = +c.elev[i], best = -1, be = e0;
+      adj[i].forEach(function (k) { var ek = +c.elev[k]; if (isFinite(ek) && ek < be) { be = ek; best = k; } });
+      down[i] = best; acc[i] = +c.area[i] || 0.85; order.push(i);
+    }
+    order.sort(function (a, b) { return (+c.elev[b]) - (+c.elev[a]); });
+    order.forEach(function (i) { if (down[i] >= 0) acc[down[i]] += acc[i]; });
+    HDATA.flow = { down: down, acc: acc };
+    return HDATA.flow;
+  }
+  function trace(start) {
+    var f = drainage(), c = HDATA.place.cells, path = [start], seen = {}, i = start; seen[i] = 1;
+    while (f.down[i] >= 0 && !seen[f.down[i]] && path.length < 400) { i = f.down[i]; seen[i] = 1; path.push(i); }
+    var km = 0; for (var k = 1; k < path.length; k++) km += kmBetween(c.lat[path[k - 1]], c.lng[path[k - 1]], c.lat[path[k]], c.lng[path[k]]);
+    return { path: path, km: km, end: i };
+  }
+  function qStart() {
+    if (!HDATA) { $('#here-card').innerHTML = '<p class="here-hint">The map is still loading. Try again in a moment.</p>'; return; }
+    var e = D.lib[SLUG], st = HERE_LL ? nearestCell(HERE_LL[0], HERE_LL[1]) : -1;
+    if (st < 0) st = nearestCell(e.lat, e.lng);
+    if (st < 0) st = 0;
+    Q = { step: 0, start: st };
+    document.getElementById('here').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    qShow();
+  }
+  function qShow() {
+    var c = HDATA.place.cells, e = D.lib[SLUG], d = HDATA.place, reg = d.regional || {}, bs = typeof reg.basin === 'string' ? JSON.parse(reg.basin) : (reg.basin || {});
+    qClear(); if (HPIN) { HM.removeLayer(HPIN); HPIN = null; }
+    var sLL = [c.lat[Q.start], c.lng[Q.start]], from = HERE_LL ? 'the spot you picked' : 'the center of ' + e.name, steps = 4, body = '', title = '';
+    qAdd(L.circleMarker(sLL, { radius: 8, color: '#fff', weight: 3, fillColor: '#123B38', fillOpacity: 1 }));
+    if (Q.step === 0) {
+      // Where it comes from: the river basin upstream
+      title = 'Where the rain comes from';
+      var rings = bs.rings || [], ll = []; for (var k = 0; k + 1 < rings.length; k += 2) ll.push([rings[k], rings[k + 1]]);
+      if (ll.length > 2) { var poly = qAdd(L.polygon(ll, { color: '#2E6E8E', weight: 2.5, fillColor: '#2E6E8E', fillOpacity: 0.12 })); HM.flyToBounds(poly.getBounds(), { padding: [20, 20], duration: 1.2 }); }
+      var sh = bs.shares || {}, built = Math.round(100 * (sh.built || 0)), forest = Math.round(100 * ((sh.forest || 0) + (sh.wetland || 0)));
+      body = '<p>Rain that falls inside the blue outline, about <b>' + (bs.area_km2 || 0).toLocaleString('en-US') + ' km\u00b2</b>, drains toward ' + esc(e.name) + '.</p>' +
+        '<p>' + (built >= 25 ? '<b>' + built + '%</b> of that land is built over, so rain runs off roofs and streets fast instead of soaking in.' : 'Only <b>' + built + '%</b> of that land is built over, so much of the rain can soak in.') + (forest ? ' <b>' + forest + '%</b> is forest or wetland, which holds water back and lets it out slowly.' : '') + '</p>';
+    } else if (Q.step === 1) {
+      // Where it goes: downhill paths, and the path from the chosen spot
+      title = 'Where it goes';
+      var f = drainage(), n = c.lat.length, rend = L.canvas({ padding: 0.3 }), lines = [];
+      var accs = Array.prototype.slice.call(f.acc).sort(function (a, b) { return a - b; }), thr = accs[Math.floor(n * 0.93)] || 10;
+      for (var i = 0; i < n; i++) if (f.down[i] >= 0 && f.acc[i] >= thr) {
+        var w = Math.min(6, 1 + Math.log2(f.acc[i] / thr + 1) * 1.6);
+        lines.push(L.polyline([[c.lat[i], c.lng[i]], [c.lat[f.down[i]], c.lng[f.down[i]]]], { renderer: rend, color: '#2E6E8E', weight: w, opacity: 0.75, interactive: false }));
+      }
+      qAdd(L.layerGroup(lines));
+      var t = trace(Q.start), pl = t.path.map(function (j) { return [c.lat[j], c.lng[j]]; });
+      if (pl.length > 1) { var tl = qAdd(L.polyline(pl, { color: '#123B38', weight: 5, opacity: 0.95, dashArray: '2 8', lineCap: 'round' })); HM.flyToBounds(tl.getBounds().pad(0.6), { duration: 1.2, maxZoom: 13 }); }
+      else HM.flyTo(sLL, 12, { duration: 1.2 });
+      var endNear = (+c.water_km[t.end] || 99) < 1;
+      qAdd(L.circleMarker([c.lat[t.end], c.lng[t.end]], { radius: 9, color: '#fff', weight: 3, fillColor: '#2E6E8E', fillOpacity: 1 }));
+      body = '<p>Water runs downhill. The blue lines are the paths most of it follows across the region, thicker where more land drains into them.</p>' +
+        (pl.length > 1 ? '<p>From ' + from + ', rain flows <b>' + (t.km < 1 ? 'less than 1 km' : 'about ' + Math.round(t.km) + ' km') + '</b> downhill and ends up in ' + (endNear ? 'a low spot next to a river or lake' : 'a low spot where it pools') + ' (the blue dot).</p>' : '<p>' + from.charAt(0).toUpperCase() + from.slice(1) + ' sits in a low spot already: water from around it flows here.</p>') +
+        '<p class="q-note">Worked out from ground height in patches of about 1 km\u00b2. Drains, pipes and canals change the real path on each street, which is where local knowledge helps.</p>';
+    } else if (Q.step === 2) {
+      // Where it collects: the most flood-exposed areas and who lives there
+      title = 'Where it collects';
+      var fl = c.flood.map(function (v) { return +v || 0; }), pos = fl.filter(function (v) { return v > 0; }).sort(function (a, b) { return a - b; });
+      var cut = pos.length ? pos[Math.floor(pos.length * 0.75)] : 1, rend2 = L.canvas({ padding: 0.3 }), g = [], people = 0, cnt = 0;
+      for (var j = 0; j < fl.length; j++) if (fl[j] > 0 && fl[j] >= cut && c.poly[j]) {
+        var pp = c.poly[j], ll2 = []; for (var q = 0; q < pp.length; q += 2) ll2.push([pp[q], pp[q + 1]]);
+        g.push(L.polygon(ll2, { renderer: rend2, stroke: false, fillColor: '#1f5fa8', fillOpacity: 0.55, interactive: false })); people += +c.pop[j] || 0; cnt++;
+      }
+      var grp = qAdd(L.featureGroup(g)); if (g.length) HM.flyToBounds(grp.getBounds(), { padding: [20, 20], duration: 1.2 });
+      body = '<p>The dark blue areas are where water collects first: low ground near rivers, lakes or the sea. They are the most flood-exposed quarter of the places with any exposure.</p>' +
+        '<p>About <b>' + T.fmtN(people) + ' people</b> live in them.</p>' +
+        '<p class="q-note">A screening of exposure from height and distance to water, not a flood forecast. Local flood maps and people who live there know the details.</p>';
+    } else {
+      // What is being done, and one thing to do
+      title = 'What\u2019s being done';
+      var WK = ['wetland', 'rain', 'river', 'park'];
+      var pj = D.projects.filter(function (p) { return p.place === SLUG && WK.indexOf(p.kind) >= 0 && isFinite(p.lat); });
+      pj.forEach(function (p) { qAdd(L.circleMarker([p.lat, p.lng], { radius: 9, color: '#fff', weight: 2.5, fillColor: '#C0603A', fillOpacity: 1 }).bindTooltip(p.name)); });
+      var obs = OBSV.filter(function (o) { return o.place === SLUG && o.kind === 'water'; });
+      obs.forEach(function (o) { qAdd(L.circleMarker([o.lat, o.lng], { radius: 6, color: '#fff', weight: 2, fillColor: '#2E6E8E', fillOpacity: 1 }).bindTooltip(o.text)); });
+      if (pj.length) HM.flyToBounds(L.featureGroup(pj.map(function (p) { return L.marker([p.lat, p.lng]); })).getBounds().pad(0.5), { duration: 1.2, maxZoom: 13 });
+      body = (pj.length ? '<p>Projects here that give water room or slow it down:</p><ul class="here-pj">' + pj.map(function (p) { return '<li><a href="#pj-' + esc(p.id) + '" translate="no">' + esc(p.name) + '</a><span>' + ({ proposed: 'Proposed', approved: 'Approved', underway: 'Under way', built: 'Built' }[p.status] || '') + (p.year ? ' \u00b7 ' + p.year : '') + '</span></li>'; }).join('') + '</ul>' : '<p>No projects on the map here yet that deal with rain and flooding.</p>') +
+        (obs.length ? '<p>' + obs.length + ' note' + (obs.length > 1 ? 's' : '') + ' from people who have seen water collect (small blue dots).</p>' : '') +
+        '<div class="here-acts"><button type="button" class="btn" data-add-kind="water">Seen water collect? Add it on the map</button><a class="btn ghost" href="../explore/?goal=flood#' + esc(SLUG) + '">Test what would keep homes dry in ThreadLab &rarr;</a>' +
+        (pj.length ? '' : '<a class="btn ghost" href="../explore/?add=1#' + esc(SLUG) + '">Add a project you know about</a>') + '</div>';
+    }
+    var dots = ''; for (var s2 = 0; s2 < steps; s2++) dots += '<i' + (s2 === Q.step ? ' class="on"' : '') + '></i>';
+    $('#here-card').innerHTML = '<p class="q-kick">Where does the rain go from here? <span class="q-dots" aria-label="Step ' + (Q.step + 1) + ' of ' + steps + '">' + dots + '</span></p><h3>' + title + '</h3>' + body +
+      '<div class="q-nav">' + (Q.step > 0 ? '<button type="button" class="btn ghost" data-qnav="-1">Back</button>' : '') + (Q.step < steps - 1 ? '<button type="button" class="btn" data-qnav="1">Next: ' + ['Where it goes', 'Where it collects', 'What\u2019s being done'][Q.step] + '</button>' : '') + '<button type="button" class="linkbtn" data-qnav="x">Back to the map</button></div>';
+    document.querySelectorAll('[data-q]').forEach(function (b) { b.classList.add('on'); });
+  }
+  document.addEventListener('click', function (ev) {
+    var qb = ev.target.closest('[data-q]'); if (qb && qb.dataset.q === 'rain') { if (LY !== 'none') setLayer('none'); qStart(); return; }
+    var nb = ev.target.closest('[data-qnav]'); if (!nb || !Q) return;
+    if (nb.dataset.qnav === 'x') { qClear(); Q = null; setLayer('flood'); $('#here-card').innerHTML = '<p class="here-hint">Tap the map anywhere to see what the data says about that area and what you can do.</p><div class="here-key" id="here-key"></div>'; drawLayer(); document.querySelectorAll('[data-q]').forEach(function (b) { b.classList.remove('on'); }); return; }
+    Q.step = Math.max(0, Math.min(3, Q.step + (+nb.dataset.qnav))); qShow();
+  });
   document.addEventListener('click', function (ev) {
     if (ev.target.closest('#here-add')) { $('#here-form').hidden = false; if (PRESET) { var r = document.querySelector('#here-form input[value="' + PRESET + '"]'); if (r) r.checked = true; PRESET = null; } $('#here-txt').focus(); }
     if (ev.target.closest('#here-cancel')) $('#here-form').hidden = true;
     var ad = ev.target.closest('[data-add-kind]');
-    if (ad) { PRESET = ad.dataset.addKind; document.getElementById('here').scrollIntoView({ behavior: 'smooth' }); var hint = document.querySelector('.here-hint'); if (hint) hint.innerHTML = '<b>Tap the map where it is</b>, then choose \u201cAdd what you know here\u201d.'; }
+    if (ad) { PRESET = ad.dataset.addKind; document.getElementById('here').scrollIntoView({ behavior: 'smooth' }); var hint = document.querySelector('.here-hint'); if (hint) hint.innerHTML = '<b>Tap the map where it is</b>, then choose \u201cAdd what you know here\u201d.'; else if (Q) { $('#here-card').insertAdjacentHTML('beforeend', '<p class="here-hint q-tap"><b>Now tap the map where you saw it.</b></p>'); } }
   });
   document.addEventListener('submit', function (ev) {
     if (ev.target.id !== 'here-form') return; ev.preventDefault();
@@ -411,7 +524,7 @@
     if (!HM) {
       HM = L.map('here-map', { scrollWheelZoom: false, zoomControl: true });
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' }).addTo(HM);
-      HM.on('click', function (ev) { if (HDATA) whatsHere(ev.latlng.lat, ev.latlng.lng); });
+      HM.on('click', function (ev) { if (!HDATA) return; if (Q) { qClear(); Q = null; } whatsHere(ev.latlng.lat, ev.latlng.lng); });
     }
     HM.setView([e.lat, e.lng], 10);
     if (HLAYER) { HM.removeLayer(HLAYER); HLAYER = null; } if (HPIN) { HM.removeLayer(HPIN); HPIN = null; }
