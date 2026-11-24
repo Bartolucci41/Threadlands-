@@ -6,7 +6,7 @@
 //   GITHUB_TOKEN  (secret)  fine-grained token with "Contents: read and write" on Bartolucci41/Threadlands-
 //   REPO          (text)    Bartolucci41/Threadlands-
 //   SITE          (text)    https://threadlands.org
-//   SUPPORT       (KV namespace binding)  where "Back this project" counts are kept (Workers KV, free tier)
+//   SUPPORT       (KV namespace binding)  where "Back this project" and "Stand with" counts are kept (Workers KV, free tier)
 //   SALT          (secret, optional)      any long random text; makes the stored visitor fingerprints unguessable
 
 const ALLOWED = ['https://threadlands.org', 'https://www.threadlands.org', 'https://bartolucci41.github.io'];
@@ -92,6 +92,37 @@ async function back(b, request, env, origin) {
   return reply({ id, n: c[id] }, 200, origin);
 }
 
+// "Stand with" a place: one entry per visitor per place, with how they are connected to it.
+// Counts per place and per tie live in one KV entry; a visitor can change their tie or step back.
+const TIES = ['live', 'from', 'work', 'care'];
+async function knownPlaces(env) {
+  const site = env.SITE || 'https://threadlands.org';
+  const r = await fetch(`${site}/data/index.json`, { cf: { cacheTtl: 300 } });
+  if (!r.ok) return new Set();
+  const j = await r.json();
+  return new Set((j.places || []).map((p) => String(p.slug)));
+}
+async function stand(b, request, env, origin) {
+  if (!env.SUPPORT) return reply({ error: 'Standing with places is not switched on yet.' }, 503, origin);
+  const place = String(b.place || '').slice(0, 80), tie = b.on === false ? null : String(b.tie || 'care');
+  if (!place || !(await knownPlaces(env)).has(place)) return reply({ error: 'Unknown place.' }, 400, origin);
+  if (tie && !TIES.includes(tie)) return reply({ error: 'Unknown tie.' }, 400, origin);
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown', now = Date.now();
+  const times = (recent.get('s' + ip) || []).filter((t) => now - t < 3600e3);
+  if (times.length >= 40) return reply({ error: 'Please try again later.' }, 429, origin);
+  times.push(now); recent.set('s' + ip, times);
+  const key = 's:' + place + ':' + (await fingerprint(ip + '|' + place + '|' + (env.SALT || 'threadlands')));
+  const was = await env.SUPPORT.get(key);
+  const all = (await env.SUPPORT.get('stands', { type: 'json' })) || {};
+  const c = all[place] || (all[place] = {});
+  if (was === tie) return reply({ place, counts: c }, 200, origin);
+  if (was) c[was] = Math.max(0, (c[was] || 0) - 1);
+  if (tie) { c[tie] = (c[tie] || 0) + 1; await env.SUPPORT.put(key, tie, { expirationTtl: 60 * 60 * 24 * 365 * 2 }); }
+  else await env.SUPPORT.delete(key);
+  await env.SUPPORT.put('stands', JSON.stringify(all));
+  return reply({ place, counts: c }, 200, origin);
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin') || '';
@@ -99,7 +130,7 @@ export default {
     // Anyone can read how many people back each project
     if (request.method === 'GET' && new URL(request.url).searchParams.has('counts')) {
       if (!env.SUPPORT) return reply({ error: 'Backing is not switched on yet.' }, 503, origin);
-      const res = reply({ counts: await counts(env) }, 200, origin);
+      const res = reply({ counts: await counts(env), stands: (await env.SUPPORT.get('stands', { type: 'json' })) || {} }, 200, origin);
       res.headers.set('Cache-Control', 'public, max-age=60');
       return res;
     }
@@ -112,6 +143,7 @@ export default {
     // A visitor proposing a real project for the map: checked here, then opened as an issue for review on GitHub
     if (b.type === 'project') return project(b, request, env, origin);
     if (b.type === 'back') return back(b, request, env, origin);
+    if (b.type === 'stand') return stand(b, request, env, origin);
     const osm = String(b.osm || '');
     const name = String(b.name || '').slice(0, 80);
     const country = String(b.country || '').slice(0, 60);

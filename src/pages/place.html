@@ -8,13 +8,19 @@
     <section class="pf-head bleed band-deep" aria-labelledby="pf-name">
       <div class="pf-head-in">
         <div class="pf-id">
-          <a class="pf-back" href="{B}involved/">&larr; Your places</a>
+          <a class="pf-back" href="{B}involved/">&larr; Places you stand with</a>
           <h1 id="pf-name" class="pf-h"></h1>
           <p class="pf-where" id="pf-where"></p>
           <div class="pf-actions">
-            <button type="button" class="btn" id="pf-follow" aria-pressed="false">Follow</button>
+            <button type="button" class="btn" id="pf-follow" aria-pressed="false" aria-expanded="false" aria-controls="pf-tie">Stand with</button>
             <button type="button" class="btn ghost-inv" id="pf-share">Share</button>
           </div>
+          <div class="pf-tie" id="pf-tie" role="group" aria-labelledby="pf-tie-q" hidden>
+            <p id="pf-tie-q">How are you connected to <span class="pf-tie-name"></span>?</p>
+            <div class="pf-tie-opts"><button type="button" class="chip" data-tie="live">I live here</button><button type="button" class="chip" data-tie="from">I&rsquo;m from here</button><button type="button" class="chip" data-tie="work">I work or study here</button><button type="button" class="chip" data-tie="care">I care about it</button></div>
+            <button type="button" class="linkbtn pf-tie-off" id="pf-tie-off" hidden>Step back from <span class="pf-tie-name"></span></button>
+          </div>
+          <p class="pf-standers" id="pf-standers" hidden></p>
         </div>
         <div class="pf-now" id="pf-now" aria-live="polite"><p class="pf-wait">Loading the weather&hellip;</p></div>
       </div>
@@ -77,8 +83,30 @@
     var w = Math.max(2, Math.min(100, Math.round(v)));
     return '<div class="pf-bar"><span class="pf-bar-l">' + label + '</span><span class="pf-bar-t" aria-hidden="true"><i style="width:' + w + '%"></i></span><b>' + Math.round(v) + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>';
   }
-  function followUI() { var on = T.isFollowed(SLUG), b = $('#pf-follow'); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.textContent = on ? 'Following ✓' : 'Follow'; }
-  $('#pf-follow').addEventListener('click', function () { if (T.isFollowed(SLUG)) T.unfollow(SLUG); else T.follow(SLUG); followUI(); });
+  // Stand with this place: say how you are connected; change it or step back any time
+  function followUI() {
+    var tie = T.tieOf(SLUG), b = $('#pf-follow'), name = D.lib[SLUG].name;
+    b.setAttribute('aria-pressed', tie ? 'true' : 'false');
+    b.textContent = tie ? 'Standing with ' + name + ' \u2713' : 'Stand with ' + name;
+    document.querySelectorAll('.pf-tie-name').forEach(function (n) { n.textContent = name; });
+    document.querySelectorAll('[data-tie]').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.tie === tie ? 'true' : 'false'); });
+    $('#pf-tie-off').hidden = !tie;
+  }
+  function showStanders(c) {
+    var el = $('#pf-standers');
+    if (!c || !c.total) { el.hidden = true; return; }
+    var parts = []; if (c.live) parts.push(c.live.toLocaleString('en-US') + ' live here');
+    var away = c.total - c.live; if (away > 0) parts.push(away.toLocaleString('en-US') + ' from elsewhere');
+    el.innerHTML = '<b>' + c.total.toLocaleString('en-US') + (c.total === 1 ? ' person stands' : ' people stand') + ' with ' + esc(D.lib[SLUG].name) + '</b>' + (parts.length ? ' \u00b7 ' + parts.join(' \u00b7 ') : '');
+    el.hidden = false;
+  }
+  function fromReply(r) { if (!r || !r.counts) return; var c = r.counts, n = (c.live || 0) + (c.from || 0) + (c.work || 0) + (c.care || 0); showStanders({ total: n, live: c.live || 0 }); }
+  $('#pf-follow').addEventListener('click', function () { var t = $('#pf-tie'); t.hidden = !t.hidden; $('#pf-follow').setAttribute('aria-expanded', t.hidden ? 'false' : 'true'); });
+  $('#pf-tie').addEventListener('click', function (ev) {
+    var c = ev.target.closest('[data-tie]'); if (!c) return;
+    T.standWith(SLUG, c.dataset.tie).then(fromReply); followUI(); $('#pf-tie').hidden = true; $('#pf-follow').setAttribute('aria-expanded', 'false');
+  });
+  $('#pf-tie-off').addEventListener('click', function () { T.stepBack(SLUG).then(fromReply); followUI(); $('#pf-tie').hidden = true; $('#pf-follow').setAttribute('aria-expanded', 'false'); });
   $('#pf-share').addEventListener('click', function () {
     var e = D.lib[SLUG], data = { title: e.name + ' on Threadlands', text: 'What’s changing in ' + e.name + ': risks, projects and news.', url: location.href };
     if (navigator.share) navigator.share(data).catch(function () {});
@@ -161,7 +189,8 @@
     $('#pf-name').textContent = e.name;
     $('#pf-where').innerHTML = T.flag(e.cc) + esc(T.where(e) + (e.city_pop ? ' · ' + T.fmtN(e.city_pop) + ' people in the city' : '') + (e.pop && (!e.city_pop || e.pop > e.city_pop * 1.1) ? ', ' + T.fmtN(e.pop) + ' in the region' : ''));
     $('#pf-explore').href = '{B}explore/#' + SLUG; $('#pf-studio').href = '{B}studio/#' + SLUG;
-    followUI();
+    followUI(); $('#pf-tie').hidden = true; $('#pf-standers').hidden = true;
+    T.standers(SLUG).then(showStanders).catch(function () {});
     var r = D.rank[SLUG] || {}, sm = D.summary[SLUG] || {};
     renderWeather(e); renderPressures(sm); renderTied(e, sm); renderReady(e, r, sm); renderProjects(e); renderNews(e);
     window.scrollTo(0, 0);

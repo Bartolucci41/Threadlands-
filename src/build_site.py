@@ -416,6 +416,17 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
     .lab-tabs { gap: 4px 16px; } .lab-tabs-k { display: none; }
   }
   /* Get involved */
+  .ladder { list-style: none; margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; counter-reset: lad; max-width: 60rem; }
+  @media (max-width: 760px) { .ladder { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .ladder li { counter-increment: lad; display: grid; gap: 2px; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); font-size: 0.88rem; color: var(--ink2); line-height: 1.4; }
+  .ladder li b { font: 700 1.05rem var(--font-display); color: var(--ink); } .ladder li b::before { content: counter(lad) " "; color: var(--accent); }
+  .mpc-tie { display: block; padding: 0 18px 16px; } .mpc-tie select { width: 100%; min-height: 36px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface2); font: 500 0.85rem var(--font-body); color: var(--ink); padding: 0 10px; }
+  .pf-tie { margin-top: 14px; padding: 14px 16px; border-radius: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); max-width: 34rem; }
+  .pf-tie p { margin: 0 0 10px; color: #fff; font-weight: 600; }
+  .pf-tie-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pf-tie .chip { background: transparent; color: #fff; border-color: rgba(255,255,255,0.45); } .pf-tie .chip[aria-pressed="true"] { background: #8fd3bf; color: #0b2624; border-color: #8fd3bf; }
+  .pf-tie-off { margin-top: 12px; color: #cfe0da; font-size: 0.85rem; }
+  .pf-standers { margin: 12px 0 0; color: #cfe0da; font-size: 0.92rem; } .pf-standers b { color: #fff; }
   .inv-first { padding-top: 24px; }
   .inv-ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
   .inv-way { display: grid; gap: 6px; align-content: start; padding: 20px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); text-decoration: none; }
@@ -635,7 +646,7 @@ def footer(base):
     return (f'<footer class="site-foot2">\n  <div class="wrap foot-grid">\n'
             f'    <div class="foot-brand"><a class="wordmark foot-wm" href="{base}" translate="no">Threadlands</a>'
             '<p>Know your city, and help make it ready for what&rsquo;s coming. For any place on Earth.</p></div>\n'
-            f'    <nav aria-label="Get involved"><h2>Get involved</h2>{col([("involved/", "Your places"), ("projects/", "Projects"), ("places/", "All places")])}</nav>\n'
+            f'    <nav aria-label="Get involved"><h2>Get involved</h2>{col([("involved/", "Places you stand with"), ("projects/", "Projects"), ("places/", "All places")])}</nav>\n'
             f'    <nav aria-label="ThreadLab"><h2>ThreadLab</h2>{col([("lab/", "Overview"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")])}</nav>\n'
             f'    <nav aria-label="About"><h2>About</h2>{col([("about/", "About Threadlands")])}</nav>\n'
             '  </div>\n  <div class="wrap foot-small">\n'

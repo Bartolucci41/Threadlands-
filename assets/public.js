@@ -111,9 +111,30 @@
   // "Back this project": counts come from the Threadlands relay; this device remembers what it backed
   var RELAY = 'https://threadlands-relay.rob41pitt.workers.dev/', BACKED = 'threadlands:backed', countsP = null;
   function backed() { try { var a = JSON.parse(store(BACKED) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
-  function support() {
-    if (!countsP) countsP = fetch(RELAY + '?counts=1').then(function (r) { if (!r.ok) throw new Error('off'); return r.json(); }).then(function (j) { return j.counts || {}; });
+  function relayData() {
+    if (!countsP) countsP = fetch(RELAY + '?counts=1').then(function (r) { if (!r.ok) throw new Error('off'); return r.json(); });
     return countsP;
+  }
+  function support() { return relayData().then(function (j) { return j.counts || {}; }); }
+
+  // "Stand with" a place: the places you stand with, and how you are connected to each
+  var TIES_KEY = 'threadlands:ties';
+  var TIES = { live: 'I live here', from: 'I\u2019m from here', work: 'I work or study here', care: 'I care about it' };
+  var TIE_SHORT = { live: 'You live here', from: 'You\u2019re from here', work: 'You work or study here', care: 'You care about it' };
+  function ties() { try { var o = JSON.parse(store(TIES_KEY) || '{}'); return o && typeof o === 'object' ? o : {}; } catch (e) { return {}; } }
+  function tieOf(slug) { return ties()[slug] || (isFollowed(slug) ? 'care' : null); }
+  function post(body) { return fetch(RELAY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }).catch(function () { return null; }); }
+  function standWith(slug, tie) {
+    tie = TIES[tie] ? tie : 'care';
+    var o = ties(); o[slug] = tie; store(TIES_KEY, JSON.stringify(o)); follow(slug);
+    return post({ type: 'stand', place: slug, tie: tie });
+  }
+  function stepBack(slug) {
+    var o = ties(); delete o[slug]; store(TIES_KEY, JSON.stringify(o)); unfollow(slug);
+    return post({ type: 'stand', place: slug, on: false });
+  }
+  function standers(slug) {
+    return relayData().then(function (j) { var c = (j.stands || {})[slug] || {}, n = 0; Object.keys(c).forEach(function (k) { n += c[k] || 0; }); return { total: n, live: c.live || 0, from: c.from || 0, work: c.work || 0, care: c.care || 0 }; });
   }
   function backProject(id) {
     return fetch(RELAY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'back', id: id }) })
@@ -142,5 +163,5 @@
 
   window.TLP = { follows: follows, follow: follow, unfollow: unfollow, isFollowed: isFollowed, setFollows: setFollows, units: units, setUnits: setUnits, temp: temp, rain: rain,
     setBase: setBase, data: data, all: all, weather: weather, air: air, aqiWord: aqiWord, alerts: alerts, sky: sky, icon: icon, day: day,
-    PRESS: PRESS, TOPIC: TOPIC, TONE: TONE, esc: esc, norm: norm, ndate: ndate, fmtN: fmtN, where: where, headline: headline, flag: flag, matches: matches, nearest: nearest, support: support, backProject: backProject, wireBacking: wireBacking, backed: backed };
+    PRESS: PRESS, TOPIC: TOPIC, TONE: TONE, esc: esc, norm: norm, ndate: ndate, fmtN: fmtN, where: where, headline: headline, flag: flag, matches: matches, nearest: nearest, support: support, relayData: relayData, TIES: TIES, TIE_SHORT: TIE_SHORT, ties: ties, tieOf: tieOf, standWith: standWith, stepBack: stepBack, standers: standers, backProject: backProject, wireBacking: wireBacking, backed: backed };
 })();

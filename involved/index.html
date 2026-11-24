@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Get involved | Threadlands</title>
-<meta name="description" content="Follow the places you care about, back real projects, and add the ones you know about. Weather warnings, risks, news and ways to help, for any place on Earth.">
+<meta name="description" content="Stand with the places you care about, back real projects, and add the ones you know about. Weather warnings, risks, news and ways to help, for any place on Earth.">
 <meta property="og:title" content="Get involved | Threadlands">
-<meta property="og:description" content="Follow the places you care about, back real projects, and add the ones you know about. Weather warnings, risks, news and ways to help, for any place on Earth.">
+<meta property="og:description" content="Stand with the places you care about, back real projects, and add the ones you know about. Weather warnings, risks, news and ways to help, for any place on Earth.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
@@ -37,13 +37,19 @@
 <script src="../assets/public.js"></script>
   <header class="page-head">
     <p class="page-kicker">Get involved</p>
-    <h1>Follow your places. Back what you want to see happen.</h1>
-    <p class="page-lead">Keep up with the places you care about: warnings, risks, news and the projects changing them. Back the projects you support, and add the ones you know about. Every contribution is checked and shows up for everyone.</p>
+    <h1>Stand with your places. Help shape what happens next.</h1>
+    <p class="page-lead">Stand with the places you live in, come from, or care about: the city you&rsquo;d fight for first, and any others close to your heart. Every person who stands with a place shows city teams and funders that its people are paying attention.</p>
+    <ol class="ladder" aria-label="Ways to take part">
+      <li><b>Stand with</b><span>a place, and get its warnings and news</span></li>
+      <li><b>Back</b><span>the projects you want to see happen</span></li>
+      <li><b>Add</b><span>what you know: a project, a problem, an event</span></li>
+      <li><b>Lead</b><span>look after a place and check what others add (coming soon)</span></li>
+    </ol>
   </header>
 
   <section class="sect mp inv-first" aria-labelledby="mine-h">
     <div class="sect-top">
-      <div><h2 id="mine-h" tabindex="-1">Your places</h2><p id="mine-sub">Saved on this device. Tap a place to see its full profile.</p></div>
+      <div><h2 id="mine-h" tabindex="-1">Places you stand with</h2><p id="mine-sub">Saved on this device. Tap a place to see its full profile.</p></div>
       <div class="mp-units" role="group" aria-label="Temperature units"><button type="button" class="chip" data-u="c">&deg;C</button><button type="button" class="chip" data-u="f">&deg;F</button></div>
     </div>
     <div class="mp-add">
@@ -57,7 +63,7 @@
     </div>
     <div class="mp-grid" id="mp-grid"></div>
     <div class="mp-empty" id="mp-empty" hidden>
-      <p>You aren&rsquo;t following any places yet. Add your city above, or start with one of these:</p>
+      <p>You aren&rsquo;t standing with any places yet. Add your city above, or start with one of these:</p>
       <div class="mp-pop" id="mp-pop"></div>
     </div>
   </section>
@@ -82,7 +88,7 @@
 <footer class="site-foot2">
   <div class="wrap foot-grid">
     <div class="foot-brand"><a class="wordmark foot-wm" href="../" translate="no">Threadlands</a><p>Know your city, and help make it ready for what&rsquo;s coming. For any place on Earth.</p></div>
-    <nav aria-label="Get involved"><h2>Get involved</h2><a href="../involved/">Your places</a><a href="../projects/">Projects</a><a href="../places/">All places</a></nav>
+    <nav aria-label="Get involved"><h2>Get involved</h2><a href="../involved/">Places you stand with</a><a href="../projects/">Projects</a><a href="../places/">All places</a></nav>
     <nav aria-label="ThreadLab"><h2>ThreadLab</h2><a href="../lab/">Overview</a><a href="../explore/">Explore</a><a href="../studio/">Studio</a><a href="../how-it-works/">Method</a></nav>
     <nav aria-label="About"><h2>About</h2><a href="../about/">About Threadlands</a></nav>
   </div>
@@ -116,7 +122,8 @@
           (top ? '<span><i>Biggest pressure</i><b class="mpc-press">' + esc(top.t) + '</b></span>' : '') + '</span>' +
         (lead ? '<span class="mpc-news"><i>' + esc(T.TONE[lead.tone] || 'News') + '</i><span translate="no">' + esc(lead.title) + '</span></span>' : '') +
       '</a>' +
-      '<button type="button" class="mpc-x" data-rm="' + esc(slug) + '" aria-label="Stop following ' + esc(e.name) + '" title="Stop following">&times;</button>' +
+      '<label class="mpc-tie"><span class="sr-only">How you are connected to ' + esc(e.name) + '</span><select data-tie="' + esc(slug) + '">' + Object.keys(T.TIES).map(function (k) { return '<option value="' + k + '"' + (k === (T.tieOf(slug) || 'care') ? ' selected' : '') + '>' + T.TIES[k] + '</option>'; }).join('') + '</select></label>' +
+      '<button type="button" class="mpc-x" data-rm="' + esc(slug) + '" aria-label="Step back from ' + esc(e.name) + '" title="Step back">&times;</button>' +
     '</article>';
   }
   function cards() {
@@ -135,8 +142,9 @@
       }).catch(function () { /* weather is optional */ });
     });
   }
-  function add(slug) { T.follow(slug); cards(); var c = document.querySelector('.mpc[data-slug="' + slug + '"]'); if (c) { c.classList.add('mpc-new'); c.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } }
-  $('#mp-grid').addEventListener('click', function (e) { var b = e.target.closest('[data-rm]'); if (!b) return; T.unfollow(b.dataset.rm); cards(); });
+  function add(slug) { T.standWith(slug, 'care'); cards(); var c = document.querySelector('.mpc[data-slug="' + slug + '"]'); if (c) { c.classList.add('mpc-new'); c.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } }
+  $('#mp-grid').addEventListener('click', function (e) { var b = e.target.closest('[data-rm]'); if (!b) return; T.stepBack(b.dataset.rm); cards(); });
+  $('#mp-grid').addEventListener('change', function (e) { var sel = e.target.closest('[data-tie]'); if (sel) T.standWith(sel.dataset.tie, sel.value); });
   $('#mp-pop').addEventListener('click', function (e) { var b = e.target.closest('[data-add]'); if (b) add(b.dataset.add); });
 
   // Add a place: the library first; anything else is built in Explore
