@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=19">
+<link rel="stylesheet" href="../assets/site.css?v=20">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <link rel="manifest" href="../manifest.webmanifest">
@@ -523,7 +523,7 @@
     Q.step = Math.max(0, Math.min(3, Q.step + (+nb.dataset.qnav))); qShow();
   });
   document.addEventListener('click', function (ev) {
-    if (ev.target.closest('#here-add')) { $('#here-form').hidden = false; if (PRESET) { var r = document.querySelector('#here-form input[value="' + PRESET + '"]'); if (r) r.checked = true; PRESET = null; } $('#here-txt').focus(); }
+    if (ev.target.closest('#here-add')) { var an = document.getElementById('here-addnote'); if (an) an.remove(); $('#here-form').hidden = false; if (PRESET) { var r = document.querySelector('#here-form input[value="' + PRESET + '"]'); if (r) r.checked = true; PRESET = null; } $('#here-txt').focus(); }
     if (ev.target.closest('#here-cancel')) $('#here-form').hidden = true;
     var ad = ev.target.closest('[data-add-kind]');
     if (ad) { PRESET = ad.dataset.addKind; document.getElementById('here').scrollIntoView({ behavior: 'smooth' }); var hint = document.querySelector('.here-hint'); if (hint) hint.innerHTML = '<b>Tap the map where it is</b>, then choose \u201cAdd what you know here\u201d.'; else if (Q) { $('#here-card').insertAdjacentHTML('beforeend', '<p class="here-hint q-tap"><b>Now tap the map where you saw it.</b></p>'); } }
@@ -592,7 +592,7 @@
       // Links from Get involved: ?pj=<id> opens that project, ?add=<kind> opens the map ready to pin what you know
       var qp = new URLSearchParams(location.search), pjId = qp.get('pj'), addK = qp.get('add');
       if (pjId) { var pc = document.getElementById('pj-' + pjId); if (pc) { pc.scrollIntoView({ block: 'center' }); pc.classList.add('pjc-hl'); var bb = pc.querySelector('.back-btn'); if (bb) setTimeout(function () { bb.focus({ preventScroll: true }); }, 300); } return; }
-      if (addK) { PRESET = /^(heat|water|shade|green|change|idea|other)$/.test(addK) ? addK : 'other'; document.getElementById('here').scrollIntoView({ block: 'start' }); var hint = document.querySelector('.here-hint'); if (hint) hint.innerHTML = '<b>Tap the map where it is</b>, then choose \u201cAdd what you know here\u201d.'; return; }
+      if (addK) { PRESET = /^(heat|water|shade|green|change|idea|other)$/.test(addK) ? addK : 'other'; var hint = document.querySelector('.here-hint'); if (hint) hint.innerHTML = '<b>Tap the map where it is</b>, then choose \u201cAdd what you know here\u201d.'; var g = document.querySelector('.here-grid'); g.insertAdjacentHTML('beforebegin', '<p class="here-addnote" id="here-addnote"><b>Add what you know:</b> tap the map where it is. You can drag and zoom to find the spot first.</p>'); document.getElementById('here-addnote').scrollIntoView({ block: 'start' }); return; }
     }, 0);
     setTimeout(function () { var sh = new URLSearchParams(location.search).get('show'), p = sh && PRESS_NOW.filter(function (x) { return x.key === sh; })[0]; if (!p) return; if (p.layer) { setLayer(p.layer); showWhy(p.key); document.getElementById('here').scrollIntoView({ block: 'start' }); } else { var t = document.getElementById(p.key === 'food' ? 'tied' : 'pressing'); if (t) t.scrollIntoView({ block: 'start' }); } }, 0); renderReady(e, r, sm); renderProjects(e); renderNews(e);
     try { loadMap(e); } catch (err) { /* the map is extra */ }
