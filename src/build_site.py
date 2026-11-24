@@ -324,6 +324,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   @media (max-width: 760px) { .rk-head.cmp, .rk-table.cmp a { grid-template-columns: 2.2rem minmax(0, 1fr) 56px 3.6rem; } .rk-head.cmp span:nth-child(3), .rk-head.cmp span:nth-child(4), .rk-table.cmp .rt-p, .rk-table.cmp .rt-j { display: none; } .rk-head:not(.cmp), .rk-table:not(.cmp) a { grid-template-columns: 0 minmax(0, 1fr); } .rk-head:not(.cmp) span:nth-child(n+3), .rk-table:not(.cmp) .rt-j { display: none; } .rk-table:not(.cmp) .rt-p { display: block; grid-column: 2; } }
   .pfp-f { margin: -4px 0 8px; font-weight: 600; color: var(--warm, #C0603A); }
   .pfr-note { flex-basis: 100%; margin: 6px 0 0; color: var(--ink2); font-size: 0.85rem; line-height: 1.5; max-width: 44ch; }
+  .pjc-hl { outline: 3px solid var(--accent); outline-offset: 3px; }
   .pfp-sep { border: 0; border-top: 1px solid var(--line); margin: 12px 0; } .here-why .hw-f { font: inherit; font-weight: 600; }
   .pfp-map { margin: 10px 0 0; font-size: 0.92rem; } .pfp-map a { font-weight: 600; color: var(--accent); }
   .here-why { display: grid; gap: 6px; padding: 0 0 14px; margin: 0 0 12px; border-bottom: 1px solid var(--line); }
@@ -453,6 +454,16 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .pf-tie .chip { background: transparent; color: #fff; border-color: rgba(255,255,255,0.45); } .pf-tie .chip[aria-pressed="true"] { background: #8fd3bf; color: #0b2624; border-color: #8fd3bf; }
   .pf-tie-off { margin-top: 12px; color: #cfe0da; font-size: 0.85rem; }
   .pf-standers { margin: 12px 0 0; color: #cfe0da; font-size: 0.92rem; } .pf-standers b { color: #fff; }
+  .inv-head h1 { max-width: 22ch; }
+  .inv-search { max-width: 36rem; margin-top: 18px; }
+  .inv-search input { font-size: 1.05rem; min-height: 50px; }
+  .inv-here { margin: 8px 0 28px; padding: 22px; border-radius: 20px; background: var(--surface); border: 2px solid var(--accent); scroll-margin-top: 16px; }
+  .inv-here .sect-top { margin-bottom: 14px; align-items: center; } .inv-here h2 { font-size: 1.6rem; } .inv-here h2:focus { outline: none; }
+  .inv-here .now-c { background: var(--bg, #fff); }
+  .inv-here-map { grid-column: 1 / -1; margin: 4px 0 0; } .inv-here-map a { font-weight: 600; color: var(--accent); }
+  .now-empty { border-style: dashed !important; border-width: 1px !important; } .now-empty b { color: var(--ink2); }
+  .inv-tie-note { margin: 6px 0 0; font-size: 0.88rem; color: var(--ink2); max-width: 60ch; }
+  .inv-else { padding-top: 8px; }
   .inv-first { padding-top: 24px; }
   .inv-ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
   .inv-way { display: grid; gap: 6px; align-content: start; padding: 20px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); text-decoration: none; }
@@ -728,7 +739,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=18">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=19">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

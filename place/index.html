@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=18">
+<link rel="stylesheet" href="../assets/site.css?v=19">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <link rel="manifest" href="../manifest.webmanifest">
@@ -588,7 +588,13 @@
     followUI(); $('#pf-tie').hidden = true; $('#pf-standers').hidden = true;
     T.standers(SLUG).then(showStanders).catch(function () {});
     var r = D.rank[SLUG] || {}, sm = D.summary[SLUG] || {};
-    renderWeather(e); renderToday(e); renderPressures(sm); renderTied(e, sm); setTimeout(function () { var sh = new URLSearchParams(location.search).get('show'), p = sh && PRESS_NOW.filter(function (x) { return x.key === sh; })[0]; if (!p) return; if (p.layer) { setLayer(p.layer); showWhy(p.key); document.getElementById('here').scrollIntoView({ block: 'start' }); } else { var t = document.getElementById(p.key === 'food' ? 'tied' : 'pressing'); if (t) t.scrollIntoView({ block: 'start' }); } }, 0); renderReady(e, r, sm); renderProjects(e); renderNews(e);
+    renderWeather(e); renderToday(e); renderPressures(sm); renderTied(e, sm); setTimeout(function () {
+      // Links from Get involved: ?pj=<id> opens that project, ?add=<kind> opens the map ready to pin what you know
+      var qp = new URLSearchParams(location.search), pjId = qp.get('pj'), addK = qp.get('add');
+      if (pjId) { var pc = document.getElementById('pj-' + pjId); if (pc) { pc.scrollIntoView({ block: 'center' }); pc.classList.add('pjc-hl'); var bb = pc.querySelector('.back-btn'); if (bb) setTimeout(function () { bb.focus({ preventScroll: true }); }, 300); } return; }
+      if (addK) { PRESET = /^(heat|water|shade|green|change|idea|other)$/.test(addK) ? addK : 'other'; document.getElementById('here').scrollIntoView({ block: 'start' }); var hint = document.querySelector('.here-hint'); if (hint) hint.innerHTML = '<b>Tap the map where it is</b>, then choose \u201cAdd what you know here\u201d.'; return; }
+    }, 0);
+    setTimeout(function () { var sh = new URLSearchParams(location.search).get('show'), p = sh && PRESS_NOW.filter(function (x) { return x.key === sh; })[0]; if (!p) return; if (p.layer) { setLayer(p.layer); showWhy(p.key); document.getElementById('here').scrollIntoView({ block: 'start' }); } else { var t = document.getElementById(p.key === 'food' ? 'tied' : 'pressing'); if (t) t.scrollIntoView({ block: 'start' }); } }, 0); renderReady(e, r, sm); renderProjects(e); renderNews(e);
     try { loadMap(e); } catch (err) { /* the map is extra */ }
     window.scrollTo(0, 0);
   }

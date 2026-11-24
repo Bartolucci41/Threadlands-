@@ -1,38 +1,30 @@
 <!-- title: Get involved | Threadlands -->
-<!-- description: Stand with the places you care about, back real projects, and add the ones you know about. Weather warnings, risks, news and ways to help, for any place on Earth. -->
+<!-- description: Take action in a place you care about: back a project, have your say, or add what you know on the map. Weather warnings, risks, news and ways to help, for any place on Earth. -->
 
 <main class="wrap">
 <script src="{B}assets/public.js"></script>
-  <header class="page-head">
+  <header class="page-head inv-head">
     <p class="page-kicker">Get involved</p>
-    <h1>Follow your places. Help shape what happens next.</h1>
-    <p class="page-lead">Follow the places you live in, come from, or care about to keep up with them. When you want to be counted, stand with a place: every person who does shows city teams and funders that its people are paying attention.</p>
-    <ol class="ladder" aria-label="Ways to take part">
-      <li><b>Follow</b><span>a place to keep up with its warnings, news and projects</span></li>
-      <li><b>Stand with</b><span>a place to be counted as one of its supporters</span></li>
-      <li><b>Back</b><span>the projects you want to see happen</span></li>
-      <li><b>Add</b><span>what you know: a project or a sourced update</span></li>
-    </ol>
+    <h1>Take action in a place you care about.</h1>
+    <form class="search inv-search" id="go-form" role="search">
+      <label class="sr-only" for="go-q">Find a place to get involved</label>
+      <input id="go-q" type="search" placeholder="Find a place to get involved" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="go-sugg" aria-autocomplete="list">
+      <button class="btn" type="submit">Find</button>
+      <ul class="sugg" id="go-sugg" role="listbox" hidden></ul>
+    </form>
+    <p class="mp-near"><button type="button" class="linkbtn" id="mp-loc">Use my location</button><span id="mp-loc-msg" aria-live="polite"></span></p>
   </header>
 
-  <section class="inv-now" aria-labelledby="now-h">
-    <h2 id="now-h" class="sr-only">Something you can do today</h2>
-    <div class="inv-now-grid" id="inv-now"></div>
+  <section class="inv-here" id="inv-here" aria-labelledby="here-h" hidden>
+    <div class="sect-top"><div><h2 id="here-h" tabindex="-1">What you can do in <span id="here-name"></span></h2></div>
+      <button type="button" class="btn ghost" id="here-follow" aria-pressed="false">Follow this place</button></div>
+    <div class="inv-now-grid" id="here-acts"></div>
   </section>
 
   <section class="sect mp inv-first" aria-labelledby="mine-h">
     <div class="sect-top">
-      <div><h2 id="mine-h" tabindex="-1">Your places</h2><p id="mine-sub">Saved on this device. Tap a place to see its full profile.</p></div>
+      <div><h2 id="mine-h" tabindex="-1">Your places</h2><p id="mine-sub">Saved on this device. Tap a place to see its full profile.</p><p class="inv-tie-note"><b>Follow</b> a place to keep up with it. Choose <b>Stand with</b> on its card when you want to be counted as one of its supporters.</p></div>
       <div class="mp-units" role="group" aria-label="Temperature units"><button type="button" class="chip" data-u="c">&deg;C</button><button type="button" class="chip" data-u="f">&deg;F</button></div>
-    </div>
-    <div class="mp-add">
-      <form class="search mp-search" id="mp-form" role="search">
-        <label class="sr-only" for="mp-q">Add a place</label>
-        <input id="mp-q" type="search" placeholder="Add a city or town" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="mp-sugg" aria-autocomplete="list">
-        <button class="btn" type="submit">Add</button>
-        <ul class="sugg" id="mp-sugg" role="listbox" hidden></ul>
-      </form>
-      <p class="mp-near"><button type="button" class="linkbtn" id="mp-loc">Use my location</button><span id="mp-loc-msg" aria-live="polite"></span></p>
     </div>
     <section class="chg" id="chg" aria-labelledby="chg-h" hidden>
       <h3 id="chg-h">What changed in your places</h3>
@@ -40,14 +32,19 @@
     </section>
     <div class="mp-grid" id="mp-grid"></div>
     <div class="mp-empty" id="mp-empty" hidden>
-      <p>You aren&rsquo;t following any places yet. Add your city above, or start with one of these:</p>
+      <p>You aren&rsquo;t following any places yet. Find one above, or start with one of these:</p>
       <div class="mp-pop" id="mp-pop"></div>
     </div>
   </section>
 
+  <section class="sect inv-else" aria-labelledby="now-h">
+    <div class="sect-top"><div><h2 id="now-h">Ways to take part elsewhere</h2><p>Open actions in other places, for when you&rsquo;re browsing.</p></div></div>
+    <div class="inv-now-grid" id="inv-now"></div>
+  </section>
+
   <section class="sect bleed band-white feed" id="feed" aria-labelledby="feed-h" hidden>
     <div class="sect-top">
-      <div><h2 id="feed-h">Projects you can back</h2><p>Parks, wetlands, trees and water projects, each with a public source. Back the ones you want to see happen, or add one you know about. Anyone can contribute.</p></div>
+      <div><h2 id="feed-h">Explore local projects</h2><p>Parks, wetlands, trees and water projects, each with a public source: some already built, some still open to back or weigh in on.</p></div>
       <a class="more" href="{B}projects/">All projects on a map &rarr;</a>
     </div>
     <div class="feed-grid" id="feed-grid"></div>
@@ -82,7 +79,7 @@
         '<span class="mpc-top"><span><b class="mpc-name">' + esc(e.name) + '</b><span class="mpc-where">' + T.flag(e.cc) + esc(T.where(e)) + '</span></span>' +
         '<span class="mpc-wx" id="wx-' + esc(slug) + '"><span class="mpc-t">&ndash;</span></span></span>' +
         '<span class="mpc-alert" id="al-' + esc(slug) + '" hidden></span>' +
-        '<span class="mpc-stats">' + (r.index != null ? '<span><i>Resilience</i><b>' + Math.round(r.index) + '</b><small>#' + r.rank + ' of ' + D.rankN + '</small></span>' : '') +
+        '<span class="mpc-stats">' +
           (top ? '<span><i>What stands out</i><b class="mpc-press">' + esc(top.t) + (top.f ? ' \u00b7 ' + esc(top.f) : '') + '</b></span>' : '') + '</span>' +
         (lead ? '<span class="mpc-news"><i>' + esc(T.TONE[lead.tone] || 'News') + '</i><span translate="no">' + esc(lead.title) + '</span></span>' : '') +
       '</a>' +
@@ -111,17 +108,39 @@
   $('#mp-grid').addEventListener('change', function (e) { var sel = e.target.closest('[data-tie]'); if (!sel) return; if (sel.value) T.standWith(sel.dataset.tie, sel.value); else T.stepBack(sel.dataset.tie); });
   $('#mp-pop').addEventListener('click', function (e) { var b = e.target.closest('[data-add]'); if (b) add(b.dataset.add); });
 
-  // Add a place: the library first; anything else is built in Explore
-  var form = $('#mp-form'), input = $('#mp-q'), list = $('#mp-sugg'), items = [], active = -1;
+  // ---- Where? Find a place, then see what you can do there (searching does not follow it)
+  var STW = { proposed: 'Proposed', approved: 'Approved', underway: 'Under way' }, OPENS = { proposed: 0, approved: 1, underway: 2 };
+  function pjLink(p) { return '{B}place/?pj=' + encodeURIComponent(p.id) + '#' + esc(p.place); }
+  function actionsFor(slug) {
+    var e = D.lib[slug], mine = D.projects.filter(function (p) { return p.place === slug; });
+    var open = mine.filter(function (p) { return p.status in OPENS; }).sort(function (a, b) { return OPENS[a.status] - OPENS[b.status]; });
+    var bp = open[0], say = mine.filter(function (p) { return p.involved; })[0], out = [];
+    out.push(bp ? '<article class="now-c"><span class="now-k">Back a project</span><b translate="no">' + esc(bp.name) + '</b><span class="now-m">' + STW[bp.status] + (bp.year ? ' ' + bp.year : '') + (open.length > 1 ? ' \u00b7 ' + (open.length - 1) + ' more open here' : '') + '</span><a href="' + pjLink(bp) + '">Open it and back it &rarr;</a></article>'
+      : '<article class="now-c now-empty"><span class="now-k">Back a project</span><b>No open projects listed here yet</b><span class="now-m">Know one that is proposed or under way? Add it with a public source and others can back it.</span><a href="{B}projects/#pj-add-h">Add a project &rarr;</a></article>');
+    out.push(say ? '<article class="now-c"><span class="now-k">Have your say</span><b translate="no">' + esc(say.name) + '</b><span class="now-m">Where the public can take part, on the organizer&rsquo;s own site.</span><a href="' + esc(say.involved) + '" target="_blank" rel="noopener">Where to take part &rarr;</a></article>'
+      : '<article class="now-c now-empty"><span class="now-k">Have your say</span><b>No open consultation listed yet</b><span class="now-m">When a meeting or feedback form opens for a project here, it will show up in this spot.</span><a href="{B}place/?add=idea#' + esc(slug) + '">Know of one? Add it &rarr;</a></article>');
+    out.push('<article class="now-c"><span class="now-k">Add what you know</span><b>Pin it on the map</b><span class="now-m">Where water collects, where shade is missing, a change on the ground. Each note is checked before it appears.</span><a href="{B}place/?add=other#' + esc(slug) + '">Open the map &rarr;</a></article>');
+    return out.join('');
+  }
+  var HERE = null;
+  function showHere(slug) {
+    HERE = slug; var e = D.lib[slug];
+    $('#here-name').innerHTML = T.flag(e.cc) + '<span translate="no">' + esc(e.name) + '</span>';
+    $('#here-acts').innerHTML = actionsFor(slug) + '<p class="inv-here-map"><a href="{B}place/#' + esc(slug) + '">See everything about ' + esc(e.name) + ', with its map &rarr;</a></p>';
+    followBtn(); $('#inv-here').hidden = false; $('#here-h').focus({ preventScroll: true }); $('#inv-here').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function followBtn() { if (!HERE) return; var on = T.isFollowed(HERE), b = $('#here-follow'); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.textContent = on ? 'Following \u2713' : 'Follow this place'; }
+  $('#here-follow').addEventListener('click', function () { if (!HERE) return; if (T.isFollowed(HERE)) { if (T.tieOf(HERE)) T.stepBack(HERE); T.unfollow(HERE); } else T.follow(HERE); followBtn(); cards(); });
+  var form = $('#go-form'), input = $('#go-q'), list = $('#go-sugg'), items = [], active = -1;
   function close() { list.hidden = true; input.setAttribute('aria-expanded', 'false'); active = -1; }
   function show() {
     var q = input.value.trim(); if (!q || !D) { close(); return; }
     items = T.matches(D.list, q, 7);
     list.innerHTML = items.map(function (e, k) { return '<li role="option" data-slug="' + e.slug + '" aria-selected="' + (k === active) + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + T.flag(e.cc) + esc(T.where(e)) + '</span></li>'; }).join('') +
-      '<li role="option" data-world="1"><span class="s-world">Not listed? Build “' + esc(q) + '” in Explore (about ten minutes)</span></li>';
+      '<li role="option" data-world="1"><span class="s-world">Not listed? Build \u201c' + esc(q) + '\u201d in Explore (about ten minutes)</span></li>';
     list.hidden = false; input.setAttribute('aria-expanded', 'true');
   }
-  function pick(slug) { input.value = ''; close(); add(slug); }
+  function pick(slug) { input.value = ''; close(); showHere(slug); }
   input.addEventListener('input', function () { active = -1; show(); });
   input.addEventListener('keydown', function (ev) {
     if (ev.key === 'ArrowDown' && items.length) { active = Math.min(items.length - 1, active + 1); show(); ev.preventDefault(); }
@@ -147,14 +166,15 @@
     navigator.geolocation.getCurrentPosition(function (pos) {
       var n = D && T.nearest(D.list, pos.coords.latitude, pos.coords.longitude);
       if (!n) { msg.textContent = ''; return; }
-      if (n.km > 60) { msg.innerHTML = ' The nearest place we have is ' + esc(n.place.name) + ', ' + Math.round(n.km) + ' km away. <a href="{B}explore/?q=' + pos.coords.latitude.toFixed(3) + ',' + pos.coords.longitude.toFixed(3) + '">Build your own area</a> or <button type="button" class="linkbtn" data-add="' + n.place.slug + '">follow ' + esc(n.place.name) + '</button>.'; return; }
-      msg.textContent = ' Added ' + n.place.name + '.'; add(n.place.slug);
+      if (n.km > 60) { msg.innerHTML = ' The nearest place we have is ' + esc(n.place.name) + ', ' + Math.round(n.km) + ' km away. <a href="{B}explore/?q=' + pos.coords.latitude.toFixed(3) + ',' + pos.coords.longitude.toFixed(3) + '">Build your own area</a> or <button type="button" class="linkbtn" data-add="' + n.place.slug + '">see ' + esc(n.place.name) + '</button>.'; return; }
+      msg.textContent = ''; showHere(n.place.slug);
     }, function () { msg.textContent = ' Location was not shared. You can type your city instead.'; }, { maximumAge: 600000, timeout: 10000 });
   });
-  $('#mp-loc-msg').addEventListener('click', function (e) { var b = e.target.closest('[data-add]'); if (b) { add(b.dataset.add); $('#mp-loc-msg').textContent = ''; } });
+  $('#mp-loc-msg').addEventListener('click', function (e) { var b = e.target.closest('[data-add]'); if (b) { showHere(b.dataset.add); $('#mp-loc-msg').textContent = ''; } });
 
   T.all().then(function (d) {
     D = d; cards();
+    var want = new URLSearchParams(location.search).get('place'); if (want && d.lib[want]) showHere(want);
     var names = {}, ccs = {}; d.list.forEach(function (e) { names[e.slug] = e.name; ccs[e.slug] = e.cc; });
     var mine = T.follows().filter(function (s) { return d.lib[s]; });
     // ---- One concrete thing to do today: back a project that is still being decided, have your say, or add a sourced update
@@ -163,19 +183,19 @@
       return (mine.indexOf(b.place) >= 0) - (mine.indexOf(a.place) >= 0) || OPEN[a.status] - OPEN[b.status] || String(b.added || '').localeCompare(String(a.added || ''));
     });
     var bp = open[0], say = open.filter(function (p) { return p.involved && p !== bp; })[0];
-    var STW = { proposed: 'Proposed', approved: 'Approved', underway: 'Under way' };
     var now = [];
     if (bp) now.push('<article class="now-c"><span class="now-k">Back a project</span><b translate="no">' + esc(bp.name) + '</b><span class="now-m">' + T.flag(ccs[bp.place]) + esc(names[bp.place] || bp.place) + ' \u00b7 ' + STW[bp.status] + (bp.year ? ' ' + bp.year : '') + '</span>' +
-      '<span class="pjc-back"><button type="button" class="btn back-btn" data-back="' + esc(bp.id) + '" aria-pressed="false" hidden>Back this</button><span class="back-n" data-backn="' + esc(bp.id) + '"></span></span><a href="{B}place/#' + esc(bp.place) + '">Read about it in its place</a></article>');
+      '<span class="pjc-back"><button type="button" class="btn back-btn" data-back="' + esc(bp.id) + '" aria-pressed="false" hidden>Back this</button><span class="back-n" data-backn="' + esc(bp.id) + '"></span></span><a href="' + pjLink(bp) + '">Open it in its place &rarr;</a></article>');
     if (say) now.push('<article class="now-c"><span class="now-k">Have your say</span><b translate="no">' + esc(say.name) + '</b><span class="now-m">' + T.flag(ccs[say.place]) + esc(names[say.place] || say.place) + '</span><a href="' + esc(say.involved) + '" target="_blank" rel="noopener">Where to take part &rarr;</a></article>');
-    now.push('<article class="now-c"><span class="now-k">Add a sourced update</span><b>Know something we don&rsquo;t?</b><span class="now-m">A new project, a decision or a change on the ground, with a link to a public source.</span><a href="{B}projects/#pj-add-h">Add it &rarr;</a></article>');
+    var addAt = mine[0] || (bp && bp.place) || 'mexico-city';
+    now.push('<article class="now-c"><span class="now-k">Add what you know</span><b>Pin it on the map of ' + esc(names[addAt] || 'a place') + '</b><span class="now-m">Where water collects, where shade is missing, a change on the ground. Each note is checked before it appears.</span><a href="{B}place/?add=other#' + esc(addAt) + '">Open the map &rarr;</a></article>');
     $('#inv-now').innerHTML = now.join(''); T.wireBacking($('#inv-now'));
     // ---- What changed in your places: specific changes from the last two weeks, newest first, each with its source
     var since = new Date(Date.now() - 15 * 864e5).toISOString().slice(0, 10).replace(/-/g, ''), chg = [];
     d.projects.forEach(function (p) {
       if (mine.indexOf(p.place) < 0 || !p.added) return;
       var day = String(p.added).replace(/-/g, ''); if (day < since) return;
-      chg.push({ date: day, place: p.place, kind: 'New on Threadlands', text: p.name, url: p.source && p.source.url, act: STW[p.status] ? ['Back it', '{B}place/#' + p.place] : null });
+      chg.push({ date: day, place: p.place, kind: 'New on Threadlands', text: p.name, url: p.source && p.source.url, act: STW[p.status] ? ['Back it', pjLink(p)] : null });
     });
     mine.forEach(function (sl) {
       ((d.news.places || {})[sl] || []).filter(function (x) { return x.named !== false && (x.tone === 'gain' || x.topic === 'policy' || x.topic === 'infrastructure'); }).slice(0, 2).forEach(function (x) {
@@ -197,7 +217,7 @@
     if (ps.length) {
       $('#feed-grid').innerHTML = ps.slice(0, 6).map(function (p) {
         var st = FSTAT[p.status] || FSTAT.proposed;
-        return '<a class="feed-card" href="{B}place/#' + esc(p.place) + '" style="--pc:' + st[1] + '"><span class="feed-top"><span class="feed-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span class="feed-city">' + T.flag(ccs[p.place]) + esc(names[p.place] || p.place) + '</span></span>' +
+        return '<a class="feed-card" href="' + pjLink(p) + '" style="--pc:' + st[1] + '"><span class="feed-top"><span class="feed-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span class="feed-city">' + T.flag(ccs[p.place]) + esc(names[p.place] || p.place) + '</span></span>' +
           '<b translate="no">' + esc(p.name) + '</b><span class="feed-sum">' + esc(String(p.summary || '').split('. ')[0].replace(/\.$/, '')) + '.</span></a>';
       }).join('');
       $('#feed').hidden = false;
