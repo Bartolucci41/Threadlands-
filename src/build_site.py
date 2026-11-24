@@ -589,7 +589,8 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .pfs { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px 32px; margin-top: 8px; padding-top: 20px; border-top: 1px solid var(--line); }
   @media (max-width: 760px) { .pfs { grid-template-columns: 1fr; } }
   .pfs h3 { font-size: 1rem; margin: 0 0 8px; }
-  .pfs-map { display: flex; gap: 16px; align-items: flex-start; } .pfs-map svg { flex: none; }
+  .pfs-map { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; } .pfs-map svg { flex: none; } .pfs-key { flex: 1 1 220px; }
+  .pf-nm { margin-left: 0.3em; }
   .pfs-r { fill: var(--surface2); stroke: var(--ink2); stroke-width: 1.2; } .pfs-c { fill: var(--accent); fill-opacity: 0.28; stroke: var(--accent); stroke-width: 1.5; }
   .pfs-key p { margin: 0 0 6px; font-size: 0.88rem; color: var(--ink2); line-height: 1.45; } .pfs-key b { color: var(--ink); }
   .pfs-key i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; } .k-r { background: var(--surface2); border: 1.2px solid var(--ink2); } .k-c { background: rgba(14,124,102,0.3); border: 1.5px solid var(--accent); }

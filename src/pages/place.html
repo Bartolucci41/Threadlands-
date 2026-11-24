@@ -89,7 +89,7 @@
   function followUI() {
     var tie = T.tieOf(SLUG), b = $('#pf-follow'), name = D.lib[SLUG].name;
     b.setAttribute('aria-pressed', tie ? 'true' : 'false');
-    b.innerHTML = (tie ? 'Standing with ' : 'Stand with ') + '<span translate="no">' + esc(name) + '</span>' + (tie ? ' \u2713' : '');
+    b.innerHTML = (tie ? 'Standing with' : 'Stand with') + '<span translate="no" class="pf-nm">' + esc(name) + '</span>' + (tie ? ' \u2713' : '');
     document.querySelectorAll('.pf-tie-name').forEach(function (n) { n.textContent = name; });
     document.querySelectorAll('[data-tie]').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.tie === tie ? 'true' : 'false'); });
     $('#pf-tie-off').hidden = !tie;
