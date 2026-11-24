@@ -1,18 +1,18 @@
-<!-- title: Threadlands: the Commons for your city -->
+<!-- title: Threadlands: know your city, help shape it -->
 <!-- description: Follow the cities you care about: live weather and warnings, the risks they face, the land and water they depend on, real projects and the latest news. For any place on Earth. -->
 
 <main class="wrap">
 <script src="{B}assets/public.js"></script>
   <section class="mp-hero bleed band-deep" aria-labelledby="mp-h">
     <div class="mp-hero-in">
-      <p class="hero3-kick">The Commons</p>
+      <p class="hero3-kick">Threadlands</p>
       <h1 id="mp-h" class="mp-h">Know your city. Help shape it.</h1>
       <div class="doors">
-        <a class="door door-places" href="#mine-h" id="door-places">
-          <span class="door-k">The Commons</span>
+        <a class="door door-places" href="{B}involved/">
+          <span class="door-k">Get involved</span>
           <b class="door-t">Follow your city</b>
           <span class="door-d">Weather and warnings, the risks your city faces, the land and water it depends on, and the projects and news changing it.</span>
-          <span class="door-go">Add your places <span aria-hidden="true">&darr;</span></span>
+          <span class="door-go">Follow your places <span aria-hidden="true">&rarr;</span></span>
         </a>
         <a class="door door-lab" href="{B}lab/">
           <span class="door-k">ThreadLab</span>
@@ -24,41 +24,12 @@
     </div>
   </section>
 
-  <section class="sect mp" aria-labelledby="mine-h">
-    <div class="sect-top">
-      <div><h2 id="mine-h" tabindex="-1">Your places</h2><p id="mine-sub">Saved on this device. Tap a place to see its full profile.</p></div>
-      <div class="mp-units" role="group" aria-label="Temperature units"><button type="button" class="chip" data-u="c">&deg;C</button><button type="button" class="chip" data-u="f">&deg;F</button></div>
-    </div>
-    <div class="mp-add">
-      <form class="search mp-search" id="mp-form" role="search">
-        <label class="sr-only" for="mp-q">Add a place</label>
-        <input id="mp-q" type="search" placeholder="Add a city or town" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="mp-sugg" aria-autocomplete="list">
-        <button class="btn" type="submit">Add</button>
-        <ul class="sugg" id="mp-sugg" role="listbox" hidden></ul>
-      </form>
-      <p class="mp-near"><button type="button" class="linkbtn" id="mp-loc">Use my location</button><span id="mp-loc-msg" aria-live="polite"></span></p>
-    </div>
-    <div class="mp-grid" id="mp-grid"></div>
-    <div class="mp-empty" id="mp-empty" hidden>
-      <p>You aren&rsquo;t following any places yet. Add your city above, or start with one of these:</p>
-      <div class="mp-pop" id="mp-pop"></div>
-    </div>
-  </section>
-
   <section class="sect news" id="news" aria-labelledby="news-h" hidden>
     <div class="sect-top">
       <div><h2 id="news-h">Across the world today</h2><p id="news-sub">Risks, progress and decisions in cities around the world, updated every day.</p></div>
     </div>
     <ol class="nw2-grid" id="news-list"></ol>
     <p class="news-note">Headlines gathered automatically from <a href="https://news.google.com/" target="_blank" rel="noopener">Google News</a> searches. Each links to the original story; Threadlands does not write or check them.</p>
-  </section>
-
-  <section class="sect bleed band-white feed" id="feed" aria-labelledby="feed-h" hidden>
-    <div class="sect-top">
-      <div><h2 id="feed-h">Projects you can back</h2><p>Parks, wetlands, trees and water projects, each with a public source. Back the ones you want to see happen, or add one you know about. Anyone can contribute.</p></div>
-      <a class="more" href="{B}projects/">All projects, and add one &rarr;</a>
-    </div>
-    <div class="feed-grid" id="feed-grid"></div>
   </section>
 
   <section class="sect" id="rank" aria-labelledby="rank-h" hidden>
@@ -87,97 +58,10 @@
 (function () {
   // Old shared links such as threadlands.org/#lagos now open that city's profile
   var h = location.hash.replace('#', '');
-  if (h && !/^(top|mine-h|news-h|rank-h|feed-h|pro-h)$/.test(h)) { location.replace('{B}place/#' + h); return; }
+  if (h && !/^(top|news-h|rank-h|pro-h)$/.test(h)) { location.replace('{B}place/#' + h); return; }
   var T = window.TLP, $ = function (s) { return document.querySelector(s); }, esc = T.esc;
   T.setBase('{B}');
-  var D = null;
-  $('#door-places').addEventListener('click', function (ev) { ev.preventDefault(); document.getElementById('mine-h').scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(function () { $('#mp-q').focus({ preventScroll: true }); }, 450); });
-  var POPULAR = ['mexico-city', 'new-york', 'sao-paulo', 'london', 'mumbai', 'tokyo', 'lagos', 'paris'];
-
-  function unitsUI() { document.querySelectorAll('[data-u]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.u === T.units() ? 'true' : 'false'); }); }
-  document.querySelector('.mp-units').addEventListener('click', function (e) { var b = e.target.closest('[data-u]'); if (!b) return; T.setUnits(b.dataset.u); unitsUI(); cards(); });
-  unitsUI();
-
-  function card(slug) {
-    var e = D.lib[slug]; if (!e) return '';
-    var r = D.rank[slug] || {}, sm = D.summary[slug] || {}, nw = (D.news.places || {})[slug] || [];
-    var top = (sm.pressures || [])[0], lead = nw.filter(function (x) { return x.named !== false; })[0];
-    return '<article class="mpc" data-slug="' + esc(slug) + '">' +
-      '<a class="mpc-main" href="{B}place/#' + esc(slug) + '">' +
-        '<span class="mpc-top"><span><b class="mpc-name">' + esc(e.name) + '</b><span class="mpc-where">' + esc(T.where(e)) + '</span></span>' +
-        '<span class="mpc-wx" id="wx-' + esc(slug) + '"><span class="mpc-t">&ndash;</span></span></span>' +
-        '<span class="mpc-alert" id="al-' + esc(slug) + '" hidden></span>' +
-        '<span class="mpc-stats">' + (r.index != null ? '<span><i>Resilience</i><b>' + Math.round(r.index) + '</b><small>#' + r.rank + ' of ' + D.rankN + '</small></span>' : '') +
-          (top ? '<span><i>Biggest pressure</i><b class="mpc-press">' + esc(top.t) + '</b></span>' : '') + '</span>' +
-        (lead ? '<span class="mpc-news"><i>' + esc(T.TONE[lead.tone] || 'News') + '</i>' + esc(lead.title) + '</span>' : '') +
-      '</a>' +
-      '<button type="button" class="mpc-x" data-rm="' + esc(slug) + '" aria-label="Stop following ' + esc(e.name) + '" title="Stop following">&times;</button>' +
-    '</article>';
-  }
-  function cards() {
-    var f = T.follows().filter(function (s) { return D.lib[s]; });
-    $('#mp-grid').innerHTML = f.map(card).join('');
-    $('#mp-empty').hidden = f.length > 0;
-    $('#mine-sub').textContent = f.length ? 'Saved on this device. Tap a place to see its full profile.' : 'Saved on this device, no account needed.';
-    if (!f.length) $('#mp-pop').innerHTML = POPULAR.filter(function (s) { return D.lib[s]; }).map(function (s) { return '<button type="button" class="chip" data-add="' + s + '">+ ' + esc(D.lib[s].name) + '</button>'; }).join('');
-    f.forEach(function (slug) {
-      var e = D.lib[slug];
-      T.weather(e.lat, e.lng).then(function (w) {
-        var c = w.current || {}, d = w.daily || {}, el = document.getElementById('wx-' + slug); if (!el) return;
-        el.innerHTML = T.icon(c.weather_code, 26) + '<span class="mpc-t">' + T.temp(c.temperature_2m) + '</span><span class="mpc-hl">' + T.sky(c.weather_code)[0] + (d.temperature_2m_max ? '<br>' + T.temp(d.temperature_2m_max[0]) + ' / ' + T.temp(d.temperature_2m_min[0]) : '') + '</span>';
-        var al = T.alerts(w)[0], ae = document.getElementById('al-' + slug);
-        if (al && ae) { ae.hidden = false; ae.className = 'mpc-alert al-' + al.kind; ae.textContent = al.text.split(':')[0].split('.')[0]; }
-      }).catch(function () { /* weather is optional */ });
-    });
-  }
-  function add(slug) { T.follow(slug); cards(); var c = document.querySelector('.mpc[data-slug="' + slug + '"]'); if (c) { c.classList.add('mpc-new'); c.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } }
-  $('#mp-grid').addEventListener('click', function (e) { var b = e.target.closest('[data-rm]'); if (!b) return; T.unfollow(b.dataset.rm); cards(); });
-  $('#mp-pop').addEventListener('click', function (e) { var b = e.target.closest('[data-add]'); if (b) add(b.dataset.add); });
-
-  // Add a place: the library first; anything else is built in Explore
-  var form = $('#mp-form'), input = $('#mp-q'), list = $('#mp-sugg'), items = [], active = -1;
-  function close() { list.hidden = true; input.setAttribute('aria-expanded', 'false'); active = -1; }
-  function show() {
-    var q = input.value.trim(); if (!q || !D) { close(); return; }
-    items = T.matches(D.list, q, 7);
-    list.innerHTML = items.map(function (e, k) { return '<li role="option" data-slug="' + e.slug + '" aria-selected="' + (k === active) + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + esc(T.where(e)) + '</span></li>'; }).join('') +
-      '<li role="option" data-world="1"><span class="s-world">Not listed? Build “' + esc(q) + '” in Explore (about ten minutes)</span></li>';
-    list.hidden = false; input.setAttribute('aria-expanded', 'true');
-  }
-  function pick(slug) { input.value = ''; close(); add(slug); }
-  input.addEventListener('input', function () { active = -1; show(); });
-  input.addEventListener('keydown', function (ev) {
-    if (ev.key === 'ArrowDown' && items.length) { active = Math.min(items.length - 1, active + 1); show(); ev.preventDefault(); }
-    else if (ev.key === 'ArrowUp' && items.length) { active = Math.max(0, active - 1); show(); ev.preventDefault(); }
-    else if (ev.key === 'Escape') close();
-  });
-  form.addEventListener('submit', function (ev) {
-    ev.preventDefault(); var q = input.value.trim(); if (!q || !D) return;
-    items = T.matches(D.list, q, 7);
-    if (active >= 0 && items[active]) pick(items[active].slug);
-    else if (items.length) pick(items[0].slug);
-    else location.href = '{B}explore/?q=' + encodeURIComponent(q);
-  });
-  list.addEventListener('mousedown', function (ev) {
-    var li = ev.target.closest('[data-slug],[data-world]'); if (!li) return; ev.preventDefault();
-    if (li.dataset.slug) pick(li.dataset.slug); else location.href = '{B}explore/?q=' + encodeURIComponent(input.value.trim());
-  });
-  input.addEventListener('blur', function () { setTimeout(close, 120); });
-  $('#mp-loc').addEventListener('click', function () {
-    var msg = $('#mp-loc-msg');
-    if (!navigator.geolocation) { msg.textContent = ' Location is not available in this browser.'; return; }
-    msg.textContent = ' Finding you…';
-    navigator.geolocation.getCurrentPosition(function (pos) {
-      var n = D && T.nearest(D.list, pos.coords.latitude, pos.coords.longitude);
-      if (!n) { msg.textContent = ''; return; }
-      if (n.km > 60) { msg.innerHTML = ' The nearest place we have is ' + esc(n.place.name) + ', ' + Math.round(n.km) + ' km away. <a href="{B}explore/?q=' + pos.coords.latitude.toFixed(3) + ',' + pos.coords.longitude.toFixed(3) + '">Build your own area</a> or <button type="button" class="linkbtn" data-add="' + n.place.slug + '">follow ' + esc(n.place.name) + '</button>.'; return; }
-      msg.textContent = ' Added ' + n.place.name + '.'; add(n.place.slug);
-    }, function () { msg.textContent = ' Location was not shared. You can type your city instead.'; }, { maximumAge: 600000, timeout: 10000 });
-  });
-  $('#mp-loc-msg').addEventListener('click', function (e) { var b = e.target.closest('[data-add]'); if (b) { add(b.dataset.add); $('#mp-loc-msg').textContent = ''; } });
-
   T.all().then(function (d) {
-    D = d; cards();
     var names = {}; d.list.forEach(function (e) { names[e.slug] = e.name; });
     // Across the world: the biggest headlines, one per city
     var top = (d.news.top || []).slice(0, 8);
@@ -185,17 +69,6 @@
       $('#news-list').innerHTML = top.map(function (it) { return T.headline(it, names); }).join('');
       if (d.news.updated) $('#news-sub').textContent = 'Risks, progress and decisions in cities around the world. Updated ' + T.ndate(d.news.updated.replace(/-/g, '')) + '.';
       $('#news').hidden = false;
-    }
-    // Latest real projects
-    var FSTAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
-    var ps = d.projects.slice().sort(function (a, b) { return String(b.added || '').localeCompare(String(a.added || '')) || (b.year || 0) - (a.year || 0); });
-    if (ps.length) {
-      $('#feed-grid').innerHTML = ps.slice(0, 3).map(function (p) {
-        var st = FSTAT[p.status] || FSTAT.proposed;
-        return '<a class="feed-card" href="{B}place/#' + esc(p.place) + '" style="--pc:' + st[1] + '"><span class="feed-top"><span class="feed-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span class="feed-city">' + esc(names[p.place] || p.place) + '</span></span>' +
-          '<b>' + esc(p.name) + '</b><span class="feed-sum">' + esc(String(p.summary || '').split('. ')[0].replace(/\.$/, '')) + '.</span></a>';
-      }).join('');
-      $('#feed').hidden = false;
     }
     // Best and least prepared
     var all = Object.keys(d.rank).map(function (k) { return d.rank[k]; }).sort(function (a, b) { return b.index - a.index; }), n = all.length;
@@ -210,5 +83,5 @@
       $('#rank-bot').innerHTML = all.slice(-3).reverse().map(function (p, k) { return row(p, n - 1 - k); }).join('');
       $('#rank').hidden = false;
     }
-  }).catch(function () { $('#mp-grid').innerHTML = '<p class="mp-err">The places could not be loaded. Check your connection and refresh.</p>'; });
+  }).catch(function () { /* the sections stay hidden */ });
 })();

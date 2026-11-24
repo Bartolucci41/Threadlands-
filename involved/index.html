@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Get involved | Threadlands</title>
+<meta name="description" content="Follow the places you care about, back real projects, and add the ones you know about. Weather warnings, risks, news and ways to help, for any place on Earth.">
+<meta property="og:title" content="Get involved | Threadlands">
+<meta property="og:description" content="Follow the places you care about, back real projects, and add the ones you know about. Weather warnings, risks, news and ways to help, for any place on Earth.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css?v=10">
+<script src="../assets/i18n.js" defer></script>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D1613" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Threadlands">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });</script>
+<script>window.TL_DATA = "https://pub-5cc2f5116c6c462596fbf16596585b83.r2.dev";</script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a92b6704e81e4aaba11a9f8a11832ae1"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+<header class="wrap site-head" id="top">
+  <div class="topbar">
+    <a class="wordmark" href="../" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="28" height="28" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#123B38" stroke="none"/></svg><span>Threadlands</span></a>
+    <div class="topright"><nav class="topnav" aria-label="Site"><a href="../"><svg class="nav-home" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Home</a><a href="../involved/" aria-current="page">Get involved</a><a href="../places/">Places</a><a href="../lab/" class="nav-lab">ThreadLab</a></nav><label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>
+  </div>
+</header>
+<main class="wrap">
+<script src="../assets/public.js"></script>
+  <header class="page-head">
+    <p class="page-kicker">Get involved</p>
+    <h1>Follow your places. Back what you want to see happen.</h1>
+    <p class="page-lead">Keep up with the places you care about: warnings, risks, news and the projects changing them. Back the projects you support, and add the ones you know about. Every contribution is checked and shows up for everyone.</p>
+  </header>
+
+  <section class="sect mp inv-first" aria-labelledby="mine-h">
+    <div class="sect-top">
+      <div><h2 id="mine-h" tabindex="-1">Your places</h2><p id="mine-sub">Saved on this device. Tap a place to see its full profile.</p></div>
+      <div class="mp-units" role="group" aria-label="Temperature units"><button type="button" class="chip" data-u="c">&deg;C</button><button type="button" class="chip" data-u="f">&deg;F</button></div>
+    </div>
+    <div class="mp-add">
+      <form class="search mp-search" id="mp-form" role="search">
+        <label class="sr-only" for="mp-q">Add a place</label>
+        <input id="mp-q" type="search" placeholder="Add a city or town" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="mp-sugg" aria-autocomplete="list">
+        <button class="btn" type="submit">Add</button>
+        <ul class="sugg" id="mp-sugg" role="listbox" hidden></ul>
+      </form>
+      <p class="mp-near"><button type="button" class="linkbtn" id="mp-loc">Use my location</button><span id="mp-loc-msg" aria-live="polite"></span></p>
+    </div>
+    <div class="mp-grid" id="mp-grid"></div>
+    <div class="mp-empty" id="mp-empty" hidden>
+      <p>You aren&rsquo;t following any places yet. Add your city above, or start with one of these:</p>
+      <div class="mp-pop" id="mp-pop"></div>
+    </div>
+  </section>
+
+  <section class="sect bleed band-white feed" id="feed" aria-labelledby="feed-h" hidden>
+    <div class="sect-top">
+      <div><h2 id="feed-h">Projects you can back</h2><p>Parks, wetlands, trees and water projects, each with a public source. Back the ones you want to see happen, or add one you know about. Anyone can contribute.</p></div>
+      <a class="more" href="../projects/">All projects on a map &rarr;</a>
+    </div>
+    <div class="feed-grid" id="feed-grid"></div>
+  </section>
+
+  <section class="sect inv-add" aria-labelledby="add-h">
+    <div class="sect-top"><div><h2 id="add-h">Add to Threadlands</h2><p>Threadlands grows with what people add. Each addition is checked before it appears.</p></div></div>
+    <div class="inv-ways">
+      <a class="inv-way" href="../projects/#pj-add-h"><b>Add a project</b><span>A new park, wetland, tree drive, flood barrier or bike lane, with a link to a public source.</span></a>
+      <a class="inv-way" href="../explore/"><b>Add your place</b><span>Not in Threadlands yet? Search for it and it is built in about ten minutes, then it is here for everyone.</span></a>
+      <div class="inv-way inv-soon"><b>Coming next</b><span>Phone alerts for heavy rain, heat and big news in your places, and local events and volunteer days.</span></div>
+    </div>
+  </section>
+</main>
+<footer class="site-foot2">
+  <div class="wrap foot-grid">
+    <div class="foot-brand"><a class="wordmark foot-wm" href="../" translate="no">Threadlands</a><p>Know your city, and help make it ready for what&rsquo;s coming. For any place on Earth.</p></div>
+    <nav aria-label="Get involved"><h2>Get involved</h2><a href="../involved/">Your places</a><a href="../projects/">Projects</a><a href="../places/">All places</a></nav>
+    <nav aria-label="ThreadLab"><h2>ThreadLab</h2><a href="../lab/">Overview</a><a href="../explore/">Explore</a><a href="../studio/">Studio</a><a href="../how-it-works/">Method</a></nav>
+    <nav aria-label="About"><h2>About</h2><a href="../about/">About Threadlands</a></nav>
+  </div>
+  <div class="wrap foot-small">
+    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>
+    <p>Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS, Landsat (USGS and NASA), Open-Meteo and GBIF.</p>
+  </div>
+</footer>
+<script>
+
+(function () {
+  var T = window.TLP, $ = function (s) { return document.querySelector(s); }, esc = T.esc;
+  T.setBase('../');
+  var D = null;
+  var POPULAR = ['mexico-city', 'new-york', 'sao-paulo', 'london', 'mumbai', 'tokyo', 'lagos', 'paris'];
+
+  function unitsUI() { document.querySelectorAll('[data-u]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.u === T.units() ? 'true' : 'false'); }); }
+  document.querySelector('.mp-units').addEventListener('click', function (e) { var b = e.target.closest('[data-u]'); if (!b) return; T.setUnits(b.dataset.u); unitsUI(); cards(); });
+  unitsUI();
+
+  function card(slug) {
+    var e = D.lib[slug]; if (!e) return '';
+    var r = D.rank[slug] || {}, sm = D.summary[slug] || {}, nw = (D.news.places || {})[slug] || [];
+    var top = (sm.pressures || [])[0], lead = nw.filter(function (x) { return x.named !== false; })[0];
+    return '<article class="mpc" data-slug="' + esc(slug) + '">' +
+      '<a class="mpc-main" href="../place/#' + esc(slug) + '">' +
+        '<span class="mpc-top"><span><b class="mpc-name">' + esc(e.name) + '</b><span class="mpc-where">' + esc(T.where(e)) + '</span></span>' +
+        '<span class="mpc-wx" id="wx-' + esc(slug) + '"><span class="mpc-t">&ndash;</span></span></span>' +
+        '<span class="mpc-alert" id="al-' + esc(slug) + '" hidden></span>' +
+        '<span class="mpc-stats">' + (r.index != null ? '<span><i>Resilience</i><b>' + Math.round(r.index) + '</b><small>#' + r.rank + ' of ' + D.rankN + '</small></span>' : '') +
+          (top ? '<span><i>Biggest pressure</i><b class="mpc-press">' + esc(top.t) + '</b></span>' : '') + '</span>' +
+        (lead ? '<span class="mpc-news"><i>' + esc(T.TONE[lead.tone] || 'News') + '</i>' + esc(lead.title) + '</span>' : '') +
+      '</a>' +
+      '<button type="button" class="mpc-x" data-rm="' + esc(slug) + '" aria-label="Stop following ' + esc(e.name) + '" title="Stop following">&times;</button>' +
+    '</article>';
+  }
+  function cards() {
+    var f = T.follows().filter(function (s) { return D.lib[s]; });
+    $('#mp-grid').innerHTML = f.map(card).join('');
+    $('#mp-empty').hidden = f.length > 0;
+    $('#mine-sub').textContent = f.length ? 'Saved on this device. Tap a place to see its full profile.' : 'Saved on this device, no account needed.';
+    if (!f.length) $('#mp-pop').innerHTML = POPULAR.filter(function (s) { return D.lib[s]; }).map(function (s) { return '<button type="button" class="chip" data-add="' + s + '">+ ' + esc(D.lib[s].name) + '</button>'; }).join('');
+    f.forEach(function (slug) {
+      var e = D.lib[slug];
+      T.weather(e.lat, e.lng).then(function (w) {
+        var c = w.current || {}, d = w.daily || {}, el = document.getElementById('wx-' + slug); if (!el) return;
+        el.innerHTML = T.icon(c.weather_code, 26) + '<span class="mpc-t">' + T.temp(c.temperature_2m) + '</span><span class="mpc-hl">' + T.sky(c.weather_code)[0] + (d.temperature_2m_max ? '<br>' + T.temp(d.temperature_2m_max[0]) + ' / ' + T.temp(d.temperature_2m_min[0]) : '') + '</span>';
+        var al = T.alerts(w)[0], ae = document.getElementById('al-' + slug);
+        if (al && ae) { ae.hidden = false; ae.className = 'mpc-alert al-' + al.kind; ae.textContent = al.text.split(':')[0].split('.')[0]; }
+      }).catch(function () { /* weather is optional */ });
+    });
+  }
+  function add(slug) { T.follow(slug); cards(); var c = document.querySelector('.mpc[data-slug="' + slug + '"]'); if (c) { c.classList.add('mpc-new'); c.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } }
+  $('#mp-grid').addEventListener('click', function (e) { var b = e.target.closest('[data-rm]'); if (!b) return; T.unfollow(b.dataset.rm); cards(); });
+  $('#mp-pop').addEventListener('click', function (e) { var b = e.target.closest('[data-add]'); if (b) add(b.dataset.add); });
+
+  // Add a place: the library first; anything else is built in Explore
+  var form = $('#mp-form'), input = $('#mp-q'), list = $('#mp-sugg'), items = [], active = -1;
+  function close() { list.hidden = true; input.setAttribute('aria-expanded', 'false'); active = -1; }
+  function show() {
+    var q = input.value.trim(); if (!q || !D) { close(); return; }
+    items = T.matches(D.list, q, 7);
+    list.innerHTML = items.map(function (e, k) { return '<li role="option" data-slug="' + e.slug + '" aria-selected="' + (k === active) + '"><span class="s-name">' + esc(e.name) + '</span><span class="s-sub">' + esc(T.where(e)) + '</span></li>'; }).join('') +
+      '<li role="option" data-world="1"><span class="s-world">Not listed? Build “' + esc(q) + '” in Explore (about ten minutes)</span></li>';
+    list.hidden = false; input.setAttribute('aria-expanded', 'true');
+  }
+  function pick(slug) { input.value = ''; close(); add(slug); }
+  input.addEventListener('input', function () { active = -1; show(); });
+  input.addEventListener('keydown', function (ev) {
+    if (ev.key === 'ArrowDown' && items.length) { active = Math.min(items.length - 1, active + 1); show(); ev.preventDefault(); }
+    else if (ev.key === 'ArrowUp' && items.length) { active = Math.max(0, active - 1); show(); ev.preventDefault(); }
+    else if (ev.key === 'Escape') close();
+  });
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault(); var q = input.value.trim(); if (!q || !D) return;
+    items = T.matches(D.list, q, 7);
+    if (active >= 0 && items[active]) pick(items[active].slug);
+    else if (items.length) pick(items[0].slug);
+    else location.href = '../explore/?q=' + encodeURIComponent(q);
+  });
+  list.addEventListener('mousedown', function (ev) {
+    var li = ev.target.closest('[data-slug],[data-world]'); if (!li) return; ev.preventDefault();
+    if (li.dataset.slug) pick(li.dataset.slug); else location.href = '../explore/?q=' + encodeURIComponent(input.value.trim());
+  });
+  input.addEventListener('blur', function () { setTimeout(close, 120); });
+  $('#mp-loc').addEventListener('click', function () {
+    var msg = $('#mp-loc-msg');
+    if (!navigator.geolocation) { msg.textContent = ' Location is not available in this browser.'; return; }
+    msg.textContent = ' Finding you…';
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      var n = D && T.nearest(D.list, pos.coords.latitude, pos.coords.longitude);
+      if (!n) { msg.textContent = ''; return; }
+      if (n.km > 60) { msg.innerHTML = ' The nearest place we have is ' + esc(n.place.name) + ', ' + Math.round(n.km) + ' km away. <a href="../explore/?q=' + pos.coords.latitude.toFixed(3) + ',' + pos.coords.longitude.toFixed(3) + '">Build your own area</a> or <button type="button" class="linkbtn" data-add="' + n.place.slug + '">follow ' + esc(n.place.name) + '</button>.'; return; }
+      msg.textContent = ' Added ' + n.place.name + '.'; add(n.place.slug);
+    }, function () { msg.textContent = ' Location was not shared. You can type your city instead.'; }, { maximumAge: 600000, timeout: 10000 });
+  });
+  $('#mp-loc-msg').addEventListener('click', function (e) { var b = e.target.closest('[data-add]'); if (b) { add(b.dataset.add); $('#mp-loc-msg').textContent = ''; } });
+
+  T.all().then(function (d) {
+    D = d; cards();
+    var names = {}; d.list.forEach(function (e) { names[e.slug] = e.name; });
+    // Latest real projects
+    var FSTAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
+    var ps = d.projects.slice().sort(function (a, b) { return String(b.added || '').localeCompare(String(a.added || '')) || (b.year || 0) - (a.year || 0); });
+    if (ps.length) {
+      $('#feed-grid').innerHTML = ps.slice(0, 6).map(function (p) {
+        var st = FSTAT[p.status] || FSTAT.proposed;
+        return '<a class="feed-card" href="../place/#' + esc(p.place) + '" style="--pc:' + st[1] + '"><span class="feed-top"><span class="feed-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span class="feed-city">' + esc(names[p.place] || p.place) + '</span></span>' +
+          '<b>' + esc(p.name) + '</b><span class="feed-sum">' + esc(String(p.summary || '').split('. ')[0].replace(/\.$/, '')) + '.</span></a>';
+      }).join('');
+      $('#feed').hidden = false;
+    }
+  }).catch(function () { $('#mp-grid').innerHTML = '<p class="mp-err">The places could not be loaded. Check your connection and refresh.</p>'; });
+})();
+
+</script>
+</body>
+</html>

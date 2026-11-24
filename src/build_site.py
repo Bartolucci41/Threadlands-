@@ -333,7 +333,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .pjc-links { display: flex; flex-wrap: wrap; gap: 14px; padding: 0 16px; font-size: 0.85rem; } .pjc-links a { color: var(--accent); font-weight: 600; }
   .pj-add { margin-top: 40px; padding: 28px 32px; border-radius: 18px; background: var(--deep, #123B38); color: #eaf2ee; display: flex; flex-wrap: wrap; gap: 18px 32px; align-items: center; justify-content: space-between; }
   .pj-add h2 { font-size: 1.6rem; color: #fff; } .pj-add p { margin: 6px 0 0; color: #b9cfc8; max-width: 52ch; }
-  .pj-add-f { display: flex; flex-wrap: wrap; gap: 8px; } .pj-add-f select { min-height: 44px; border-radius: 10px; border: 0; padding: 0 12px; font: inherit; min-width: 240px; }
+  .pj-add-f { display: flex; flex-wrap: wrap; gap: 8px; } .pj-add-f select { min-height: 44px; border-radius: 10px; border: 0; padding: 0 12px; font: inherit; min-width: 0; width: min(100%, 300px); } .pj-add-f label { min-width: 0; max-width: 100%; }
   .pj-add .btn { background: #fff; color: var(--deep, #123B38); border-color: #fff; }
   @media (max-width: 900px) { .pj-layout { grid-template-columns: 1fr; } .pj-map { height: 380px; position: static; } .pj-list { max-height: none; } }
   .hero3 { padding-top: 56px; padding-bottom: 8px; margin-top: 8px; }
@@ -396,8 +396,27 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
 
   /* ---- Two faces: the side switch in the top bar */
   .topnav .nav-home { margin-right: 5px; vertical-align: -2px; }
-  @media (max-width: 440px) { .topright { flex-wrap: nowrap; gap: 10px; } .topnav { gap: 12px; flex-wrap: nowrap; white-space: nowrap; } .topnav .nav-home { display: none; } .lang-sel { width: auto; padding-left: 8px; padding-right: 22px; font-size: 0.74rem; } .lab-tabs { gap: 4px 16px; } .lab-tabs-k { display: none; } }
-  @media (max-width: 345px) { .topright { flex-wrap: wrap; } }
+  .topnav a.nav-lab { padding: 6px 14px; border-radius: 999px; background: var(--deep, #123B38); color: #fff; font-weight: 600; text-decoration: none; }
+  .topnav a.nav-lab:hover { background: #1d5650; color: #fff; }
+  .topnav a.nav-lab[aria-current="page"] { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px #8fd3bf; text-decoration: none; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .topnav a.nav-lab { background: #8fd3bf; color: #0b2624; } }
+  @media (max-width: 560px) {
+    .site-head { position: relative; }
+    .site-head .lang-l { position: absolute; top: 14px; right: 0; }
+    .lang-sel { font-size: 0.78rem; padding-left: 8px; }
+    .topright { width: 100%; }
+    .topnav { gap: 6px 14px; font-size: 0.92rem; }
+    .topnav a.nav-lab { padding: 5px 12px; }
+    .lab-tabs { gap: 4px 16px; } .lab-tabs-k { display: none; }
+  }
+  /* Get involved */
+  .inv-first { padding-top: 24px; }
+  .inv-ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .inv-way { display: grid; gap: 6px; align-content: start; padding: 20px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); text-decoration: none; }
+  a.inv-way:hover { border-color: var(--deep, #123B38); }
+  .inv-way b { font: 700 1.2rem var(--font-display); } .inv-way span { color: var(--ink2); line-height: 1.5; }
+  a.inv-way b::after { content: " \2192"; color: var(--accent); }
+  .inv-soon { background: transparent; border-style: dashed; }
   .lab-tabs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px; padding: 8px 0 10px; border-top: 1px solid var(--line); font-size: 0.9rem; }
   .lab-tabs-k { font: 600 0.7rem var(--font-body); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); margin-right: 4px; }
   .lab-tabs a { color: var(--ink2); text-decoration: none; font-weight: 600; min-height: 32px; display: inline-flex; align-items: center; }
@@ -557,10 +576,10 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
 # Cloudflare Web Analytics: private visit counts for Robert, no cookies and no personal data
 ANALYTICS = ("<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' "
              "data-cf-beacon='{\"token\": \"a92b6704e81e4aaba11a9f8a11832ae1\"}'></script><!-- End Cloudflare Web Analytics -->\n")
-PAGES = [("", "Commons"), ("place/", "Place"), ("places/", "Places"), ("projects/", "Projects"), ("about/", "About"),
+PAGES = [("", "Home"), ("involved/", "Get involved"), ("place/", "Place"), ("places/", "Places"), ("projects/", "Projects"), ("about/", "About"),
          ("lab/", "ThreadLab"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")]
 # Two faces: everyone's side, and the professional side with the tools
-NAV = [("", "Commons"), ("places/", "Places"), ("lab/", "ThreadLab")]
+NAV = [("", "Home"), ("involved/", "Get involved"), ("places/", "Places"), ("lab/", "ThreadLab")]
 NAV_LAB = [("lab/", "Overview"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")]
 PRO_PAGES = ("lab/", "explore/", "studio/", "how-it-works/")
 
@@ -594,8 +613,8 @@ def nav(base, here):
     # One top bar on every page; ThreadLab's pages add a row of tabs underneath
     lab = here in PRO_PAGES
     house = '<svg class="nav-home" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>'
-    cur = "lab/" if lab else ("places/" if here == "place/" else "" if here == "projects/" else here)
-    links = "".join(f'<a href="{base}{p}"' + (' aria-current="page"' if p == cur else "") + '>' + (house if p == "" else "") + f'{n}</a>' for p, n in NAV)
+    cur = "lab/" if lab else ("places/" if here == "place/" else "involved/" if here == "projects/" else here)
+    links = "".join(f'<a href="{base}{p}"' + (' class="nav-lab"' if p == "lab/" else "") + (' aria-current="page"' if p == cur else "") + '>' + (house if p == "" else "") + f'{n}</a>' for p, n in NAV)
     tabs = ""
     if lab:
         tabs = ('  <nav class="lab-tabs" aria-label="ThreadLab"><span class="lab-tabs-k">ThreadLab</span>' +
@@ -610,7 +629,7 @@ def footer(base):
     return (f'<footer class="site-foot2">\n  <div class="wrap foot-grid">\n'
             f'    <div class="foot-brand"><a class="wordmark foot-wm" href="{base}" translate="no">Threadlands</a>'
             '<p>Know your city, and help make it ready for what&rsquo;s coming. For any place on Earth.</p></div>\n'
-            f'    <nav aria-label="Commons"><h2>Commons</h2>{col([("", "Your places"), ("projects/", "Projects"), ("places/", "All places")])}</nav>\n'
+            f'    <nav aria-label="Get involved"><h2>Get involved</h2>{col([("involved/", "Your places"), ("projects/", "Projects"), ("places/", "All places")])}</nav>\n'
             f'    <nav aria-label="ThreadLab"><h2>ThreadLab</h2>{col([("lab/", "Overview"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")])}</nav>\n'
             f'    <nav aria-label="About"><h2>About</h2>{col([("about/", "About Threadlands")])}</nav>\n'
             '  </div>\n  <div class="wrap foot-small">\n'
@@ -641,7 +660,7 @@ for i, sc in enumerate(re.findall(r"<script>(.*?)</script>", doc, re.S)):
     write(f"src/.check/explore{i}.js", sc)
 
 # ---- The other pages
-for name in ("home", "place", "lab", "studio", "places", "projects", "how-it-works", "about"):
+for name in ("home", "involved", "place", "lab", "studio", "places", "projects", "how-it-works", "about"):
     spec = read(SRC, "pages", name + ".html")
     meta = dict(re.findall(r"<!--\s*(\w+):\s*(.*?)\s*-->", spec.split("\n\n", 1)[0]))
     content = spec.split("\n\n", 1)[1]
