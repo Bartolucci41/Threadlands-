@@ -1,11 +1,42 @@
-<!-- title: Cities | Threadlands -->
-<!-- description: Every city in Threadlands on one map and one list, ranked for how prepared it is for heat, floods and drought, with real projects counted in. -->
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Places | Threadlands</title>
+<meta name="description" content="Every city in Threadlands on one map and one list, ranked for how prepared it is for heat, floods and drought, with real projects counted in.">
+<meta property="og:title" content="Places | Threadlands">
+<meta property="og:description" content="Every city in Threadlands on one map and one list, ranked for how prepared it is for heat, floods and drought, with real projects counted in.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css?v=10">
+<script src="../assets/i18n.js" defer></script>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D1613" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Threadlands">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });</script>
+<script>window.TL_DATA = "https://pub-5cc2f5116c6c462596fbf16596585b83.r2.dev";</script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a92b6704e81e4aaba11a9f8a11832ae1"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+<header class="wrap site-head" id="top">
+  <div class="topbar">
+    <a class="wordmark" href="../" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="28" height="28" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#123B38" stroke="none"/></svg><span>Threadlands</span></a>
+    <div class="topright"><nav class="topnav" aria-label="Site"><a href="../"><svg class="nav-home" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Commons</a><a href="../places/" aria-current="page">Places</a><a href="../lab/">ThreadLab</a></nav><label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>
+  </div>
+</header>
 <main class="wrap">
   <header class="page-head">
-    <p class="page-kicker">Cities</p>
-    <h1>How prepared are cities for heat, floods and drought?</h1>
-    <p class="page-lead">Every place in Threadlands, ranked by its resilience index from 0 to 100. Real projects that are approved, under way or recently built count toward each score. Don&rsquo;t see your city? <a href="{B}explore/">Search for it in Explore</a> and build it in about ten minutes.</p>
+    <p class="page-kicker">Places</p>
+    <h1>Every place, and how ready it is for heat, floods and drought.</h1>
+    <p class="page-lead">Every place in Threadlands, ranked by its resilience index from 0 to 100. Real projects that are approved, under way or recently built count toward each score. Don&rsquo;t see your city? <a href="../explore/">Search for it in Explore</a> and build it in about ten minutes.</p>
   </header>
   <div class="lib-map" id="lib-map"><canvas id="lib-canvas" role="img" aria-label="World map with a dot for every city"></canvas><span class="lib-tip" id="lib-tip" hidden></span>
     <div class="lib-zoom"><button type="button" class="chip" id="lz-in" aria-label="Zoom in">+</button><button type="button" class="chip" id="lz-out" aria-label="Zoom out">&minus;</button><button type="button" class="chip" id="lz-fit" aria-label="Show the whole world" title="Show the whole world">&#8634;</button></div></div>
@@ -22,7 +53,7 @@
   <div class="filters" id="rk-regions" role="group" aria-label="Region"></div>
   <div class="filters"><label><span class="sr-only">Find a city</span><input type="search" id="rk-q" placeholder="Find a city or country"></label><span class="rk-count" id="rk-count"></span></div>
 
-  <ol class="rk-table" id="rk-table"><li class="rk-none">Loading the cities&hellip;</li></ol>
+  <ol class="rk-table" id="rk-table"><li class="rk-none">Loading the places&hellip;</li></ol>
 
   <section class="rk-method" aria-labelledby="rk-m-h">
     <h2 id="rk-m-h">How the index works</h2>
@@ -34,14 +65,27 @@
     <p class="rank-note" id="rk-updated"></p>
   </section>
 </main>
-<!--SCRIPT-->
+<footer class="site-foot2">
+  <div class="wrap foot-grid">
+    <div class="foot-brand"><a class="wordmark foot-wm" href="../" translate="no">Threadlands</a><p>Know your city, and help make it ready for what&rsquo;s coming. For any place on Earth.</p></div>
+    <nav aria-label="Commons"><h2>Commons</h2><a href="../">Your places</a><a href="../projects/">Projects</a><a href="../places/">All places</a></nav>
+    <nav aria-label="ThreadLab"><h2>ThreadLab</h2><a href="../lab/">Overview</a><a href="../explore/">Explore</a><a href="../studio/">Studio</a><a href="../how-it-works/">Method</a></nav>
+    <nav aria-label="About"><h2>About</h2><a href="../about/">About Threadlands</a></nav>
+  </div>
+  <div class="wrap foot-small">
+    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>
+    <p>Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS, Landsat (USGS and NASA), Open-Meteo and GBIF.</p>
+  </div>
+</footer>
+<script>
+
 (function () {
   var $ = function (s) { return document.querySelector(s); };
   function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function norm(t) { return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
   var LIB = [], shown = [], dots = [], LAND = null, cv = $('#lib-canvas'), tip = $('#lib-tip');
   var V = { z: 1, lng: 0, lat: 7.5 }, W = 0, H = 0;
-  fetch('{B}assets/land.json').then(function (r) { return r.json(); }).then(function (l) { LAND = l; drawMap(); }).catch(function () { /* map without coastlines */ });
+  fetch('../assets/land.json').then(function (r) { return r.json(); }).then(function (l) { LAND = l; drawMap(); }).catch(function () { /* map without coastlines */ });
   function color(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
   function drawMap() {
     W = cv.parentNode.clientWidth;
@@ -131,12 +175,12 @@
   });
   cv.addEventListener('pointerup', function (ev) {
     var dr = drag; drag = null;
-    if (dr && !dr.moved) { var d = hit(ev); if (d) { if (ev.pointerType === 'mouse') location.href = '{B}place/#' + d.e.slug; else showTip(d, true); } }
+    if (dr && !dr.moved) { var d = hit(ev); if (d) { if (ev.pointerType === 'mouse') location.href = '../place/#' + d.e.slug; else showTip(d, true); } }
   });
   function showTip(d, tap) {
     tip.hidden = false; tip.innerHTML = '';
     tip.style.pointerEvents = tap ? 'auto' : 'none';
-    if (tap) { var a = document.createElement('a'); a.href = '{B}place/#' + d.e.slug; a.textContent = d.e.name + ', ' + d.e.country + ' \u2192'; tip.appendChild(a); }
+    if (tap) { var a = document.createElement('a'); a.href = '../place/#' + d.e.slug; a.textContent = d.e.name + ', ' + d.e.country + ' \u2192'; tip.appendChild(a); }
     else tip.textContent = d.e.name + ', ' + d.e.country;
     tip.style.left = d.x + 'px'; tip.style.top = d.y + 'px';
   }
@@ -176,10 +220,10 @@
       var v = p[key], has = v != null, w = has ? Math.max(3, Math.round(100 * (v - lo + 1) / (hi - lo + 1))) : 0;
       var pj = p.projects && p.projects.add >= 0.05 ? '<span class="rk-pj">+' + p.projects.add.toFixed(1) + ' from projects</span>' : (p.projects ? '<span class="rk-pj rk-pj0">' + p.projects.n + ' project' + (p.projects.n > 1 ? 's' : '') + ' on the map</span>' : '');
       var num = SORT === 'name' ? '' : SORT === 'pop' ? p._rank : (has ? p._rank : '');
-      return '<li' + (p.requested ? ' class="vis"' : '') + '><a href="{B}place/#' + esc(p.slug) + '"><span class="rt-n">' + num + '</span><span class="rt-c"><b>' + esc(p.name) + '</b><span>' + esc(where(p)) + (fmtPop(p) ? ' \u00b7 ' + fmtPop(p) : '') + '</span>' + (p.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</span>' +
+      return '<li' + (p.requested ? ' class="vis"' : '') + '><a href="../place/#' + esc(p.slug) + '"><span class="rt-n">' + num + '</span><span class="rt-c"><b>' + esc(p.name) + '</b><span>' + esc(where(p)) + (fmtPop(p) ? ' \u00b7 ' + fmtPop(p) : '') + '</span>' + (p.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</span>' +
         '<span class="rt-p">' + (p.top ? esc(PRESS[p.top] || '') : '') + '</span><span class="rt-j">' + pj + '</span>' +
         '<span class="rt-bar" aria-hidden="true">' + (has ? '<i style="width:' + w + '%"></i>' : '') + '</span><span class="rt-v">' + (has ? Math.round(v) : '<small>new</small>') + '</span></a></li>';
-    }).join('') || '<li class="rk-none">No place matches. <a href="{B}explore/?q=' + encodeURIComponent($('#rk-q').value.trim()) + '">Search everywhere for it</a> and build it.</li>';
+    }).join('') || '<li class="rk-none">No place matches. <a href="../explore/?q=' + encodeURIComponent($('#rk-q').value.trim()) + '">Search everywhere for it</a> and build it.</li>';
     var k2 = REGION + '|' + q; if (k2 !== LASTKEY) { LASTKEY = k2; fitTo(shown); } else drawMap();
   }
   function regions() {
@@ -194,13 +238,17 @@
   $('#rk-regions').addEventListener('click', function (e) { var b = e.target.closest('[data-r]'); if (!b) return; REGION = b.dataset.r; regions(); render(); });
   var qs = new URLSearchParams(location.search); if (qs.get('sort')) SORT = qs.get('sort'); if (qs.get('q')) $('#rk-q').value = qs.get('q');
   document.querySelectorAll('[data-sort]').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.sort === SORT ? 'true' : 'false'); });
-  Promise.all([fetch('{B}data/index.json').then(function (r) { return r.json(); }), fetch('{B}data/ranking.json').then(function (r) { return r.json(); }).catch(function () { return { places: [] }; })]).then(function (x) {
+  Promise.all([fetch('../data/index.json').then(function (r) { return r.json(); }), fetch('../data/ranking.json').then(function (r) { return r.json(); }).catch(function () { return { places: [] }; })]).then(function (x) {
     var RK = {}; (x[1].places || []).forEach(function (p) { if (p && p.slug) RK[p.slug] = p; });
     LIB = (x[0].places || []).filter(function (e) { return e && e.slug && isFinite(e.lat) && isFinite(e.lng); }).map(function (e) {
       var r = RK[e.slug] || {}; return Object.assign({}, e, { index: r.index, heat: r.heat, habitat: r.habitat, food: r.food, top: r.top, projects: r.projects });
     });
     if (x[1].updated) $('#rk-updated').textContent = 'Updated ' + new Date(x[1].updated + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + '. The ranking refreshes whenever a place is built or a project is approved.';
     regions(); render();
-  }).catch(function () { $('#rk-table').innerHTML = '<li class="rk-none">The cities could not be loaded. Check your connection and refresh.</li>'; });
+  }).catch(function () { $('#rk-table').innerHTML = '<li class="rk-none">The places could not be loaded. Check your connection and refresh.</li>'; });
   window.addEventListener('resize', drawMap);
 })();
+
+</script>
+</body>
+</html>

@@ -867,6 +867,8 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
 
   /* ---- Two faces: the side switch in the top bar */
   .topnav .nav-home { margin-right: 5px; vertical-align: -2px; }
+  @media (max-width: 440px) { .topright { flex-wrap: nowrap; gap: 10px; } .topnav { gap: 12px; flex-wrap: nowrap; white-space: nowrap; } .topnav .nav-home { display: none; } .lang-sel { width: auto; padding-left: 8px; padding-right: 22px; font-size: 0.74rem; } .lab-tabs { gap: 4px 16px; } .lab-tabs-k { display: none; } }
+  @media (max-width: 345px) { .topright { flex-wrap: wrap; } }
   .lab-tabs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px; padding: 8px 0 10px; border-top: 1px solid var(--line); font-size: 0.9rem; }
   .lab-tabs-k { font: 600 0.7rem var(--font-body); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); margin-right: 4px; }
   .lab-tabs a { color: var(--ink2); text-decoration: none; font-weight: 600; min-height: 32px; display: inline-flex; align-items: center; }

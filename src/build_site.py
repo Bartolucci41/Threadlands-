@@ -396,6 +396,8 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
 
   /* ---- Two faces: the side switch in the top bar */
   .topnav .nav-home { margin-right: 5px; vertical-align: -2px; }
+  @media (max-width: 440px) { .topright { flex-wrap: nowrap; gap: 10px; } .topnav { gap: 12px; flex-wrap: nowrap; white-space: nowrap; } .topnav .nav-home { display: none; } .lang-sel { width: auto; padding-left: 8px; padding-right: 22px; font-size: 0.74rem; } .lab-tabs { gap: 4px 16px; } .lab-tabs-k { display: none; } }
+  @media (max-width: 345px) { .topright { flex-wrap: wrap; } }
   .lab-tabs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px; padding: 8px 0 10px; border-top: 1px solid var(--line); font-size: 0.9rem; }
   .lab-tabs-k { font: 600 0.7rem var(--font-body); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); margin-right: 4px; }
   .lab-tabs a { color: var(--ink2); text-decoration: none; font-weight: 600; min-height: 32px; display: inline-flex; align-items: center; }
@@ -555,10 +557,10 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
 # Cloudflare Web Analytics: private visit counts for Robert, no cookies and no personal data
 ANALYTICS = ("<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' "
              "data-cf-beacon='{\"token\": \"a92b6704e81e4aaba11a9f8a11832ae1\"}'></script><!-- End Cloudflare Web Analytics -->\n")
-PAGES = [("", "My places"), ("place/", "City"), ("cities/", "Cities"), ("projects/", "Projects"), ("about/", "About"),
-         ("lab/", "The Lab"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")]
+PAGES = [("", "Commons"), ("place/", "Place"), ("places/", "Places"), ("projects/", "Projects"), ("about/", "About"),
+         ("lab/", "ThreadLab"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")]
 # Two faces: everyone's side, and the professional side with the tools
-NAV = [("", "Home"), ("cities/", "Cities"), ("projects/", "Projects"), ("lab/", "Lab")]
+NAV = [("", "Commons"), ("places/", "Places"), ("lab/", "ThreadLab")]
 NAV_LAB = [("lab/", "Overview"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")]
 PRO_PAGES = ("lab/", "explore/", "studio/", "how-it-works/")
 
@@ -589,14 +591,14 @@ def head(base, title, desc):
 
 
 def nav(base, here):
-    # One top bar on every page; the Lab's pages add a row of tabs underneath
+    # One top bar on every page; ThreadLab's pages add a row of tabs underneath
     lab = here in PRO_PAGES
     house = '<svg class="nav-home" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>'
-    cur = "lab/" if lab else ("cities/" if here == "place/" else here)
+    cur = "lab/" if lab else ("places/" if here == "place/" else "" if here == "projects/" else here)
     links = "".join(f'<a href="{base}{p}"' + (' aria-current="page"' if p == cur else "") + '>' + (house if p == "" else "") + f'{n}</a>' for p, n in NAV)
     tabs = ""
     if lab:
-        tabs = ('  <nav class="lab-tabs" aria-label="The Lab"><span class="lab-tabs-k">The Lab</span>' +
+        tabs = ('  <nav class="lab-tabs" aria-label="ThreadLab"><span class="lab-tabs-k">ThreadLab</span>' +
                 "".join(f'<a href="{base}{p}"' + (' aria-current="page"' if p == here else "") + f'>{n}</a>' for p, n in NAV_LAB) + '</nav>\n')
     return (f'<header class="wrap site-head" id="top">\n  <div class="topbar">\n    <a class="wordmark" href="{base}" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="28" height="28" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#123B38" stroke="none"/></svg><span>Threadlands</span></a>\n'
             f'    <div class="topright"><nav class="topnav" aria-label="Site">{links}</nav>'
@@ -607,9 +609,9 @@ def footer(base):
     col = lambda items: "".join(f'<a href="{base}{p}">{n}</a>' for p, n in items)
     return (f'<footer class="site-foot2">\n  <div class="wrap foot-grid">\n'
             f'    <div class="foot-brand"><a class="wordmark foot-wm" href="{base}" translate="no">Threadlands</a>'
-            '<p>Know your city, and help make it ready for what&rsquo;s coming. Free, for any place on Earth.</p></div>\n'
-            f'    <nav aria-label="Threadlands"><h2>Threadlands</h2>{col([("", "Home"), ("cities/", "Cities"), ("projects/", "Projects")])}</nav>\n'
-            f'    <nav aria-label="The Lab"><h2>The Lab</h2>{col([("lab/", "Overview"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")])}</nav>\n'
+            '<p>Know your city, and help make it ready for what&rsquo;s coming. For any place on Earth.</p></div>\n'
+            f'    <nav aria-label="Commons"><h2>Commons</h2>{col([("", "Your places"), ("projects/", "Projects"), ("places/", "All places")])}</nav>\n'
+            f'    <nav aria-label="ThreadLab"><h2>ThreadLab</h2>{col([("lab/", "Overview"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")])}</nav>\n'
             f'    <nav aria-label="About"><h2>About</h2>{col([("about/", "About Threadlands")])}</nav>\n'
             '  </div>\n  <div class="wrap foot-small">\n'
             '    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>\n'
@@ -639,7 +641,7 @@ for i, sc in enumerate(re.findall(r"<script>(.*?)</script>", doc, re.S)):
     write(f"src/.check/explore{i}.js", sc)
 
 # ---- The other pages
-for name in ("home", "place", "lab", "studio", "cities", "projects", "how-it-works", "about"):
+for name in ("home", "place", "lab", "studio", "places", "projects", "how-it-works", "about"):
     spec = read(SRC, "pages", name + ".html")
     meta = dict(re.findall(r"<!--\s*(\w+):\s*(.*?)\s*-->", spec.split("\n\n", 1)[0]))
     content = spec.split("\n\n", 1)[1]
@@ -651,8 +653,8 @@ for name in ("home", "place", "lab", "studio", "cities", "projects", "how-it-wor
          parts[1].replace("{B}", base) if len(parts) > 1 else "")
     if len(parts) > 1:
         write(f"src/.check/{name}.js", parts[1])
-# Old addresses: Library and Rankings became Cities
-for old, new in (("library", "cities"), ("rankings", "cities"), ("pro", "lab")):
+# Old addresses: Library, Rankings and Cities became Places
+for old, new in (("library", "places"), ("rankings", "places"), ("cities", "places"), ("pro", "lab")):
     write(f"{old}/index.html", '<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8"><title>Threadlands</title>'
           f'<link rel="canonical" href="../{new}/"><meta http-equiv="refresh" content="0; url=../{new}/">'
           f"<script>location.replace('../{new}/' + location.search + location.hash);</script></head>"

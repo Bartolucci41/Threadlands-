@@ -29,7 +29,7 @@
 <header class="wrap site-head" id="top">
   <div class="topbar">
     <a class="wordmark" href="../" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="28" height="28" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#123B38" stroke="none"/></svg><span>Threadlands</span></a>
-    <div class="topright"><nav class="topnav" aria-label="Site"><a href="../"><svg class="nav-home" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Home</a><a href="../cities/" aria-current="page">Cities</a><a href="../projects/">Projects</a><a href="../lab/">Lab</a></nav><label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>
+    <div class="topright"><nav class="topnav" aria-label="Site"><a href="../"><svg class="nav-home" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Commons</a><a href="../places/" aria-current="page">Places</a><a href="../lab/">ThreadLab</a></nav><label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>
   </div>
 </header>
 <main class="wrap">
@@ -39,7 +39,7 @@
     <section class="pf-head bleed band-deep" aria-labelledby="pf-name">
       <div class="pf-head-in">
         <div class="pf-id">
-          <a class="pf-back" href="../">&larr; My places</a>
+          <a class="pf-back" href="../">&larr; Your places</a>
           <h1 id="pf-name" class="pf-h"></h1>
           <p class="pf-where" id="pf-where"></p>
           <div class="pf-actions">
@@ -69,7 +69,7 @@
     </section>
 
     <section class="sect pf-sec" id="ready" aria-labelledby="ready-h">
-      <div class="sect-top"><div><h2 id="ready-h">How ready is it?</h2><p>The Threadlands resilience index and three stress tests, from 0 to 100. Higher is better prepared.</p></div><a class="more" id="pf-cities" href="../cities/">Compare every city &rarr;</a></div>
+      <div class="sect-top"><div><h2 id="ready-h">How ready is it?</h2><p>The Threadlands resilience index and three stress tests, from 0 to 100. Higher is better prepared.</p></div><a class="more" id="pf-cities" href="../places/">Compare every place &rarr;</a></div>
       <div class="pf-ready" id="pf-ready"></div>
     </section>
 
@@ -89,7 +89,7 @@
     <section class="sect bleed band-deep pro-band" aria-labelledby="deep-h">
       <div class="pro-band-in">
         <div>
-          <p class="hero3-kick">Go deeper in the Lab</p>
+          <p class="hero3-kick">Go deeper in ThreadLab</p>
           <h2 id="deep-h">Work on this city</h2>
           <p>See the full map of heat, flooding, farmland and nature, test the city against 2050, find the plan that does the most, and take a costed brief to council.</p>
         </div>
@@ -100,9 +100,9 @@
 </main>
 <footer class="site-foot2">
   <div class="wrap foot-grid">
-    <div class="foot-brand"><a class="wordmark foot-wm" href="../" translate="no">Threadlands</a><p>Know your city, and help make it ready for what&rsquo;s coming. Free, for any place on Earth.</p></div>
-    <nav aria-label="Threadlands"><h2>Threadlands</h2><a href="../">Home</a><a href="../cities/">Cities</a><a href="../projects/">Projects</a></nav>
-    <nav aria-label="The Lab"><h2>The Lab</h2><a href="../lab/">Overview</a><a href="../explore/">Explore</a><a href="../studio/">Studio</a><a href="../how-it-works/">Method</a></nav>
+    <div class="foot-brand"><a class="wordmark foot-wm" href="../" translate="no">Threadlands</a><p>Know your city, and help make it ready for what&rsquo;s coming. For any place on Earth.</p></div>
+    <nav aria-label="Commons"><h2>Commons</h2><a href="../">Your places</a><a href="../projects/">Projects</a><a href="../places/">All places</a></nav>
+    <nav aria-label="ThreadLab"><h2>ThreadLab</h2><a href="../lab/">Overview</a><a href="../explore/">Explore</a><a href="../studio/">Studio</a><a href="../how-it-works/">Method</a></nav>
     <nav aria-label="About"><h2>About</h2><a href="../about/">About Threadlands</a></nav>
   </div>
   <div class="wrap foot-small">
@@ -166,7 +166,7 @@
       (r.projects && r.projects.add >= 0.05 ? '<span class="rk-pj">+' + r.projects.add.toFixed(1) + ' from real projects</span>' : '') + '</div>' +
       '<div class="pfr-bars">' + (t.heatwave != null ? bar(t.heatwave, 'A heatwave') : '') + (t.flood != null ? bar(t.flood, 'A river flood') : '') + (t.drought != null ? bar(t.drought, 'A drought year') : '') +
       (r.heat != null ? bar(r.heat, 'Heat relief today') : '') + (r.habitat != null ? bar(r.habitat, 'Connected nature') : '') + '</div>';
-    $('#pf-cities').href = '../cities/?q=' + encodeURIComponent(e.name);
+    $('#pf-cities').href = '../places/?q=' + encodeURIComponent(e.name);
   }
   function renderProjects(e) {
     var STAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };

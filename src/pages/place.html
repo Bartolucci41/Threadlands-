@@ -8,7 +8,7 @@
     <section class="pf-head bleed band-deep" aria-labelledby="pf-name">
       <div class="pf-head-in">
         <div class="pf-id">
-          <a class="pf-back" href="{B}">&larr; My places</a>
+          <a class="pf-back" href="{B}">&larr; Your places</a>
           <h1 id="pf-name" class="pf-h"></h1>
           <p class="pf-where" id="pf-where"></p>
           <div class="pf-actions">
@@ -38,7 +38,7 @@
     </section>
 
     <section class="sect pf-sec" id="ready" aria-labelledby="ready-h">
-      <div class="sect-top"><div><h2 id="ready-h">How ready is it?</h2><p>The Threadlands resilience index and three stress tests, from 0 to 100. Higher is better prepared.</p></div><a class="more" id="pf-cities" href="{B}cities/">Compare every city &rarr;</a></div>
+      <div class="sect-top"><div><h2 id="ready-h">How ready is it?</h2><p>The Threadlands resilience index and three stress tests, from 0 to 100. Higher is better prepared.</p></div><a class="more" id="pf-cities" href="{B}places/">Compare every place &rarr;</a></div>
       <div class="pf-ready" id="pf-ready"></div>
     </section>
 
@@ -58,7 +58,7 @@
     <section class="sect bleed band-deep pro-band" aria-labelledby="deep-h">
       <div class="pro-band-in">
         <div>
-          <p class="hero3-kick">Go deeper in the Lab</p>
+          <p class="hero3-kick">Go deeper in ThreadLab</p>
           <h2 id="deep-h">Work on this city</h2>
           <p>See the full map of heat, flooding, farmland and nature, test the city against 2050, find the plan that does the most, and take a costed brief to council.</p>
         </div>
@@ -122,7 +122,7 @@
       (r.projects && r.projects.add >= 0.05 ? '<span class="rk-pj">+' + r.projects.add.toFixed(1) + ' from real projects</span>' : '') + '</div>' +
       '<div class="pfr-bars">' + (t.heatwave != null ? bar(t.heatwave, 'A heatwave') : '') + (t.flood != null ? bar(t.flood, 'A river flood') : '') + (t.drought != null ? bar(t.drought, 'A drought year') : '') +
       (r.heat != null ? bar(r.heat, 'Heat relief today') : '') + (r.habitat != null ? bar(r.habitat, 'Connected nature') : '') + '</div>';
-    $('#pf-cities').href = '{B}cities/?q=' + encodeURIComponent(e.name);
+    $('#pf-cities').href = '{B}places/?q=' + encodeURIComponent(e.name);
   }
   function renderProjects(e) {
     var STAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
