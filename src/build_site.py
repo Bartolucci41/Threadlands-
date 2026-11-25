@@ -325,6 +325,8 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .pfp-f { margin: -4px 0 8px; font-weight: 600; color: var(--warm, #C0603A); }
   .pfr-note { flex-basis: 100%; margin: 6px 0 0; color: var(--ink2); font-size: 0.85rem; line-height: 1.5; max-width: 44ch; }
   /* ---- Feedback form */
+  .fb-btn { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 9px 16px; border-radius: 999px; border: 1.5px solid #8fd3bf; background: transparent; color: #fff; font: 600 0.92rem var(--font-body); cursor: pointer; }
+  .fb-btn:hover { background: #8fd3bf; color: #0b2624; }
   .fb-link { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin-left: 10px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; opacity: .85; }
   .fb-link:hover { opacity: 1; }
   .fb-mini { font: 600 0.82rem var(--font-body); color: var(--ink2); background: none; border: 0; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
@@ -777,7 +779,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=22">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=23">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
@@ -799,12 +801,13 @@ def footer(base):
     col = lambda items: "".join(f'<a href="{base}{p}">{n}</a>' for p, n in items)
     return (f'<footer class="site-foot2">\n  <div class="wrap foot-grid">\n'
             f'    <div class="foot-brand"><a class="wordmark foot-wm" href="{base}" translate="no">Threadlands</a>'
-            '<p>A civic climate map. See what&rsquo;s happening where you live, map what you notice, and explore what could change.</p></div>\n'
+            '<p>A civic climate map. See what&rsquo;s happening where you live, map what you notice, and explore what could change.</p>'
+            '<button type="button" class="fb-btn" data-feedback=""><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Send feedback</button></div>\n'
             f'    <nav aria-label="Get involved"><h2>Get involved</h2>{col([("involved/", "Places you stand with"), ("projects/", "Projects"), ("places/", "All places")])}</nav>\n'
             f'    <nav aria-label="ThreadLab"><h2>ThreadLab</h2>{col([("lab/", "Overview"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")])}</nav>\n'
-            f'    <nav aria-label="About"><h2>About</h2>{col([("about/", "About Threadlands")])}</nav>\n'
+            f'    <nav aria-label="About"><h2>About</h2>{col([("about/", "About Threadlands")])}<a href="#" data-feedback="">Send feedback</a></nav>\n'
             '  </div>\n  <div class="wrap foot-small">\n'
-            '    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci. <button type="button" class="fb-link" data-feedback="">Send feedback</button></p>\n'
+            '    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>\n'
             '    <p>Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS, Landsat (USGS and NASA), Open-Meteo and GBIF.</p>\n'
             '  </div>\n</footer>\n')
 

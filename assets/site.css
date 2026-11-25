@@ -801,6 +801,8 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .pfp-f { margin: -4px 0 8px; font-weight: 600; color: var(--warm, #C0603A); }
   .pfr-note { flex-basis: 100%; margin: 6px 0 0; color: var(--ink2); font-size: 0.85rem; line-height: 1.5; max-width: 44ch; }
   /* ---- Feedback form */
+  .fb-btn { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 9px 16px; border-radius: 999px; border: 1.5px solid #8fd3bf; background: transparent; color: #fff; font: 600 0.92rem var(--font-body); cursor: pointer; }
+  .fb-btn:hover { background: #8fd3bf; color: #0b2624; }
   .fb-link { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin-left: 10px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; opacity: .85; }
   .fb-link:hover { opacity: 1; }
   .fb-mini { font: 600 0.82rem var(--font-body); color: var(--ink2); background: none; border: 0; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
