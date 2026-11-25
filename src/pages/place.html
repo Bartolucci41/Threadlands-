@@ -299,7 +299,8 @@
     if (HLAYER) { HM.removeLayer(HLAYER); HLAYER = null; }
     document.querySelectorAll('[data-ly]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.ly === LY ? 'true' : 'false'); });
     var keyTxt = { heat: ['Cooler', 'Hotter', 'Measured surface heat from Landsat, compared across the region. Grey: no reading.'], flood: ['Lower', 'Higher', 'Flood exposure: low ground near rivers, lakes or the sea, where water collects first.'], green: ['Little', 'Lots', 'Share of trees, grass, wetland and farmland.'] };
-    if (LY === 'none') { $('#here-key').innerHTML = ''; return; }
+    var HK = $('#here-key');   // the key is only there while no area card is open
+    if (LY === 'none') { if (HK) HK.innerHTML = ''; return; }
     var c = HDATA.place.cells, vals = HCELLS[LY], r = range(vals), group = [];
     var rend = L.canvas({ padding: 0.3 });
     for (var i = 0; i < c.lat.length; i++) {
@@ -309,7 +310,7 @@
     }
     HLAYER = L.layerGroup(group).addTo(HM);
     var kt = keyTxt[LY];
-    $('#here-key').innerHTML = '<div class="hk-bar hk-' + LY + '"></div><div class="hk-l"><span>' + kt[0] + '</span><span>' + kt[1] + '</span></div><p class="hk-n">' + kt[2] + ' Each patch is about 1 km\u00b2.</p>';
+    if (HK) HK.innerHTML = '<div class="hk-bar hk-' + LY + '"></div><div class="hk-l"><span>' + kt[0] + '</span><span>' + kt[1] + '</span></div><p class="hk-n">' + kt[2] + ' Each patch is about 1 km\u00b2.</p>';
   }
   function setLayer(ly) { LY = ly; drawLayer(); }
   document.querySelector('.here-layers').addEventListener('click', function (ev) { var b = ev.target.closest('[data-ly]'); if (b) setLayer(b.dataset.ly); });
