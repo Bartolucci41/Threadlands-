@@ -417,9 +417,9 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .topnav a.nav-lab { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; color: #fff; background: #165049; font-weight: 600; text-decoration: none; transition: background .12s ease; }
   .topnav a.nav-lab::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #8fd3bf; }
   .topnav a.nav-lab:hover { color: #fff; background: #0f3b36; }
-  .topnav a.nav-lab[aria-current="page"] { text-decoration: none; outline: 2px solid #8fd3bf; outline-offset: 2px; }
+  .site-head .topnav a.nav-lab[aria-current="page"] { color: #fff; text-decoration: none; outline: 2px solid #8fd3bf; outline-offset: 2px; }
   .topnav a.nav-lab:focus-visible { outline: 3px solid #8fd3bf; outline-offset: 3px; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .topnav a.nav-lab { color: #0b2624; background: #8fd3bf; } :root:not([data-theme="light"]) .topnav a.nav-lab::before { background: #123B38; } }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .topnav a.nav-lab, :root:not([data-theme="light"]) .site-head .topnav a.nav-lab[aria-current="page"] { color: #0b2624; background: #8fd3bf; } :root:not([data-theme="light"]) .topnav a.nav-lab::before { background: #123B38; } }
   @media (max-width: 560px) {
     .site-head { position: relative; }
     .site-head .lang-l { position: absolute; top: 14px; right: 0; }
@@ -740,7 +740,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=20">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=21">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

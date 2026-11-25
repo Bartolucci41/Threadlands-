@@ -1,7 +1,7 @@
 // Threadlands offline support: pages and data you have opened keep working without a connection.
 // Pages and data: network first, so updates show at once; the saved copy is used only when offline.
 // Styles, scripts and images: served from the saved copy, refreshed in the background.
-var VERSION = 'tl-v44';
+var VERSION = 'tl-v45';
 var CORE = ['/', '/explore/', '/studio/', '/places/', '/place/', '/lab/', '/involved/', '/assets/public.js', '/data/summary.json', '/data/ranking.json', '/how-it-works/', '/about/', '/assets/site.css',
   '/data/index.json', '/data/price-levels.json', '/data/materials.json', '/data/trees.json', '/manifest.webmanifest'];
 self.addEventListener('install', function (e) {
