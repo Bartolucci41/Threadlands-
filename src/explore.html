@@ -1822,7 +1822,13 @@
     var rows = METRICS.map(function (m) { return '<tr><td>' + esc(m.name) + '</td><td>' + Math.round(bau.metrics[m.k]) + '</td><td>' + Math.round(res.metrics[m.k]) + '</td><td>' + dl(res.metrics[m.k] - bau.metrics[m.k]) + rng(m.k) + '</td></tr>'; }).join('') +
       TESTS.map(function (t) { return '<tr><td>' + esc(t.name) + ' (stress test)</td><td>' + Math.round(bau.tests[t.k]) + '</td><td>' + Math.round(res.tests[t.k]) + '</td><td>' + dl(res.tests[t.k] - bau.tests[t.k]) + rng(t.k, 1) + '</td></tr>'; }).join('');
     var costs = $('#costs') ? $('#costs').outerHTML : '';
-    var wts = Array.prototype.slice.call(document.querySelectorAll('#wts-list li')).slice(0, 5).map(function (li) { var parts = []; li.querySelectorAll('*').forEach(function (el) { if (!el.children.length && el.tagName !== 'A' && el.textContent.trim()) parts.push(el.textContent.replace(/\s+/g, ' ').trim()); }); return '<li>' + esc((parts.length ? parts.join('. ') : li.textContent).replace(/\.\./g, '.')) + '</li>'; }).join('');
+    // Where to start follows the plan's own goal (wetlands for a flood plan, shade for a heat plan), else its biggest lever
+    var GOAL_WTS = { heat: 'canopy', flood: 'wetlands', habitat: 'corridors', food: 'regen' }, wantA = FIX && GOAL_WTS[FIX.goal];
+    if (!wantA) { var top = LEVERS.filter(function (L) { return state[L.key] > 0 && WTS_PAINT.hasOwnProperty(L.key); }).sort(function (a, b) { return state[b.key] - state[a.key]; })[0]; wantA = top ? top.key : WTS.action; }
+    var keepA = WTS.action; WTS.action = wantA; try { renderWTS(); } catch (e) { /* the list is optional */ }
+    var wtsName = (wtsAction() || {}).name || '';
+    var wts = Array.prototype.slice.call(document.querySelectorAll('#wts-list li')).slice(0, 5).map(function (li) { var parts = []; li.querySelectorAll('*').forEach(function (el) { if (!el.children.length && el.tagName !== 'A' && el.textContent.trim()) parts.push(el.textContent.replace(/\s+/g, ' ').trim()); }); return '<li>' + esc((parts.length ? parts.join('. ') : li.textContent).replace(/^\s*\d+\.\s*/, '').replace(/\.\./g, '.')) + '</li>'; }).join('');
+    WTS.action = keepA; try { renderWTS(); } catch (e) { /* ignore */ }
     var ir = fresh && LASTR.index[1] - LASTR.index[0] >= 1 ? ' (likely ' + dl(LASTR.index[0]) + ' to ' + dl(LASTR.index[1]) + ')' : '';
     return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + name + ': decision brief</title>' +
       '<style>body{margin:0;background:#eceee9;font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;color:#1d2523}.pg{max-width:820px;margin:24px auto;background:#fff;padding:48px 56px;box-shadow:0 2px 12px rgba(0,0,0,.08)}' +
@@ -1838,9 +1844,9 @@
       (press ? '<h2>What stands out in the data</h2>' + press : '') +
       '<h2>The plan</h2>' + (levers ? '<ul>' + levers + '</ul>' : '<p>No actions chosen yet: this shows business as usual.</p>') +
       '<h2>What it would change</h2><table><thead><tr><th>Measure (0 to 100)</th><th>Without the plan</th><th>With the plan</th><th>Change</th></tr></thead><tbody>' + rows + '</tbody></table>' +
-      '<p class="note">Ranges show how far each change could move if the model’s assumptions are off (middle 80% of 30 runs).</p>' +
+      (rows.indexOf('class="r"') >= 0 ? '<p class="note">Ranges show how far each change could move if the model’s assumptions are off (middle 80% of 30 runs).</p>' : '') +
       (costs ? '<h2>Rough costs and benefits</h2>' + costs : '') +
-      (wts ? '<h2>Where to start</h2><ol>' + wts + '</ol>' : '') +
+      (wts ? '<h2>Where to start: ' + esc(wtsName.toLowerCase()) + '</h2><ol>' + wts + '</ol>' : '') +
       '<h2>Scenario and assumptions</h2><ul>' +
       '<li><b>Scenario:</b> ' + esc(scn.goal) + ', in the ' + esc(scn.climate) + ' climate. Every change is measured against business as usual (no new actions) in that same climate.</li>' +
       '<li><b>Plan settings:</b> ' + (scn.levers.length ? esc(scn.levers.join(', ')) : 'none') + (scn.extra.length ? '; plus ' + esc(scn.extra.join(' and ')) : '') + '. Open the same place in Explore and set these to reproduce every number here.</li>' +
@@ -2258,7 +2264,7 @@
     // A link such as explore/?goal=flood#lima opens the Plan step and tests that goal for this place
     var wantGoal = new URLSearchParams(location.search).get('goal');
     if (wantGoal && GOALS[wantGoal] && kind !== 'demo' && !GOAL_DONE) {
-      GOAL_DONE = true;
+      // marked done only once a goal search finishes, so a second load of the place does not lose it
       setTimeout(function () { showTab('plan'); var gb = document.querySelector('.fix-goal[data-goal="' + wantGoal + '"]'); if (gb) gb.click(); }, 400);
     }
     loadLive(data);
@@ -2600,7 +2606,7 @@
         fixSearch = null;
         if (forP !== P || !best) { fixShow('ask'); return; }
         var before = P.BAU;
-        FIX = { goal: b.dataset.goal, plan: best };
+        FIX = { goal: b.dataset.goal, plan: best }; GOAL_DONE = true;
         Object.assign(state, best); $('#budget-note').hidden = true;
         FADE = { from: FIELD ? FIELD.cv : null, f: FIELD, t0: performance.now() };
         render();
