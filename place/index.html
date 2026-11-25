@@ -10,9 +10,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=21">
+<link rel="stylesheet" href="../assets/site.css?v=22">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
+<script src="../assets/feedback.js?v=1" defer></script>
 <link rel="manifest" href="../manifest.webmanifest">
 <meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0D1613" media="(prefers-color-scheme: dark)">
@@ -148,7 +149,7 @@
     <nav aria-label="About"><h2>About</h2><a href="../about/">About Threadlands</a></nav>
   </div>
   <div class="wrap foot-small">
-    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>
+    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci. <button type="button" class="fb-link" data-feedback="">Send feedback</button></p>
     <p>Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS, Landsat (USGS and NASA), Open-Meteo and GBIF.</p>
   </div>
 </footer>
@@ -386,6 +387,14 @@
     if (p <= 0.25) return w[3] + ' than three quarters of the modeled region';
     return 'around the middle for the modeled region';
   }
+  // What a data report from the map attaches: the place, the tapped area and the layer on screen
+  var HERE_FB = null, LY_NAME = { heat: 'Heat', flood: 'Flooding', green: 'Green and nature', none: 'Streets only' };
+  window.TLF_CONTEXT = function () {
+    var e = D && D.lib && D.lib[SLUG], c = { Place: e ? e.name + (e.country ? ', ' + e.country : '') : SLUG, Layer: LY_NAME[LY] || LY };
+    if (HERE_FB) { c.Area = HERE_FB.lat.toFixed(4) + ', ' + HERE_FB.lng.toFixed(4) + ' (about 1 km² around it)'; if (HERE_FB.cell >= 0 && HDATA) c.Patch = String(HDATA.place.cells.id[HERE_FB.cell]); }
+    if (Q) c.Question = 'Where does the rain go from here? (step ' + (Q.step + 1) + ')';
+    return c;
+  };
   function whatsHere(lat, lng) {
     if (HPIN) HM.removeLayer(HPIN);
     HPIN = L.circleMarker([lat, lng], { radius: 9, color: '#fff', weight: 3, fillColor: '#123B38', fillOpacity: 1 }).addTo(HM);
@@ -401,7 +410,7 @@
     var obs = OBSV.filter(function (o) { return o.place === SLUG; }).map(function (o) { return [kmBetween(lat, lng, o.lat, o.lng), o]; }).filter(function (x) { return x[0] < 2; }).sort(function (a, b) { return a[0] - b[0]; }).slice(0, 3);
     var goal = hp != null && hp >= 0.75 ? 'heat' : fp >= 0.75 && (+c.flood[i] || 0) > 0 ? 'flood' : gp <= 0.25 ? 'habitat' : 'heat';
     var gw = { heat: 'cool this region', flood: 'reduce flooding in this region', habitat: 'bring nature back to this region' };
-    $('#here-card').innerHTML = '<h3>About this area</h3><p class="here-scale">The area of about 1 km\u00b2 around the spot you tapped. For what happens on a single street or corner, local knowledge is what the map needs.</p><ul class="here-facts">' + out.join('') + '</ul>' +
+    HERE_FB = { lat: lat, lng: lng, cell: i }; $('#here-card').innerHTML = '<div class="here-card-top"><h3>About this area</h3><button type="button" class="fb-mini" data-feedback="data">Report a data issue</button></div><p class="here-scale">The area of about 1 km\u00b2 around the spot you tapped. For what happens on a single street or corner, local knowledge is what the map needs.</p><ul class="here-facts">' + out.join('') + '</ul>' +
       '<h4>Nearby projects</h4>' + (near.length ? '<ul class="here-pj">' + near.map(function (x) { var p = x[1]; return '<li><a href="#pj-' + esc(p.id) + '" translate="no">' + esc(p.name) + '</a><span>' + (x[0] < 1 ? 'under 1 km' : x[0].toFixed(1) + ' km') + ' away</span></li>'; }).join('') + '</ul>' : '<p class="here-none">No projects within 5 km on the map yet.</p>') +
       (obs.length ? '<h4>What people have noticed nearby</h4><ul class="here-pj">' + obs.map(function (x) { var o = x[1]; return '<li><span class="ob-k">' + esc(KIND_OBS[o.kind] || 'Note') + '</span> ' + esc(o.text) + '<span class="ob-r">' + (o.review === 'corroborated' ? 'Corroborated by a local partner' : o.source_url ? 'Location and source checked' : 'Location checked') + '</span></li>'; }).join('') + '</ul>' : '') +
       '<div class="here-acts"><button type="button" class="btn" id="here-add">Add what you know here</button><a class="btn ghost" href="../explore/?goal=' + goal + '#' + esc(SLUG) + '">Explore ways to ' + gw[goal] + ' &rarr;</a></div>' +

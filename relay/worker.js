@@ -8,6 +8,7 @@
 //   SITE          (text)    https://threadlands.org
 //   SUPPORT       (KV namespace binding)  where "Back this project" and "Stand with" counts are kept (Workers KV, free tier)
 //   SALT          (secret, optional)      any long random text; makes the stored visitor fingerprints unguessable
+//   INBOX_KEY     (secret)  a long password of your choosing; opens the private feedback inbox at threadlands.org/inbox/
 
 const ALLOWED = ['https://threadlands.org', 'https://www.threadlands.org', 'https://bartolucci41.github.io'];
 const recent = new Map(); // per-visitor limit inside one worker instance (a soft brake, not a guarantee)
@@ -24,7 +25,7 @@ function reply(body, status, origin) {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': ALLOWED.includes(origin) ? origin : ALLOWED[0],
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Headers': 'Content-Type, X-Inbox-Key',
       'Vary': 'Origin',
     },
   });
@@ -146,6 +147,57 @@ async function stand(b, request, env, origin) {
   return reply({ place, counts: c }, 200, origin);
 }
 
+// ---- Feedback: a private queue. Reports are kept in KV, never published; only the inbox key can read them.
+const FB_KINDS = ['broken', 'data', 'unclear', 'idea'];
+const FB_STATUS = ['new', 'looking', 'fixed', 'closed'];
+async function feedback(b, request, env, origin) {
+  if (!env.SUPPORT) return reply({ error: 'Feedback is not switched on yet.' }, 503, origin);
+  const kind = FB_KINDS.includes(b.kind) ? b.kind : '';
+  const said = String(b.text || '').replace(/[<>]/g, '').trim().slice(0, 2000);
+  if (!kind || said.length < 3) return reply({ error: 'Choose what kind of feedback it is and tell us what you saw.' }, 400, origin);
+  const email = String(b.email || '').trim().slice(0, 200);
+  if (email && !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email)) return reply({ error: 'That email address does not look right.' }, 400, origin);
+  let context = {};
+  try { context = JSON.parse(JSON.stringify(b.context || {}).slice(0, 3000)); } catch (e) { context = {}; }
+  const shot = typeof b.shot === 'string' && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(b.shot) && b.shot.length < 2.2e6 ? b.shot : '';
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown', now = Date.now();
+  const times = (recent.get('f' + ip) || []).filter((t) => now - t < 3600e3);
+  if (times.length >= 10) return reply({ error: 'You have sent a lot of feedback in the last hour. Please try again later.' }, 429, origin);
+  times.push(now); recent.set('f' + ip, times);
+  // newest first when the inbox lists keys in order
+  const id = String(9999999999999 - now).padStart(13, '0') + '-' + Math.random().toString(36).slice(2, 8);
+  const item = { id, at: new Date(now).toISOString(), kind, text: said, email, context, hasShot: !!shot, status: 'new' };
+  await env.SUPPORT.put('fb:' + id, JSON.stringify(item), { metadata: { kind, at: item.at, status: 'new' } });
+  if (shot) await env.SUPPORT.put('fbshot:' + id, shot);
+  return reply({ ok: true }, 201, origin);
+}
+function inboxOk(request, env) {
+  const k = request.headers.get('X-Inbox-Key') || '';
+  return !!env.INBOX_KEY && k.length >= 12 && k === env.INBOX_KEY;
+}
+async function inbox(request, env, origin) {
+  if (!inboxOk(request, env)) return reply({ error: 'Wrong inbox key.' }, 401, origin);
+  const q = new URL(request.url).searchParams, one = q.get('inbox');
+  if (one && one !== '1') {
+    const item = await env.SUPPORT.get('fb:' + one, { type: 'json' });
+    if (!item) return reply({ error: 'Not found.' }, 404, origin);
+    if (item.hasShot) item.shot = await env.SUPPORT.get('fbshot:' + one);
+    return reply(item, 200, origin);
+  }
+  const list = await env.SUPPORT.list({ prefix: 'fb:', limit: 200 });
+  const items = await Promise.all(list.keys.map((k) => env.SUPPORT.get(k.name, { type: 'json' })));
+  return reply({ items: items.filter(Boolean) }, 200, origin);
+}
+async function inboxStatus(b, request, env, origin) {
+  if (!inboxOk(request, env)) return reply({ error: 'Wrong inbox key.' }, 401, origin);
+  const id = String(b.id || ''), status = FB_STATUS.includes(b.status) ? b.status : '';
+  const item = await env.SUPPORT.get('fb:' + id, { type: 'json' });
+  if (!item || !status) return reply({ error: 'Not found.' }, 404, origin);
+  item.status = status; item.note = String(b.note || item.note || '').slice(0, 1000);
+  await env.SUPPORT.put('fb:' + id, JSON.stringify(item), { metadata: { kind: item.kind, at: item.at, status } });
+  return reply({ ok: true }, 200, origin);
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin') || '';
@@ -157,6 +209,8 @@ export default {
       res.headers.set('Cache-Control', 'public, max-age=60');
       return res;
     }
+    // The private feedback inbox (needs the inbox key)
+    if (request.method === 'GET' && new URL(request.url).searchParams.has('inbox')) return inbox(request, env, origin);
     if (request.method !== 'POST') return reply({ error: 'Use POST.' }, 405, origin);
     if (!ALLOWED.includes(origin)) return reply({ error: 'Requests are accepted from threadlands.org only.' }, 403, origin);
 
@@ -168,6 +222,8 @@ export default {
     if (b.type === 'back') return back(b, request, env, origin);
     if (b.type === 'stand') return stand(b, request, env, origin);
     if (b.type === 'observation') return observation(b, request, env, origin);
+    if (b.type === 'feedback') return feedback(b, request, env, origin);
+    if (b.type === 'inbox-status') return inboxStatus(b, request, env, origin);
     const osm = String(b.osm || '');
     const name = String(b.name || '').slice(0, 80);
     const country = String(b.country || '').slice(0, 60);

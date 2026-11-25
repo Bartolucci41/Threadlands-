@@ -1,0 +1,70 @@
+<!-- title: Feedback inbox | Threadlands -->
+<!-- description: Private. -->
+
+<main class="wrap inbox">
+  <header class="page-head">
+    <p class="page-kicker">Private</p>
+    <h1>Feedback inbox</h1>
+    <p class="page-lead">Reports sent from the site. Only someone with the inbox key can read them; the key stays in this browser tab.</p>
+    <form class="search" id="ib-form">
+      <label class="sr-only" for="ib-key">Inbox key</label>
+      <input id="ib-key" type="password" placeholder="Inbox key" autocomplete="current-password">
+      <button class="btn" type="submit">Open</button>
+    </form>
+    <p class="ib-msg" id="ib-msg" role="status"></p>
+  </header>
+  <div class="ib-filters" id="ib-filters" hidden>
+    <button type="button" class="chip" data-st="open" aria-pressed="true">Open</button>
+    <button type="button" class="chip" data-st="fixed" aria-pressed="false">Fixed</button>
+    <button type="button" class="chip" data-st="all" aria-pressed="false">All</button>
+  </div>
+  <ol class="ib-list" id="ib-list"></ol>
+</main>
+<!--SCRIPT-->
+(function () {
+  var RELAY = 'https://threadlands-relay.rob41pitt.workers.dev/';
+  var KIND = { broken: 'Something is broken', data: 'Data or a map detail looks wrong', unclear: 'Hard to understand', idea: 'An idea' };
+  var STATUS = { new: 'New', looking: 'Looking into it', fixed: 'Fixed', closed: 'Closed' };
+  var KEY = '', ITEMS = [], SHOW = 'open', $ = function (s) { return document.querySelector(s); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  try { KEY = sessionStorage.getItem('tl-inbox') || ''; } catch (e) { KEY = ''; }
+  function api(path, opts) {
+    opts = opts || {}; opts.headers = Object.assign({ 'X-Inbox-Key': KEY }, opts.headers || {});
+    return fetch(RELAY + path, opts).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Could not load.'); return j; }); });
+  }
+  function load() {
+    $('#ib-msg').textContent = 'Loading…';
+    api('?inbox=1').then(function (j) {
+      ITEMS = j.items || []; $('#ib-filters').hidden = false; $('#ib-form').hidden = true;
+      try { sessionStorage.setItem('tl-inbox', KEY); } catch (e) { /* ignore */ }
+      render();
+    }).catch(function (e) { $('#ib-msg').textContent = e.message; $('#ib-form').hidden = false; });
+  }
+  function render() {
+    var list = ITEMS.filter(function (it) { return SHOW === 'all' || (SHOW === 'fixed' ? it.status === 'fixed' || it.status === 'closed' : it.status === 'new' || it.status === 'looking'); });
+    $('#ib-msg').textContent = ITEMS.length + ' report' + (ITEMS.length === 1 ? '' : 's') + ' in total, ' + ITEMS.filter(function (i) { return i.status === 'new'; }).length + ' new.';
+    $('#ib-list').innerHTML = list.length ? list.map(function (it) {
+      var ctx = Object.keys(it.context || {}).map(function (k) { return '<dt>' + esc(k) + '</dt><dd>' + esc(it.context[k]) + '</dd>'; }).join('');
+      var reply = it.email ? 'mailto:' + encodeURIComponent(it.email) + '?subject=' + encodeURIComponent('Your Threadlands report') + '&body=' + encodeURIComponent('Hi,\n\nThank you for your report on Threadlands:\n\n"' + it.text + '"\n\nWe looked into it and \n\nThanks for helping make the map better.\nRobert, Threadlands') : '';
+      return '<li class="ib-item st-' + esc(it.status) + '"><div class="ib-top"><span class="ib-kind">' + esc(KIND[it.kind] || it.kind) + '</span><span class="ib-at">' + esc(new Date(it.at).toLocaleString()) + '</span></div>' +
+        '<p class="ib-text">' + esc(it.text) + '</p>' + (ctx ? '<dl class="ib-ctx">' + ctx + '</dl>' : '') +
+        '<div class="ib-act"><label>Status <select data-id="' + esc(it.id) + '">' + Object.keys(STATUS).map(function (s) { return '<option value="' + s + '"' + (s === it.status ? ' selected' : '') + '>' + STATUS[s] + '</option>'; }).join('') + '</select></label>' +
+        (it.hasShot ? '<button type="button" class="btn ghost" data-shot="' + esc(it.id) + '">See screenshot</button>' : '') +
+        (reply ? '<a class="btn ghost" href="' + reply + '">Reply to ' + esc(it.email) + '</a>' : '<span class="ib-noreply">No email left</span>') + '</div><div class="ib-img"></div></li>';
+    }).join('') : '<li class="ib-empty">Nothing here.</li>';
+  }
+  $('#ib-form').addEventListener('submit', function (e) { e.preventDefault(); KEY = $('#ib-key').value.trim(); load(); });
+  $('#ib-filters').addEventListener('click', function (e) { var b = e.target.closest('[data-st]'); if (!b) return; SHOW = b.dataset.st; document.querySelectorAll('[data-st]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); render(); });
+  $('#ib-list').addEventListener('change', function (e) {
+    var s = e.target.closest('select[data-id]'); if (!s) return;
+    api('', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'inbox-status', id: s.dataset.id, status: s.value }) })
+      .then(function () { ITEMS.forEach(function (i) { if (i.id === s.dataset.id) i.status = s.value; }); render(); })
+      .catch(function (err) { alert(err.message); });
+  });
+  $('#ib-list').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-shot]'); if (!b) return; b.disabled = true;
+    api('?inbox=' + encodeURIComponent(b.dataset.shot)).then(function (it) { b.closest('li').querySelector('.ib-img').innerHTML = it.shot ? '<img src="' + it.shot + '" alt="Screenshot sent with the report">' : ''; b.remove(); })
+      .catch(function (err) { b.disabled = false; alert(err.message); });
+  });
+  if (KEY) load();
+})();

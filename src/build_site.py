@@ -324,6 +324,43 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   @media (max-width: 760px) { .rk-head.cmp, .rk-table.cmp a { grid-template-columns: 2.2rem minmax(0, 1fr) 56px 3.6rem; } .rk-head.cmp span:nth-child(3), .rk-head.cmp span:nth-child(4), .rk-table.cmp .rt-p, .rk-table.cmp .rt-j { display: none; } .rk-head:not(.cmp), .rk-table:not(.cmp) a { grid-template-columns: 0 minmax(0, 1fr); } .rk-head:not(.cmp) span:nth-child(n+3), .rk-table:not(.cmp) .rt-j { display: none; } .rk-table:not(.cmp) .rt-p { display: block; grid-column: 2; } }
   .pfp-f { margin: -4px 0 8px; font-weight: 600; color: var(--warm, #C0603A); }
   .pfr-note { flex-basis: 100%; margin: 6px 0 0; color: var(--ink2); font-size: 0.85rem; line-height: 1.5; max-width: 44ch; }
+  /* ---- Feedback form */
+  .fb-link { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin-left: 10px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; opacity: .85; }
+  .fb-link:hover { opacity: 1; }
+  .fb-mini { font: 600 0.82rem var(--font-body); color: var(--ink2); background: none; border: 0; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .fb-mini:hover { color: var(--accent); }
+  .here-card-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .fb-dlg { width: min(560px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 0; border: 0; border-radius: 18px; background: var(--card, #fff); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+  .fb-dlg::backdrop { background: rgba(10, 30, 28, .45); }
+  .fb-form, .fb-done { display: flex; flex-direction: column; max-height: calc(100dvh - 24px); }
+  .fb-form[hidden], .fb-done[hidden] { display: none; }
+  .fb-top { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px 6px; }
+  .fb-top h2, .fb-done h2 { font-size: 1.35rem; margin: 0; }
+  .fb-x { font-size: 1.6rem; line-height: 1; background: none; border: 0; color: var(--ink2); cursor: pointer; padding: 4px 8px; }
+  .fb-body { padding: 6px 22px 8px; overflow: auto; }
+  .fb-kinds { border: 0; padding: 0; margin: 0 0 12px; display: grid; gap: 6px; }
+  .fb-kinds legend { font-weight: 600; margin-bottom: 8px; }
+  .fb-k { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; }
+  .fb-k:has(input:checked) { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .fb-l { display: block; font-weight: 600; margin: 12px 0 6px; } .fb-l span { font-weight: 400; color: var(--ink2); }
+  .fb-body textarea, .fb-body input[type=email] { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg, #fff); color: inherit; }
+  .fb-local { margin: 0 0 6px; padding: 10px 12px; border-radius: 10px; background: var(--surface); font-size: .9rem; }
+  .fb-ctx { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--surface); font-size: .85rem; }
+  .fb-ctx-h { margin: 0 0 6px; font-weight: 600; }
+  .fb-ctx dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 0; } .fb-ctx dt { color: var(--ink2); } .fb-ctx dd { margin: 0; word-break: break-word; }
+  .fb-shot, .fb-priv { font-size: .85rem; color: var(--ink2); margin: 6px 0 0; }
+  .fb-err { color: #b3261e; font-weight: 600; margin: 10px 0 0; }
+  .fb-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 22px 18px; border-top: 1px solid var(--line); }
+  .fb-done { padding: 22px 0 0; } .fb-done h2 { padding: 0 22px; } .fb-next { padding: 8px 22px 6px; margin: 0; }
+  .inbox .ib-filters { display: flex; gap: 8px; margin: 8px 0 16px; }
+  .ib-list { list-style: none; padding: 0; margin: 0 0 40px; display: grid; gap: 12px; }
+  .ib-item { border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; background: var(--card, #fff); }
+  .ib-item.st-new { border-left: 4px solid var(--warm, #C0603A); }
+  .ib-top { display: flex; justify-content: space-between; gap: 10px; font-size: .85rem; color: var(--ink2); } .ib-kind { font-weight: 700; color: var(--ink); }
+  .ib-text { margin: 8px 0; white-space: pre-wrap; }
+  .ib-ctx { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: .85rem; margin: 0 0 10px; } .ib-ctx dt { color: var(--ink2); } .ib-ctx dd { margin: 0; word-break: break-word; }
+  .ib-act { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: .9rem; } .ib-noreply { color: var(--ink2); }
+  .ib-img img { max-width: 100%; margin-top: 10px; border-radius: 8px; border: 1px solid var(--line); }
   .here-addnote { margin: 0 0 10px; padding: 12px 16px; border-radius: 12px; background: var(--accent); color: var(--accent-ink, #fff); font-size: 0.95rem; scroll-margin-top: 12px; }
   .pjc-hl { outline: 3px solid var(--accent); outline-offset: 3px; }
   .pfp-sep { border: 0; border-top: 1px solid var(--line); margin: 12px 0; } .here-why .hw-f { font: inherit; font-weight: 600; }
@@ -720,7 +757,7 @@ PRO_PAGES = ("lab/", "explore/", "studio/", "how-it-works/")
 
 def APP(base):
     # Installable app: icon, manifest and offline support
-    return (f'<script src="{base}assets/i18n.js" defer></script>\n'
+    return (f'<script src="{base}assets/i18n.js" defer></script>\n<script src="{base}assets/feedback.js?v=1" defer></script>\n'
             f'<link rel="manifest" href="{base}manifest.webmanifest">\n'
             '<meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">\n'
             '<meta name="theme-color" content="#0D1613" media="(prefers-color-scheme: dark)">\n'
@@ -740,7 +777,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=21">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=22">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
@@ -767,7 +804,7 @@ def footer(base):
             f'    <nav aria-label="ThreadLab"><h2>ThreadLab</h2>{col([("lab/", "Overview"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")])}</nav>\n'
             f'    <nav aria-label="About"><h2>About</h2>{col([("about/", "About Threadlands")])}</nav>\n'
             '  </div>\n  <div class="wrap foot-small">\n'
-            '    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>\n'
+            '    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci. <button type="button" class="fb-link" data-feedback="">Send feedback</button></p>\n'
             '    <p>Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS, Landsat (USGS and NASA), Open-Meteo and GBIF.</p>\n'
             '  </div>\n</footer>\n')
 
@@ -794,7 +831,7 @@ for i, sc in enumerate(re.findall(r"<script>(.*?)</script>", doc, re.S)):
     write(f"src/.check/explore{i}.js", sc)
 
 # ---- The other pages
-for name in ("home", "involved", "place", "lab", "studio", "places", "projects", "how-it-works", "about"):
+for name in ("home", "involved", "place", "lab", "studio", "places", "projects", "how-it-works", "about", "inbox"):
     spec = read(SRC, "pages", name + ".html")
     meta = dict(re.findall(r"<!--\s*(\w+):\s*(.*?)\s*-->", spec.split("\n\n", 1)[0]))
     content = spec.split("\n\n", 1)[1]
@@ -802,6 +839,8 @@ for name in ("home", "involved", "place", "lab", "studio", "places", "projects",
     rel = "index.html" if name == "home" else f"{name}/index.html"
     base = "" if name == "home" else "../"
     here = "" if name == "home" else f"{name}/"
+    if name == "inbox":   # private: kept out of search engines
+        parts[0] = '<meta name="robots" content="noindex, nofollow">\n' + parts[0]
     page(rel, base, here, meta["title"], meta["description"], parts[0].replace("{B}", base),
          parts[1].replace("{B}", base) if len(parts) > 1 else "")
     if len(parts) > 1:

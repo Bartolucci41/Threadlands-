@@ -10,9 +10,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=21">
+<link rel="stylesheet" href="../assets/site.css?v=22">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
+<script src="../assets/feedback.js?v=1" defer></script>
 <link rel="manifest" href="../manifest.webmanifest">
 <meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0D1613" media="(prefers-color-scheme: dark)">
@@ -166,6 +167,7 @@
         <span class="ps-rng" id="ps-rng"></span>
         <p class="msub mctx" id="ps-ctx" style="flex-basis:100%;margin:0"></p>
         <p class="ps-scn" id="ps-scn"></p>
+        <p class="ps-fb"><button type="button" class="fb-mini" data-feedback="data">Report a data issue</button></p>
       </div>
       <div class="tpanel" role="tabpanel" id="tp-understand" aria-labelledby="ptab-understand">
         <section class="glance" id="glance" aria-labelledby="glance-h" hidden>
@@ -325,7 +327,7 @@
     <nav aria-label="About"><h2>About</h2><a href="../about/">About Threadlands</a></nav>
   </div>
   <div class="wrap foot-small">
-    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>
+    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci. <button type="button" class="fb-link" data-feedback="">Send feedback</button></p>
     <p>Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS, Landsat (USGS and NASA), Open-Meteo and GBIF.</p>
   </div>
 </footer>
@@ -3055,6 +3057,15 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     if (FIX && $('#fix-cmp').getAttribute('aria-pressed') === 'true') { Object.assign(state, FIX.plan); render(); }
     fixShow('ask');
   });
+  // What a data report from ThreadLab attaches: the place, the layer and the scenario behind the scores
+  window.TLF_CONTEXT = function () {
+    var LN = { land: 'Land', threads: 'Threads', heat: 'Heat', flood: 'Flood', habitat: 'Habitat', sat: 'Measured heat', now: 'This week' };
+    var c = { Place: P && P.place ? P.place.name : '', Layer: LN[layer] || layer };
+    try { c.Scenario = scenario().line; } catch (e) { /* optional */ }
+    if (res && typeof res.index === 'number') c.Scores = 'index ' + Math.round(res.index) + (P && P.BAU ? ', ' + (Math.round(res.index) - Math.round(P.BAU.index) >= 0 ? '+' : '') + (Math.round(res.index) - Math.round(P.BAU.index)) + ' vs business as usual' : '');
+    if (sel >= 0 && P && P.place.cells) c.Area = 'patch ' + P.place.cells.id[sel] + ' (' + Number(P.place.cells.lat[sel]).toFixed(4) + ', ' + Number(P.place.cells.lng[sel]).toFixed(4) + ')';
+    return c;
+  };
   function setLayer(l) {
     layer = l;
     document.querySelectorAll('.layers .chip').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.layer === l ? 'true' : 'false'); });
