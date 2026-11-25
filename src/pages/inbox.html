@@ -45,12 +45,11 @@
     $('#ib-msg').textContent = ITEMS.length + ' report' + (ITEMS.length === 1 ? '' : 's') + ' in total, ' + ITEMS.filter(function (i) { return i.status === 'new'; }).length + ' new.';
     $('#ib-list').innerHTML = list.length ? list.map(function (it) {
       var ctx = Object.keys(it.context || {}).map(function (k) { return '<dt>' + esc(k) + '</dt><dd>' + esc(it.context[k]) + '</dd>'; }).join('');
-      var reply = it.email ? 'mailto:' + encodeURIComponent(it.email) + '?subject=' + encodeURIComponent('Your Threadlands report') + '&body=' + encodeURIComponent('Hi,\n\nThank you for your report on Threadlands:\n\n"' + it.text + '"\n\nWe looked into it and \n\nThanks for helping make the map better.\nRobert, Threadlands') : '';
       return '<li class="ib-item st-' + esc(it.status) + '"><div class="ib-top"><span class="ib-kind">' + esc(KIND[it.kind] || it.kind) + '</span><span class="ib-at">' + esc(new Date(it.at).toLocaleString()) + '</span></div>' +
         '<p class="ib-text">' + esc(it.text) + '</p>' + (ctx ? '<dl class="ib-ctx">' + ctx + '</dl>' : '') +
         '<div class="ib-act"><label>Status <select data-id="' + esc(it.id) + '">' + Object.keys(STATUS).map(function (s) { return '<option value="' + s + '"' + (s === it.status ? ' selected' : '') + '>' + STATUS[s] + '</option>'; }).join('') + '</select></label>' +
         (it.hasShot ? '<button type="button" class="btn ghost" data-shot="' + esc(it.id) + '">See screenshot</button>' : '') +
-        (reply ? '<a class="btn ghost" href="' + reply + '">Reply to ' + esc(it.email) + '</a>' : '<span class="ib-noreply">No email left</span>') + '</div><div class="ib-img"></div></li>';
+        '</div>' + (it.email ? '<div class="ib-reply"><label for="rp-' + esc(it.id) + '">Your reply to ' + esc(it.email) + '</label><textarea id="rp-' + esc(it.id) + '" rows="3" placeholder="What you found or changed, in a sentence or two. For example: You were right, the green-space measure only counted the ground where people live. We now explain that on the map.">' + esc(it.note || '') + '</textarea><button type="button" class="btn" data-reply="' + esc(it.id) + '">Write the email</button></div>' : '<p class="ib-noreply">No email left, so there is no one to reply to.</p>') + '<div class="ib-img"></div></li>';
     }).join('') : '<li class="ib-empty">Nothing here.</li>';
   }
   $('#ib-form').addEventListener('submit', function (e) { e.preventDefault(); KEY = $('#ib-key').value.trim(); load(); });
@@ -60,6 +59,15 @@
     api('', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'inbox-status', id: s.dataset.id, status: s.value }) })
       .then(function () { ITEMS.forEach(function (i) { if (i.id === s.dataset.id) i.status = s.value; }); render(); })
       .catch(function (err) { alert(err.message); });
+  });
+  // Reply: your note becomes a complete email in your mail app; nothing is sent until you press Send there
+  $('#ib-list').addEventListener('click', function (e) {
+    var r = e.target.closest('[data-reply]'); if (!r) return;
+    var it = ITEMS.filter(function (i) { return i.id === r.dataset.reply; })[0], note = document.getElementById('rp-' + it.id).value.trim();
+    if (!note) { document.getElementById('rp-' + it.id).focus(); return; }
+    var fixed = it.status === 'fixed';
+    var body = 'Hi,\n\nThank you for your report on Threadlands. You wrote:\n\n"' + it.text + '"\n\n' + note + '\n\n' + (fixed ? 'The change is live on threadlands.org now.\n\n' : '') + 'Thanks for helping make the map better.\n\nRobert Bartolucci\nThreadlands · threadlands.org';
+    location.href = 'mailto:' + encodeURIComponent(it.email) + '?subject=' + encodeURIComponent(fixed ? 'Fixed: your Threadlands report' : 'About your Threadlands report') + '&body=' + encodeURIComponent(body);
   });
   $('#ib-list').addEventListener('click', function (e) {
     var b = e.target.closest('[data-shot]'); if (!b) return; b.disabled = true;

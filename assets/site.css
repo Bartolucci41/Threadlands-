@@ -838,6 +838,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .ib-text { margin: 8px 0; white-space: pre-wrap; }
   .ib-ctx { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: .85rem; margin: 0 0 10px; } .ib-ctx dt { color: var(--ink2); } .ib-ctx dd { margin: 0; word-break: break-word; }
   .ib-act { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: .9rem; } .ib-noreply { color: var(--ink2); }
+  .ib-reply { margin-top: 12px; display: grid; gap: 6px; } .ib-reply label { font-weight: 600; font-size: .9rem; } .ib-reply textarea { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; width: 100%; } .ib-reply .btn { justify-self: start; }
   .ib-img img { max-width: 100%; margin-top: 10px; border-radius: 8px; border: 1px solid var(--line); }
   .here-addnote { margin: 0 0 10px; padding: 12px 16px; border-radius: 12px; background: var(--accent); color: var(--accent-ink, #fff); font-size: 0.95rem; scroll-margin-top: 12px; }
   .pjc-hl { outline: 3px solid var(--accent); outline-offset: 3px; }
