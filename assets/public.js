@@ -77,7 +77,7 @@
 
   // Plain words
   var PRESS = { heat: 'Heat', flood: 'Flooding', grey: 'Trees & green space', trees: 'Trees & green space', food: 'Food' };
-  var PRESS_F = { heat: 'High surface temperatures', flood: 'High modeled exposure', grey: 'Limited green cover', trees: 'Low tree cover', food: 'Limited nearby farmland capacity' };
+  var PRESS_F = { heat: 'High surface temperatures', flood: 'High modeled exposure', grey: 'Little green where people live', trees: 'Low tree cover where people live', food: 'Limited nearby farmland capacity' };
   var TOPIC = { flood: 'Flooding', heat: 'Heat', drought: 'Drought', fire: 'Fire', water: 'Rain and storms', greening: 'Green space', infrastructure: 'Infrastructure', policy: 'Policy', climate: 'Climate' };
   var TONE = { concern: 'Risk', gain: 'Progress', update: 'Update' };
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
