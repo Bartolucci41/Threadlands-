@@ -2,7 +2,7 @@
 <!-- description: A civic climate map. See what’s happening where you live, map what you notice, and explore what could change. -->
 
 <main class="wrap">
-<script src="{B}assets/public.js?v=2"></script>
+<script src="{B}assets/public.js?v=3"></script>
   <section class="mp-hero bleed band-deep" aria-labelledby="mp-h">
     <div class="mp-hero-in">
       <p class="hero3-kick">Threadlands &middot; a civic climate map</p>
@@ -21,10 +21,12 @@
     </div>
   </section>
 
-  <section class="sect news" id="news" aria-labelledby="news-h" hidden>
-    <div class="sect-top">
-      <div><h2 id="news-h">Across the world today</h2><p id="news-sub">Risks, progress and decisions in cities around the world.</p></div>
-    </div>
+  <section class="sect news gazette" id="news" aria-labelledby="news-h" hidden>
+    <header class="gz-head">
+      <p class="gz-ear"><span>Extra! Extra!</span><span>Threadlands edition</span></p>
+      <h2 id="news-h" class="gz-mast">Across the World Today</h2>
+      <p class="gz-date"><span>Vol. I</span><span id="gz-date"></span><span id="news-sub">Risks, progress and decisions in cities around the world.</span></p>
+    </header>
     <ol class="nw2-grid" id="news-list"></ol>
     <p class="news-note">Headlines gathered automatically from <a href="https://news.google.com/" target="_blank" rel="noopener">Google News</a> searches. Each links to the original story; Threadlands does not write or check them.</p>
   </section>
@@ -101,6 +103,7 @@
     var top = (d.news.top || []).slice(0, 8);
     if (top.length) {
       $('#news-list').innerHTML = top.map(function (it) { return T.headline(it, names, ccs); }).join('');
+      $('#gz-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
       if (d.news.updated) $('#news-sub').textContent = 'Risks, progress and decisions in cities around the world. Updated ' + T.ndate(d.news.updated.replace(/-/g, '')) + '.';
       $('#news').hidden = false;
     }

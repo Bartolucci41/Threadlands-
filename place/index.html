@@ -9,8 +9,8 @@
 <meta property="og:description" content="Live weather and warnings, the risks a city faces, the land and water it depends on, the projects changing it and the latest news.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=34">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&family=UnifrakturMaguntia&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap">
+<link rel="stylesheet" href="../assets/site.css?v=35">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -37,7 +37,7 @@
 <main class="wrap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-<script src="../assets/public.js?v=2"></script>
+<script src="../assets/public.js?v=3"></script>
   <div class="pf-missing" id="pf-missing" hidden></div>
   <article class="pf" id="pf" hidden>
     <section class="pf-head bleed band-deep" aria-labelledby="pf-name">
@@ -135,8 +135,12 @@
       <div class="pf-add"><p><b>Know a project that belongs here?</b> A new park, a wetland, a tree-planting drive, a flood barrier. Add it with a link to a public source and it is checked before it appears.</p><a class="btn" id="pf-add" href="../explore/?add=1">Add a project</a></div>
     </section>
 
-    <section class="sect pf-sec" aria-labelledby="pf-news-h">
-      <div class="sect-top"><div><h2 id="pf-news-h">In the news</h2><p id="pf-news-sub">Risks, progress and decisions from the last two weeks.</p></div></div>
+    <section class="sect pf-sec gazette" aria-labelledby="pf-news-h">
+      <header class="gz-head">
+        <p class="gz-ear"><span>Latest dispatches</span><span class="gz-city" id="gz-city"></span></p>
+        <h2 id="pf-news-h" class="gz-mast">In the News</h2>
+        <p class="gz-date"><span id="pf-news-sub">Risks, progress and decisions from the last two weeks.</span></p>
+      </header>
       <div class="filters" id="pf-scope" role="group" aria-label="Area" hidden></div>
       <ol class="nw2-list" id="pf-news"></ol>
       <p class="news-note">Headlines gathered automatically from <a href="https://news.google.com/" target="_blank" rel="noopener">Google News</a> searches. Each links to the original story; Threadlands does not write or check them.</p>
@@ -409,7 +413,7 @@
     regs.forEach(function (r) { var it = (nw.regions || {})[r]; if (it && it.length) opts.push([r, r, it]); });
     $('#pf-scope').hidden = opts.length < 2;
     $('#pf-scope').innerHTML = opts.map(function (o) { return '<button type="button" class="chip" data-scope="' + esc(o[0]) + '" aria-pressed="' + (o[0] === SCOPE) + '">' + esc(o[1]) + '</button>'; }).join('');
-    var cur = opts.filter(function (o) { return o[0] === SCOPE; })[0] || opts[0];
+    var cur = opts.filter(function (o) { return o[0] === SCOPE; })[0] || opts[0]; $('#gz-city').textContent = e.name + ' edition';
     $('#pf-news').innerHTML = cur[2].length ? cur[2].map(function (it) { return T.headline(it, null); }).join('') : '<li class="pf-none">No headlines in the last two weeks.</li>';
     if (nw.updated) $('#pf-news-sub').textContent = 'Risks, progress and decisions from the last two weeks. Updated ' + T.ndate(nw.updated.replace(/-/g, '')) + '.';
   }

@@ -1101,6 +1101,24 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .lib-bg { position: absolute; left: 10px; top: 10px; display: flex; gap: 6px; padding: 6px 8px; border-radius: 999px; background: rgba(255,255,255,0.85); box-shadow: 0 1px 4px rgba(0,0,0,0.12); z-index: 2; }
   .lib-sw { width: 20px; height: 20px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.15); background: var(--sw); padding: 0; cursor: pointer; } .lib-sw[aria-pressed="true"] { outline: 2px solid var(--accent); outline-offset: 2px; }
   .lib-map.dark .lib-tip { background: #111; color: #fff; }
+  /* The news as a newspaper: masthead, dateline, column rules, a big head and a smaller deck */
+  .gazette { --gz-paper: #F4EEDF; --gz-ink: #1d1a16; --gz-rule: #b9ab8c; background: var(--gz-paper); color: var(--gz-ink); padding: 26px clamp(16px, 3vw, 34px) 22px; border-radius: 6px; box-shadow: inset 0 0 0 1px #e2d7bd; }
+  .gz-head { text-align: center; border-bottom: 4px double var(--gz-ink); padding-bottom: 8px; margin-bottom: 4px; }
+  .gz-ear { display: flex; justify-content: space-between; margin: 0 0 4px; font: italic 400 0.85rem 'Old Standard TT', Georgia, serif; color: #5a5040; } .gz-ear span:first-child { font-weight: 700; font-style: normal; letter-spacing: 0.08em; text-transform: uppercase; color: #8a2d1c; }
+  .gz-mast { font: 400 clamp(2.2rem, 6vw, 4.2rem)/1 'UnifrakturMaguntia', 'Old Standard TT', serif; color: var(--gz-ink); margin: 2px 0 8px; letter-spacing: 0.01em; }
+  .gz-date { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 18px; margin: 0; padding: 5px 0; border-top: 1px solid var(--gz-ink); font: 400 0.82rem 'Old Standard TT', Georgia, serif; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gz-ink); }
+  .gazette .nw2-grid, .gazette .nw2-list { border-top: 0; max-width: none; } .gazette .nw2-grid { gap: 0; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .gazette .nw2 { padding: 14px 16px; border-bottom: 1px solid var(--gz-rule); border-right: 1px solid var(--gz-rule); gap: 6px; }
+  .gazette .nw2-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .gazette .nw2-tag { font: 700 0.7rem 'Old Standard TT', Georgia, serif; letter-spacing: 0.1em; color: #5a5040; } .gazette .nw2-tag b { color: #8a2d1c !important; }
+  .gazette .nw2-h { display: grid; gap: 5px; color: var(--gz-ink); text-decoration: none; } .gazette .nw2-h:hover .nw2-hd { text-decoration: underline; text-decoration-thickness: 1px; }
+  .nw2-kick { font: italic 400 0.9rem 'Old Standard TT', Georgia, serif; color: #5a5040; }
+  .nw2-hd { font: 700 1.35rem/1.12 'Old Standard TT', Georgia, serif; letter-spacing: -0.005em; }
+  .nw2-dk { font: italic 400 0.92rem/1.35 'Old Standard TT', Georgia, serif; color: #3d372e; }
+  .gazette .nw2-m { font: 400 0.78rem var(--font-body); color: #6a604f; } .gazette .nw2-m a { color: #8a2d1c; }
+  .gazette .nw2-grid .nw2:first-child { grid-column: span 2; } .gazette .nw2-grid .nw2:first-child .nw2-hd { font-size: 2rem; line-height: 1.05; }
+  @media (max-width: 560px) { .gazette .nw2-grid .nw2:first-child { grid-column: auto; } .gazette .nw2-grid .nw2:first-child .nw2-hd { font-size: 1.6rem; } .gazette .nw2 { border-right: 0; padding: 12px 0; } }
+  .gazette .news-note { color: #6a604f; font-size: 0.78rem; margin-top: 10px; } .gazette .news-note a { color: #8a2d1c; } .gazette .filters .chip { background: transparent; border-color: var(--gz-rule); color: var(--gz-ink); }
   .gi-ways { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0 0 18px; } @media (max-width: 860px) { .gi-ways { grid-template-columns: 1fr 1fr; } } @media (max-width: 480px) { .gi-ways { grid-template-columns: 1fr; } }
   .gi-w { display: grid; gap: 3px; text-align: left; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; font: inherit; cursor: pointer; } .gi-w:hover { border-color: var(--accent); } .gi-w b { color: var(--accent); } .gi-w span { font-size: 0.85rem; color: var(--ink2); line-height: 1.4; }
   .pjc-who { font-size: 0.82rem; color: var(--ink2); margin-top: 4px; } .pjc-who i { font-style: normal; font-weight: 700; color: var(--ink); } .pjc-links .linkbtn { color: var(--accent); font-weight: 600; font-size: inherit; }

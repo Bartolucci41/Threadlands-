@@ -9,8 +9,8 @@
 <meta property="og:description" content="A civic climate map. See what’s happening where you live, map what you notice, and explore what could change.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=34">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&family=UnifrakturMaguntia&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap">
+<link rel="stylesheet" href="assets/site.css?v=35">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="assets/i18n.js" defer></script>
 <script src="assets/feedback.js?v=1" defer></script>
@@ -35,7 +35,7 @@
   </div>
 </header>
 <main class="wrap">
-<script src="assets/public.js?v=2"></script>
+<script src="assets/public.js?v=3"></script>
   <section class="mp-hero bleed band-deep" aria-labelledby="mp-h">
     <div class="mp-hero-in">
       <p class="hero3-kick">Threadlands &middot; a civic climate map</p>
@@ -54,10 +54,12 @@
     </div>
   </section>
 
-  <section class="sect news" id="news" aria-labelledby="news-h" hidden>
-    <div class="sect-top">
-      <div><h2 id="news-h">Across the world today</h2><p id="news-sub">Risks, progress and decisions in cities around the world.</p></div>
-    </div>
+  <section class="sect news gazette" id="news" aria-labelledby="news-h" hidden>
+    <header class="gz-head">
+      <p class="gz-ear"><span>Extra! Extra!</span><span>Threadlands edition</span></p>
+      <h2 id="news-h" class="gz-mast">Across the World Today</h2>
+      <p class="gz-date"><span>Vol. I</span><span id="gz-date"></span><span id="news-sub">Risks, progress and decisions in cities around the world.</span></p>
+    </header>
     <ol class="nw2-grid" id="news-list"></ol>
     <p class="news-note">Headlines gathered automatically from <a href="https://news.google.com/" target="_blank" rel="noopener">Google News</a> searches. Each links to the original story; Threadlands does not write or check them.</p>
   </section>
@@ -147,6 +149,7 @@
     var top = (d.news.top || []).slice(0, 8);
     if (top.length) {
       $('#news-list').innerHTML = top.map(function (it) { return T.headline(it, names, ccs); }).join('');
+      $('#gz-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
       if (d.news.updated) $('#news-sub').textContent = 'Risks, progress and decisions in cities around the world. Updated ' + T.ndate(d.news.updated.replace(/-/g, '')) + '.';
       $('#news').hidden = false;
     }

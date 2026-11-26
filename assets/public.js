@@ -90,10 +90,28 @@
     if (/region|región/i.test(st) || st === e.name) st = '';
     return (st ? st + ', ' : '') + e.country;
   }
+  // A newspaper headline: a short head the eye lands on, the rest of the same words as a smaller deck below
+  function splitHead(t) {
+    t = String(t || '').trim(); var kick = '', m = t.match(/^([^:]{2,160}):\s+(.+)$/);
+    if (m) {
+      if (m[1].split(/\s+/).length <= 4) { kick = m[1]; t = m[2]; }
+      else if (m[1].split(/\s+/).length <= 12) return ['', m[1], cap(m[2])];   // a phrase before a colon is the headline itself
+    }
+    var w = t.split(/\s+/);
+    if (w.length <= 9) return [kick, t, ''];
+    // Break only where the sentence breaks: a comma, semicolon or dash, or a clause word such as "as" or "after"
+    var cut = -1;
+    for (var k = 3; k <= w.length - 2 && cut < 0; k++) if (/[,;]$/.test(w[k - 1]) || /^[–—-]$/.test(w[k])) cut = k;
+    if (cut < 0) for (k = 4; k <= w.length - 2 && cut < 0; k++) if (/^(as|after|amid|while|despite|because|ahead|following|until|para|tras|mientras|ante|dopo|mentre|pour|apr\u00e8s)$/i.test(w[k])) cut = k;
+    if (cut < 0) return w.length <= 16 ? [kick, t, ''] : [kick, w.slice(0, 8).join(' ') + '…', '…' + w.slice(8).join(' ')];
+    var deck = w.slice(cut).join(' ').replace(/^[–—-]\s*/, '');
+    return [kick, w.slice(0, cut).join(' ').replace(/[,;]$/, ''), cap(deck)];
+  }
+  function cap(x) { return x.charAt(0).toUpperCase() + x.slice(1); }
   function headline(it, names, ccs) {
-    var tone = it.tone || (/(flood|heat|drought|fire|water)/.test(it.topic) ? 'concern' : 'update');
+    var tone = it.tone || (/(flood|heat|drought|fire|water)/.test(it.topic) ? 'concern' : 'update'), h = splitHead(it.title);
     return '<li class="nw2 tone-' + tone + '"><span class="nw2-tag"><b>' + (TONE[tone] || '') + '</b>' + (TOPIC[it.topic] ? ' · ' + TOPIC[it.topic] : '') + '</span>' +
-      '<a class="nw2-h" translate="no" href="' + esc(it.url) + '" target="_blank" rel="noopener">' + esc(it.title) + '</a>' +
+      '<a class="nw2-h" translate="no" href="' + esc(it.url) + '" target="_blank" rel="noopener">' + (h[0] ? '<span class="nw2-kick">' + esc(h[0]) + '</span>' : '') + '<span class="nw2-hd">' + esc(h[1]) + '</span>' + (h[2] ? '<span class="nw2-dk">' + esc(h[2]) + '</span>' : '') + '</a>' +
       '<span class="nw2-m">' + (names && it.place ? '<a href="' + BASE + 'place/#' + esc(it.place) + '">' + flag(ccs && ccs[it.place]) + esc(names[it.place] || it.place) + '</a> · ' : '') + esc(it.source) + (it.date ? ' · ' + ndate(it.date) : '') + '</span></li>';
   }
   // Library search: names first, then anything in the address
