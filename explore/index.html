@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=33">
+<link rel="stylesheet" href="../assets/site.css?v=34">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -2295,6 +2295,34 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
 
   // ---- Updates
   var announceTimer = 0;
+  // Places you follow or stand with keep your last plan, climate and goal on this device, so they are there when you come back
+  function isMine(slug) {
+    try { var f = JSON.parse(localStorage.getItem('threadlands:follows') || '[]'), t = JSON.parse(localStorage.getItem('threadlands:ties') || '{}'); return f.indexOf(slug) >= 0 || !!(t && t[slug]); } catch (e) { return false; }
+  }
+  var SAVE_T = 0, RESTORING = false;
+  function saveMine() {
+    if (RESTORING || kind !== 'real' || !current || !isMine(current)) return;
+    clearTimeout(SAVE_T);
+    SAVE_T = setTimeout(function () {
+      var lv = {}; LEVERS.forEach(function (L) { lv[L.key] = state[L.key]; });
+      try { localStorage.setItem('threadlands:explore:' + current, JSON.stringify({ levers: lv, clim: CLIM, goal: FIX ? FIX.goal : null, t: Date.now() })); } catch (e) { /* storage blocked */ }
+    }, 500);
+  }
+  function restoreMine(slug) {
+    if (!isMine(slug)) return;
+    var o = null; try { o = JSON.parse(localStorage.getItem('threadlands:explore:' + slug) || 'null'); } catch (e) { return; }
+    if (!o || !o.levers) return;
+    RESTORING = true;
+    LEVERS.forEach(function (L) { if (typeof o.levers[L.key] === 'number') state[L.key] = Math.max(0, Math.min(100, o.levers[L.key])); });
+    if (o.clim && TM.CLIMATE[o.clim]) { CLIM = o.clim; document.querySelectorAll('[data-clim]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.clim === CLIM ? 'true' : 'false'); }); P.setClimate(CLIM); }
+    render(); RESTORING = false;
+    var any = LEVERS.some(function (L) { return state[L.key] !== PRESETS[1].v[L.key]; });
+    if (!any && CLIM === 'today') return;
+    var n = $('#restored'); if (!n) { n = document.createElement('p'); n.id = 'restored'; n.className = 'restored'; $('#alert').insertAdjacentElement('afterend', n); }
+    n.hidden = false;
+    n.innerHTML = 'Your last plan for this place is back, from ' + new Date(o.t || Date.now()).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + '. <button type="button" class="linkbtn" id="restored-fresh">Start fresh</button>';
+    $('#restored-fresh').onclick = function () { Object.assign(state, PRESETS[1].v); try { localStorage.removeItem('threadlands:explore:' + slug); } catch (e) {} n.hidden = true; render(); };
+  }
   function render() {
     res = P.evaluate(state); THR.cache = {};
     try { renderDirection(); } catch (err) { $('#dir').hidden = true; }
@@ -2323,6 +2351,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     $('#budget-txt').textContent = Math.round(used) + ' of ' + TM.BUDGET;
     $('#budget-fill').style.width = Math.min(100, used / TM.BUDGET * 100) + '%';
     LEVERS.forEach(function (L) { $('#out-' + L.key).textContent = state[L.key]; $('#in-' + L.key).value = state[L.key]; });
+    saveMine();
     document.querySelectorAll('[data-preset]').forEach(function (b) {
       var p = b.dataset.preset === 'best' ? { v: bestMix } : PRESETS.filter(function (x) { return x.id === b.dataset.preset; })[0];
       var same = p && p.v && LEVERS.every(function (L) { return p.v[L.key] === state[L.key]; });
@@ -3423,8 +3452,10 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     showError('Loading ' + e.name + '…');
     fetch(BASE + 'data/places/' + slug + '.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
       clearError();
-      setPlace(d, 'real');
+      RESTORING = true; setPlace(d, 'real'); RESTORING = false;
       current = slug;
+      var rp = $('#restored'); if (rp) rp.hidden = true;
+      if (!new URLSearchParams(location.search).get('goal')) restoreMine(slug);
       try { localStorage.setItem('threadlands:last-slug', slug); } catch (e) { /* ignore */ }
       markExamples();
       if (!fromHash) { try { history.replaceState(null, '', '#' + slug); } catch (err) { /* ignore */ } }

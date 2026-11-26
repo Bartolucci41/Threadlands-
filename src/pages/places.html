@@ -8,6 +8,7 @@
     <p class="page-lead">Open any place to see its key findings, and where they are on the map. Don&rsquo;t see yours? <a href="{B}explore/">Search for it in Explore</a> and build it in about ten minutes.</p>
   </header>
   <div class="lib-map" id="lib-map"><canvas id="lib-canvas" role="img" aria-label="World map with a dot for every city"></canvas><span class="lib-tip" id="lib-tip" hidden></span>
+    <div class="lib-bg" role="group" aria-label="Map background"><button type="button" class="lib-sw" data-bg="light" style="--sw:#ECEAE3" aria-label="Light background" title="Light" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="gray" style="--sw:#2B2E30" aria-label="Dark gray background" title="Dark gray" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="green" style="--sw:#123B30" aria-label="Dark green background" title="Dark green" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="red" style="--sw:#3A1517" aria-label="Dark red background" title="Dark red" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="purple" style="--sw:#2A1D40" aria-label="Dark purple background" title="Dark purple" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="blue" style="--sw:#12304F" aria-label="Blue background" title="Blue" aria-pressed="false"></button></div>
     <div class="lib-zoom"><button type="button" class="chip" id="lz-in" aria-label="Zoom in">+</button><button type="button" class="chip" id="lz-out" aria-label="Zoom out">&minus;</button><button type="button" class="chip" id="lz-fit" aria-label="Show the whole world" title="Show the whole world">&#8634;</button></div></div>
 
   <div class="filters" role="group" aria-label="Sort by">
@@ -60,7 +61,23 @@
   var LIB = [], shown = [], dots = [], LAND = null, cv = $('#lib-canvas'), tip = $('#lib-tip');
   var V = { z: 1, lng: 0, lat: 7.5 }, W = 0, H = 0;
   fetch('{B}assets/land.json').then(function (r) { return r.json(); }).then(function (l) { LAND = l; drawMap(); }).catch(function () { /* map without coastlines */ });
-  function color(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  // Map backgrounds: chosen once, remembered on this device
+  var BGS = { gray: ['#2B2E30', '#3E4245', '#54595C', '#F2A65A', '#C9CDCF'], green: ['#10261F', '#1F3F34', '#2E5446', '#F2B56B', '#B9D3C8'], red: ['#2A1214', '#46201F', '#5E2C2A', '#F6C36A', '#E2C2BE'], purple: ['#1E1530', '#33274D', '#463A63', '#F2B56B', '#D2C8E6'], blue: ['#0F2236', '#1C3A58', '#2A4C6E', '#F2B56B', '#C3D4E6'] };
+  var MAPBG = 'light'; try { MAPBG = localStorage.getItem('threadlands:mapbg') || 'light'; } catch (e) {}
+  if (MAPBG !== 'light' && !BGS[MAPBG]) MAPBG = 'light';
+  function color(name) {
+    var b = BGS[MAPBG];
+    if (b) { var m = { '--surface': 0, '--surface2': 1, '--line': 2, '--accent': 3, '--ink2': 4 }[name]; if (m != null) return b[m]; }
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+  function setBg(k) {
+    MAPBG = k; try { localStorage.setItem('threadlands:mapbg', k); } catch (e) {}
+    document.querySelectorAll('.lib-sw').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.bg === k ? 'true' : 'false'); });
+    document.getElementById('lib-map').classList.toggle('dark', k !== 'light');
+    drawMap();
+  }
+  document.querySelectorAll('.lib-sw').forEach(function (b) { b.addEventListener('click', function () { setBg(b.dataset.bg); }); });
+  document.querySelectorAll('.lib-sw').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.bg === MAPBG ? 'true' : 'false'); }); document.getElementById('lib-map').classList.toggle('dark', MAPBG !== 'light');
   function drawMap() {
     W = cv.parentNode.clientWidth;
     if (!W) return;
