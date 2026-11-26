@@ -662,6 +662,8 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .sa { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin: 8px 0; } .sa-svg { width: 260px; height: 170px; background: var(--surface2); border-radius: 10px; }
   .sa-pl { fill: rgba(18,59,56,.18); stroke: #123B38; stroke-width: 2; stroke-linejoin: round; } .sa-buf { fill: none; stroke: rgba(192,96,58,.18); stroke-linejoin: round; } .sa-buf2 { fill: rgba(192,96,58,.14); }
   .sa figcaption { display: grid; gap: 6px; font-size: 0.86rem; color: var(--ink2); max-width: 22rem; } .sa figcaption span { display: flex; gap: 8px; align-items: center; } .sa-k1, .sa-k2 { width: 14px; height: 14px; border-radius: 3px; flex: none; } .sa-k1 { background: rgba(18,59,56,.3); border: 2px solid #123B38; } .sa-k2 { background: rgba(192,96,58,.3); }
+  .home-search.mp-search { max-width: 46rem; gap: 10px; } .home-search input { min-height: 62px; font-size: 1.15rem; padding: 0 24px; } .home-search .btn { min-height: 62px; padding: 0 28px; font-size: 1.05rem; }
+  @media (max-width: 560px) { .home-search.mp-search { flex-wrap: wrap; } .home-search input { flex: 1 1 100%; min-height: 56px; font-size: 1.05rem; } .home-search .btn { min-height: 50px; } }
   .gi-ways { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0 0 18px; } @media (max-width: 860px) { .gi-ways { grid-template-columns: 1fr 1fr; } } @media (max-width: 480px) { .gi-ways { grid-template-columns: 1fr; } }
   .gi-w { display: grid; gap: 3px; text-align: left; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; font: inherit; cursor: pointer; } .gi-w:hover { border-color: var(--accent); } .gi-w b { color: var(--accent); } .gi-w span { font-size: 0.85rem; color: var(--ink2); line-height: 1.4; }
   .pjc-who { font-size: 0.82rem; color: var(--ink2); margin-top: 4px; } .pjc-who i { font-style: normal; font-weight: 700; color: var(--ink); } .pjc-links .linkbtn { color: var(--accent); font-weight: 600; font-size: inherit; }
@@ -907,7 +909,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=38">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=39">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
