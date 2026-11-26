@@ -514,9 +514,9 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .lib-vis { align-self: flex-start; margin-top: 6px; font: 600 0.68rem var(--font-body); padding: 2px 8px; border-radius: 999px; background: #F3E3C4; color: #6B4510; }
   .lib-chips .chip-vis { border-style: dashed; }
   .lib-empty { color: var(--ink2); }
-  .bio { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 22px; align-items: start; }
-  .bio-photo { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; }
-  @media (max-width: 560px) { .bio { grid-template-columns: minmax(0, 1fr); } .bio-photo { width: 120px; height: 120px; } }
+  .bio { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 22px; align-items: start; }
+  .bio-photo { width: 200px; height: 200px; border-radius: 50%; object-fit: cover; }
+  @media (max-width: 560px) { .bio { grid-template-columns: minmax(0, 1fr); } .bio-photo { width: 150px; height: 150px; } }
   .about-grid { display: grid; gap: 28px; max-width: 46rem; }
   .about-grid h2 { font-size: 1.5rem; margin: 0 0 8px; }
   .about-grid p { margin: 0 0 10px; color: var(--ink2); }
@@ -948,7 +948,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=48">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=49">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
