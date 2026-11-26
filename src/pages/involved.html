@@ -159,22 +159,29 @@
     if (li.dataset.slug) pick(li.dataset.slug); else location.href = '{B}explore/?q=' + encodeURIComponent(input.value.trim());
   });
   input.addEventListener('blur', function () { setTimeout(close, 120); });
+  // Use my location: the browser's location if it is shared; if not, quietly fall back to an approximate,
+  // city-level location from the connection, so nobody has to change a setting to get started.
+  var RELAY = 'https://threadlands-relay.rob41pitt.workers.dev/';
+  function nearTo(lat, lng, approx) {
+    var msg = $('#mp-loc-msg'), n = D && T.nearest(D.list, lat, lng);
+    if (!n) { msg.textContent = ''; return; }
+    if (n.km > 60) { msg.innerHTML = 'The nearest place we have is ' + esc(n.place.name) + ', ' + Math.round(n.km) + ' km away. <a href="{B}explore/?q=' + lat.toFixed(3) + ',' + lng.toFixed(3) + '">Build your own area</a> or <button type="button" class="linkbtn" data-add="' + n.place.slug + '">see ' + esc(n.place.name) + '</button>.'; return; }
+    msg.innerHTML = approx ? 'Showing ' + esc(n.place.name) + ', based on your connection. <button type="button" class="linkbtn" id="mp-not">Not right?</button>' : '';
+    showHere(n.place.slug);
+  }
+  function approx(fail) {
+    fetch(RELAY + '?where=1').then(function (r) { if (!r.ok) throw 0; return r.json(); })
+      .then(function (w) { if (typeof w.lat !== 'number') throw 0; nearTo(w.lat, w.lng, true); })
+      .catch(fail);
+  }
   $('#mp-loc').addEventListener('click', function () {
-    var msg = $('#mp-loc-msg');
-    if (!navigator.geolocation) { msg.textContent = 'Location is not available in this browser. Type your city above.'; return; }
+    var msg = $('#mp-loc-msg'), help = function () { msg.innerHTML = 'Couldn&rsquo;t find you. Type your city above. <details class="loc-help"><summary>Why?</summary><p>Your browser or computer isn&rsquo;t sharing location with this site. To allow it, click the icon at the left of the address bar. On a Mac, also check System Settings &rsaquo; Privacy &amp; Security &rsaquo; Location Services.</p></details>'; };
     msg.textContent = 'Finding you…';
-    navigator.geolocation.getCurrentPosition(function (pos) {
-      var n = D && T.nearest(D.list, pos.coords.latitude, pos.coords.longitude);
-      if (!n) { msg.textContent = ''; return; }
-      if (n.km > 60) { msg.innerHTML = 'The nearest place we have is ' + esc(n.place.name) + ', ' + Math.round(n.km) + ' km away. <a href="{B}explore/?q=' + pos.coords.latitude.toFixed(3) + ',' + pos.coords.longitude.toFixed(3) + '">Build your own area</a> or <button type="button" class="linkbtn" data-add="' + n.place.slug + '">see ' + esc(n.place.name) + '</button>.'; return; }
-      msg.textContent = ''; showHere(n.place.slug);
-    }, function (err) {
-      // Say what actually happened, so people know whether to change a setting or just type their city
-      msg.textContent = err && err.code === 1 ? 'Your browser is blocking location for this site. Allow it in the address bar or your browser settings, or type your city above.'
-        : err && err.code === 3 ? 'Finding your location took too long. Try again, or type your city above.'
-        : 'Your device could not find your location. Check that location services are on, or type your city above.';
-    }, { maximumAge: 600000, timeout: 20000 });
+    if (!navigator.geolocation) { approx(help); return; }
+    navigator.geolocation.getCurrentPosition(function (pos) { nearTo(pos.coords.latitude, pos.coords.longitude, false); },
+      function () { approx(help); }, { maximumAge: 600000, timeout: 12000 });
   });
+  document.addEventListener('click', function (e) { if (e.target.id === 'mp-not') { $('#mp-loc-msg').textContent = ''; var q = document.querySelector('.mp-search input, #go-q, form input[type=search]'); if (q) q.focus(); } });
   $('#mp-loc-msg').addEventListener('click', function (e) { var b = e.target.closest('[data-add]'); if (b) { showHere(b.dataset.add); $('#mp-loc-msg').textContent = ''; } });
 
   T.all().then(function (d) {

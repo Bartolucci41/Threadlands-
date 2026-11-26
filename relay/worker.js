@@ -211,6 +211,13 @@ export default {
     }
     // The private feedback inbox (needs the inbox key)
     if (request.method === 'GET' && new URL(request.url).searchParams.has('inbox')) return inbox(request, env, origin);
+    // Approximate location from the connection, city level, for when the browser can't share one.
+    // Cloudflare provides it with every request; nothing is stored.
+    if (request.method === 'GET' && new URL(request.url).searchParams.has('where')) {
+      const cf = request.cf || {};
+      if (cf.latitude == null) return reply({ error: 'unknown' }, 404, origin);
+      return reply({ lat: +cf.latitude, lng: +cf.longitude, city: cf.city || '', country: cf.country || '' }, 200, origin);
+    }
     if (request.method !== 'POST') return reply({ error: 'Use POST.' }, 405, origin);
     if (!ALLOWED.includes(origin)) return reply({ error: 'Requests are accepted from threadlands.org only.' }, 403, origin);
 
