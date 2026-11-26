@@ -212,7 +212,8 @@ export default {
     // The private feedback inbox (needs the inbox key)
     if (request.method === 'GET' && new URL(request.url).searchParams.has('inbox')) return inbox(request, env, origin);
     // Approximate location from the connection, city level, for when the browser can't share one.
-    // Cloudflare provides it with every request; nothing is stored.
+    // Cloudflare estimates it from the connection. This worker does not write it to storage or log it;
+    // Cloudflare's own request logs may still hold request details for a short time (Workers Logs: up to 7 days).
     if (request.method === 'GET' && new URL(request.url).searchParams.has('where')) {
       const cf = request.cf || {};
       if (cf.latitude == null) return reply({ error: 'unknown' }, 404, origin);

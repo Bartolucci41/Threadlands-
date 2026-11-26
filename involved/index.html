@@ -212,7 +212,7 @@
     var msg = $('#mp-loc-msg'), n = D && T.nearest(D.list, lat, lng);
     if (!n) { msg.textContent = ''; return; }
     if (n.km > 60) { msg.innerHTML = 'The nearest place we have is ' + esc(n.place.name) + ', ' + Math.round(n.km) + ' km away. <a href="../explore/?q=' + lat.toFixed(3) + ',' + lng.toFixed(3) + '">Build your own area</a> or <button type="button" class="linkbtn" data-add="' + n.place.slug + '">see ' + esc(n.place.name) + '</button>.'; return; }
-    msg.innerHTML = approx ? 'Showing ' + esc(n.place.name) + ', based on your connection. <button type="button" class="linkbtn" id="mp-not">Not right?</button>' : '';
+    msg.innerHTML = approx ? 'Showing ' + esc(n.place.name) + ', based on your connection. <button type="button" class="linkbtn" id="mp-not">Not right?</button> <details class="loc-help"><summary>Why?</summary><p>Your browser didn&rsquo;t share your location, so Cloudflare, which runs part of this site, estimated your city from your internet connection. Threadlands doesn&rsquo;t save your estimated location. VPNs and mobile networks can make it wrong.</p></details>' : '';
     showHere(n.place.slug);
   }
   function approx(fail) {
