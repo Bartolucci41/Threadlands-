@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=24">
+<link rel="stylesheet" href="../assets/site.css?v=25">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -98,11 +98,11 @@
     </section>
 
     <nav class="pf-jump" aria-label="On this page">
-      <a href="#here">What&rsquo;s here</a><a href="#pressing">What stands out</a><a href="#tied">What it depends on</a><a href="#ready">How ready</a><a href="#changing">What&rsquo;s changing</a><a href="#pf-news-h">News</a>
+      <a href="#here">What&rsquo;s here</a><a href="#pressing">Key findings</a><a href="#tied">What it depends on</a><a href="#ready">How ready</a><a href="#changing">What&rsquo;s changing</a><a href="#pf-news-h">News</a>
     </nav>
 
     <section class="sect pf-sec" id="pressing" aria-labelledby="pressing-h">
-      <div class="sect-top"><div><h2 id="pressing-h">What stands out</h2><p>The measures that stood out most in Threadlands&rsquo; data for this place, compared with every other place. A standout is not necessarily the city&rsquo;s biggest risk; each one links to the map so you can see where and why.</p></div></div>
+      <div class="sect-top"><div><h2 id="pressing-h">Key findings</h2><p>The main things Threadlands&rsquo; data shows for this place, each linked to the map. Only the farmland measure is compared with other places for now: heat, flooding, green cover and tree cover are not yet measured the same way everywhere, so they are shown for this place alone. A finding is not necessarily the city&rsquo;s biggest risk.</p></div></div>
       <div class="pf-press" id="pf-press"></div>
     </section>
 
@@ -246,7 +246,7 @@
       var p = g.items[0], keys = g.items.map(function (x) { return x.key; }).join(','), pct = Math.max.apply(null, g.items.map(function (x) { return x.pct || 0; }));
       var body = g.items.map(function (x) { return (x.f ? '<p class="pfp-f">' + esc(x.f) + '</p>' : '') + '<p class="pfp-what">' + esc(x.what) + '</p><p class="pfp-who">' + esc(x.who) + '</p>'; }).join('<hr class="pfp-sep">');
       return '<article class="pfp pfp-' + esc(p.key) + '"><span class="pfp-k">' + esc(pctWord(pct)) + '</span><h3>' + esc(p.t) + '</h3>' + body + (p.layer ? '<p class="pfp-map"><a href="#here" data-goto-ly="' + esc(p.layer) + '" data-why="' + esc(keys) + '">See where on the map &rarr;</a></p>' : p.key === 'food' ? '<p class="pfp-map"><a href="#tied">See the farmland around it &rarr;</a></p>' : '') + nextSteps(GOAL_OF[p.key]) + '</article>';
-    }).join('') : '<p class="pf-none">No pressure stands out here compared with other cities.</p>';
+    }).join('') : '<p class="pf-none">No finding clears its threshold for this place.</p>';
   }
   function renderTied(e, sm) {
     var t = sm.threads || {}, out = [], n = esc(e.name);
@@ -369,7 +369,7 @@
   function showWhy(key) {
     var first = PRESS_NOW.filter(function (x) { return key.split(',').indexOf(x.key) >= 0; })[0]; if (!first) return;
     var items = PRESS_NOW.filter(function (x) { return x.t === first.t; }), pct = Math.max.apply(null, items.map(function (x) { return x.pct || 0; }));
-    $('#here-card').innerHTML = '<div class="here-why"><span class="pfp-k">Why this stands out</span><b>' + esc(first.t) + '</b>' + items.map(function (p) { return '<p><b class="hw-f">' + esc(p.f || '') + '.</b> ' + esc(p.what) + '</p>'; }).join('') + '<p class="hw-n">' + (items.length > 1 ? 'These measures' : 'This measure') + ' stood out in Threadlands&rsquo; data compared with other places' + (pct ? ' (more than ' + pct + '% of them)' : '') + '. ' + (items.length > 1 ? 'They are' : 'It is') + ' not necessarily ' + esc(D.lib[SLUG].name) + '&rsquo;s biggest risk.</p></div><p class="here-hint">Tap the map anywhere to see what the data says about that area.</p><div class="here-key" id="here-key"></div>';
+    $('#here-card').innerHTML = '<div class="here-why"><span class="pfp-k">About this finding</span><b>' + esc(first.t) + '</b>' + items.map(function (p) { return '<p><b class="hw-f">' + esc(p.f || '') + '.</b> ' + esc(p.what) + '</p>'; }).join('') + '<p class="hw-n">' + (pct ? 'Compared with other places, this is higher than in ' + pct + '% of them. ' : 'This is shown for ' + esc(D.lib[SLUG].name) + ' alone: it is not yet measured the same way everywhere, so it is not compared with other places. ') + 'A finding is not necessarily the city&rsquo;s biggest risk.</p></div><p class="here-hint">Tap the map anywhere to see what the data says about that area.</p><div class="here-key" id="here-key"></div>';
     drawLayer();
   }
   function nearestCell(lat, lng) {

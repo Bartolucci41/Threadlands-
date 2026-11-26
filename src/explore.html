@@ -648,8 +648,8 @@
           <div class="glance-grid" id="glance-grid"></div>
         </section>
       <section class="press" id="press" hidden>
-        <h2>What stands out</h2>
-        <p class="hint adv" id="press-note">Measured from this place's own data. A standout is a measure that stood out in Threadlands' data, not necessarily the biggest risk.</p>
+        <h2>Key findings</h2>
+        <p class="hint adv" id="press-note">Measured from this place's own data.</p>
         <ol class="press-list" id="press-list"></ol>
       </section>
       <section class="live" id="live-now" hidden>
@@ -1842,7 +1842,7 @@
       '<h1>' + name + ': a resilience plan</h1><p class="meta">Decision brief made with Threadlands (threadlands.org) on ' + meta.generated + ' · Climate: ' + esc(meta.climate) + ' · Screening estimates, not engineering results</p>' +
       '<p class="meta"><b>Scenario:</b> ' + esc(scn.line) + '</p>' +
       '<div class="big"><div><b>' + Math.round(res.index) + '</b><span>resilience index with this plan</span></div><div><b>' + dl(Math.round(res.index) - Math.round(bau.index)) + '</b><span>vs. business as usual' + ir + '</span></div><div><b>' + Math.round(today.index) + '</b><span>today, before any plan</span></div></div>' +
-      (press ? '<h2>What stands out in the data</h2>' + press : '') +
+      (press ? '<h2>Key findings in the data</h2>' + press : '') +
       '<h2>The plan</h2>' + (levers ? '<ul>' + levers + '</ul>' : '<p>No actions chosen yet: this shows business as usual.</p>') +
       '<h2>What it would change</h2><table><thead><tr><th>Measure (0 to 100)</th><th>Without the plan</th><th>With the plan</th><th>Change</th></tr></thead><tbody>' + rows + '</tbody></table>' +
       (rows.indexOf('class="r"') >= 0 ? '<p class="note">Ranges show how far each change could move if the model’s assumptions are off (middle 80% of 30 runs).</p>' : '') +
@@ -2242,7 +2242,7 @@
     document.getElementById('press-list').innerHTML = pr.top.map(function (t) {
       return '<li><div class="press-h"><strong>' + t.t + ' \u00b7 ' + t.f + '</strong>' + (t.pct !== null ? '<span class="press-b">Stands out against ' + Math.min(99, t.pct) + '% of places</span>' : '') + '</div><p>' + t.what + '</p>' + (t.who ? '<p class="press-who">' + t.who + '</p>' : '') + '</li>';
     }).join('');
-    document.getElementById('press-note').textContent = 'Measured from this place\u2019s own data' + (PDIST_N ? ' and compared with all ' + PDIST_N + ' places in the library' : '') + '. A standout is a measure that stood out in Threadlands\u2019 data, not necessarily the biggest risk.';
+    document.getElementById('press-note').textContent = 'Measured from this place\u2019s own data. Only the farmland measure is compared with other places for now; heat, flooding, green and tree cover depend on each place\u2019s grid-cell size. A finding is not necessarily the biggest risk.';
     box.hidden = false;
   }
   function setPlace(data, k) {
@@ -2318,7 +2318,8 @@
       var r = ok ? TLProfile.rankIn(v, list) : null;
       el.innerHTML = r === null ? '' : '<span class="cx-bar" aria-hidden="true"><i style="left:' + r + '%"></i></span>Today, better than ' + r + '% of the ' + list.length + ' places in the library';
     }
-    METRICS.forEach(function (m) { var el = $('#mc-' + m.k); if (el) line(el, ok ? P.BAU_TODAY.metrics[m.k] : null, ok ? PCTX['m_' + m.k] : null); });
+    // The model's scores depend on each place's grid-cell size, so they are compared only within a place for now
+    METRICS.forEach(function (m) { var el = $('#mc-' + m.k); if (el) el.innerHTML = ''; });
   }
   function renderGlance() {
     var box = $('#glance');
@@ -2371,6 +2372,8 @@
     // How each fact compares with every place in the library: [stat key, phrase for "more than X% of places"]
     var CMP = { 'People': ['pop', 'More people than'], 'Heat, measured': ['heat', 'A stronger heat island than'], 'Flooding': ['flood', 'More flood-prone land than'],
       'Water': ['basin', 'A larger river basin than'], 'Food': ['food', 'More nearby farmland per person than'], 'Wild places': ['wild', 'Nature farther away than'] };
+    // Heat and flooding depend on each place's grid-cell size, so they are not compared between places for now
+    delete CMP['Heat, measured']; delete CMP['Flooding'];
     $('#glance-grid').innerHTML = cards.map(function (k) {
       var cm = CMP[k[0]], r = cm && ST ? TLProfile.rankIn(ST[cm[0]], PCTX[cm[0]]) : null;
       var ctx = r === null ? '' : '<span class="gl-cx"><span class="cx-bar" aria-hidden="true"><i style="left:' + r + '%"></i></span>' + cm[1] + ' ' + r + '% of the ' + PCTX[cm[0]].length + ' places in the library</span>';

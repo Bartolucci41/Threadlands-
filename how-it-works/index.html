@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=24">
+<link rel="stylesheet" href="../assets/site.css?v=25">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -132,6 +132,24 @@
     <div class="prose">
       <p>Levers cost different amounts per point: shade 0.9, corridors 0.6, wetlands 0.85, regenerative farming 0.8 and compact growth 1.6, against a cap of 240. The best-mix search tries every combination in steps of 20 that fits the cap. Several quite different mixes often score within a point or two of the best, so there is usually more than one good route.</p>
     </div>
+    </details>
+
+    <details class="how-sec" id="limits">
+      <summary><h2 id="limits-h">Known limitations</h2><span>What the numbers can and cannot support yet, and what is being fixed.</span></summary>
+      <div class="how-lims">
+      <h3>Grid cells differ in size between places</h3>
+      <p>Each place is divided into hexagonal grid cells, but the cell size was chosen per place: about 0.1 km² for 2 places, 0.5 to 0.9 km² for 44, 4 to 6 km² for 66, 25 to 42 km² for 14 and about 250 km² for 1. Measures that count residents in cells above or below a threshold (heat hot spots, flood-prone ground, green cover, tree cover) change with the cell size, so they are not compared between places for now. Only the farmland measure, the river basin and the distance to forest or wetland are compared. The overall index combines cell-based measures and is shown as a first look only.</p>
+      <h3>How population is placed in small cells</h3>
+      <p>Population comes from WorldPop 2020 at about 1 km. Where cells are smaller than that, each 1 km figure is shared among the smaller pieces inside it, with ten times more weight on ground mapped as built-up. That is a reasonable guess, not a measurement, and it tends to place people on built-up, less green ground.</p>
+      <h3 id="green-test">A test: green cover in San Francisco</h3>
+      <p>San Francisco uses cells of about 0.1 km². Published result: 59% of the study region&rsquo;s residents (72% inside the city) live in cells with less than 10% green cover. Recomputed from the same data in blocks of about 0.8 km²: 52% (66% in the city). In blocks of about 5 km²: 36% (36%). Spreading people evenly by area within roughly 1 km blocks instead of favouring built-up ground: 56% (68%). The blocks are squares, not the real cells, and do not line up exactly with WorldPop&rsquo;s pixels, so these show how sensitive the result is, not a corrected value. Cell size moved it far more than the population method. Neither direction nor size has been tested for other places yet.</p>
+      <h3>What the green-cover measure leaves out</h3>
+      <p>Green means trees, grass, shrubs and wetland in ESA WorldCover 2021. Water, bare ground and built-up land are not green. Cropland is also left out, because the measure was meant to describe green cover that shades and cools neighbourhoods day to day, and farmland is often bare for part of the year and privately farmed. Given Threadlands&rsquo; focus on the ties between cities and farmland, that choice should be reviewed; farmland is counted separately in the food measure. Only the resident&rsquo;s own cell counts: nearby parks, open space and water do not. A fixed-distance measure would be an improvement, but it would still not be the same as walking access, which depends on entrances, routes, barriers and whether land is open to the public.</p>
+      <h3>Results within a place are not yet validated</h3>
+      <p>Removing comparisons does not make a single place&rsquo;s numbers reliable. Surface heat has been checked against satellite readings; green cover, tree cover and the population figures inside a place have not been checked against local data, and flood exposure is a screening estimate from ground height and distance to water, not a flood model. Treat all of them as indicative.</p>
+      <h3>Inputs for future features</h3>
+      <p>Cost estimates, the 2050 climate scenarios and counts of support (Stand with, Back this) exist on the site, but none has been validated as an input for decisions. Each needs its own review before it is used to steer plans.</p>
+      </div>
     </details>
   </section>
 </main>

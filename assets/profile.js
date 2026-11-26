@@ -5,7 +5,7 @@
   function measure(data) {
     var c = data.cells || {}, n = (c.pop || []).length, R = data.regional || {}, cellKm2 = +data.hex_km2 || null;
     var P = 0, heatP = 0, floodP = 0, greyP = 0, crowdP = 0, treeW = 0, hotTreeW = 0, hotP = 0, coolTreeW = 0, coolP = 0;
-    var floodLowInc = 0, lstN = 0, rows = [];
+    var floodLowInc = 0, lstN = 0, rows = [], cityP = 0, cityGreyP = 0, inside = c.inside || [];
     for (var i = 0; i < n; i++) {
       var p = num(c.pop[i]); if (p <= 0) continue;
       var a = num(c.area && c.area[i]) || 1, dens = p / a;
@@ -15,6 +15,7 @@
       if (typeof lst === 'number') { lstN++; if (lst >= 2) heatP += p; }
       if (fl >= 0.5) floodP += p;
       if (green < 0.1) greyP += p;
+      if (inside[i]) { cityP += p; if (green < 0.1) cityGreyP += p; }
       if (dens >= 15000) crowdP += p;
       rows.push({ p: p, dens: dens, tree: tree, fl: fl >= 0.5 ? 1 : 0, lst: typeof lst === 'number' ? lst : null });
     }
@@ -32,7 +33,7 @@
       pop: P,
       heat: lstN ? heatP / P : null,
       flood: floodP / P,
-      grey: greyP / P, cellKm2: cellKm2,
+      grey: greyP / P, cellKm2: cellKm2, greyCity: cityP ? cityGreyP / cityP : null, bufferKm: +data.buffer_km || null,
       crowd: crowdP / P,
       trees: treeW / P,
       food: food,
@@ -41,6 +42,10 @@
     };
   }
   // Higher score = bigger pressure. Each is compared with every other place in the library when the spread is known.
+  // Only measures that are worked out the same way everywhere are compared between places.
+  // Heat, flooding, green cover and tree cover depend on each place's grid-cell size (0.1 to tens of km²)
+  // and on how population is spread within cells, so they are reported for the place alone until that is fixed.
+  var COMPARABLE = { food: true };
   var KEYS = {
     heat: function (m) { return m.heat; },
     flood: function (m) { return m.flood; },
@@ -56,15 +61,16 @@
   function describe(key, m) {
     var d = m.dense, ppl = function (s) { var v = s * m.pop; return v >= 1e6 ? (v / 1e6).toFixed(1) + ' million' : v >= 1e3 ? Math.round(v / 1e3) + ',000' : Math.round(v); };
     switch (key) {
-      case 'heat': return { t: 'Heat', f: 'High surface temperatures', layer: 'heat', what: ppl(m.heat) + ' people (' + pctTxt(m.heat) + ') live where satellites measure the ground at least 2°C hotter than is typical for the region.',
+      case 'heat': return { t: 'Heat', f: 'Residents in local heat hot spots', layer: 'heat', what: ppl(m.heat) + ' people (' + pctTxt(m.heat) + ') live where satellites measure the ground at least 2°C hotter than is typical for the region.',
         who: d.lst !== null && d.lstRest !== null ? 'The most densely populated fifth of residents average ' + deg(d.lst - d.lstRest) + ' compared with everyone else, with ' + pctTxt(d.tree) + ' tree cover against ' + pctTxt(d.treeRest) + '.' : '' };
       case 'flood': return { t: 'Flooding', f: 'High modeled exposure', layer: 'flood', what: 'The model places ' + ppl(m.flood) + ' people (' + pctTxt(m.flood) + ') on low ground close to rivers or the sea, where water collects first.',
         who: d.fl > d.flRest * 1.2 && d.fl >= 0.05 ? 'High population density adds to the exposure: ' + pctTxt(d.fl) + ' of the most densely populated fifth of residents live on that low ground, against ' + pctTxt(d.flRest) + ' of everyone else.' : 'The model works in grid cells, not streets, so it shows where water tends to collect, not which streets flood.' };
-      case 'grey': return { t: 'Trees & green space', f: 'Low green cover in home areas', layer: 'green', what: ppl(m.grey) + ' people (' + pctTxt(m.grey) + ') live in grid cells' + cellTxt(m) + ' where less than a tenth of the ground is mapped as trees, grass, shrubs or wetland.',
-        who: 'It looks only at the cell around each home: parks, open space and water nearby are not counted.' };
+      case 'grey': return { t: 'Trees & green space', f: 'Residents in low-green-cover cells', layer: 'green',
+        what: 'In the wider study region' + (m.bufferKm ? ' (the city and ' + Math.round(m.bufferKm) + ' km around it)' : '') + ', ' + ppl(m.grey) + ' people (' + pctTxt(m.grey) + ') live in grid cells' + cellTxt(m) + ' where less than 10% of the ground is mapped as trees, grass, shrubs or wetland (ESA WorldCover 2021).' + (m.greyCity !== null ? ' Inside the city itself: ' + pctTxt(m.greyCity) + '.' : ''),
+        who: 'Not counted as green: water, cropland, bare ground and built-up land. Parks, open space and water outside a resident\u2019s own cell are not counted either. Results depend on the cell size and on how population is spread within cells, so treat them as indicative.' };
       case 'crowd': return { t: 'Population', f: 'High population density', layer: null, what: pctTxt(m.crowd) + ' of people live at more than 15,000 per km².',
         who: 'Dense neighborhoods have the least room for parks, drainage or trees.' };
-      case 'trees': return { t: 'Trees & green space', f: 'Low tree cover in home areas', layer: 'green', what: 'The average resident has ' + pctTxt(m.trees) + ' tree cover in the grid cell' + cellTxt(m) + ' around their home.',
+      case 'trees': return { t: 'Trees & green space', f: 'Tree cover in residents\u2019 cells', layer: 'green', what: 'The average resident has ' + pctTxt(m.trees) + ' tree cover in the grid cell' + cellTxt(m) + ' around their home (ESA WorldCover 2021). Results depend on the cell size, so treat them as indicative.',
         who: d.treeRest > d.tree ? 'The most densely populated fifth of residents get ' + pctTxt(d.tree) + ', against ' + pctTxt(d.treeRest) + ' for everyone else.' : 'Trees are spread fairly evenly between dense and open neighborhoods.' };
       case 'food': return { t: 'Food', f: 'Limited nearby farmland capacity', layer: null, what: 'Farmland within 50 km could feed ' + (m.food < 0.01 ? 'less than 1%' : 'about ' + pctTxt(Math.min(1, m.food))) + ' of the region’s people.',
         who: 'This measures farmland capacity nearby, not where the city’s food actually comes from.' };
@@ -76,12 +82,14 @@
     Object.keys(KEYS).forEach(function (k) {
       if (k === 'crowd') return;
       var s = KEYS[k](m); if (s === null || s === undefined) return;
-      var p = dist ? pct(s, dist[k]) : null;
+      var p = dist && COMPARABLE[k] ? pct(s, dist[k]) : null;
       out.push({ key: k, score: s, pct: p, rank: p !== null ? p : s * 100 });
     });
-    out.sort(function (a, b) { return b.rank - a.rank; });
+    // Findings compared with other places come first; the rest are ordered by how high they are for this place
+    out.sort(function (a, b) { return ((b.pct !== null) - (a.pct !== null)) || b.rank - a.rank; });
     // Only pressures that stand out: worse than most places (when the library spread is known) and not near zero
-    var strong = out.filter(function (o) { return o.score > 0.02 && (o.pct === null ? o.score >= 0.15 : o.pct >= 50); });
+    var OWN = { heat: 0.15, flood: 0.15, grey: 0.25, trees: 0.9, food: 0.75 };   // trees: average tree cover under 10%; food: nearby farmland feeds under a quarter
+    var strong = out.filter(function (o) { return o.score > 0.02 && (o.pct === null ? o.score >= (OWN[o.key] || 0.15) : o.pct >= 50); });
     if (!strong.length) strong = out.slice(0, 1);
     out = strong;
     return { m: m, top: out.slice(0, 3).map(function (o) { var d = describe(o.key, m); d.key = o.key; d.pct = o.pct; return d; }) };

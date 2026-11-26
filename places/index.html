@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=24">
+<link rel="stylesheet" href="../assets/site.css?v=25">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -38,7 +38,7 @@
   <header class="page-head">
     <p class="page-kicker">Places</p>
     <h1>Every place has a story in its data.</h1>
-    <p class="page-lead">Open any place to see what stands out, and where on the map. Don&rsquo;t see yours? <a href="../explore/">Search for it in Explore</a> and build it in about ten minutes.</p>
+    <p class="page-lead">Open any place to see its key findings, and where they are on the map. Don&rsquo;t see yours? <a href="../explore/">Search for it in Explore</a> and build it in about ten minutes.</p>
   </header>
   <div class="lib-map" id="lib-map"><canvas id="lib-canvas" role="img" aria-label="World map with a dot for every city"></canvas><span class="lib-tip" id="lib-tip" hidden></span>
     <div class="lib-zoom"><button type="button" class="chip" id="lz-in" aria-label="Zoom in">+</button><button type="button" class="chip" id="lz-out" aria-label="Zoom out">&minus;</button><button type="button" class="chip" id="lz-fit" aria-label="Show the whole world" title="Show the whole world">&#8634;</button></div></div>
@@ -47,10 +47,7 @@
     <span class="eyebrow" style="margin-right:4px">Sort by</span>
     <button type="button" class="chip" data-sort="pop" aria-pressed="true">Population</button>
     <button type="button" class="chip" data-sort="name" aria-pressed="false">A&ndash;Z</button>
-    <span class="eyebrow" style="margin:0 4px 0 12px">Compare scores</span>
-    <button type="button" class="chip" data-sort="tree" aria-pressed="false">Tree cover</button>
-    <button type="button" class="chip" data-sort="green_low" aria-pressed="false">Green space</button>
-    <button type="button" class="chip" data-sort="heat" aria-pressed="false">Local heat hot spots</button>
+    <span class="eyebrow" style="margin:0 4px 0 12px">Compare</span>
     <button type="button" class="chip" data-sort="farm" aria-pressed="false">Nearby farmland</button>
     <button type="button" class="chip" data-sort="wild_km" aria-pressed="false">Nearest wild place</button>
     <button type="button" class="chip" data-sort="index" aria-pressed="false">Overall index</button>
@@ -69,6 +66,7 @@
       <div><h3>Real projects</h3><p>Parks, wetlands and other projects with a public source are placed on the map. Those approved, under way or built since 2021 count toward the score. Older ones already show in the 2021 land cover.</p></div>
       <div><h3>Read it as a first look</h3><p>This is a screening index, not a verdict. Flood and travel are not yet fully comparable between places, and some places are outlined larger than the city itself. We are working on both, and the index will change as the data improves.</p></div>
     </div>
+    <p class="rk-lim"><b>Why only some measures are compared.</b> Heat hot spots, green cover and tree cover are not compared between places for now: each place uses a different grid-cell size, and those measures change with it. <a href="../how-it-works/#limits">Read the known limitations &rarr;</a></p>
     <p class="rank-note" id="rk-updated"></p>
   </section>
 </main>
@@ -212,13 +210,10 @@
   function where(e) { var ps = String(e.display || '').split(', '), st = ps.length >= 3 ? ps[ps.length - 2] : (/^New York/.test(e.name) ? 'New York' : ''); return (/^(US|CA|AU)$/.test(e.cc) && st && st !== e.name ? st + ' \u00b7 ' : '') + e.country; }
   function fmtN(n) { return n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : Math.round(n / 1e3) + 'K'; }
   function fmtPop(e) { var c = e.city_pop, r = e.pop; if (!r) return ''; if (!c || c >= r * 0.9) return fmtN(r) + ' people'; return fmtN(c) + ' in the city, ' + fmtN(r) + ' in the region'; }
-  var PRESS = { heat: ['Heat', 'High surface temperatures'], flood: ['Flooding', 'High modeled exposure'], grey: ['Trees & green space', 'Low green cover in home areas'], trees: ['Trees & green space', 'Low tree cover in home areas'], food: ['Food', 'Limited nearby farmland capacity'] };
+  var PRESS = { heat: ['Heat', 'Residents in local heat hot spots'], flood: ['Flooding', 'High modeled exposure'], grey: ['Trees & green space', 'Residents in low-green-cover cells'], trees: ['Trees & green space', 'Tree cover in residents\u2019 cells'], food: ['Food', 'Limited nearby farmland capacity'] };
   var SORT = 'pop', REGION = 'All', LASTKEY = '';
   // Measured values, each in its own units, ordered so the end worth learning from comes first
   var MEAS = {
-    tree: { h: 'Tree cover around residents', up: true, u: '%', note: 'Average tree cover around where people live, from 2021 satellite land cover (ESA WorldCover). Highest first: places to learn from about shade.' },
-    green_low: { h: 'Residents with little green nearby', up: false, u: '%', note: 'Share of residents living where less than a tenth of the ground is trees, grass, shrubs or wetland. Lowest first.' },
-    heat: { h: 'Residents in local heat hot spots (%)', up: false, u: '%', note: 'A local heat hot spot is ground that satellites (Landsat) measure at least 2\u00b0C hotter than is typical for its own region. This shows the share of residents living in the hottest parts of their region. It does not show who is exposed to dangerous heat: a place with few hot spots can still have a very hot climate. Lowest share first.', more: 'hot-spot', moreTxt: 'How typical is worked out' },
     farm: { h: 'Fed by farmland within 50 km', up: true, u: '%', note: 'Share of people within 50 km who the farmland within 50 km could feed. It measures capacity, not where food actually comes from. Highest first.' },
     wild_km: { h: 'Nearest forest or wetland', up: false, u: ' km', max: 40, note: 'Distance from the center of where people live to the nearest forest or wetland in the model (patches of about 1 km²). Nearest first.' },
     index: { h: 'Overall index, out of 100', up: true, u: '', note: 'A first look only. The overall index combines heat, flooding, nature, food and travel from the Threadlands model. It is not a grade: no place scores near 100, study areas differ, and flood and travel are not yet fully comparable between places, so a few points apart means little. It is most useful in ThreadLab, for comparing plans for the same place.' }
@@ -231,7 +226,7 @@
     list.forEach(function (p, k) { p._rank = k + 1; });
     var CMP = !!MEAS[SORT], M = MEAS[SORT];
     $('#rk-table').classList.toggle('cmp', CMP); $('#rk-head').className = 'rk-head' + (CMP ? ' cmp' : ''); $('#rk-cmp-note').hidden = !CMP; if (CMP) $('#rk-cmp-note').innerHTML = M.note + (M.more ? ' <a href="../how-it-works/#' + M.more + '">' + M.moreTxt + ' &rarr;</a>' : '');
-    $('#rk-head').innerHTML = '<span></span><span>Place</span><span>What stands out <i>in Threadlands&rsquo; data</i></span><span>Projects</span>' + (CMP ? '<span>' + M.h + '</span><span></span>' : '');
+    $('#rk-head').innerHTML = '<span></span><span>Place</span><span>Key finding <i>in Threadlands&rsquo; data</i></span><span>Projects</span>' + (CMP ? '<span>' + M.h + '</span><span></span>' : '');
     shown = list.filter(function (p) { return (REGION === 'All' || (REGION === VIS ? p.requested : regionOf(p) === REGION)) && (!q || norm(p.name + ' ' + p.country + ' ' + (p.display || '')).indexOf(q) >= 0); });
     var nc = {}; shown.forEach(function (p) { nc[p.country] = 1; });
     $('#rk-count').textContent = shown.length + ' of ' + LIB.length + ' places in ' + Object.keys(nc).length + ' countries';

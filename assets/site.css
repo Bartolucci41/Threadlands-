@@ -841,6 +841,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .ib-reply { margin-top: 12px; display: grid; gap: 6px; } .ib-reply label { font-weight: 600; font-size: .9rem; } .ib-reply textarea { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; width: 100%; } .ib-reply .btn { justify-self: start; }
   .ib-img img { max-width: 100%; margin-top: 10px; border-radius: 8px; border: 1px solid var(--line); }
   .here-addnote { margin: 0 0 10px; padding: 12px 16px; border-radius: 12px; background: var(--accent); color: var(--accent-ink, #fff); font-size: 0.95rem; scroll-margin-top: 12px; }
+  .how-lims h3 { font-size: 1.05rem; margin: 18px 0 6px; } .how-lims p { max-width: 70ch; }
   .pjc-hl { outline: 3px solid var(--accent); outline-offset: 3px; }
   .pfp-sep { border: 0; border-top: 1px solid var(--line); margin: 12px 0; } .here-why .hw-f { font: inherit; font-weight: 600; }
   .pfp-map { margin: 10px 0 0; font-size: 0.92rem; } .pfp-map a { font-weight: 600; color: var(--accent); }
