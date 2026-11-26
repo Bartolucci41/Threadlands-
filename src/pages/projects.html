@@ -51,9 +51,12 @@
     $('#pj-list').innerHTML = list.map(function (p) {
       var st = STAT[p.status] || STAT.proposed;
       return '<li class="pjc" id="pjc-' + esc(p.id) + '" style="--pc:' + st[1] + '"><button type="button" class="pjc-go" data-id="' + esc(p.id) + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span>' + (window.TLP ? TLP.flag(CC[p.place]) : '') + esc(NAMES[p.place] || p.place) + ' · ' + (KIND[p.kind] || 'Other') + '</span></span>' +
-        '<b translate="no">' + esc(p.name) + '</b><span class="pjc-sum">' + esc(p.summary || '') + '</span></button>' +
+        '<b translate="no">' + esc(p.name) + '</b>' + (p.area ? '<span class="pjc-area">' + esc(p.area) + '</span>' : '') + (p.who ? '<span class="pjc-who"><i>Organizer</i> ' + esc(p.who) + '</span>' : '') +
+        (p.next && p.next.text && !(p.next.until && new Date(p.next.until + 'T23:59:59') < new Date()) ? '<span class="pjc-next' + (p.next.open === false ? ' closed' : '') + '"><b>' + (p.next.open === false ? 'Next step' : 'Take part') + '</b> ' + esc(p.next.text) + '</span>' : '') + '</button>' +
+        (p.photo && p.photo.src ? '<img class="pjc-thumb" src="../' + esc(p.photo.src) + '" alt="" loading="lazy">' : p.lat != null ? '<img class="pjc-thumb" src="../assets/img/pj/' + esc(p.id) + '.jpg" alt="" loading="lazy" onerror="this.remove()" title="Location in Threadlands\u2019 land-cover data">' : '') +
+        '<details class="pjc-more"><summary>More about this project</summary><div>' + esc(p.summary || '') +
         '<span class="pjc-links"><a href="../place/#' + esc(p.place) + '">' + esc(NAMES[p.place] || 'The city') + '</a><a href="../explore/#' + esc(p.place) + '">See it in Explore</a>' + (p.source && p.source.url ? '<a href="' + esc(p.source.url) + '" target="_blank" rel="noopener">Source</a>' : '') +
-        (p.involved ? '<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Get involved</a>' : '') + '</span>' +
+        (p.involved ? '<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Contact the organizer</a>' : '') + '</span></div></details>' +
         '<span class="pjc-back"><button type="button" class="btn back-btn" data-back="' + esc(p.id) + '" aria-pressed="false" hidden>Back this</button><span class="back-n" data-backn="' + esc(p.id) + '"></span></span></li>';
     }).join('') || '<li class="rk-none">No projects with this status yet.</li>';
     if (window.TLP) TLP.wireBacking($('#pj-list'));
