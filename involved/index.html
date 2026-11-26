@@ -207,14 +207,19 @@
   input.addEventListener('blur', function () { setTimeout(close, 120); });
   $('#mp-loc').addEventListener('click', function () {
     var msg = $('#mp-loc-msg');
-    if (!navigator.geolocation) { msg.textContent = ' Location is not available in this browser.'; return; }
-    msg.textContent = ' Finding you…';
+    if (!navigator.geolocation) { msg.textContent = 'Location is not available in this browser. Type your city above.'; return; }
+    msg.textContent = 'Finding you…';
     navigator.geolocation.getCurrentPosition(function (pos) {
       var n = D && T.nearest(D.list, pos.coords.latitude, pos.coords.longitude);
       if (!n) { msg.textContent = ''; return; }
-      if (n.km > 60) { msg.innerHTML = ' The nearest place we have is ' + esc(n.place.name) + ', ' + Math.round(n.km) + ' km away. <a href="../explore/?q=' + pos.coords.latitude.toFixed(3) + ',' + pos.coords.longitude.toFixed(3) + '">Build your own area</a> or <button type="button" class="linkbtn" data-add="' + n.place.slug + '">see ' + esc(n.place.name) + '</button>.'; return; }
+      if (n.km > 60) { msg.innerHTML = 'The nearest place we have is ' + esc(n.place.name) + ', ' + Math.round(n.km) + ' km away. <a href="../explore/?q=' + pos.coords.latitude.toFixed(3) + ',' + pos.coords.longitude.toFixed(3) + '">Build your own area</a> or <button type="button" class="linkbtn" data-add="' + n.place.slug + '">see ' + esc(n.place.name) + '</button>.'; return; }
       msg.textContent = ''; showHere(n.place.slug);
-    }, function () { msg.textContent = ' Location was not shared. You can type your city instead.'; }, { maximumAge: 600000, timeout: 10000 });
+    }, function (err) {
+      // Say what actually happened, so people know whether to change a setting or just type their city
+      msg.textContent = err && err.code === 1 ? 'Your browser is blocking location for this site. Allow it in the address bar or your browser settings, or type your city above.'
+        : err && err.code === 3 ? 'Finding your location took too long. Try again, or type your city above.'
+        : 'Your device could not find your location. Check that location services are on, or type your city above.';
+    }, { maximumAge: 600000, timeout: 20000 });
   });
   $('#mp-loc-msg').addEventListener('click', function (e) { var b = e.target.closest('[data-add]'); if (b) { showHere(b.dataset.add); $('#mp-loc-msg').textContent = ''; } });
 
