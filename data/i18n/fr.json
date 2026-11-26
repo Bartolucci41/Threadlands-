@@ -1519,5 +1519,7 @@
 "Hypothèses de coût",
 "La chaleur modélisée est vérifiée par rapport aux relevés par satellite. D'autres mesures ne sont pas encore validées par rapport aux données locales, et certaines dépendent de la taille des cellules de la grille.",
 "Le bilan thermique du satellite",
-"Limites connues, et ce qui est fixé"
+"Limites connues, et ce qui est fixé",
+"Chaque plan est noté contre ne rien faire dans le même climat. Le mémoire de décision, avec ses sources et ses hypothèses, s'ouvre comme une page que vous pouvez imprimer ou enregistrer en format PDF à envoyer.",
+"Chaque hexagone est un patch d'environ {0} km2. Sa charge thermique provient principalement du pavage et des toits, et en partie du nombre de personnes qui y vivent. Ajouter des arbres de rue à {1} de ce qui est possible le réduit à travers la région, et le score de soulagement de la chaleur dans toute la ville dans le modèle passe de {2} à {3} de {4}. C'est un score modélisé pour comparer les options, pas les degrés de refroidissement ou un résultat mesuré."
 ]

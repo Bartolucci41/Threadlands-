@@ -1519,5 +1519,7 @@
 "Suposições de custos",
 "O calor modelado é verificado com as leituras de satélite. Outras medidas ainda não foram validadas em relação aos dados locais, e algumas dependem do tamanho da célula de grade, então trate-os como indicativos.",
 "A verificação de calor do satélite",
-"Limitações conhecidas, e o que está sendo fixado"
+"Limitações conhecidas, e o que está sendo fixado",
+"Cada plano é marcado contra fazer nada no mesmo clima. A decisão breve, com suas fontes e suposições, abre como uma página que você pode imprimir ou salvar como um PDF para enviar.",
+"Cada hexágono é um sistema de aproximadamente {0} km2. Sua carga de calor vem principalmente de pavimentação e telhados, e em parte de quantas pessoas vivem lá. Adicionar árvores de rua a {1} do que é possível reduz-lo através da área, e a pontuação de alívio de calor em toda a cidade no modelo sobe de {2} para {3} de {4}. Essa é uma pontuação modelada para comparar opções, não graus de resfriamento ou um resultado medido."
 ]

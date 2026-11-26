@@ -1519,5 +1519,7 @@
 "Hipótesis de gastos",
 "El calor modelado se comprueba contra las lecturas de satélites. Otras medidas todavía no se validan contra los datos locales, y algunas dependen del tamaño de la cuadrícula, por lo que tratarlos como indicativos.",
 "Comprobación de calor por satélite",
-"Limitaciones conocidas, y lo que se está arreglando"
+"Limitaciones conocidas, y lo que se está arreglando",
+"Cada plan está marcado contra no hacer nada en el mismo clima. El informe de decisión, con sus fuentes y suposiciones, se abre como una página que puede imprimir o guardar como un PDF para enviar.",
+"Cada hexágono es un parche de aproximadamente {0} km2. Su carga de calor proviene principalmente de pavimentos y techos, y en parte de cuánta gente vive allí. La adición de árboles callejeros a {1} de lo que es posible lo baja a través de la zona, y la puntuación de alivio térmico en toda la ciudad en el modelo se eleva de {2} a {3} de {4}. Esa es una puntuación modelada para comparar opciones, no grados de enfriamiento o un resultado medido."
 ]
