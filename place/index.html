@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=26">
+<link rel="stylesheet" href="../assets/site.css?v=28">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -46,6 +46,7 @@
           <a class="pf-back" href="../involved/">&larr; Your places</a>
           <h1 id="pf-name" class="pf-h"></h1>
           <p class="pf-where" id="pf-where"></p>
+          <a class="pf-time" id="pf-time" href="../time/#mexico-city" hidden>See it through time: from the lakes of 1519 to 2050 &rarr;</a>
           <div class="pf-actions">
             <button type="button" class="btn" id="pf-save" aria-pressed="false">Follow this place</button>
             <button type="button" class="btn ghost-inv" id="pf-follow" aria-pressed="false" aria-expanded="false" aria-controls="pf-tie">Stand with</button>
@@ -597,7 +598,7 @@
     }
     $('#pf-missing').hidden = true; $('#pf').hidden = false;
     document.title = e.name + ' | Threadlands';
-    $('#pf-name').textContent = e.name;
+    $('#pf-name').textContent = e.name; $('#pf-time').hidden = SLUG !== 'mexico-city';
     $('#pf-where').innerHTML = T.flag(e.cc) + esc(T.where(e) + (e.city_pop ? ' · ' + T.fmtN(e.city_pop) + ' people in the city' : '') + (e.pop && (!e.city_pop || e.pop > e.city_pop * 1.1) ? ', ' + T.fmtN(e.pop) + ' in the region' : ''));
     $('#pf-explore').href = '../explore/#' + SLUG; $('#pf-studio').href = '../studio/#' + SLUG;
     followUI(); $('#pf-tie').hidden = true; $('#pf-standers').hidden = true;

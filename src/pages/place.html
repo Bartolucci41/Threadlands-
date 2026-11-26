@@ -13,6 +13,7 @@
           <a class="pf-back" href="{B}involved/">&larr; Your places</a>
           <h1 id="pf-name" class="pf-h"></h1>
           <p class="pf-where" id="pf-where"></p>
+          <a class="pf-time" id="pf-time" href="{B}time/#mexico-city" hidden>See it through time: from the lakes of 1519 to 2050 &rarr;</a>
           <div class="pf-actions">
             <button type="button" class="btn" id="pf-save" aria-pressed="false">Follow this place</button>
             <button type="button" class="btn ghost-inv" id="pf-follow" aria-pressed="false" aria-expanded="false" aria-controls="pf-tie">Stand with</button>
@@ -551,7 +552,7 @@
     }
     $('#pf-missing').hidden = true; $('#pf').hidden = false;
     document.title = e.name + ' | Threadlands';
-    $('#pf-name').textContent = e.name;
+    $('#pf-name').textContent = e.name; $('#pf-time').hidden = SLUG !== 'mexico-city';
     $('#pf-where').innerHTML = T.flag(e.cc) + esc(T.where(e) + (e.city_pop ? ' · ' + T.fmtN(e.city_pop) + ' people in the city' : '') + (e.pop && (!e.city_pop || e.pop > e.city_pop * 1.1) ? ', ' + T.fmtN(e.pop) + ' in the region' : ''));
     $('#pf-explore').href = '{B}explore/#' + SLUG; $('#pf-studio').href = '{B}studio/#' + SLUG;
     followUI(); $('#pf-tie').hidden = true; $('#pf-standers').hidden = true;

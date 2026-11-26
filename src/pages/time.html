@@ -1,0 +1,313 @@
+<!-- title: Mexico City through time | Threadlands -->
+<!-- description: Slide from the lakes of 1519 to today's city of 23 million and one possible future. See how water, land and people changed together in Mexico City. -->
+
+<main class="tm" id="tm" data-stop="0">
+  <header class="tm-hero" id="tm-hero">
+    <div class="wrap tm-hero-in">
+      <div class="tm-hero-top">
+        <p class="tm-kick"><a href="{B}place/#mexico-city">Mexico City</a> &middot; through time</p>
+        <div class="tm-mode" role="tablist" aria-label="View">
+          <button type="button" role="tab" id="tab-time" aria-selected="true" aria-controls="tm-time">Through time</button>
+          <button type="button" role="tab" id="tab-season" aria-selected="false" aria-controls="tm-season">This season</button>
+        </div>
+      </div>
+      <p class="tm-era" id="tm-era">Before 1519</p>
+      <h1 class="tm-big" id="tm-big">A city on a lake</h1>
+      <p class="tm-sub" id="tm-sub"></p>
+    </div>
+  </header>
+
+  <section class="wrap tm-time" id="tm-time" role="tabpanel" aria-labelledby="tab-time">
+    <div class="tm-line">
+      <p class="tm-q" id="tm-q">What was here?</p>
+      <div class="tm-track">
+        <input type="range" id="tm-range" min="0" max="4" step="0.01" value="0" aria-label="Move through time" aria-valuetext="Before 1519">
+        <div class="tm-stops" id="tm-stops"></div>
+      </div>
+    </div>
+    <div class="tm-split">
+    <div class="tm-mapcard">
+      <canvas id="tm-map" role="img" aria-label="Map of the Valley of Mexico"></canvas>
+      <div class="tm-legend" id="tm-legend"></div>
+      <p class="tm-cap" id="tm-cap"></p>
+    </div>
+    <div class="tm-cards" id="tm-cards"></div>
+    </div>
+  </section>
+
+  <section class="wrap tm-season" id="tm-season" role="tabpanel" aria-labelledby="tab-season" hidden>
+    <p class="tm-season-lead" id="tm-season-lead"></p>
+    <div class="tm-cards" id="tm-scards"></div>
+  </section>
+
+  <section class="wrap tm-src" aria-labelledby="tm-src-h">
+    <details>
+      <summary id="tm-src-h">How this is made, and the sources</summary>
+      <p><b>The old lakes</b> are traced from elevation: every grid cell at or below 2,250 m that connects to the center of the old island city, the high-water line used by L&oacute;pez-L&oacute;pez and colleagues (2023). In our cells that comes to about <span data-t="lake_km2"></span> km&sup2;. Published estimates of the lakes&rsquo; size range from about 1,000 to 2,000 km&sup2;. Today&rsquo;s ground has sunk in places, so the outline is a reconstruction, not a survey. The shrinking lake between 1607 and 1980 is not mapped year by year.</p>
+      <p><b>Today</b> uses the same Threadlands data as the <a href="{B}place/#mexico-city">Mexico City page</a>: ESA WorldCover 2021, WorldPop 2020, Landsat surface heat from 2021 to 2025, and cells of about <span data-t="hex_km2"></span> km&sup2;.</p>
+      <p><b>The future</b> is one scenario run in the Threadlands model, on the middle climate path for 2050: wetlands on unbuilt land of the old lakebed (about <span data-t="wetland_km2"></span> km&sup2;, close to the size of the Parque Ecol&oacute;gico Lago de Texcoco) and 20% more tree cover on streets. It is a test of an idea, not a forecast. <a href="{B}explore/#mexico-city">Try your own in ThreadLab &rarr;</a></p>
+      <ul class="tm-refs">
+        <li><a href="https://www.frontiersin.org/articles/10.3389/fenvs.2023.1217343">L&oacute;pez-L&oacute;pez et al. (2023), the lakes of the Basin of Mexico from Humboldt to today</a>, Frontiers in Environmental Science</li>
+        <li><a href="https://ebsco.com/research-starters/history/draining-lake-texcoco">Draining of Lake Texcoco</a>, EBSCO Research Starters</li>
+        <li><a href="https://eos.org/articles/groundwater-pumping-is-causing-mexico-city-to-sink">Groundwater pumping is causing Mexico City to sink</a>, Eos (2023), on Khorrami and colleagues</li>
+        <li><a href="https://www.livescience.com/planet-earth/climate-change/mexico-city-could-be-just-months-away-from-running-out-of-drinking-water">Mexico City&rsquo;s water supply</a>, Live Science (2024)</li>
+        <li><a href="https://www.elimparcial.com/mexico/2024/09/02/entrada-gratis-y-14000-hectareas-de-naturaleza-amlo-inaugura-el-parque-ecologico-lago-de-texcoco/">Parque Ecol&oacute;gico Lago de Texcoco opens</a>, El Imparcial (2024)</li>
+        <li><a href="https://mexicobusiness.news/agribusiness/news/sedema-installs-73000-rain-harvesting-systems">73,000 rain harvesting systems</a>, Mexico Business News (2024)</li>
+      </ul>
+      <p class="tm-fb"><button type="button" class="linkbtn" data-feedback="data">Report a data issue</button> &middot; <button type="button" class="linkbtn" data-feedback="idea">Suggest a moment or a source</button></p>
+    </details>
+  </section>
+</main>
+<!--SCRIPT-->
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fmt(n) { return n >= 1e6 ? (n / 1e6).toFixed(1) + ' million' : n.toLocaleString('en-US'); }
+  var D = null, T = {}, F = {}, STOP = 0, POS = 0;
+  var ADD = '{B}place/?add=';
+
+  // The five moments. Each card's text is a function of the data, so the numbers stay tied to the source.
+  var STOPS = [
+    { era: 'Before 1519', short: '1519', q: 'What was here?', big: 'A city on a lake', sub: function () { return 'Five linked lakes filled the floor of the valley. Tenochtitlan, founded around 1325, stood on an island in the middle.'; },
+      cap: 'The lakes are traced from elevation, at the old 2,250 m high-water line. The island city is drawn approximately.' },
+    { era: '1607 to 1900', short: '1607', q: 'What changed?', big: 'Draining the lakes', sub: function () { return 'After repeated floods, the colonial city chose to drain the lakes rather than live with them. Water was sent north, out of the valley.'; },
+      cap: 'Dotted line: the old shoreline. The shrinking lake is not mapped year by year.' },
+    { era: '1950 to 1985', short: '1950', q: 'What changed?', big: 'The city moves onto the lakebed', sub: function () { return 'As the lakes dried, neighborhoods spread across the old bed. Wells pumped the water underneath, and the ground began to sink.'; },
+      cap: 'Shows today’s built-up land over the old shoreline. We do not yet have a map of the city in these decades.' },
+    { era: 'Today', short: 'Today', q: 'What is here now?', big: function () { return fmt(T.pop_lakebed) + ' people live on the old lake'; }, sub: function () { return 'That is ' + Math.round(100 * T.pop_lakebed / T.pop_region) + '% of the ' + fmt(T.pop_region) + ' people in the region. About ' + T.water_km2_now + ' km² of open water and wetland is left on the old lakebed.'; },
+      cap: 'Built-up land, green space and water from 2021, with local heat hot spots in orange.' },
+    { era: '2050, one possible future', short: '2050', q: 'What could come next?', big: 'Let the lakebed hold water again', sub: function () { return 'A tested idea: wetlands on ' + F.wetland_km2 + ' km² of unbuilt lakebed and more street trees. The overall index rises from ' + F.bau.index + ' to ' + F.plan.index + ' against business as usual in 2050.'; },
+      cap: 'Teal: wetlands in the scenario. One modeled idea, not a forecast or a plan.' }
+  ];
+
+  var CARDS = [
+    { k: 'land', t: 'The living landscape', s: [
+      function () { return { v: 'About ' + T.lake_km2.toLocaleString('en-US') + ' km² of lake', l: 'Zumpango, Xaltocan, Texcoco, Xochimilco and Chalco', m: '<p>Five lakes joined into one in wet years. Texcoco, the lowest, was salty. Xochimilco and Chalco, fed by springs in the south, were fresh.</p><p>Our outline counts about ' + T.lake_km2.toLocaleString('en-US') + ' km² below the 2,250 m line. López-López and colleagues put the pre-Hispanic lake at about 1,280 km², and other estimates range from 1,000 to 2,000 km².</p>' }; },
+      function () { return { v: 'About a third left by 1803', l: 'When Humboldt mapped the valley', m: '<p>By one recent estimate, the lakes had shrunk to about a third of their old size by the time Alexander von Humboldt measured them in 1803.</p><p>Texcoco lost most of its area over the next two centuries.</p>' }; },
+      function () { return { v: 'Texcoco nearly dry', l: 'A salty, dusty bed east of the city', m: '<p>The dry bed of Lake Texcoco became a source of dust storms. In 1983 the Nabor Carrillo reservoir was dug into a small part of it, to hold water again.</p>' }; },
+      function () { return { v: T.water_km2_now + ' km² of water and wetland', l: 'Left on the old lakebed, about ' + Math.round(100 * T.water_km2_now / T.lake_km2) + '% of it', m: '<p>In our 2021 land cover, about ' + T.water_km2_now + ' km² of open water and wetland remains inside the old shoreline. López-López and colleagues estimate the lakes today at 2.83% of their former area.</p><p>Texcoco and Xochimilco are now protected Ramsar wetlands.</p>' }; },
+      function () { return { v: '+' + F.wetland_km2 + ' km² of wetland', l: 'On unbuilt land of the old lakebed', m: '<p>The scenario turns open and bare land on the old lakebed back into wetland: about ' + F.wetland_km2 + ' km², close to the 14,000 hectares of the Parque Ecológico Lago de Texcoco, opened in 2024.</p><p>Nature score in the model: ' + F.bau.nature + ' → ' + F.plan.nature + '.</p>' }; }
+    ] },
+    { k: 'people', t: 'People and place', s: [
+      function () { return { v: 'Tenochtitlan', l: 'An island city, linked to shore by causeways', m: '<p>The Mexica founded Tenochtitlan around 1325. In the fresh southern lakes, farmers built <b>chinampas</b>: raised fields made of lake mud, branches and plants, with channels about 1.5 m deep between them.</p><p>Some chinampas still farm in Xochimilco today.</p>' }; },
+      function () { return { v: '160,000 people in 1803', l: 'The colonial city, by Humboldt’s count', m: '<p>The Spanish rebuilt the city on the ruins of Tenochtitlan in 1521 and, after the floods, set out to drain the valley. By 1800 Mexico City was the largest city in the Western Hemisphere.</p>' }; },
+      function () { return { v: 'New neighborhoods on the dry bed', l: 'Such as Ciudad Nezahualcóyotl, on old Lake Texcoco', m: '<p>People arriving from across the country settled on cheap land of the old lakebed, often before water, drainage or paving arrived. Many of today’s densest neighborhoods began this way.</p>' }; },
+      function () { return { v: fmt(T.pop_lakebed), l: 'People living inside the old shoreline today', m: '<p>' + Math.round(100 * T.pop_lakebed / T.pop_region) + '% of the region’s ' + fmt(T.pop_region) + ' people live on the old lakebed, on about ' + T.lakebed_built_km2 + ' km² of built-up land.</p>' }; },
+      function () { return { v: 'Who would gain', l: 'Lakebed neighborhoods carry the most heat and least green', m: '<p>The neighborhoods on the old lakebed have the least green and the most heat (see Heat and shade). They would gain most from water and trees coming back, if the plans include them.</p><p>Equity and affordability are not measured in the model yet.</p>' }; }
+    ] },
+    { k: 'water', t: 'Water', s: [
+      function () { return { v: 'Rain filled the valley', l: 'A closed basin, with no river out', m: '<p>The valley has no natural outlet, so rain and springs gathered in the lakes. In 1449 a dike about 16 km long, built under Nezahualcóyotl, held Texcoco’s salty water away from the fresh lakes around the city.</p>' }; },
+      function () { return { v: '1607: the first drain north', l: 'Then the flood of 1629, and the Gran Canal in 1900', m: '<p>Work on a tunnel to send water north out of the valley began on November 28, 1607, led by Enrico Martínez. It did not stop the flood of 1629, in which scholars estimate more than 30,000 people died.</p><p>A new canal and tunnel, the Gran Canal, opened around 1900. Floods continued.</p>' }; },
+      function () { return { v: 'Pumping, and sinking', l: 'Deep drainage tunnels in the 1970s', m: '<p>Wells drew water from the clay under the old lakes, and the ground above began to sink. In the 1970s a system of deep drainage tunnels cut flooding sharply.</p>' }; },
+      function () { return { v: 'Too much and too little', l: 'Floods in the rainy season, shortages in the dry one', m: '<p>About 60% of the city’s water is pumped from the aquifer beneath it, and the rest is pumped uphill from outside the valley. About 40% is lost to leaks on the way.</p><p>Pumping makes parts of the city sink by up to about 35 cm a year, which cracks pipes and drains and makes floods worse.</p><p class="tm-note"><b>A limit of our data:</b> our flood screen counts rivers and coasts, not water pooling on the flat lakebed, so it misses much of Mexico City’s flooding. It finds ' + T.flood_lake + '% of lakebed residents flood-prone, versus ' + T.flood_off + '% elsewhere in the region.</p>' }; },
+      function () { return { v: 'Flood score ' + F.bau.flood + ' → ' + F.plan.flood, l: 'Against business as usual in 2050', m: '<p>In the model, wetlands and trees hold rain where it falls. The share of rain held in the land rises from ' + F.bau.storage + ' to ' + F.plan.storage + ' on the model’s scale, and the flood score from ' + F.bau.flood + ' to ' + F.plan.flood + '.</p><p>Already under way: about 73,000 homes with rain harvesting systems, installed by the city by 2024.</p>' }; }
+    ] },
+    { k: 'heat', t: 'Heat and shade', s: [
+      function () { return { v: 'No measurements', l: 'Open water and wetland covered the valley floor', m: '<p>There is no temperature record for the valley before the Spanish arrived. Open water and wetland, which cool the air around them, covered much of the floor.</p>' }; },
+      function () { return { v: 'No measurements', l: 'Satellite heat records start in the 1980s', m: '<p>We have no comparable heat data for these years.</p>' }; },
+      function () { return { v: 'No measurements yet', l: 'Satellite heat records start in the 1980s', m: '<p>A Landsat record of how the lakebed warmed as it was built over is possible, and is on our list.</p>' }; },
+      function () { return { v: T.hot_lake + '% vs ' + T.hot_off + '%', l: 'Residents in local heat hot spots: on the old lakebed vs elsewhere', m: '<p>' + T.hot_lake + '% of people on the old lakebed live in a local heat hot spot, ground at least 2°C hotter than the region’s typical, compared with ' + T.hot_off + '% elsewhere in the region.</p><p>' + T.lowgreen_lake + '% of lakebed residents live in cells with under a tenth green cover, compared with ' + T.lowgreen_off + '% elsewhere.</p><p><a href="{B}how-it-works/#hot-spot">How a hot spot is defined &rarr;</a></p>' }; },
+      function () { return { v: 'Heat relief ' + F.bau.heat + ' → ' + F.plan.heat, l: 'With 20% more tree cover on streets', m: '<p>Most of the heat gain in the scenario comes from street trees. The wetlands on the far side of the lakebed do little for heat in the dense neighborhoods.</p>' }; }
+    ] },
+    { k: 'notice', t: 'What people notice', s: [
+      function () { return { v: 'Stories of the lake', l: 'Do you know a place name, a story or a map from this time?', m: '<p>Many places still carry lake names. Share what you know and we will add it here, with your name if you like.</p>', a: ['Share a story', 'change'] }; },
+      function () { return { v: 'Floods remembered', l: 'Do you know where the water came back?', m: '<p>Share a place where floods are remembered, with a source if you have one.</p>', a: ['Share a place', 'water'] }; },
+      function () { return { v: 'Memories of the lakebed', l: 'Did your family settle on the old lake?', m: '<p>Memories, photographs and questions from these decades help tell the story honestly. Add yours.</p>', a: ['Add a memory', 'change'] }; },
+      function () { return { v: OBS.length ? OBS.length + ' observation' + (OBS.length > 1 ? 's' : '') : 'None yet', l: OBS.length ? 'From people in Mexico City' : 'Be the first to add what you see', m: OBS.length ? OBS.slice(0, 3).map(function (o) { return '<p>“' + esc(o.text) + '”</p>'; }).join('') : '<p>Water that collects after rain, streets with no shade, a wetland coming back: what you notice on the ground can appear here for everyone.</p>', a: ['Add what you know', 'water'] }; },
+      function () { return { v: 'What should come back?', l: 'Tell us what you would want on the old lakebed', m: '<p>Ideas from people who live there matter more than any model.</p>', a: ['Share an idea', 'idea'] }; }
+    ] },
+    { k: 'future', t: 'Possible futures', s: [
+      function () { return { v: 'Living with water', l: 'Chinampas, dikes and causeways', m: '<p>The city of 1519 was built around the water. Some of its ideas, like chinampas, are coming back into plans for the south of the city.</p>' }; },
+      function () { return { v: 'A choice was made', l: 'Drain the valley', m: '<p>Draining solved one problem and created others: dust, sinking ground and a city that must pump its water uphill.</p>' }; },
+      function () { return { v: 'Holding water again', l: 'The Nabor Carrillo reservoir, 1983', m: '<p>The first large step back toward the lake: a reservoir dug into the dry bed of Texcoco.</p>' }; },
+      function () { return { v: PJ.length + ' projects on the map', l: 'Built or under way since 2021', m: PJ.map(function (p) { return '<p><b>' + esc(p.name) + '</b> · ' + esc(p.status === 'built' ? 'Built' : 'Under way') + (p.source && p.source.url ? ' · <a href="' + esc(p.source.url) + '">source</a>' : '') + '</p>'; }).join('') + '<p><a href="{B}place/#mexico-city">See them on the map &rarr;</a></p>' }; },
+      function () { return { v: 'Index ' + F.bau.index + ' → ' + F.plan.index, l: 'Overall index, provisional, against business as usual in 2050', m: '<p>Business as usual in 2050, on the middle climate path, scores ' + F.bau.index + '. The scenario scores ' + F.plan.index + '. Test restoration, public space, housing or water ideas of your own.</p><p><a class="btn" href="{B}explore/#mexico-city">Open ThreadLab for Mexico City</a></p>' }; }
+    ] }
+  ];
+  var ICON = { land: '◒', people: '●', water: '≋', heat: '☀', notice: '✎', future: '→' };
+  var OBS = [], PJ = [];
+
+  // ---------- Map ----------
+  var cv = $('#tm-map'), CC = null, W = 0, H = 0, PROJ = null;
+  var LABELS = [
+    [19.4326, -99.1332, 'Tenochtitlan', [0]], [19.4326, -99.1332, 'Historic center', [1, 2, 3, 4]],
+    [19.511, -98.883, 'Texcoco', [0, 1, 2, 3, 4]], [19.262, -99.105, 'Xochimilco', [0, 1, 2, 3, 4]], [19.263, -98.897, 'Chalco', [0, 1, 2]],
+    [19.797, -99.099, 'Zumpango', [0, 1]], [19.4, -99.015, 'Nezahualcóyotl', [2, 3]], [19.49, -98.99, 'Lago de Texcoco park', [3, 4]], [19.357, -99.06, 'Iztapalapa', [3]]
+  ];
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function mix(c1, c2, t) { return [lerp(c1[0], c2[0], t), lerp(c1[1], c2[1], t), lerp(c1[2], c2[2], t)]; }
+  var TERR = [[226, 220, 198], [158, 150, 118]];
+  function terrain(e) { return mix(TERR[0], TERR[1], Math.max(0, Math.min(1, (e - 2250) / 1100))); }
+  function colors() {
+    var c = D.cells, n = c.lat.length, out = [[], [], [], [], []];
+    for (var i = 0; i < n; i++) {
+      var land = terrain(c.elev[i]), L = c.lake[i], depth = Math.max(0, Math.min(1, (D.lake_line_m - c.elev[i]) / 14));
+      var lake0 = mix([132, 182, 209], [52, 112, 156], depth), chin = c.lat[i] < 19.33 && c.lng[i] > -99.16;
+      out[0][i] = L ? (chin ? mix(lake0, [104, 160, 124], 0.45) : lake0) : land;
+      out[1][i] = L ? mix(land, [176, 203, 214], 0.55) : land;
+      var b = c.built[i] / 100, g = c.green[i] / 100, w = c.water[i] / 100;
+      var city = mix(land, [118, 116, 112], Math.min(1, b * 1.1));
+      out[2][i] = b > 0.25 ? city : land;
+      var now = mix(mix(land, [124, 160, 104], Math.min(1, g * 1.2)), [112, 110, 106], Math.min(1, b * 1.1));
+      if (w > 0.3) now = [79, 141, 181];
+      if (c.hot[i] && c.built[i] >= 30) now = mix(now, [224, 123, 57], 0.62);
+      out[3][i] = now;
+      out[4][i] = c.fut[i] ? [46, 156, 134] : now;
+    }
+    return out;
+  }
+  function project() {
+    var B = D.bbox, lat0 = (B[0] + B[1]) / 2, kx = Math.cos(lat0 * Math.PI / 180);
+    var w = (B[3] - B[2]) * kx, h = (B[1] - B[0]);
+    W = cv.parentNode.clientWidth; var s = Math.min(W / w, Math.max(360, Math.min(720, window.innerHeight * 0.8)) / h); H = Math.round(h * s); var ox = (W - w * s) / 2;
+    var dpr = window.devicePixelRatio || 1; cv.width = W * dpr; cv.height = H * dpr; cv.style.height = H + 'px';
+    var r = Math.sqrt(2 * D.hex_km2 / (3 * Math.sqrt(3))) / 111.32 * s * 1.13;
+    PROJ = { x: function (lng) { return ox + (lng - B[2]) * kx * s; }, y: function (lat) { return (B[1] - lat) * s; }, r: r, dpr: dpr };
+  }
+  function shoreline(ctx) {
+    // Edges of lake cells that face land, drawn as a dashed line
+    var c = D.cells, n = c.lat.length, r = PROJ.r * 0.98;
+    ctx.save(); ctx.fillStyle = 'rgba(24,74,120,0.95)'; ctx.beginPath(); var d = Math.max(1.3, r * 0.28);
+    for (var i = 0; i < n; i++) if (c.lake[i] && EDGE[i]) { var x = PROJ.x(c.lng[i]), y = PROJ.y(c.lat[i]); ctx.moveTo(x + d, y); ctx.arc(x, y, d, 0, 6.283); }
+    ctx.fill(); ctx.restore();
+  }
+  var EDGE = null;
+  function edges() {
+    // A lake cell is on the shore when a neighbour within 1.6 cell widths is not lake
+    var c = D.cells, n = c.lat.length, g = {}, k = PROJ.r * 1.9, e = new Uint8Array(n);
+    function key(x, y) { return Math.floor(x / k) + ',' + Math.floor(y / k); }
+    var X = [], Y = [];
+    for (var i = 0; i < n; i++) { X[i] = PROJ.x(c.lng[i]); Y[i] = PROJ.y(c.lat[i]); (g[key(X[i], Y[i])] = g[key(X[i], Y[i])] || []).push(i); }
+    for (i = 0; i < n; i++) {
+      if (!c.lake[i]) continue; var gx = Math.floor(X[i] / k), gy = Math.floor(Y[i] / k), found = 0, near = 0;
+      for (var dx = -1; dx <= 1 && !found; dx++) for (var dy = -1; dy <= 1 && !found; dy++) (g[(gx + dx) + ',' + (gy + dy)] || []).forEach(function (j) { var dd = Math.hypot(X[j] - X[i], Y[j] - Y[i]); if (dd < k && j !== i) { near++; if (!c.lake[j]) found = 1; } });
+      e[i] = found || near < 5 ? 1 : 0;
+    }
+    return e;
+  }
+  function hex(ctx, x, y, r) { ctx.moveTo(x + r, y); for (var a = 1; a < 6; a++) ctx.lineTo(x + r * Math.cos(a * Math.PI / 3), y + r * Math.sin(a * Math.PI / 3)); ctx.closePath(); }
+  function draw() {
+    if (!D) return;
+    var ctx = cv.getContext('2d'), c = D.cells, n = c.lat.length, a = Math.floor(POS), b = Math.min(4, a + 1), t = POS - a;
+    ctx.setTransform(PROJ.dpr, 0, 0, PROJ.dpr, 0, 0); ctx.fillStyle = '#EFEBDF'; ctx.fillRect(0, 0, W, H);
+    // Ease the blend so each moment holds near its stop
+    var e = t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
+    for (var i = 0; i < n; i++) {
+      var col = mix(CC[a][i], CC[b][i], e);
+      ctx.fillStyle = 'rgb(' + (col[0] | 0) + ',' + (col[1] | 0) + ',' + (col[2] | 0) + ')';
+      ctx.beginPath(); hex(ctx, PROJ.x(c.lng[i]), PROJ.y(c.lat[i]), PROJ.r); ctx.fill();
+    }
+    var s = Math.round(POS);
+    if (s >= 1) shoreline(ctx);
+    if (s === 0) { // the island city
+      var x = PROJ.x(-99.1332), y = PROJ.y(19.4326), rr = Math.max(5, PROJ.r * 1.7);
+      ctx.fillStyle = '#E2DCC6'; ctx.strokeStyle = '#6B5E44'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(x, y, rr, 0, 6.283); ctx.fill(); ctx.stroke();
+    }
+    if (s === 1) { // the drain north
+      var x0 = PROJ.x(-99.13), y0 = PROJ.y(19.56), x1 = PROJ.x(-99.2), y1 = PROJ.y(19.83);
+      ctx.strokeStyle = '#7A4E1E'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo(x0 - 8, (y0 + y1) / 2, x1, y1 + 10); ctx.stroke();
+      ctx.fillStyle = '#7A4E1E'; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 - 6, y1 + 12); ctx.lineTo(x1 + 6, y1 + 12); ctx.closePath(); ctx.fill();
+      label(ctx, x1 + 10, y1 + 6, 'Drained north, out of the valley', '#7A4E1E');
+    }
+    var fs = W < 520 ? 11 : 13;
+    ctx.font = '600 ' + fs + 'px ' + getComputedStyle(document.body).fontFamily;
+    LABELS.forEach(function (l) { if (l[3].indexOf(s) < 0) return; label(ctx, PROJ.x(l[1]) + (l[2] === 'Tenochtitlan' ? PROJ.r * 2.1 : 6), PROJ.y(l[0]) + 4, l[2], '#1E2A2F'); });
+  }
+  function label(ctx, x, y, txt, col) {
+    var fs = W < 520 ? 11 : 13; ctx.font = '600 ' + fs + 'px ' + getComputedStyle(document.body).fontFamily;
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.strokeText(txt, x, y); ctx.fillStyle = col; ctx.fillText(txt, x, y);
+  }
+  var LEG = [
+    [['Lake', '#5A8FB6'], ['Chinampa lake', '#6E9C88'], ['Land, darker = higher', '#B7AF8C']],
+    [['Drying lakebed', '#B3C9D0'], ['Old shoreline', 'dash']],
+    [['Built-up land', '#7A7874'], ['Old shoreline', 'dash']],
+    [['Built-up land', '#76746F'], ['Green space', '#7CA068'], ['Water', '#4F8DB5'], ['Heat hot spot', '#E07B39'], ['Old shoreline', 'dash']],
+    [['Wetland in the scenario', '#2E9C86'], ['Built-up land', '#76746F'], ['Old shoreline', 'dash']]
+  ];
+
+  // ---------- Cards and the moment ----------
+  function val(f) { return typeof f === 'function' ? f() : f; }
+  var OPEN = {};
+  function renderCards() {
+    $('#tm-cards').innerHTML = CARDS.map(function (cd) {
+      var x = cd.s[STOP](), o = !!OPEN[cd.k];
+      return '<article class="tm-card k-' + cd.k + '"><button type="button" class="tm-ch" aria-expanded="' + o + '" data-k="' + cd.k + '"><span class="tm-ck"><i aria-hidden="true">' + ICON[cd.k] + '</i>' + cd.t + '</span><b class="tm-cv">' + x.v + '</b><span class="tm-cl">' + x.l + '</span><span class="tm-cm" aria-hidden="true">' + (o ? 'Less' : 'More') + '</span></button>' +
+        '<div class="tm-more"' + (o ? '' : ' hidden') + '>' + x.m + (x.a ? '<p><a class="btn ghost" href="' + ADD + x.a[1] + '#mexico-city">' + x.a[0] + '</a></p>' : '') + '</div></article>';
+    }).join('');
+  }
+  function setStop(s, fromRange) {
+    var changed = s !== STOP; STOP = s; var st = STOPS[s];
+    $('#tm').dataset.stop = s;
+    $('#tm-era').textContent = st.era; $('#tm-big').textContent = val(st.big); $('#tm-sub').textContent = val(st.sub); $('#tm-q').textContent = st.q;
+    $('#tm-cap').textContent = st.cap;
+    $('#tm-legend').innerHTML = LEG[s].map(function (l) { return '<span>' + (l[1] === 'dash' ? '<i class="tm-dash"></i>' : '<i style="background:' + l[1] + '"></i>') + l[0] + '</span>'; }).join('');
+    document.querySelectorAll('.tm-stop').forEach(function (b, k) { b.setAttribute('aria-current', k === s ? 'true' : 'false'); });
+    $('#tm-range').setAttribute('aria-valuetext', st.era);
+    if (changed || !$('#tm-cards').childElementCount) renderCards();
+    try { history.replaceState(null, '', '#mexico-city/' + st.short.toLowerCase()); } catch (e) {}
+  }
+  var raf = 0;
+  function go(p) { POS = p; if (!raf) raf = requestAnimationFrame(function () { raf = 0; draw(); }); var s = Math.round(p); if (s !== STOP) setStop(s); }
+  function animateTo(target) {
+    var from = POS, t0 = performance.now(), dur = 300 + 260 * Math.abs(target - from);
+    (function step(now) { var k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3); go(from + (target - from) * e); $('#tm-range').value = POS; if (k < 1) requestAnimationFrame(step); else setStop(target); })(t0);
+  }
+  $('#tm-range').addEventListener('input', function () { go(+this.value); });
+  $('#tm-range').addEventListener('change', function () { animateTo(Math.round(+this.value)); });
+  $('#tm-stops').innerHTML = STOPS.map(function (s, k) { return '<button type="button" class="tm-stop" data-s="' + k + '" aria-current="' + (k === 0) + '"><b>' + s.short + '</b></button>'; }).join('');
+  $('#tm-stops').addEventListener('click', function (e) { var b = e.target.closest('[data-s]'); if (b) animateTo(+b.dataset.s); });
+  $('#tm-cards').addEventListener('click', function (e) {
+    var b = e.target.closest('.tm-ch'); if (!b) return; var k = b.dataset.k; OPEN[k] = !OPEN[k];
+    b.setAttribute('aria-expanded', OPEN[k]); b.querySelector('.tm-cm').textContent = OPEN[k] ? 'Less' : 'More'; b.nextElementSibling.hidden = !OPEN[k];
+  });
+  document.addEventListener('keydown', function (e) {
+    if ($('#tm-time').hidden || /INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName)) return;
+    if (e.key === 'ArrowRight' && STOP < 4) animateTo(STOP + 1); if (e.key === 'ArrowLeft' && STOP > 0) animateTo(STOP - 1);
+  });
+
+  // ---------- This season ----------
+  function season(now) {
+    var m = new Date().getMonth(), wet = m >= 5 && m <= 9, cards = [];
+    $('#tm-season-lead').textContent = wet ? 'It is the rainy season in Mexico City, from about June to October: the months of floods.' : 'It is the dry season in Mexico City, from about November to May: the months when water runs short.';
+    cards.push({ k: 'water', t: wet ? 'Rainy season' : 'Dry season', v: wet ? 'Watch where water collects' : 'Rain is months away', l: wet ? 'Storms fall on a flat lakebed with nowhere to drain' : 'The rains usually return in May or June', m: wet ? '<p>Most floods happen on the old lakebed, where the ground has sunk and drains have cracked. If you see water collecting after rain, add it to the map.</p>' : '<p>About 60% of the city’s water comes from the aquifer beneath it. The rest is pumped uphill from reservoirs outside the valley, which refill only when the rains return.</p>' });
+    if (now && now.status === 'ok') {
+      var a = now.land_anom, dd = new Date(now.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      cards.push({ k: 'heat', t: 'Latest satellite pass', v: (a > 0 ? '+' : '') + a.toFixed(1) + '°C', l: 'Ground vs the usual for this time of year, on ' + dd, m: '<p>Landsat passed over Mexico City on ' + dd + '. Ground across the region was ' + Math.abs(a).toFixed(1) + '°C ' + (a >= 0 ? 'warmer' : 'cooler') + ' than the middle of ' + now.usual_scenes + ' clear passes at the same time of year since 2020, and built-up ground was ' + Math.abs(now.built_anom).toFixed(1) + '°C ' + (now.built_anom >= 0 ? 'warmer' : 'cooler') + '.</p><p><a href="{B}place/#mexico-city">See it on the map &rarr;</a></p>' });
+    }
+    cards.push({ k: 'land', t: 'A place to explore', v: 'Parque Ecológico Lago de Texcoco', l: 'Wetlands back on the old lakebed, opened in 2024', m: '<p>About 14,000 hectares on the dry bed of Lake Texcoco, where an airport was once planned. Entry is free.</p><p><a href="{B}place/?pj=mx-texcoco-park#mexico-city">See it on the map &rarr;</a></p>' });
+    cards.push({ k: 'notice', t: 'From the community', v: OBS.length ? OBS.length + ' recent' : 'Nothing yet', l: OBS.length ? 'Observations from people in Mexico City' : 'Be the first to add what you notice this season', m: OBS.length ? OBS.slice(0, 3).map(function (o) { return '<p>“' + esc(o.text) + '”</p>'; }).join('') : '<p>What you see on the ground can appear here for everyone.</p>', a: ['Add what you know', wet ? 'water' : 'heat'] });
+    var up = PJ.filter(function (p) { return p.status === 'underway'; })[0] || PJ[0];
+    if (up) cards.push({ k: 'future', t: 'Project to follow', v: up.name, l: up.status === 'underway' ? 'Under way' : 'Built', m: '<p>' + (up.source && up.source.title ? esc(up.source.title) : '') + '</p>' + (up.source && up.source.url ? '<p><a href="' + esc(up.source.url) + '">Read the source &rarr;</a></p>' : '') + '<p><a href="{B}involved/?place=mexico-city">Ways to take part in Mexico City &rarr;</a></p>' });
+    $('#tm-scards').innerHTML = cards.map(function (x) {
+      return '<article class="tm-card k-' + x.k + '"><div class="tm-ch tm-ch-s"><span class="tm-ck"><i aria-hidden="true">' + ICON[x.k] + '</i>' + x.t + '</span><b class="tm-cv">' + x.v + '</b><span class="tm-cl">' + x.l + '</span></div><div class="tm-more">' + x.m + (x.a ? '<p><a class="btn ghost" href="' + ADD + x.a[1] + '#mexico-city">' + x.a[0] + '</a></p>' : '') + '</div></article>';
+    }).join('');
+  }
+  function mode(m) {
+    var t = m === 'time'; $('#tab-time').setAttribute('aria-selected', t); $('#tab-season').setAttribute('aria-selected', !t);
+    $('#tm-time').hidden = !t; $('#tm-season').hidden = t; $('#tm').classList.toggle('season', !t);
+    if (t) setStop(STOP); else { $('#tm-era').textContent = 'This season'; $('#tm-big').textContent = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }); $('#tm-sub').textContent = 'What is happening now, and a reason to come back.'; try { history.replaceState(null, '', '#mexico-city/season'); } catch (e) {} }
+  }
+  $('#tab-time').addEventListener('click', function () { mode('time'); });
+  $('#tab-season').addEventListener('click', function () { mode('season'); });
+
+  window.TLF_CONTEXT = function () { return { Place: 'Mexico City', View: $('#tm-time').hidden ? 'This season' : 'Through time', Moment: STOPS[STOP].era }; };
+
+  var B0 = window.TL_DATA || '{B}data/';
+  Promise.all([
+    fetch('{B}data/time/mexico-city.json').then(function (r) { return r.json(); }),
+    fetch('{B}data/now/mexico-city.json').then(function (r) { return r.json(); }).catch(function () { return null; }),
+    fetch('{B}data/projects.json').then(function (r) { return r.json(); }).catch(function () { return { projects: [] }; }),
+    fetch('{B}data/observations.json').then(function (r) { return r.json(); }).catch(function () { return []; })
+  ]).then(function (x) {
+    D = x[0]; T = D.today; F = D.future;
+    PJ = (x[2].projects || []).filter(function (p) { return p.place === 'mexico-city'; });
+    var ob = Array.isArray(x[3]) ? x[3] : (x[3].observations || []); OBS = ob.filter(function (o) { return o.place === 'mexico-city' && o.text; });
+    document.querySelectorAll('[data-t]').forEach(function (el) { var k = el.dataset.t; el.textContent = k === 'hex_km2' ? D.hex_km2 : k === 'wetland_km2' ? F.wetland_km2 : (T[k] || '').toLocaleString('en-US'); });
+    CC = colors(); project(); EDGE = edges();
+    var h = (location.hash.split('/')[1] || '').toLowerCase(), k = STOPS.map(function (s) { return s.short.toLowerCase(); }).indexOf(h);
+    if (h === 'season') { STOP = 3; POS = 3; $('#tm-range').value = 3; setStop(3); mode('season'); }
+    else { if (k < 0) k = 0; POS = k; $('#tm-range').value = k; setStop(k); }
+    draw(); season(x[1]);
+  }).catch(function (e) { $('#tm-cards').innerHTML = '<p>The story could not be loaded. Check your connection and refresh.</p>'; console.error(e); });
+  var rt = 0; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (!D) return; project(); EDGE = edges(); draw(); }, 150); });
+})();
