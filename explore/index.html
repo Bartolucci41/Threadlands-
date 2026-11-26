@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=37">
+<link rel="stylesheet" href="../assets/site.css?v=38">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -3473,14 +3473,63 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     return { name: name, country: a.country || parts[parts.length - 1] || '', title: [name].concat(area).join(', '), kind: kind.charAt(0).toUpperCase() + kind.slice(1),
       display: h.display_name, osm: (h.osm_type || '').charAt(0).toUpperCase() + h.osm_id, lat: Number(h.lat), lng: Number(h.lon) };
   }
+  // Before building, show the study area the robot would use: the place's own outline, or, when OpenStreetMap has only a
+  // point, the surrounding district it falls back to (or a 5 km circle). Same rules and sizes as pipeline/run_place.py.
+  var H3A = { 3: 12393.4, 4: 1770.35, 5: 252.90, 6: 36.129, 7: 5.161, 8: 0.737, 9: 0.105 };
+  function bufKm(a) { return a >= 20000 ? 0 : a >= 3000 ? 10 : Math.min(40, Math.max(12, 0.8 * Math.sqrt(Math.max(a, 1)))); }
+  function cellKm2(regionKm2) { var best = 3; Object.keys(H3A).forEach(function (r) { if (regionKm2 / H3A[r] <= 2500) best = +r; }); return H3A[best]; }
+  function rings(g) { return !g ? [] : g.type === 'Polygon' ? [g.coordinates[0]] : g.type === 'MultiPolygon' ? g.coordinates.map(function (p) { return p[0]; }) : []; }
+  function ringKm2(r, lat0) { var a = 0, kx = 111.32 * Math.cos(lat0 * Math.PI / 180); for (var k = 0, n = r.length; k < n - 1; k++) a += (r[k][0] * kx) * (r[k + 1][1] * 110.57) - (r[k + 1][0] * kx) * (r[k][1] * 110.57); return Math.abs(a / 2); }
+  function areaPreview(h, cb) {
+    var Q = 'https://nominatim.openstreetmap.org/', P = '&format=jsonv2&polygon_geojson=1&polygon_threshold=0.002&accept-language=en';
+    fetch(Q + 'lookup?osm_ids=' + h.osm + P).then(function (r) { return r.json(); }).then(function (a) {
+      var rec = a && a[0]; if (!rec) throw 0;
+      if (rings(rec.geojson).length) return cb({ g: rec.geojson, how: 'own', lat: +rec.lat, lng: +rec.lon });
+      // Only a point: try the district around it, as the build does
+      var tryZ = function (zs, best) {
+        if (!zs.length) return cb(best ? { g: best.geojson, how: 'district', name: best.name, lat: +rec.lat, lng: +rec.lon } : { how: 'circle', lat: +rec.lat, lng: +rec.lon });
+        fetch(Q + 'reverse?lat=' + rec.lat + '&lon=' + rec.lon + '&zoom=' + zs[0] + P).then(function (r) { return r.json(); }).then(function (rv) {
+          if (rv && rings(rv.geojson).length) { var km = rings(rv.geojson).reduce(function (t, r) { return t + ringKm2(r, +rec.lat); }, 0); if (km >= 40 || zs.length === 1) return tryZ([], rv); return tryZ(zs.slice(1), rv); }
+          tryZ(zs.slice(1), best);
+        }).catch(function () { tryZ(zs.slice(1), best); });
+      };
+      tryZ([10, 8], null);
+    }).catch(function () { cb(null); });
+  }
+  function previewSVG(v) {
+    var W = 260, H = 170, kx = 111.32 * Math.cos(v.lat * Math.PI / 180), ky = 110.57, rs = v.g ? rings(v.g) : [];
+    var placeKm2 = rs.length ? rs.reduce(function (t, r) { return t + ringKm2(r, v.lat); }, 0) : Math.PI * 25;
+    var b = bufKm(placeKm2), pts = [];
+    rs.forEach(function (r) { r.forEach(function (p) { pts.push([(p[0] - v.lng) * kx, (p[1] - v.lat) * ky]); }); });
+    if (!pts.length) pts = [[-5, -5], [5, 5]];
+    var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
+    var x0 = Math.min.apply(null, xs) - b, x1 = Math.max.apply(null, xs) + b, y0 = Math.min.apply(null, ys) - b, y1 = Math.max.apply(null, ys) + b;
+    var sc = Math.min(W / (x1 - x0), H / (y1 - y0)) * 0.94, ox = (W - (x1 - x0) * sc) / 2, oy = (H - (y1 - y0) * sc) / 2;
+    var X = function (x) { return (ox + (x - x0) * sc).toFixed(1); }, Y = function (y) { return (oy + (y1 - y) * sc).toFixed(1); };
+    var path = rs.map(function (r) { return 'M' + r.map(function (p) { return X((p[0] - v.lng) * kx) + ',' + Y((p[1] - v.lat) * ky); }).join('L') + 'Z'; }).join('');
+    var shape = rs.length ? '<path d="' + path + '" class="sa-pl"/>' : '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="' + (5 * sc).toFixed(1) + '" class="sa-pl"/>';
+    var halo = b ? (rs.length ? '<path d="' + path + '" class="sa-buf" stroke-width="' + (2 * b * sc).toFixed(1) + '"/>' : '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="' + ((5 + b) * sc).toFixed(1) + '" class="sa-buf2"/>') : '';
+    var region = placeKm2 + (b ? Math.PI * b * b + 2 * b * Math.sqrt(Math.PI * placeKm2) * 1.15 : 0);
+    return { svg: '<svg viewBox="0 0 ' + W + ' ' + H + '" class="sa-svg" role="img" aria-label="Proposed study area">' + halo + shape + '</svg>', placeKm2: placeKm2, buf: b, cell: cellKm2(region), region: region };
+  }
+  function fmtKm(a) { return a >= 100 ? Math.round(a).toLocaleString('en-US') : a >= 10 ? Math.round(a) : a.toFixed(1); }
   function showRequest(reqId, h) {
     var box = $(reqId);
     box.hidden = false;
-    var small = /Postal|Neighborhood|Village/.test(h.kind);
-    box.innerHTML = '<p><b>' + esc(h.title) + '</b> is not in the library yet.</p>' +
-      '<p>' + (small ? 'It will be built with the land around it, so you can see the region it depends on. ' : '') + 'Building a new place takes about 10 to 15 minutes, and then it is saved for everyone.</p>' +
-      '<div class="row">' + (REQUEST_URL ? '<button class="btn" type="button" data-req="go">Build this place</button>' : '<span class="tag" style="margin:0">Building on request is coming soon</span>') +
-      '<button class="btn ghost" type="button" data-req="close">Close</button></div>';
+    box.innerHTML = '<p><b>' + esc(h.title) + '</b> is not in the library yet.</p><p class="sa-wait">Checking its boundary&hellip;</p>';
+    areaPreview(h, function (v) {
+      var info = '', pic = '';
+      if (v) {
+        var p = previewSVG(v);
+        pic = '<figure class="sa">' + p.svg + '<figcaption><span><i class="sa-k1"></i>' + (v.how === 'own' ? esc(h.name) + '&rsquo;s boundary' : v.how === 'district' ? 'No boundary for ' + esc(h.name) + ': using ' + esc(v.name || 'the surrounding district') : 'No boundary: a 5 km circle around ' + esc(h.name)) + '</span>' + (p.buf ? '<span><i class="sa-k2"></i>' + Math.round(p.buf) + ' km of surrounding land, for its farms, water and forest</span>' : '') + '</figcaption></figure>';
+        info = '<p>Study area about ' + fmtKm(p.region) + ' km&sup2;, in grid cells of about ' + fmtKm(p.cell) + ' km&sup2;.' +
+          (p.cell >= 25 ? ' <b>This is a large region, so the map will be coarse.</b> A city or district inside it will give a much sharper picture.' : '') + '</p>';
+      }
+      box.innerHTML = '<p><b>' + esc(h.title) + '</b> is not in the library yet. This is the area that would be built:</p>' + pic + info +
+        '<p>Building takes about 10 to 15 minutes, and then it is saved for everyone.</p>' +
+        '<div class="row">' + (REQUEST_URL ? '<button class="btn" type="button" data-req="go">Build this area</button>' : '<span class="tag" style="margin:0">Building on request is coming soon</span>') +
+        '<button class="btn ghost" type="button" data-req="close">Not this one</button></div>';
+    });
     box.onclick = function (ev) {
       var b = ev.target.closest('[data-req]');
       if (!b) return;
