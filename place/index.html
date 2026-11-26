@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=42">
+<link rel="stylesheet" href="../assets/site.css?v=43">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -379,6 +379,15 @@
       if (navigator.share) navigator.share({ title: o3.t, url: url }).catch(function () {}); else if (navigator.clipboard) navigator.clipboard.writeText(url).then(function () { sh.textContent = 'Link copied'; setTimeout(function () { sh.textContent = 'Share'; }, 2000); }); }
   });
   // Ideas as they spread: a project's stage, and the same idea in other places (stages after USDN's innovation pathway)
+  // The next way to take part: what, with its source and an as-of date; it fades out once its own end date has passed
+  function nextLine(p) {
+    var n = p.next; if (!n || !n.text) return '';
+    if (n.until && new Date(n.until + 'T23:59:59') < new Date()) return '';
+    var asof = n.asof ? new Date(n.asof + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : '';
+    var old = n.asof && (Date.now() - new Date(n.asof).getTime()) > 270 * 864e5;
+    return '<span class="pjc-next' + (n.open === false ? ' closed' : '') + (old ? ' old' : '') + '"><b>' + (n.open === false ? 'Next step' : 'Take part') + '</b> ' + esc(n.text) +
+      ' <span class="pjc-asof">' + (asof ? 'As of ' + asof : '') + (n.source && n.source.url ? (asof ? ' · ' : '') + '<a href="' + esc(n.source.url) + '" target="_blank" rel="noopener">source</a>' : '') + (n.url ? ' · <a href="' + esc(n.url) + '" target="_blank" rel="noopener">official site</a>' : '') + (old ? ' · may be out of date' : '') + '</span></span>';
+  }
   function ideaLine(p) {
     var ID = D.ideas || {}, SG = D.stages || {}, others = p.idea ? D.projects.filter(function (x) { return x.idea === p.idea && x.place !== p.place; }) : [];
     var link = function (x) { var e2 = D.lib[x.place] || {}; return '<a href="../place/?pj=' + esc(x.id) + '#' + esc(x.place) + '">' + esc(e2.name || x.place) + '</a>'; };
@@ -399,7 +408,7 @@
     var mine = D.projects.filter(function (p) { return p.place === SLUG; });
     $('#pf-proj').innerHTML = mine.length ? mine.map(function (p) {
       var st = STAT[p.status] || STAT.proposed;
-      return '<article class="pjc" id="pj-' + esc(p.id) + '" style="--pc:' + st[1] + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span>' + (p.added_by_visitor ? '<span>Added by a visitor</span>' : '') + '</span><b translate="no">' + esc(p.name) + '</b><span class="pjc-sum">' + esc(p.summary || '') + '</span>' + (p.who ? '<span class="pjc-who"><i>Run by</i> ' + esc(p.who) + '</span>' : '') + ideaLine(p) +
+      return '<article class="pjc" id="pj-' + esc(p.id) + '" style="--pc:' + st[1] + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span>' + (p.added_by_visitor ? '<span>Added by a visitor</span>' : '') + '</span><b translate="no">' + esc(p.name) + '</b><span class="pjc-sum">' + esc(p.summary || '') + '</span>' + (p.area ? '<span class="pjc-area">' + esc(p.area) + '</span>' : '') + (p.who ? '<span class="pjc-who"><i>Run by</i> ' + esc(p.who) + '</span>' : '') + nextLine(p) + ideaLine(p) +
         '<span class="pjc-back"><button type="button" class="btn back-btn" data-back="' + esc(p.id) + '" aria-pressed="false" hidden>Back this</button><span class="back-n" data-backn="' + esc(p.id) + '"></span></span>' +
         '<span class="pjc-links">' + (p.involved ? '<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Contact the organizer</a>' : '') + '<button type="button" class="linkbtn" data-pj-partner="' + esc(p.id) + '">Suggest a partner</button>' + (p.source && p.source.url ? '<a href="' + esc(p.source.url) + '" target="_blank" rel="noopener">Source</a>' : '') + '<a href="../explore/#' + esc(SLUG) + '">See it on the map</a></span></article>';
     }).join('') : '<p class="pf-none">No projects here yet. Be the first to add one.</p>';

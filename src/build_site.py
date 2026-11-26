@@ -676,6 +676,9 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .ab-fig { margin: 8px 0 6px; } .ab-fig img { display: block; width: auto; max-width: min(720px, 100%); max-height: 460px; height: auto; border-radius: 12px; border: 1px solid var(--line); } .ab-fig figcaption { font-size: 0.86rem; color: var(--ink2); margin-top: 6px; max-width: 720px; } .ab-fig a { color: var(--accent); font-weight: 600; }
   .ab-li > summary { display: block; } .about-list .ab-li > summary::after { font-size: 1.05rem; }
   .mp-kick strong { display: inline-block; margin-left: 2px; font: 800 1.3rem var(--font-display); letter-spacing: 0.02em; text-transform: none; color: #fff; }
+  .pjc-area { font-size: 0.82rem; font-weight: 600; color: var(--ink); } .pjc-area::before { content: '●'; color: var(--accent); margin-right: 6px; font-size: 0.6rem; vertical-align: 2px; }
+  .pjc-next { display: block; margin-top: 8px; padding: 8px 10px; border-radius: 8px; background: #E4F1EC; font-size: 0.85rem; line-height: 1.45; color: var(--ink); } .pf-proj .pjc .pjc-next b, .pjc .pjc-next b { display: inline; font: 700 0.85rem var(--font-body); color: var(--accent); margin-right: 2px; }
+  .pjc-next.closed { background: var(--surface2); } .pjc-next.old { opacity: 0.75; } .pjc-asof { display: block; margin-top: 3px; font-size: 0.75rem; color: var(--ink2); } .pjc-asof a { color: var(--accent); }
   .gi-ways { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0 0 18px; } @media (max-width: 860px) { .gi-ways { grid-template-columns: 1fr 1fr; } } @media (max-width: 480px) { .gi-ways { grid-template-columns: 1fr; } }
   .gi-w { display: grid; gap: 3px; text-align: left; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; font: inherit; cursor: pointer; } .gi-w:hover { border-color: var(--accent); } .gi-w b { color: var(--accent); } .gi-w span { font-size: 0.85rem; color: var(--ink2); line-height: 1.4; }
   .pjc-who { font-size: 0.82rem; color: var(--ink2); margin-top: 4px; } .pjc-who i { font-style: normal; font-weight: 700; color: var(--ink); } .pjc-links .linkbtn { color: var(--accent); font-weight: 600; font-size: inherit; }
@@ -921,7 +924,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=42">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=43">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

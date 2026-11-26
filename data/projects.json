@@ -20,7 +20,17 @@
    "involved": "",
    "added": "2026-11-22",
    "stage": "tried",
-   "idea": "wetland-restoration"
+   "idea": "wetland-restoration",
+   "area": "Old Lake Texcoco, State of Mexico",
+   "next": {
+    "text": "Visit free, Tuesday to Sunday, 7:00 to 19:00. CONANP runs free birdwatching and environmental education workshops, and winter is when migratory birds fill the lagoons.",
+    "asof": "2025-12-29",
+    "source": {
+     "title": "Chilango: Parque Ecológico Lago de Texcoco actividades gratis 2026 (29 Dec 2025)",
+     "url": "https://www.chilango.com/que-hacer/parque-ecologico-lago-de-texcoco-actividades-gratis-2026-nuevo-horario/"
+    },
+    "url": "https://parquelagotexcoco.conagua.gob.mx/"
+   }
   },
   {
    "id": "mx-gran-canal",
@@ -41,7 +51,13 @@
    "involved": "",
    "added": "2026-11-22",
    "stage": "tried",
-   "idea": "infrastructure-to-park"
+   "idea": "infrastructure-to-park",
+   "area": "Venustiano Carranza",
+   "next": {
+    "text": "No open call or event found right now. It is a public park, open to walk. Follow for updates.",
+    "asof": "2026-11-26",
+    "open": false
+   }
   },
   {
    "id": "mx-tlallipan",
@@ -62,7 +78,16 @@
    "involved": "",
    "added": "2026-11-22",
    "stage": "tried",
-   "idea": "green-route"
+   "idea": "green-route",
+   "area": "Calzada de Tlalpan, between Pino Suárez and Chabacano",
+   "next": {
+    "text": "Drop in: free culture workshops (painting, papier-mâché), a pollinator garden, and low-cost fruit and vegetables from local producers.",
+    "asof": "2026-08-29",
+    "source": {
+     "title": "Crónica: Jardín Flotante Tlallipan reaches half a million visitors (29 Aug 2026)",
+     "url": "https://www.cronica.com.mx/metropoli/2026/08/29/alcanza-jardin-flotante-tlallipan-medio-millon-de-visitantes/"
+    }
+   }
   },
   {
    "id": "mx-cosecha-lluvia",
@@ -83,7 +108,18 @@
    "involved": "https://www.sedema.cdmx.gob.mx/",
    "added": "2026-11-22",
    "stage": "program",
-   "idea": "rain-harvesting"
+   "idea": "rain-harvesting",
+   "area": "Started in Iztapalapa and Xochimilco; now in rounds by borough",
+   "next": {
+    "text": "Sign-up opens in rounds by area. The last round we could confirm was for parts of Coyoacán and Tlalpan (July 2025). No open call confirmed for 2026 yet: follow for updates.",
+    "asof": "2025-07-22",
+    "source": {
+     "title": "Yahoo Noticias: Abren preregistro para Cosecha de Lluvia y Calentadores Solares (22 Jul 2025)",
+     "url": "https://es-us.noticias.yahoo.com/abren-preregistro-cosecha-lluvia-calentadores-100651606.html"
+    },
+    "url": "https://cosechalluvia.sedema.cdmx.gob.mx/",
+    "open": false
+   }
   },
   {
    "id": "bkk-chula-centenary",
