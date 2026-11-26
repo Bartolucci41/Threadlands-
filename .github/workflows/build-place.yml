@@ -9,7 +9,7 @@ on:
         description: "Short name for the place, like toluca-mexico"
         required: true
       query:
-        description: "What to search for, like 'Toluca, Mexico' or 'osm:R123456'"
+        description: "The OpenStreetMap record to build, like 'osm:R123456' (find it on openstreetmap.org)"
         required: true
 
 permissions:

@@ -3490,7 +3490,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
   }
   function requestBuild(box, h) {
     box.innerHTML = '<p>Sending your request…</p>';
-    fetch(REQUEST_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: h.display, osm: h.osm, name: h.name, country: h.country }) })
+    fetch(REQUEST_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ osm: h.osm }) })
       .then(function (r) { return r.json(); })
       .then(function (j) {
         if (!j || !j.slug) { box.innerHTML = '<p>' + esc((j && j.error) || 'The request could not be sent. Please try again later.') + '</p>'; return; }

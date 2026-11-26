@@ -78,6 +78,13 @@ def one(slug, query):
     if os.path.exists(os.path.join(PLACES, slug + ".json")):
         print("already built:", slug)
         return
+    m = re.fullmatch(r"osm:([NWR]\d{1,12})", query.strip(), re.I)
+    if not m:
+        raise SystemExit("requests must name an OpenStreetMap record, like osm:R123456")
+    suffix = "-" + m.group(1).lower()
+    if any(f.endswith(suffix + ".json") for f in os.listdir(PLACES)):
+        print("already built under another name:", m.group(1))
+        return
     req = os.path.join(ROOT, "pipeline", "requested.txt")
     known = dict(cities("requested.txt"))
     if slug not in known:

@@ -232,17 +232,44 @@ export default {
     if (b.type === 'observation') return observation(b, request, env, origin);
     if (b.type === 'feedback') return feedback(b, request, env, origin);
     if (b.type === 'inbox-status') return inboxStatus(b, request, env, origin);
-    const osm = String(b.osm || '');
-    const name = String(b.name || '').slice(0, 80);
-    const country = String(b.country || '').slice(0, 60);
-    if (!/^[NWR]\d{1,12}$/.test(osm) || !name) return reply({ error: 'Choose a place from the search results.' }, 400, origin);
-
-    const slug = [slugify(name), slugify(country), osm.toLowerCase()].filter(Boolean).join('-');
-
-    // Already built? Then just open it.
+    // Build a new place. Only an OpenStreetMap record chosen from the search results is accepted: the relay looks the
+    // record up itself and takes its name, country and kind from there, never from what the visitor typed.
+    const osm = String(b.osm || '').toUpperCase();
+    if (!/^[NWR]\d{1,12}$/.test(osm)) return reply({ error: 'Choose a place from the search results.' }, 400, origin);
     const site = env.SITE || 'https://threadlands.org';
-    const have = await fetch(`${site}/data/places/${slug}.json`, { method: 'HEAD' });
-    if (have.ok) return reply({ slug, ready: true }, 200, origin);
+    const suffix = '-' + osm.toLowerCase();
+
+    // Already built, under any name? Then just open it.
+    try {
+      const idx = await (await fetch(`${site}/data/index.json`, { cf: { cacheTtl: 60 } })).json();
+      const hit = (Array.isArray(idx) ? idx : idx.places || []).find((e) => String(e.slug || '').endsWith(suffix));
+      if (hit) return reply({ slug: hit.slug, ready: true }, 200, origin);
+    } catch (e) { /* the index is a shortcut; the build itself also refuses duplicates */ }
+
+    // Look the record up on the server
+    let rec;
+    try {
+      const lr = await fetch(`https://nominatim.openstreetmap.org/lookup?osm_ids=${osm}&format=jsonv2&addressdetails=1&accept-language=en`,
+        { headers: { 'User-Agent': 'threadlands-relay (https://threadlands.org)' } });
+      rec = (await lr.json())[0];
+    } catch (e) { return reply({ error: 'Could not check that place right now. Please try again in a minute.' }, 502, origin); }
+    if (!rec) return reply({ error: 'That place could not be found on OpenStreetMap.' }, 404, origin);
+    const okKind = rec.category === 'boundary' || rec.category === 'place' || (rec.addresstype && /^(city|town|village|municipality|county|state|region|suburb|quarter|neighbourhood|borough|district|province|island|postcode|hamlet)$/.test(rec.addresstype));
+    if (!okKind) return reply({ error: 'Choose a city, town, district or region from the search results.' }, 400, origin);
+    const a = rec.address || {};
+    const name = String(rec.name || (rec.display_name || '').split(',')[0] || '').slice(0, 80);
+    const country = String(a.country || (rec.display_name || '').split(',').pop() || '').trim().slice(0, 60);
+    if (!name) return reply({ error: 'That place has no name on OpenStreetMap.' }, 400, origin);
+    const slug = [slugify(name), slugify(country), osm.toLowerCase()].filter(Boolean).join('-');
+    const has = await fetch(`${site}/data/places/${slug}.json`, { method: 'HEAD' });
+    if (has.ok) return reply({ slug, ready: true }, 200, origin);
+
+    // A build already running for this record? Then wait for that one instead of starting another.
+    const key = 'build:' + osm;
+    if (env.SUPPORT) {
+      const running = await env.SUPPORT.get(key);
+      if (running) return reply({ slug: running, ready: false, building: true }, 202, origin);
+    }
 
     // Soft limit: three new requests per visitor per hour
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
@@ -262,6 +289,7 @@ export default {
       body: JSON.stringify({ event_type: 'build-place', client_payload: { slug, query: 'osm:' + osm } }),
     });
     if (r.status !== 204) return reply({ error: 'The build robot did not accept the request.', status: r.status }, 502, origin);
+    if (env.SUPPORT) await env.SUPPORT.put(key, slug, { expirationTtl: 90 * 60 });   // a build takes up to about 75 minutes
     return reply({ slug, ready: false }, 202, origin);
   },
 };
