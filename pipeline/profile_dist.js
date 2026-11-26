@@ -18,7 +18,7 @@ for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.json'))) {
       const top = (T.profile(data, null) || { top: [] }).top[0];
       ranking.push({ slug, name: ie.name || data.name, country: ie.country || '', cc: ie.cc || data.country_code || '', requested: !!ie.requested,
         index: +PP.BAU_TODAY.index.toFixed(1), projects: (() => { const mine = PROJ.filter(p => p.place === slug); if (!mine.length) return undefined; const e = T.projectsEffect(PP, mine, TM.ZERO); return { n: mine.length, counted: e.counted, add: +e.index.toFixed(2) }; })(), heat: Math.round(PP.BAU_TODAY.metrics.heat), habitat: Math.round(PP.BAU_TODAY.metrics.habitat),
-        food: Math.round(PP.BAU_TODAY.metrics.food), pop: Math.round(st.pop), top: top ? top.key : null });
+        food: Math.round(PP.BAU_TODAY.metrics.food), comp: (() => { const M = PP.BAU_TODAY.metrics, r1 = v => +(+v).toFixed(1); return { heat: r1(M.heat), water: r1((0.8 / 3 * 0.5 * M.flood + 0.8 / 3 * 0.2 * M.storage) / (0.8 / 3 * 0.7)), nature: r1(M.habitat), food: r1((0.8 / 3 * 0.5 * M.food + 0.8 / 3 * 0.4 * M.foodDry) / (0.8 / 3 * 0.9)), travel: r1(M.mobility) }; })(), cell_km2: data.hex_km2 ? +(+data.hex_km2).toFixed(2) : null, pop: Math.round(st.pop), top: top ? top.key : null });
       for (const k in st) if (st[k] !== null && isFinite(st[k])) (ctx[k] = ctx[k] || []).push(+(+st[k]).toFixed(4));
     } catch (e) { console.error('stats', f, e.message); }
     for (const k in T.KEYS) { const s = T.KEYS[k](m); if (s !== null && s !== undefined && isFinite(s)) dist[k].push(+s.toFixed(4)); }

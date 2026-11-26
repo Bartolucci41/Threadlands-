@@ -794,6 +794,30 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .rt-v small { font-size: 0.6em; font-weight: 700; margin-left: 1px; }
   .rk-table:not(.cmp) a { grid-template-columns: 1rem minmax(0, 2.2fr) minmax(0, 1.6fr) minmax(0, 1fr); }
   .rk-cmp-note { margin: 4px 0 0; padding: 12px 16px; border-radius: 12px; background: var(--surface); color: var(--ink2); font-size: 0.9rem; line-height: 1.5; max-width: 60rem; }
+  .c-heat { --c: #D9822B; } .c-nature { --c: #4F8A4B; } .c-food { --c: #C9A227; } .c-water { --c: #3A7CA5; } .c-travel { --c: #8A6FB0; } .c-pj { --c: #9AA0A6; }
+  .rt-bar.stack { display: flex; gap: 1px; } .rt-bar.stack i { background: var(--c); border-radius: 0; flex: none; } .rt-bar.stack i:first-child { border-radius: 4px 0 0 4px; }
+  .rt-cell { display: block; font-size: 0.75rem; color: var(--ink2); margin-top: 2px; }
+  .rk-cmp-note p { margin: 0; } .rk-how { margin-top: 8px; } .rk-how summary { cursor: pointer; font-weight: 700; color: var(--accent); } .rk-how dl { display: grid; grid-template-columns: 7.5rem 1fr; gap: 6px 14px; margin: 10px 0 6px; } .rk-how dt { font-weight: 700; color: var(--ink); } .rk-how dd { margin: 0; } .rk-how a { color: var(--accent); font-weight: 600; }
+  @media (max-width: 560px) { .rk-how dl { grid-template-columns: 1fr; gap: 2px; } .rk-how dd { margin-bottom: 8px; } }
+  .rk-pri { margin: 14px 0 0; padding: 18px 20px; border: 1px solid var(--line); border-radius: 14px; max-width: 60rem; }
+  .rk-pri-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; } .rk-pri h2 { font: 800 1.15rem var(--font-display); margin: 0; } .rk-pri-top .linkbtn { color: var(--accent); font-weight: 600; font-size: 0.88rem; }
+  .rk-pri-lead, .rk-pri-fixed { margin: 6px 0 0; color: var(--ink2); font-size: 0.9rem; line-height: 1.5; } .rk-pri-fixed { margin-top: 14px; font-size: 0.85rem; } .rk-pri-fixed a { color: var(--accent); }
+  .rk-pri-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 22px; margin-top: 14px; }
+  .rk-pri-k { display: grid; gap: 4px; } .rk-pri-n { font-weight: 700; display: flex; align-items: center; gap: 8px; } .rk-pri-n i, .sd-parts li > span:first-child i { width: 10px; height: 10px; border-radius: 3px; background: var(--c); display: inline-block; flex: none; }
+  .rk-pri-k input { width: 100%; accent-color: var(--accent); } .rk-pri-k output { font-size: 0.82rem; color: var(--ink2); }
+  @media (max-width: 640px) { .rk-pri-grid { grid-template-columns: 1fr; } }
+  .rk-side { margin: 22px 0 6px; } .rk-side-top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; } .rk-side h2 { font: 800 1.15rem var(--font-display); margin: 0; } .rk-side-add input { min-height: 40px; padding: 6px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; min-width: min(320px, 80vw); }
+  .rk-side-empty { margin: 8px 0 0; color: var(--ink2); font-size: 0.9rem; }
+  .rk-side-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 12px; }
+  .sd-card { position: relative; border: 1px solid var(--line); border-radius: 14px; padding: 16px 16px 12px; background: var(--bg); }
+  .sd-card h3 { margin: 0 28px 2px 0; font: 800 1.1rem var(--font-display); } .sd-card h3 a { color: var(--ink); text-decoration: none; } .sd-card h3 a:hover { text-decoration: underline; }
+  .sd-x { position: absolute; top: 8px; right: 10px; border: 0; background: none; font-size: 1.4rem; line-height: 1; color: var(--ink2); cursor: pointer; }
+  .sd-sub, .sd-grid { margin: 0; font-size: 0.8rem; color: var(--ink2); } .sd-find { margin: 8px 0 0; font-size: 0.88rem; }
+  .sd-ix { display: flex; align-items: baseline; gap: 10px; margin: 12px 0 6px; padding-top: 10px; border-top: 1px solid var(--line); } .sd-ixv { font: 800 1.8rem var(--font-display); font-variant-numeric: tabular-nums; } .sd-ixl { font-size: 0.8rem; font-weight: 700; } .sd-ixl i { display: block; font-style: normal; font-weight: 500; color: var(--ink2); }
+  .sd-parts { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 5px; } .sd-parts li { display: grid; grid-template-columns: 8.2rem 1fr 2rem; gap: 8px; align-items: center; font-size: 0.82rem; } .sd-parts span:first-child { display: flex; align-items: center; gap: 6px; } .sd-parts b { text-align: right; font-variant-numeric: tabular-nums; }
+  .sd-pb { display: block; height: 6px; border-radius: 3px; background: var(--surface2); overflow: hidden; } .sd-pb i { display: block; height: 100%; background: var(--c); }
+  .sd-m { margin: 0 0 10px; padding-top: 8px; border-top: 1px solid var(--line); display: grid; gap: 4px; } .sd-m div { display: flex; justify-content: space-between; gap: 10px; font-size: 0.82rem; } .sd-m dt { color: var(--ink2); } .sd-m dd { margin: 0; font-weight: 800; font-variant-numeric: tabular-nums; } .sd-m small { font-weight: 600; color: var(--ink2); margin-left: 1px; }
+  .sd-warn { margin: 12px 0 0; padding: 10px 14px; border-radius: 10px; background: #F3E3C455; font-size: 0.85rem; } .sd-warn a { color: var(--accent); font-weight: 600; }
   .rk-head i { font-style: normal; text-transform: none; letter-spacing: 0; font-weight: 500; display: block; }
   .rk-head + .rk-table { margin-top: 0; }
   .rt-p b { color: var(--ink); font-weight: 600; }

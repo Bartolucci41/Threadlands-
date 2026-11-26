@@ -15,6 +15,10 @@
     <button type="button" class="chip" data-sort="pop" aria-pressed="true">Population</button>
     <button type="button" class="chip" data-sort="name" aria-pressed="false">A&ndash;Z</button>
     <span class="eyebrow" style="margin:0 4px 0 12px">Compare</span>
+    <button type="button" class="chip" data-sort="heat" aria-pressed="false">Heat hot spots</button>
+    <button type="button" class="chip" data-sort="green_low" aria-pressed="false">Low green cover</button>
+    <button type="button" class="chip" data-sort="tree" aria-pressed="false">Tree cover</button>
+    <button type="button" class="chip" data-sort="flood" aria-pressed="false">Flood-prone homes</button>
     <button type="button" class="chip" data-sort="farm" aria-pressed="false">Nearby farmland</button>
     <button type="button" class="chip" data-sort="wild_km" aria-pressed="false">Nearest wild place</button>
     <button type="button" class="chip" data-sort="index" aria-pressed="false">Overall index</button>
@@ -22,7 +26,18 @@
   <div class="filters" id="rk-regions" role="group" aria-label="Region"></div>
   <div class="filters"><label><span class="sr-only">Find a city</span><input type="search" id="rk-q" placeholder="Find a city or country"></label><span class="rk-count" id="rk-count"></span></div>
 
-  <p class="rk-cmp-note" id="rk-cmp-note" hidden></p>
+  <div class="filters" id="rk-grid" role="group" aria-label="Grid-cell size" hidden></div>
+  <div class="rk-cmp-note" id="rk-cmp-note" hidden></div>
+  <div class="rk-pri" id="rk-pri" hidden>
+    <div class="rk-pri-top"><h2>Your priorities</h2><button type="button" class="linkbtn" id="rk-pri-reset" hidden>Back to the model&rsquo;s weights</button></div>
+    <p class="rk-pri-lead">The overall index is one provisional way of reading the data. Move a slider and the index and the order change, because different priorities lead to different judgments.</p>
+    <div class="rk-pri-grid" id="rk-pri-grid"></div>
+    <p class="rk-pri-fixed"><b>Water</b> and <b>low-carbon travel</b> are also in the index, but every place starts at almost the same score: the model measures them against each place&rsquo;s own today, so they move only when you test a plan in <a href="{B}explore/">ThreadLab</a>. To compare water between places now, use <a href="?sort=flood">Flood-prone homes</a>. <b>Equity</b> and <b>affordability</b> are not measured yet.</p>
+  </div>
+  <section class="rk-side" id="rk-side" aria-labelledby="rk-side-h">
+    <div class="rk-side-top"><h2 id="rk-side-h">Side by side</h2><label class="rk-side-add"><span class="sr-only">Add a place to compare</span><input type="search" id="rk-side-q" list="rk-side-list" placeholder="Add a place to compare (up to 3)"></label><datalist id="rk-side-list"></datalist></div>
+    <div class="rk-side-cards" id="rk-side-cards"></div>
+  </section>
   <div class="rk-head" id="rk-head" aria-hidden="true"></div>
   <ol class="rk-table" id="rk-table"><li class="rk-none">Loading the places&hellip;</li></ol>
 
@@ -33,7 +48,7 @@
       <div><h3>Real projects</h3><p>Parks, wetlands and other projects with a public source are placed on the map. Those approved, under way or built since 2021 count toward the score. Older ones already show in the 2021 land cover.</p></div>
       <div><h3>Read it as a first look</h3><p>This is a screening index, not a verdict. Flood and travel are not yet fully comparable between places, and some places are outlined larger than the city itself. We are working on both, and the index will change as the data improves.</p></div>
     </div>
-    <p class="rk-lim"><b>Why only some measures are compared.</b> Heat hot spots, green cover and tree cover are not compared between places for now: each place uses a different grid-cell size, and those measures change with it. <a href="{B}how-it-works/#limits">Read the known limitations &rarr;</a></p>
+    <p class="rk-lim"><b>Read cell-based comparisons with care.</b> Heat hot spots, green cover, tree cover and flood-prone homes are counted in grid cells, and cell sizes differ between places, from about 0.1 km&sup2; to over 25 km&sup2;. Results change with cell size, so each row shows its grid, and you can compare only places with a similar grid. <a href="{B}how-it-works/#limits">Read the known limitations &rarr;</a></p>
     <p class="rank-note" id="rk-updated"></p>
   </section>
 </main>
@@ -168,29 +183,61 @@
   var SORT = 'pop', REGION = 'All', LASTKEY = '';
   // Measured values, each in its own units, ordered so the end worth learning from comes first
   var MEAS = {
-    farm: { h: 'Fed by farmland within 50 km', up: true, u: '%', note: 'Share of people within 50 km who the farmland within 50 km could feed. It measures capacity, not where food actually comes from. Highest first.' },
-    wild_km: { h: 'Nearest forest or wetland', up: false, u: ' km', max: 40, note: 'Distance from the center of where people live to the nearest forest or wetland in the model (patches of about 1 km²). Nearest first.' },
-    index: { h: 'Overall index, out of 100', up: true, u: '', note: 'A first look only. The overall index combines heat, flooding, nature, food and travel from the Threadlands model. It is not a grade: no place scores near 100, study areas differ, and flood and travel are not yet fully comparable between places, so a few points apart means little. It is most useful in ThreadLab, for comparing plans for the same place.' }
+    heat: { h: 'Residents in local heat hot spots', up: false, u: '%', cell: true, more: 'hot-spot', note: 'Share of residents living in grid cells at least 2&deg;C hotter at the surface than the typical ground in their own region. Fewest first. Each region is compared with itself, so this shows how uneven heat is inside a place, not which place is hotter.',
+      m: [['Source', 'Landsat 8 and 9 surface temperature, up to 20 clear daytime passes from 2021 to 2025 in the hottest months. WorldPop 2020 for residents.'], ['Area', 'The whole modeled region around the city, not only the city limits.'], ['Calculation', 'On each pass, every cell is compared with the median surface temperature of all land in the region. The middle value across passes is kept.'], ['Threshold', 'A cell is a hot spot at 2&deg;C or more above the regional median.'], ['Grid', 'Cell size differs between places, and smaller cells pick out more local hot spots.']] },
+    green_low: { h: 'Residents in low-green-cover cells', up: false, u: '%', cell: true, more: 'green-test', note: 'Share of residents in cells where trees, grass, shrubs and wetland together cover less than a tenth of the land. Fewest first.',
+      m: [['Source', 'ESA WorldCover 2021 (10 m land cover). WorldPop 2020 for residents.'], ['Area', 'The whole modeled region. Each place page also shows the city on its own.'], ['Calculation', 'The green share of each cell, then the share of residents in cells under the threshold.'], ['Threshold', 'Under 10% green cover.'], ['Excludes', 'Cropland, bare ground and water do not count as green.'], ['Grid', 'Very sensitive to cell size: in a San Francisco test it fell from 59% to 36% with larger cells.']] },
+    tree: { h: 'Tree cover where people live', up: true, u: '%', cell: true, note: 'Average tree cover in the cells where residents live, weighted by how many people live in each. Most first.',
+      m: [['Source', 'ESA WorldCover 2021 tree class. WorldPop 2020 for residents.'], ['Area', 'The whole modeled region.'], ['Calculation', 'The tree share of each cell, averaged over residents.'], ['Threshold', 'None: it is an average.'], ['Grid', 'Less sensitive to cell size than a threshold measure, but not immune.']] },
+    flood: { h: 'Residents in flood-prone cells', up: false, u: '%', cell: true, note: 'Share of residents in cells the model treats as flood-prone. Fewest first. It screens for exposure. It is not a flood map.',
+      m: [['Source', 'OpenStreetMap rivers, lakes and coast, a 30 m elevation model, and WorldPop 2020.'], ['Area', 'The whole modeled region.'], ['Calculation', 'A cell is flood-prone when a river runs through it, or when it is within about 2 km of a river, lake or sea and less than 5 m above it.'], ['Threshold', 'At least half of the cell is flood-prone.'], ['Grid', 'Larger cells spread exposure over more people.']] },
+    farm: { h: 'Fed by farmland within 50 km', up: true, u: '%', note: 'Share of people within 50 km who the farmland within 50 km could feed. It measures capacity, not where food actually comes from. Highest first.',
+      m: [['Source', 'ESA WorldCover 2021 cropland. WorldPop 2020.'], ['Area', 'A 50 km circle around the city.'], ['Calculation', 'Cropland area divided by the land one person needs, compared with the people in the circle.'], ['Limits', 'Ignores what is grown, yields and trade.']] },
+    wild_km: { h: 'Nearest forest or wetland', up: false, u: ' km', max: 40, note: 'Distance from the center of where people live to the nearest forest or wetland in the model (patches of about 1 km²). Nearest first.',
+      m: [['Source', 'ESA WorldCover 2021.'], ['Calculation', 'Straight-line distance from the population-weighted center to the nearest patch that is large enough.'], ['Limits', 'Straight-line distance, not walking access.']] },
+    index: { h: 'Overall index, out of 100', up: true, u: '', note: 'A provisional reading, not a grade. It combines the Threadlands model&rsquo;s scores for heat relief, nature, food, water and travel, and the colored bar shows how many points each adds. No place scores near 100, and a few points apart means little.',
+      m: [['Source', 'The Threadlands model, run on each place&rsquo;s own data, for today, with no plan.'], ['Calculation', 'Three stress tests (a heatwave, a river flood and a drought year) count for 80% and low-carbon travel for 20%. Unpacked, those become the weights behind the sliders: heat relief 19%, nature 19%, local food 24%, water 19%, travel 20%.'], ['Projects', 'Projects on the map since 2021 add a little, shown as the grey end of the bar.'], ['Limits', 'Heat relief is cell-based. Water and travel barely differ between places today.']] }
   };
-  function mv(p) { return SORT === 'index' ? p.index : p.vals ? p.vals[SORT] : null; }
+  // The index unpacked into five parts people can weigh. The default weights reproduce the model's index exactly.
+  var COMP = [['heat', 'Heat relief', 0.7 / 3 * 0.8, true], ['nature', 'Nature', 0.7 / 3 * 0.8, true], ['food', 'Local food', 0.9 / 3 * 0.8, true], ['water', 'Water', 0.7 / 3 * 0.8, false], ['travel', 'Low-carbon travel', 0.2, false]];
+  var LEVEL = [['Not a priority', 0], ['Some', 0.5], ['Important', 1], ['Very important', 2]], PRI = { heat: 2, nature: 2, food: 2 };
+  function weights() { var w = {}; COMP.forEach(function (c) { w[c[0]] = c[2] * (c[3] ? LEVEL[PRI[c[0]]][1] : 1); }); return w; }
+  function parts(p) {
+    if (!p.comp) return null; var w = weights(), tot = 0, out = [];
+    COMP.forEach(function (c) { tot += w[c[0]]; });
+    COMP.forEach(function (c) { out.push([c[0], c[1], tot ? w[c[0]] * p.comp[c[0]] / tot : 0]); });
+    return out;
+  }
+  function idx(p) { var ps = parts(p); if (!ps) return p.index == null ? null : p.index; var v = 0; ps.forEach(function (x) { v += x[2]; }); return v + (p.projects && p.projects.add || 0); }
+  var GRID = [['all', 'Any grid', 0, 1e9], ['fine', 'Under 1 km² cells', 0, 1], ['mid', '1 to 10 km²', 1, 10], ['coarse', 'Over 10 km²', 10, 1e9]], GRIDSEL = 'all';
+  function cellTxt(k) { return k == null ? '' : (k < 1 ? '~' + k.toFixed(k < 0.2 ? 2 : 1) : '~' + Math.round(k)) + ' km² cells'; }
+  function mv(p) { return SORT === 'index' ? idx(p) : p.vals ? p.vals[SORT] : null; }
   function val(p) { if (SORT === 'pop') return p.city_pop || p.pop || 0; var v = mv(p); if (v == null) return -Infinity; return MEAS[SORT].up ? v : -v; }
   function render() {
     var q = norm($('#rk-q').value.trim());
     var list = LIB.slice().sort(SORT === 'name' ? function (a, b) { return a.name.localeCompare(b.name); } : function (a, b) { return val(b) - val(a); });
     list.forEach(function (p, k) { p._rank = k + 1; });
     var CMP = !!MEAS[SORT], M = MEAS[SORT];
-    $('#rk-table').classList.toggle('cmp', CMP); $('#rk-head').className = 'rk-head' + (CMP ? ' cmp' : ''); $('#rk-cmp-note').hidden = !CMP; if (CMP) $('#rk-cmp-note').innerHTML = M.note + (M.more ? ' <a href="{B}how-it-works/#' + M.more + '">' + M.moreTxt + ' &rarr;</a>' : '');
+    $('#rk-table').classList.toggle('cmp', CMP); $('#rk-head').className = 'rk-head' + (CMP ? ' cmp' : ''); $('#rk-cmp-note').hidden = !CMP;
+    if (CMP) $('#rk-cmp-note').innerHTML = '<p>' + M.note + '</p><details class="rk-how"' + (OPENHOW ? ' open' : '') + '><summary>How this is measured</summary><dl>' + M.m.map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>'; }).join('') + '</dl><p><a href="{B}how-it-works/#' + (M.more || 'limits') + '">Full method and known limitations &rarr;</a></p></details>';
+    $('#rk-grid').hidden = !(CMP && M.cell); if (!(CMP && M.cell)) GRIDSEL = 'all';
+    $('#rk-grid').innerHTML = '<span class="eyebrow" style="margin-right:4px">Compare places with</span>' + GRID.map(function (g) { return '<button type="button" class="chip" data-g="' + g[0] + '" aria-pressed="' + (g[0] === GRIDSEL) + '">' + g[1] + '</button>'; }).join('');
+    $('#rk-pri').hidden = SORT !== 'index'; if (SORT === 'index') priUI();
+    var G = GRID.filter(function (g) { return g[0] === GRIDSEL; })[0];
     $('#rk-head').innerHTML = '<span></span><span>Place</span><span>Key finding <i>in Threadlands&rsquo; data</i></span><span>Projects</span>' + (CMP ? '<span>' + M.h + '</span><span></span>' : '');
-    shown = list.filter(function (p) { return (REGION === 'All' || (REGION === VIS ? p.requested : regionOf(p) === REGION)) && (!q || norm(p.name + ' ' + p.country + ' ' + (p.display || '')).indexOf(q) >= 0); });
+    shown = list.filter(function (p) { return (GRIDSEL === 'all' || (p.cell_km2 != null && p.cell_km2 >= G[2] && p.cell_km2 < G[3])) && (REGION === 'All' || (REGION === VIS ? p.requested : regionOf(p) === REGION)) && (!q || norm(p.name + ' ' + p.country + ' ' + (p.display || '')).indexOf(q) >= 0); });
+    shown.forEach(function (p, k) { p._rank = k + 1; });
     var nc = {}; shown.forEach(function (p) { nc[p.country] = 1; });
     $('#rk-count').textContent = shown.length + ' of ' + LIB.length + ' places in ' + Object.keys(nc).length + ' countries';
     $('#rk-table').innerHTML = shown.map(function (p) {
       var v = CMP ? mv(p) : null, has = v != null, w = has ? Math.max(1, Math.min(100, Math.round(100 * v / (M.max || 100)))) : 0, pr = p.top && PRESS[p.top];
+      var bar = has ? '<i style="width:' + w + '%"></i>' : '';
+      if (SORT === 'index' && has && parts(p)) { bar = parts(p).map(function (x) { return '<i class="c-' + x[0] + '" style="width:' + x[2].toFixed(2) + '%" title="' + x[1] + ': ' + x[2].toFixed(1) + ' points"></i>'; }).join('') + (p.projects && p.projects.add ? '<i class="c-pj" style="width:' + p.projects.add.toFixed(2) + '%" title="Projects: ' + p.projects.add.toFixed(1) + ' points"></i>' : ''); }
       var pj = p.projects ? '<span class="rk-pj">' + p.projects.n + ' project' + (p.projects.n > 1 ? 's' : '') + ' on the map</span>' : '<span class="rk-pj0n">None added yet</span>';
       var num = CMP && has ? p._rank : '';
-      return '<li' + (p.requested ? ' class="vis"' : '') + '><a href="{B}place/' + (pr ? '?show=' + p.top : '') + '#' + esc(p.slug) + '"><span class="rt-n">' + num + '</span><span class="rt-c"><b>' + esc(p.name) + '</b><span>' + flag(p.cc) + esc(where(p)) + (fmtPop(p) ? ' \u00b7 ' + fmtPop(p) : '') + '</span>' + (p.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + '</span>' +
+      return '<li' + (p.requested ? ' class="vis"' : '') + '><a href="{B}place/' + (pr ? '?show=' + p.top : '') + '#' + esc(p.slug) + '"><span class="rt-n">' + num + '</span><span class="rt-c"><b>' + esc(p.name) + '</b><span>' + flag(p.cc) + esc(where(p)) + (fmtPop(p) ? ' \u00b7 ' + fmtPop(p) : '') + '</span>' + (p.requested ? '<span class="lib-vis">Added by a visitor</span>' : '') + (CMP && M.cell && p.cell_km2 ? '<span class="rt-cell">' + cellTxt(p.cell_km2) + '</span>' : '') + '</span>' +
         '<span class="rt-p">' + (pr ? '<b>' + esc(pr[0]) + '</b> \u00b7 ' + esc(pr[1]) : '') + '</span><span class="rt-j">' + pj + '</span>' +
-        (CMP ? '<span class="rt-bar" aria-hidden="true">' + (has ? '<i style="width:' + w + '%"></i>' : '') + '</span><span class="rt-v">' + (has ? (M.u === ' km' ? v.toFixed(v < 10 ? 1 : 0) : Math.round(v)) + '<small>' + M.u + '</small>' : '<small>n/a</small>') + '</span>' : '') + '</a></li>';
+        (CMP ? '<span class="rt-bar' + (SORT === 'index' ? ' stack' : '') + '" aria-hidden="true">' + bar + '</span><span class="rt-v">' + (has ? (M.u === ' km' ? v.toFixed(v < 10 ? 1 : 0) : SORT === 'index' ? v.toFixed(1) : Math.round(v)) + '<small>' + M.u + '</small>' : '<small>n/a</small>') + '</span>' : '') + '</a></li>';
     }).join('') || '<li class="rk-none">No place matches. <a href="{B}explore/?q=' + encodeURIComponent($('#rk-q').value.trim()) + '">Search everywhere for it</a> and build it.</li>';
     var k2 = REGION + '|' + q; if (k2 !== LASTKEY) { LASTKEY = k2; fitTo(shown); } else drawMap();
   }
@@ -203,16 +250,58 @@
   }
   document.querySelectorAll('[data-sort]').forEach(function (b) { b.addEventListener('click', function () { SORT = b.dataset.sort; document.querySelectorAll('[data-sort]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); render(); }); });
   $('#rk-q').addEventListener('input', render);
+  var OPENHOW = false;
+  $('#rk-cmp-note').addEventListener('toggle', function (e) { if (e.target.tagName === 'DETAILS') OPENHOW = e.target.open; }, true);
+  $('#rk-grid').addEventListener('click', function (e) { var b = e.target.closest('[data-g]'); if (!b) return; GRIDSEL = b.dataset.g; render(); });
+  function priUI() {
+    var g = $('#rk-pri-grid'); if (g.childElementCount) return;
+    g.innerHTML = COMP.filter(function (c) { return c[3]; }).map(function (c) {
+      return '<label class="rk-pri-k"><span class="rk-pri-n"><i class="c-' + c[0] + '"></i>' + c[1] + '</span><input type="range" min="0" max="3" step="1" value="' + PRI[c[0]] + '" data-k="' + c[0] + '" aria-valuetext="' + LEVEL[PRI[c[0]]][0] + '"><output>' + LEVEL[PRI[c[0]]][0] + '</output></label>';
+    }).join('');
+  }
+  $('#rk-pri').addEventListener('input', function (e) { var k = e.target.dataset && e.target.dataset.k; if (!k) return; PRI[k] = +e.target.value; e.target.nextElementSibling.textContent = LEVEL[PRI[k]][0]; e.target.setAttribute('aria-valuetext', LEVEL[PRI[k]][0]); $('#rk-pri-reset').hidden = false; render(); renderSide(); });
+  $('#rk-pri-reset').addEventListener('click', function () { PRI = { heat: 2, nature: 2, food: 2 }; $('#rk-pri-grid').innerHTML = ''; this.hidden = true; priUI(); render(); renderSide(); });
+  // Side by side: up to three places, each measure in its own units, with its grid
+  var SIDE = [];
+  function bySlug(sl) { return LIB.filter(function (p) { return p.slug === sl; })[0]; }
+  function sideURL() { var u = new URL(location.href); if (SIDE.length) u.searchParams.set('side', SIDE.join(',')); else u.searchParams.delete('side'); history.replaceState(null, '', u); }
+  function renderSide() {
+    var box = $('#rk-side-cards'); if (!LIB.length) return; var ow = $('.sd-warn'); if (ow) ow.remove();
+    if (!SIDE.length) { box.innerHTML = '<p class="rk-side-empty">Pick two or three places to see their measures, the parts of their index and their grids next to each other.</p>'; return; }
+    var rows = ['heat', 'green_low', 'tree', 'flood', 'farm', 'wild_km'];
+    box.innerHTML = SIDE.map(function (sl) {
+      var p = bySlug(sl); if (!p) return '';
+      var pr = p.top && PRESS[p.top], ix = idx(p), ps = parts(p) || [];
+      return '<article class="sd-card"><button type="button" class="sd-x" data-rm="' + esc(sl) + '" aria-label="Remove ' + esc(p.name) + '">&times;</button>' +
+        '<h3><a href="{B}place/#' + esc(sl) + '">' + flag(p.cc) + esc(p.name) + '</a></h3><p class="sd-sub">' + esc(where(p)) + (fmtPop(p) ? ' · ' + fmtPop(p) : '') + '</p>' +
+        (pr ? '<p class="sd-find"><b>' + esc(pr[0]) + '</b> · ' + esc(pr[1]) + '</p>' : '') +
+        '<div class="sd-ix"><span class="sd-ixv">' + (ix != null ? ix.toFixed(1) : 'n/a') + '</span><span class="sd-ixl">Overall index<i>provisional, with your priorities</i></span></div>' +
+        '<ul class="sd-parts">' + ps.map(function (x) { var c = p.comp[x[0]]; return '<li><span><i class="c-' + x[0] + '"></i>' + x[1] + '</span><span class="sd-pb"><i class="c-' + x[0] + '" style="width:' + Math.round(c) + '%"></i></span><b>' + Math.round(c) + '</b></li>'; }).join('') + '</ul>' +
+        '<dl class="sd-m">' + rows.map(function (k) { var M = MEAS[k], v = p.vals ? p.vals[k] : null; return '<div><dt>' + M.h + '</dt><dd>' + (v == null ? '<small>n/a</small>' : (k === 'wild_km' ? v.toFixed(v < 10 ? 1 : 0) : Math.round(v)) + '<small>' + M.u + '</small>') + '</dd></div>'; }).join('') + '</dl>' +
+        '<p class="sd-grid">' + (p.cell_km2 ? 'Grid: ' + cellTxt(p.cell_km2) + ' · ' : '') + (p.projects ? p.projects.n + ' project' + (p.projects.n > 1 ? 's' : '') + ' on the map' : 'No projects added yet') + '</p></article>';
+    }).join('');
+    var ks = SIDE.map(function (sl) { var p = bySlug(sl); return p && p.cell_km2; }).filter(Boolean);
+    if (ks.length > 1 && Math.max.apply(null, ks) / Math.min.apply(null, ks) >= 3) box.insertAdjacentHTML('afterend', '<p class="sd-warn">These places use very different grid-cell sizes, so their heat, green, tree and flood figures are not like for like. Farmland and wild places are not affected. <a href="{B}how-it-works/#limits">Why &rarr;</a></p>');
+  }
+  $('#rk-side-q').addEventListener('change', function () {
+    var v = norm(this.value.trim()), p = LIB.filter(function (e) { return norm(e.name + ', ' + e.country) === v || norm(e.name) === v; })[0];
+    if (p && SIDE.indexOf(p.slug) < 0) { if (SIDE.length >= 3) SIDE.shift(); SIDE.push(p.slug); sideURL(); renderSide(); }
+    this.value = '';
+  });
+  $('#rk-side-cards').addEventListener('click', function (e) { var b = e.target.closest('[data-rm]'); if (!b) return; SIDE = SIDE.filter(function (x) { return x !== b.dataset.rm; }); sideURL(); renderSide(); });
+
   $('#rk-regions').addEventListener('click', function (e) { var b = e.target.closest('[data-r]'); if (!b) return; REGION = b.dataset.r; regions(); render(); });
   var qs = new URLSearchParams(location.search); if (qs.get('sort')) SORT = qs.get('sort'); if (qs.get('q')) $('#rk-q').value = qs.get('q');
   document.querySelectorAll('[data-sort]').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.sort === SORT ? 'true' : 'false'); });
   Promise.all([fetch('{B}data/index.json').then(function (r) { return r.json(); }), fetch('{B}data/ranking.json').then(function (r) { return r.json(); }).catch(function () { return { places: [] }; })]).then(function (x) {
     var RK = {}; (x[1].places || []).forEach(function (p) { if (p && p.slug) RK[p.slug] = p; });
     LIB = (x[0].places || []).filter(function (e) { return e && e.slug && isFinite(e.lat) && isFinite(e.lng); }).map(function (e) {
-      var r = RK[e.slug] || {}; return Object.assign({}, e, { index: r.index, vals: r.vals, top: r.top, projects: r.projects });
+      var r = RK[e.slug] || {}; return Object.assign({}, e, { index: r.index, vals: r.vals, top: r.top, projects: r.projects, comp: r.comp, cell_km2: r.cell_km2 });
     });
     if (x[1].updated) $('#rk-updated').textContent = 'Updated ' + new Date(x[1].updated + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + '. The ranking refreshes whenever a place is built or a project is approved.';
-    regions(); render();
+    $('#rk-side-list').innerHTML = LIB.map(function (e) { return '<option value="' + esc(e.name + ', ' + e.country) + '">'; }).join('');
+    if (qs.get('side')) SIDE = qs.get('side').split(',').filter(function (sl) { return bySlug(sl); }).slice(0, 3);
+    regions(); render(); renderSide();
   }).catch(function () { $('#rk-table').innerHTML = '<li class="rk-none">The places could not be loaded. Check your connection and refresh.</li>'; });
   window.addEventListener('resize', drawMap);
 })();
