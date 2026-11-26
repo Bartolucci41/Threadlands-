@@ -878,7 +878,7 @@ def footer(base):
             f'    <nav aria-label="About"><h2>About</h2>{col([("about/", "About Threadlands")])}<a href="#" data-feedback="">Send feedback</a></nav>\n'
             '  </div>\n  <div class="wrap foot-small">\n'
             '    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>\n'
-            '    <p>Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS, Landsat (USGS and NASA), Open-Meteo and GBIF.</p>\n'
+            '    <p>Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS, Natural Earth, Landsat (USGS and NASA), Open-Meteo and GBIF.</p>\n'
             '  </div>\n</footer>\n')
 
 
