@@ -2,11 +2,13 @@
 Used until a credited photo is added (projects.json: "photo": {"src", "credit", "date"}).
 Usage: python3 -I pipeline/project_thumbs.py  -> assets/img/pj/<id>.jpg"""
 import json, math, os
+import numpy as np
+from scipy import ndimage
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 OUT = os.path.join(ROOT, 'assets', 'img', 'pj'); os.makedirs(OUT, exist_ok=True)
 FD = '/usr/share/fonts/opentype/inter/'
-F1 = ImageFont.truetype(FD + 'Inter-SemiBold.otf', 23); F2 = ImageFont.truetype(FD + 'Inter-Medium.otf', 20)
+F1 = ImageFont.truetype(FD + 'Inter-SemiBold.otf', 23); F2 = ImageFont.truetype(FD + 'Inter-Medium.otf', 20); F3 = ImageFont.truetype(FD + 'Inter-Medium.otf', 18)
 # Built land is kept pale so parks, farmland and water stand out
 COL = {'built': (226, 221, 211), 'tree': (58, 118, 72), 'shrub': (120, 150, 92), 'grass': (150, 186, 104), 'crop': (222, 202, 120), 'bare': (214, 196, 166), 'water': (52, 128, 190), 'wetland': (78, 156, 156)}
 W, H, SPAN_KM = 480, 255, 30
@@ -41,6 +43,7 @@ for p in json.load(open(os.path.join(ROOT, 'data', 'projects.json')))['projects'
     d = cache[p['place']]; c = d['cells']; kx = math.cos(math.radians(p['lat'])); s = W / SPAN_KM
     xy = lambda la, ln: (W / 2 + (ln - p['lng']) * 111.32 * kx * s, H / 2 - (la - p['lat']) * 110.57 * s)
     BUSY.clear(); im = Image.new('RGB', (W, H), (238, 235, 227)); dr = ImageDraw.Draw(im)
+    cov = Image.new('L', (W, H), 0); dc = ImageDraw.Draw(cov)
     r = math.sqrt(2 * float(d.get('hex_km2') or 1) / (3 * math.sqrt(3))) * s * 1.15
     for i in range(len(c['lat'])):
         x, y = xy(c['lat'][i], c['lng'][i])
@@ -48,8 +51,20 @@ for p in json.load(open(os.path.join(ROOT, 'data', 'projects.json')))['projects'
         mix, tot = [0, 0, 0], 0
         for k, col in COL.items():
             v = float(c[k][i] or 0) * (1.6 if k in ('water', 'wetland') else 1.2 if k == 'tree' else 1); tot += v; mix = [m + v * cc for m, cc in zip(mix, col)]
-        if tot > 0: dr.polygon([(x + r * math.cos(math.radians(60 * k + 30)), y + r * math.sin(math.radians(60 * k + 30))) for k in range(6)], fill=tuple(int(m / tot) for m in mix))
-    im = im.filter(ImageFilter.GaussianBlur(1.2)); dr = ImageDraw.Draw(im)
+        hexp = [(x + r * math.cos(math.radians(60 * k + 30)), y + r * math.sin(math.radians(60 * k + 30))) for k in range(6)]
+        dc.polygon(hexp, fill=255)
+        if tot > 0: dr.polygon(hexp, fill=tuple(int(m / tot) for m in mix))
+    im = im.filter(ImageFilter.GaussianBlur(1.2))
+    # Beyond the study boundary: hatched grey, so it reads as outside the map rather than as land with no detail
+    out = np.asarray(cov) < 128; OUTLAB = None
+    if out.mean() > 0.04:
+        hat = Image.new('RGB', (W, H), (214, 216, 218)); dh = ImageDraw.Draw(hat)
+        for k in range(-H, W, 12): dh.line([(k, H), (k + H, 0)], fill=(196, 199, 203), width=2)
+        im.paste(hat, (0, 0), Image.fromarray((out * 255).astype('uint8')).filter(ImageFilter.GaussianBlur(0.8)))
+        dist = ndimage.distance_transform_edt(out); dist[:TOP + 10, :] = 0; dist[H - 50:, W - 150:] = 0
+        yy, xx = np.unravel_index(np.argmax(dist), dist.shape)
+        if dist[yy, xx] > 18: OUTLAB = (int(xx), int(yy))
+    dr = ImageDraw.Draw(im)
     # Project footprint (if known) and pin
     a = p.get('area_km2') or 0; rr = max(0, min(130, math.sqrt(a / math.pi) * s)) if a else 0
     if rr > 14:
@@ -74,6 +89,8 @@ for p in json.load(open(os.path.join(ROOT, 'data', 'projects.json')))['projects'
             place(dr, [(ex + 22, ey - 16, 'l'), (ex - 22, ey - 16, 'r'), (ex + 14, ey - 50, 'l'), (ex - 14, ey - 50, 'r'), (ex + 14, ey + 14, 'l'), (ex - 14, ey + 14, 'r'), (8, ey - 16, 'l'), (W - 8, ey - 16, 'r'), (W / 2, ey - 50, 'c')], txt, F2)
     lab = short(p.get('area')); off = (min(rr, 60) * 0.7 if rr > 14 else 0) + 20
     if lab: place(dr, [(W/2 + off, H/2 - 17, 'l'), (W/2 - off, H/2 - 17, 'r'), (W/2, H/2 + 18, 'c'), (W/2, H/2 - 52, 'c'), (W/2 + off, H/2 + 10, 'l'), (W/2 - off, H/2 + 10, 'r'), (W/2 + off, H/2 - 44, 'l'), (W/2 - off, H/2 - 44, 'r')], lab, F1)
+    if OUTLAB:
+        ox, oy = OUTLAB; place(dr, [(ox, oy - 16, 'c'), (ox, oy - 36, 'c'), (ox, oy + 4, 'c'), (ox - 20, oy - 16, 'r'), (ox + 20, oy - 16, 'l')], 'Outside this map', F3)
     # Scale
     X0 = W - 32 - L; dr.rounded_rectangle([X0 - 10, H - 44, W - 10, H - 10], radius=8, fill=(255, 255, 255))
     dr.line([X0, H - 18, X0 + L, H - 18], fill=INK, width=3); dr.text((X0, H - 42), '5 km', font=ImageFont.truetype(FD + 'Inter-Medium.otf', 16), fill=INK)
