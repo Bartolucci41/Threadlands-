@@ -1097,6 +1097,10 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .door-d { font-size: 1rem; line-height: 1.5; opacity: 0.85; max-width: 40ch; }
   .door-go { margin-top: auto; padding-top: 10px; font: 700 1rem var(--font-body); }
   .home-search { max-width: 40rem; margin-top: 4px; } .home-search input { font-size: 1.05rem; min-height: 54px; }
+  .gi-ways { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0 0 18px; } @media (max-width: 860px) { .gi-ways { grid-template-columns: 1fr 1fr; } } @media (max-width: 480px) { .gi-ways { grid-template-columns: 1fr; } }
+  .gi-w { display: grid; gap: 3px; text-align: left; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; font: inherit; cursor: pointer; } .gi-w:hover { border-color: var(--accent); } .gi-w b { color: var(--accent); } .gi-w span { font-size: 0.85rem; color: var(--ink2); line-height: 1.4; }
+  .pjc-who { font-size: 0.82rem; color: var(--ink2); margin-top: 4px; } .pjc-who i { font-style: normal; font-weight: 700; color: var(--ink); } .pjc-links .linkbtn { color: var(--accent); font-weight: 600; font-size: inherit; }
+  .story-go { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; } .story-alt { color: var(--accent); font-weight: 700; }
   .hs-all { align-self: center; margin-left: 4px; color: #fff; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
   .story { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 34px; align-items: center; }
   .story-img img { display: block; width: 100%; max-height: 600px; object-fit: contain; }

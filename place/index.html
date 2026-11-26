@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=32">
+<link rel="stylesheet" href="../assets/site.css?v=33">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -124,7 +124,13 @@
     </section>
 
     <section class="sect pf-sec" id="changing" aria-labelledby="changing-h">
-      <div class="sect-top"><div><h2 id="changing-h">What&rsquo;s changing</h2><p>Real parks, wetlands, trees and water projects here, each with a public source. Back the ones you want to see happen: the count shows city teams and funders where the public support is.</p></div></div>
+      <div class="sect-top"><div><h2 id="changing-h">Get involved</h2><p>Real parks, wetlands, trees and water projects here, each with a public source and the people running it.</p></div></div>
+      <div class="gi-ways" role="list">
+        <a role="listitem" class="gi-w" href="#pf-proj"><b>Back a project</b><span>The count shows city teams and funders where public support is.</span></a>
+        <a role="listitem" class="gi-w" id="gi-add" href="?add=other"><b>Add what you notice</b><span>Water that collects, streets without shade: pin it on the map.</span></a>
+        <button type="button" role="listitem" class="gi-w" id="gi-partner"><b>Suggest a partner</b><span>A group, school or company that could help a project here.</span></button>
+        <button type="button" role="listitem" class="gi-w" id="gi-follow"><b>Follow for updates</b><span>See new projects and changes here on your Get involved page.</span></button>
+      </div>
       <div class="pf-proj" id="pf-proj"></div>
       <div class="pf-add"><p><b>Know a project that belongs here?</b> A new park, a wetland, a tree-planting drive, a flood barrier. Add it with a link to a public source and it is checked before it appears.</p><a class="btn" id="pf-add" href="../explore/?add=1">Add a project</a></div>
     </section>
@@ -379,16 +385,22 @@
       (from ? '<span class="pjc-also">Learned from ' + link(from) + '</span>' : '') +
       (others.length ? '<span class="pjc-also">Similar approach elsewhere: ' + others.slice(0, 3).map(link).join(', ') + '</span>' : '') + '</span>';
   }
+  document.addEventListener('click', function (ev) {
+    var pp = ev.target.closest('[data-pj-partner]'), gp = ev.target.closest('#gi-partner'), gf = ev.target.closest('#gi-follow');
+    if (pp && window.TLF) { var pr = D.projects.filter(function (x) { return x.id === pp.dataset.pjPartner; })[0] || {}; TLF.open({ kind: 'idea', context: { Place: (D.lib[SLUG] || {}).name, Project: pr.name, Asking: 'Suggest a partner' } }); }
+    else if (gp && window.TLF) TLF.open({ kind: 'idea', context: { Place: (D.lib[SLUG] || {}).name, Asking: 'Suggest a partner' } });
+    else if (gf) { var sv = $('#pf-save'); if (sv && sv.getAttribute('aria-pressed') !== 'true') sv.click(); gf.querySelector('b').textContent = 'Following'; }
+  });
   function renderProjects(e) {
     var STAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
     var mine = D.projects.filter(function (p) { return p.place === SLUG; });
     $('#pf-proj').innerHTML = mine.length ? mine.map(function (p) {
       var st = STAT[p.status] || STAT.proposed;
-      return '<article class="pjc" id="pj-' + esc(p.id) + '" style="--pc:' + st[1] + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span>' + (p.added_by_visitor ? '<span>Added by a visitor</span>' : '') + '</span><b translate="no">' + esc(p.name) + '</b><span class="pjc-sum">' + esc(p.summary || '') + '</span>' + ideaLine(p) +
+      return '<article class="pjc" id="pj-' + esc(p.id) + '" style="--pc:' + st[1] + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span>' + (p.added_by_visitor ? '<span>Added by a visitor</span>' : '') + '</span><b translate="no">' + esc(p.name) + '</b><span class="pjc-sum">' + esc(p.summary || '') + '</span>' + (p.who ? '<span class="pjc-who"><i>Run by</i> ' + esc(p.who) + '</span>' : '') + ideaLine(p) +
         '<span class="pjc-back"><button type="button" class="btn back-btn" data-back="' + esc(p.id) + '" aria-pressed="false" hidden>Back this</button><span class="back-n" data-backn="' + esc(p.id) + '"></span></span>' +
-        '<span class="pjc-links">' + (p.involved ? '<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Get involved</a>' : '') + (p.source && p.source.url ? '<a href="' + esc(p.source.url) + '" target="_blank" rel="noopener">Source</a>' : '') + '<a href="../explore/#' + esc(SLUG) + '">See it on the map</a></span></article>';
+        '<span class="pjc-links">' + (p.involved ? '<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Contact the organizer</a>' : '') + '<button type="button" class="linkbtn" data-pj-partner="' + esc(p.id) + '">Suggest a partner</button>' + (p.source && p.source.url ? '<a href="' + esc(p.source.url) + '" target="_blank" rel="noopener">Source</a>' : '') + '<a href="../explore/#' + esc(SLUG) + '">See it on the map</a></span></article>';
     }).join('') : '<p class="pf-none">No projects here yet. Be the first to add one.</p>';
-    $('#pf-add').href = '../explore/?add=1#' + SLUG;
+    $('#pf-add').href = '../explore/?add=1#' + SLUG; $('#gi-add').href = '?add=other#' + SLUG;
     T.wireBacking($('#pf-proj'));
   }
   var SCOPE = 'city';
