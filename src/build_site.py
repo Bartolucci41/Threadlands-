@@ -679,6 +679,15 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .pjc-area { font-size: 0.82rem; font-weight: 600; color: var(--ink); } .pjc-area::before { content: '●'; color: var(--accent); margin-right: 6px; font-size: 0.6rem; vertical-align: 2px; }
   .pjc-next { display: block; margin-top: 8px; padding: 8px 10px; border-radius: 8px; background: #E4F1EC; font-size: 0.85rem; line-height: 1.45; color: var(--ink); } .pf-proj .pjc .pjc-next b, .pjc .pjc-next b { display: inline; font: 700 0.85rem var(--font-body); color: var(--accent); margin-right: 2px; }
   .pjc-next.closed { background: var(--surface2); } .pjc-next.old { opacity: 0.75; } .pjc-asof { display: block; margin-top: 3px; font-size: 0.75rem; color: var(--ink2); } .pjc-asof a { color: var(--accent); }
+  .pf-head.local { background-image: var(--mark), linear-gradient(var(--deep, #123B38), var(--deep, #123B38)); background-repeat: no-repeat; background-position: right 3% center, 0 0; background-size: auto 92%, cover; }
+  @media (max-width: 760px) { .pf-head.local { background-image: linear-gradient(rgba(18,59,56,.82), rgba(18,59,56,.82)), var(--mark), linear-gradient(var(--deep, #123B38), var(--deep, #123B38)); background-position: 0 0, right -70px bottom 10px, 0 0; background-size: cover, auto 70%, cover; } }
+  .pf-kick { margin: 0 0 4px; font: 600 0.82rem var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--city, #8fd3bf); }
+  .pf-local { margin: 26px 0 8px; padding-bottom: 18px; border-bottom: 1px solid var(--line); } .pf-local h2 { font: 800 1.45rem var(--font-display); margin: 0 0 12px; }
+  .pfl-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; } @media (max-width: 760px) { .pfl-grid { grid-template-columns: 1fr; } }
+  .pfl-c { padding-top: 10px; border-top: 3px solid #4F8DB5; } .pfl-c.k-food { border-top-color: #C9A227; } .pfl-c.k-nature { border-top-color: #4F8A4B; }
+  .pfl-c b { display: flex; gap: 8px; align-items: baseline; font: 750 1.02rem/1.3 var(--font-display); } .pfl-c b i { font-style: normal; color: var(--ink2); } .pfl-c p { margin: 6px 0; font-size: 0.92rem; line-height: 1.5; color: var(--ink2); }
+  .pfl-src { font-size: 0.76rem; color: var(--ink2); } .pfl-src a { color: var(--accent); }
+  .pfl-areas { margin: 16px 0 0; font-size: 0.88rem; line-height: 1.7; color: var(--ink); } .pfl-areas span { font-weight: 700; margin-right: 6px; } .pfl-areas i { color: var(--ink2); font-style: normal; }
   .gi-ways { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0 0 18px; } @media (max-width: 860px) { .gi-ways { grid-template-columns: 1fr 1fr; } } @media (max-width: 480px) { .gi-ways { grid-template-columns: 1fr; } }
   .gi-w { display: grid; gap: 3px; text-align: left; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; font: inherit; cursor: pointer; } .gi-w:hover { border-color: var(--accent); } .gi-w b { color: var(--accent); } .gi-w span { font-size: 0.85rem; color: var(--ink2); line-height: 1.4; }
   .pjc-who { font-size: 0.82rem; color: var(--ink2); margin-top: 4px; } .pjc-who i { font-style: normal; font-weight: 700; color: var(--ink); } .pjc-links .linkbtn { color: var(--accent); font-weight: 600; font-size: inherit; }
@@ -924,7 +933,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=43">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=44">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=43">
+<link rel="stylesheet" href="../assets/site.css?v=44">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -45,6 +45,7 @@
       <div class="pf-head-in">
         <div class="pf-id">
           <a class="pf-back" href="../involved/">&larr; Your places</a>
+          <p class="pf-kick" id="pf-kick" hidden></p>
           <h1 id="pf-name" class="pf-h"></h1>
           <p class="pf-where" id="pf-where"></p>
           <a class="pf-time" id="pf-time" href="../time/#mexico-city" hidden>See it through time: from the lakes of 1519 to 2050 &rarr;</a>
@@ -68,6 +69,7 @@
     </section>
 
     <div class="pf-alerts" id="pf-alerts" hidden></div>
+    <section class="pf-local" id="pf-local" hidden aria-labelledby="pf-local-h"></section>
 
     <section class="today" aria-labelledby="today-h">
       <h2 id="today-h">Today in <span id="today-name" translate="no"></span></h2>
@@ -387,6 +389,21 @@
     var old = n.asof && (Date.now() - new Date(n.asof).getTime()) > 270 * 864e5;
     return '<span class="pjc-next' + (n.open === false ? ' closed' : '') + (old ? ' old' : '') + '"><b>' + (n.open === false ? 'Next step' : 'Take part') + '</b> ' + esc(n.text) +
       ' <span class="pjc-asof">' + (asof ? 'As of ' + asof : '') + (n.source && n.source.url ? (asof ? ' · ' : '') + '<a href="' + esc(n.source.url) + '" target="_blank" rel="noopener">source</a>' : '') + (n.url ? ' · <a href="' + esc(n.url) + '" target="_blank" rel="noopener">official site</a>' : '') + (old ? ' · may be out of date' : '') + '</span></span>';
+  }
+  // A place's own identity, where one has been made by hand: its landscape, its neighborhoods and what sustains it
+  function loadIdentity(e) {
+    var head = $('.pf-head'), kick = $('#pf-kick'), box = $('#pf-local');
+    head.classList.remove('local'); head.style.removeProperty('--mark'); head.style.removeProperty('--city'); kick.hidden = true; box.hidden = true; box.innerHTML = '';
+    fetch('../data/identity/' + SLUG + '.json').then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (I) {
+      if (I.slug !== SLUG) return;
+      head.classList.add('local'); head.style.setProperty('--mark', 'url(../' + I.mark + ')'); head.style.setProperty('--city', I.accent);
+      kick.textContent = I.kicker; kick.hidden = false;
+      var ICO = { water: '≋', food: '❦', nature: '▲' };
+      box.innerHTML = '<h2 id="pf-local-h">What sustains ' + esc(e.name) + '</h2><div class="pfl-grid">' + I.sustains.map(function (x) {
+        return '<div class="pfl-c k-' + x.k + '"><b><i aria-hidden="true">' + (ICO[x.k] || '') + '</i>' + esc(x.t) + '</b><p>' + esc(x.d) + '</p><span class="pfl-src">' + (x.go ? '<a href="../' + x.go[1] + '">' + esc(x.go[0]) + ' &rarr;</a> · ' : '') + 'Source: ' + x.src.map(function (s) { return '<a href="' + esc(s[1]) + '" target="_blank" rel="noopener">' + esc(s[0]) + '</a>'; }).join(', ') + '</span></div>';
+      }).join('') + '</div>' + (I.areas ? '<p class="pfl-areas"><span>' + esc(I.areas.label) + '</span> ' + I.areas.names.map(esc).join(' · ') + (I.areas.more ? ' <i>' + esc(I.areas.more) + '</i>' : '') + '</p>' : '');
+      box.hidden = false;
+    }).catch(function () {});
   }
   function ideaLine(p) {
     var ID = D.ideas || {}, SG = D.stages || {}, others = p.idea ? D.projects.filter(function (x) { return x.idea === p.idea && x.place !== p.place; }) : [];
@@ -716,7 +733,7 @@
     }
     $('#pf-missing').hidden = true; $('#pf').hidden = false;
     document.title = e.name + ' | Threadlands';
-    $('#pf-name').textContent = e.name; $('#pf-time').hidden = SLUG !== 'mexico-city';
+    $('#pf-name').textContent = e.name; loadIdentity(e); $('#pf-time').hidden = SLUG !== 'mexico-city';
     $('#pf-where').innerHTML = T.flag(e.cc) + esc(T.where(e) + (e.city_pop ? ' · ' + T.fmtN(e.city_pop) + ' people in the city' : '') + (e.pop && (!e.city_pop || e.pop > e.city_pop * 1.1) ? ', ' + T.fmtN(e.pop) + ' in the region' : ''));
     $('#pf-explore').href = '../explore/#' + SLUG; $('#pf-studio').href = '../studio/#' + SLUG;
     followUI(); $('#pf-tie').hidden = true; $('#pf-standers').hidden = true;
