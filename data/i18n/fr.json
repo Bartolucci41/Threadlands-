@@ -1521,5 +1521,20 @@
 "Le bilan thermique du satellite",
 "Limites connues, et ce qui est fixé",
 "Chaque plan est noté contre ne rien faire dans le même climat. Le mémoire de décision, avec ses sources et ses hypothèses, s'ouvre comme une page que vous pouvez imprimer ou enregistrer en format PDF à envoyer.",
-"Chaque hexagone est un patch d'environ {0} km2. Sa charge thermique provient principalement du pavage et des toits, et en partie du nombre de personnes qui y vivent. Ajouter des arbres de rue à {1} de ce qui est possible le réduit à travers la région, et le score de soulagement de la chaleur dans toute la ville dans le modèle passe de {2} à {3} de {4}. C'est un score modélisé pour comparer les options, pas les degrés de refroidissement ou un résultat mesuré."
+"Chaque hexagone est un patch d'environ {0} km2. Sa charge thermique provient principalement du pavage et des toits, et en partie du nombre de personnes qui y vivent. Ajouter des arbres de rue à {1} de ce qui est possible le réduit à travers la région, et le score de soulagement de la chaleur dans toute la ville dans le modèle passe de {2} à {3} de {4}. C'est un score modélisé pour comparer les options, pas les degrés de refroidissement ou un résultat mesuré.",
+"Voir les fils",
+"aquifère",
+"Forêts et zones humides",
+"Limite de ville",
+"La ville",
+"Produits alimentaires",
+"air frais, stockage des inondations, faune",
+"Les mêmes fils dans un endroit réel: la vallée du Mexique dans les Threadlands, avec son terrain, les points chauds de chaleur, probablement les inondations et l'eau qui reste.",
+"Voir dans le temps →",
+"Profil de Mexico: le bassin fluvial, les terres agricoles et les endroits sauvages dont il dépend.",
+"Mexico en {0} avec les zones humides sur le vieux lit de lac: une idée modelée.",
+"Points chauds locaux à Iztapalapa, de la température de surface de Landsat.",
+"Chaque source et hypothèse est écrite sur la page Méthode.",
+"Un exemple travaillé de la page de la méthode : arbres de rue et charge thermique.",
+"Diagramme: une ville au centre, avec des fils sortant de sa limite de ville aux rivières et aquifères, terres agricoles, forêts et zones humides"
 ]

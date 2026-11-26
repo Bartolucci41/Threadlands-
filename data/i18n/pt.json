@@ -1521,5 +1521,20 @@
 "A verificação de calor do satélite",
 "Limitações conhecidas, e o que está sendo fixado",
 "Cada plano é marcado contra fazer nada no mesmo clima. A decisão breve, com suas fontes e suposições, abre como uma página que você pode imprimir ou salvar como um PDF para enviar.",
-"Cada hexágono é um sistema de aproximadamente {0} km2. Sua carga de calor vem principalmente de pavimentação e telhados, e em parte de quantas pessoas vivem lá. Adicionar árvores de rua a {1} do que é possível reduz-lo através da área, e a pontuação de alívio de calor em toda a cidade no modelo sobe de {2} para {3} de {4}. Essa é uma pontuação modelada para comparar opções, não graus de resfriamento ou um resultado medido."
+"Cada hexágono é um sistema de aproximadamente {0} km2. Sua carga de calor vem principalmente de pavimentação e telhados, e em parte de quantas pessoas vivem lá. Adicionar árvores de rua a {1} do que é possível reduz-lo através da área, e a pontuação de alívio de calor em toda a cidade no modelo sobe de {2} para {3} de {4}. Essa é uma pontuação modelada para comparar opções, não graus de resfriamento ou um resultado medido.",
+"Veja os fios",
+"Aquífero",
+"Florestas e zonas húmidas",
+"Limite da cidade",
+"A cidade",
+"alimentos",
+"ar fresco, armazenamento de inundações, vida selvagem",
+"Os mesmos fios em um lugar real: o Vale do México em Threadlands, com seu terreno, pontos quentes de calor, provavelmente inundações e a água que permanece.",
+"Veja-o através do tempo →",
+"O perfil da Cidade do México: a bacia do rio, terras agrícolas e lugares selvagens de que depende.",
+"Cidade do México em {0} com zonas húmidas no antigo leito de lago: uma idéia modelada.",
+"Pontos quentes de calor local em Iztapalapa, a partir da temperatura de superfície Landsat.",
+"Cada fonte e suposição é escrita na página Método.",
+"Um exemplo trabalhado da página do método: árvores de rua e carga de calor.",
+"Diagrama: uma cidade no centro, com linhas passando pelo limite da cidade para rios e aquíferos, terras agrícolas e florestas e zonas húmidas"
 ]

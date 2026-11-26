@@ -1521,5 +1521,20 @@
 "Comprobación de calor por satélite",
 "Limitaciones conocidas, y lo que se está arreglando",
 "Cada plan está marcado contra no hacer nada en el mismo clima. El informe de decisión, con sus fuentes y suposiciones, se abre como una página que puede imprimir o guardar como un PDF para enviar.",
-"Cada hexágono es un parche de aproximadamente {0} km2. Su carga de calor proviene principalmente de pavimentos y techos, y en parte de cuánta gente vive allí. La adición de árboles callejeros a {1} de lo que es posible lo baja a través de la zona, y la puntuación de alivio térmico en toda la ciudad en el modelo se eleva de {2} a {3} de {4}. Esa es una puntuación modelada para comparar opciones, no grados de enfriamiento o un resultado medido."
+"Cada hexágono es un parche de aproximadamente {0} km2. Su carga de calor proviene principalmente de pavimentos y techos, y en parte de cuánta gente vive allí. La adición de árboles callejeros a {1} de lo que es posible lo baja a través de la zona, y la puntuación de alivio térmico en toda la ciudad en el modelo se eleva de {2} a {3} de {4}. Esa es una puntuación modelada para comparar opciones, no grados de enfriamiento o un resultado medido.",
+"Ver los hilos",
+"Aquifer",
+"Bosques y humedales",
+"Limite de la ciudad",
+"La ciudad",
+"alimentos",
+"aire fresco, almacenamiento de inundaciones, vida silvestre",
+"Los mismos hilos en un lugar real: el Valle de México en Threadlands, con su terreno, puntos calientes de calor, probable inundaciones y el agua que queda.",
+"Verlo a través del tiempo →",
+"Perfil de la Ciudad de México: la cuenca fluvial, las tierras agrícolas y los lugares salvajes que depende.",
+"Ciudad de México en {0} con humedales en el antiguo lagos: una idea modelada.",
+"Puntos calientes locales en Iztapalapa, desde la temperatura superficial de Landsat.",
+"Cada fuente y suposición se escribe en la página Método.",
+"Un ejemplo trabajado de la página método: árboles callejeros y carga de calor.",
+"Diagrama: una ciudad en el centro, con hilos que pasan por encima de su límite de ciudad a ríos y acuíferos, tierras agrícolas, bosques y humedales"
 ]
