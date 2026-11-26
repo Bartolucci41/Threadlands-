@@ -664,6 +664,17 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .sa figcaption { display: grid; gap: 6px; font-size: 0.86rem; color: var(--ink2); max-width: 22rem; } .sa figcaption span { display: flex; gap: 8px; align-items: center; } .sa-k1, .sa-k2 { width: 14px; height: 14px; border-radius: 3px; flex: none; } .sa-k1 { background: rgba(18,59,56,.3); border: 2px solid #123B38; } .sa-k2 { background: rgba(192,96,58,.3); }
   .home-search.mp-search { max-width: 46rem; gap: 10px; } .home-search input { min-height: 62px; font-size: 1.15rem; padding: 0 24px; } .home-search .btn { min-height: 62px; padding: 0 28px; font-size: 1.05rem; }
   @media (max-width: 560px) { .home-search.mp-search { flex-wrap: wrap; } .home-search input { flex: 1 1 100%; min-height: 56px; font-size: 1.05rem; } .home-search .btn { min-height: 50px; } }
+  .topnav a { white-space: nowrap; }
+  @media (max-width: 430px) { .topnav { gap: 6px 11px; font-size: 0.88rem; } .topnav .nav-home { display: none; } .topnav a.nav-lab { padding: 3px 9px; } }
+  @media (max-width: 380px) { .topnav { gap: 6px 8px; font-size: 0.82rem; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; } .topnav a.nav-lab { padding: 3px 7px; gap: 4px; } .topnav a.nav-lab::before { display: none; } }
+  .ab-more, .ab-li { margin: 10px 0 0; } .ab-more > summary, .ab-li > summary { cursor: pointer; list-style: none; } .ab-more > summary { display: inline-flex; gap: 8px; align-items: center; font-weight: 700; color: var(--accent); padding: 6px 0; }
+  .ab-more > summary::after, .ab-li > summary::after { content: '+'; font-weight: 700; color: var(--accent); margin-left: 6px; } .ab-more[open] > summary::after, .ab-li[open] > summary::after { content: '–'; }
+  .ab-svg { display: block; width: 100%; max-width: 720px; height: auto; margin: 10px 0 14px; } .ab-bg { fill: var(--surface2); } .ab-river { fill: none; stroke: #4F8DB5; stroke-width: 9; stroke-linecap: round; } .ab-aq { stroke: #4F8DB5; stroke-width: 4; stroke-dasharray: 2 7; stroke-linecap: round; opacity: .7; }
+  .ab-f { stroke: #9C8A3C; stroke-width: 1.5; } .ab-tree path { fill: #4F8A4B; } .ab-wet ellipse { fill: #79A9C4; opacity: .7; } .ab-wet path { stroke: #4F8A4B; stroke-width: 3; stroke-linecap: round; }
+  .ab-lim { fill: none; stroke: var(--ink2); stroke-width: 2; stroke-dasharray: 6 6; } .ab-city rect { fill: #123B38; } .ab-th { fill: none; stroke: #C0603A; stroke-width: 2.5; stroke-linecap: round; }
+  .ab-t { font: 600 15px var(--font-body); fill: var(--ink); } .ab-c { text-anchor: middle; } .ab-b { font-weight: 800; } .ab-s { font: italic 500 13px var(--font-body); fill: #A04A28; }
+  .ab-fig { margin: 8px 0 6px; } .ab-fig img { display: block; width: auto; max-width: min(720px, 100%); max-height: 460px; height: auto; border-radius: 12px; border: 1px solid var(--line); } .ab-fig figcaption { font-size: 0.86rem; color: var(--ink2); margin-top: 6px; max-width: 720px; } .ab-fig a { color: var(--accent); font-weight: 600; }
+  .ab-li > summary { display: block; } .about-list .ab-li > summary::after { font-size: 1.05rem; }
   .gi-ways { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0 0 18px; } @media (max-width: 860px) { .gi-ways { grid-template-columns: 1fr 1fr; } } @media (max-width: 480px) { .gi-ways { grid-template-columns: 1fr; } }
   .gi-w { display: grid; gap: 3px; text-align: left; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; font: inherit; cursor: pointer; } .gi-w:hover { border-color: var(--accent); } .gi-w b { color: var(--accent); } .gi-w span { font-size: 0.85rem; color: var(--ink2); line-height: 1.4; }
   .pjc-who { font-size: 0.82rem; color: var(--ink2); margin-top: 4px; } .pjc-who i { font-style: normal; font-weight: 700; color: var(--ink); } .pjc-links .linkbtn { color: var(--accent); font-weight: 600; font-size: inherit; }
@@ -882,7 +893,7 @@ ANALYTICS = ("<!-- Cloudflare Web Analytics --><script type='module' src='https:
 PAGES = [("", "Home"), ("involved/", "Get involved"), ("place/", "Place"), ("places/", "Places"), ("projects/", "Projects"), ("about/", "About"),
          ("lab/", "ThreadLab"), ("explore/", "Explore"), ("studio/", "Studio"), ("how-it-works/", "Method")]
 # Two faces: everyone's side, and the professional side with the tools
-NAV = [("", "Home"), ("places/", "Places"), ("involved/", "Get involved"), ("lab/", "ThreadLab")]
+NAV = [("", "Home"), ("places/", "Places"), ("involved/", "Get involved"), ("about/", "About"), ("lab/", "ThreadLab")]
 NAV_LAB = [("lab/", "Overview"), ("explore/", "Explore"), ("studio/", "Studio"), ("guide/", "How to use"), ("how-it-works/", "Method")]
 PRO_PAGES = ("lab/", "explore/", "studio/", "how-it-works/", "guide/")
 
@@ -909,7 +920,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=39">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=40">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
