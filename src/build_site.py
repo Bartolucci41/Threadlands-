@@ -350,6 +350,13 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .sh-n i { font-style: normal; color: var(--ink2); font-size: 0.78rem; } .sh-b { height: 6px; border-radius: 3px; background: var(--surface2); overflow: hidden; } .sh-b i { display: block; height: 100%; background: var(--accent); } .sh-p { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
   .sh-note { margin: 10px 0 0; font-size: 0.86rem; line-height: 1.45; } .sh-src { margin: 10px 0 0; font-size: 0.78rem; color: var(--ink2); } .sh-src .linkbtn, .sh-more { color: var(--accent); font-weight: 600; } .sh-more { display: inline-block; margin-top: 10px; font-size: 0.88rem; }
   .pjc-idea { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-size: 0.8rem; color: var(--ink2); margin-top: 6px; } .pjc-stage { font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--surface2); color: var(--ink); } .pjc-stage.s-spreading { background: #F3E3C4; } .pjc-stage.s-program { background: #DCEBE5; }
+.sh-step { display: inline-grid; place-items: center; width: 1.35rem; height: 1.35rem; border-radius: 50%; background: var(--accent); color: #fff; font-size: 0.72rem; margin-right: 7px; letter-spacing: 0; }
+  .sh-pl { font-weight: 700; } .sh-ctx { font-style: normal; font-size: 0.75rem; padding: 1px 6px; border-radius: 999px; background: var(--surface2); color: var(--ink2); white-space: nowrap; } .sh-list span a { color: var(--accent); font-weight: 600; }
+  .sh-g { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 3.6rem; gap: 8px; align-items: center; width: 100%; border: 0; background: none; padding: 4px 6px; margin: 0 -6px; border-radius: 8px; font: inherit; color: inherit; text-align: left; cursor: pointer; } .sh-g:hover, .sh-g[aria-pressed="true"] { background: var(--surface2); }
+  .sh-gov li { display: block; } .sh-hint { margin: 6px 0 0; font-size: 0.78rem; color: var(--ink2); }
+  .sh-opps { display: grid; gap: 12px; } .sh-opp { padding: 10px 12px; border-radius: 10px; background: var(--bg); border-left: 3px solid var(--warm, #C0603A); } .sh-opp b { display: block; font-size: 0.95rem; } .sh-opp p { margin: 4px 0 6px; font-size: 0.86rem; line-height: 1.45; color: var(--ink2); }
+  .sh-acts { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.84rem; } .sh-acts a, .sh-acts .linkbtn { color: var(--accent); font-weight: 600; } .sh-hl { box-shadow: 0 0 0 2px var(--accent); }
+  .mp-start { margin: 0 0 22px; font-size: 1.08rem; font-weight: 700; color: #fff; }
   .pjc-also a { color: var(--accent); font-weight: 600; }
   .tm { --tm-a: #1F4E6B; --tm-b: #5B93B8; }
   .tm[data-stop="1"] { --tm-a: #5E4A2C; --tm-b: #A98953; } .tm[data-stop="2"] { --tm-a: #3B3D42; --tm-b: #7D7F84; } .tm[data-stop="3"] { --tm-a: #22323B; --tm-b: #4E6A76; } .tm[data-stop="4"] { --tm-a: #164A41; --tm-b: #3E9A86; } .tm.season { --tm-a: #3A2F4F; --tm-b: #8A6FB0; }
@@ -600,7 +607,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .mp-hero-in { max-width: 72rem; }
   .mp-h { max-width: 18ch; }
   .mp-h { color: #fff; font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.04; letter-spacing: -0.03em; margin: 0; }
-  .mp-sub { margin: 16px 0 22px; font-size: 1.08rem; line-height: 1.55; color: #cfe0da; max-width: 52ch; }
+  .mp-sub { margin: 16px 0 8px; font-size: 1.08rem; line-height: 1.55; color: #cfe0da; max-width: 52ch; }
   .doors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 30px; }
   @media (max-width: 720px) { .doors { grid-template-columns: 1fr; gap: 12px; } }
   .door { display: grid; gap: 8px; align-content: start; padding: 26px 28px 24px; border-radius: 22px; text-decoration: none; min-height: 210px; box-sizing: border-box; transition: transform .15s, box-shadow .15s; }
@@ -849,7 +856,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=30">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=31">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

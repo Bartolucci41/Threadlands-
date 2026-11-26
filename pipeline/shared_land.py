@@ -74,6 +74,37 @@ def inside(rings, x, y):
     return res
 
 
+def simplify(r, tol):
+    """Douglas-Peucker on one ring (lng, lat), iterative."""
+    n = len(r)
+    if n < 5:
+        return r
+    keep = np.zeros(n, dtype=bool); keep[0] = keep[-1] = True
+    stack = [(0, n - 1)]
+    while stack:
+        i, j = stack.pop()
+        if j <= i + 1:
+            continue
+        a, b = r[i], r[j]; seg = b - a; L = np.hypot(*seg) or 1e-12
+        q = r[i + 1:j] - a; d = np.abs(seg[0] * q[:, 1] - seg[1] * q[:, 0]) / L if L > 1e-9 else np.hypot(q[:, 0], q[:, 1])
+        k = int(np.argmax(d))
+        if d[k] > tol:
+            m = i + 1 + k; keep[m] = True; stack += [(i, m), (m, j)]
+    return r[keep]
+
+
+def outline(f, box, tol=0.004):
+    """The government's boundary near the study region, simplified, as [[lng, lat], ...] rings."""
+    out = []
+    for r in f['rings']:
+        if r[:, 0].max() < box[0] or r[:, 0].min() > box[2] or r[:, 1].max() < box[1] or r[:, 1].min() > box[3]:
+            continue
+        sr = simplify(r, tol)
+        if len(sr) >= 4:
+            out.append([[round(float(x), 3), round(float(y), 3)] for x, y in sr])
+    return out
+
+
 def assign(feats, lng, lat):
     out = np.full(len(lng), -1)
     bx = (lng.min(), lat.min(), lng.max(), lat.max())
@@ -129,7 +160,8 @@ def main():
             for k in sorted(set(ix.tolist()) - {-1}):
                 m = ix == k
                 f = feats[k]
-                rows.append({'id': f['id'], 'name': f['name'], 'type': f['type'], 'country': f['country'], 'region': f['region'],
+                box = (lng.min() - 0.5, lat.min() - 0.5, lng.max() + 0.5, lat.max() + 0.5)
+                rows.append({'geom': outline(f, box), 'id': f['id'], 'name': f['name'], 'type': f['type'], 'country': f['country'], 'region': f['region'],
                              'pop': int(pop[m].sum()), 'km2': round(float(area[m].sum())), 'city_pop': int(pop[m & (ins == 1)].sum()),
                              'basin_km2': round(float(area[m & inbasin].sum())) if inbasin.any() else None})
             rows.sort(key=lambda r: -r['pop'])
