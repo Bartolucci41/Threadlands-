@@ -1371,5 +1371,6 @@
 "Leggi i confronti basati sulle celle con cura.",
 "Le macchie calde di calore, la copertura verde, la copertura degli alberi e le case prone di inondazione sono conteggiate in celle di rete, e le dimensioni delle cellule differiscono tra i luoghi, da circa {0} km2 a oltre {1} km2. I risultati cambiano con la dimensione della cella, quindi ogni riga mostra la sua griglia, e puoi confrontare solo i posti con una griglia simile.",
 "Dimensioni della griglia",
-"Aggiungi un posto da confrontare (fino a {0})"
+"Aggiungi un posto da confrontare (fino a {0})",
+"Guardalo nel tempo: dai laghi di {0} a {1} →"
 ]

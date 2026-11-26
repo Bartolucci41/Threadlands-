@@ -1371,5 +1371,6 @@
 "Leia comparações baseadas em células com cuidado.",
 "Os pontos quentes de calor, cobertura verde, cobertura de árvores e casas propensas a inundações são contados em células de grade, e os tamanhos das células diferem entre os locais, de cerca de {0} km2 a mais de {1} km2. Os resultados mudam com o tamanho da célula, então cada linha mostra sua grade, e você pode comparar apenas lugares com uma grade semelhante.",
 "Tamanho da grade",
-"Adicionar um local para comparar (até {0})"
+"Adicionar um local para comparar (até {0})",
+"Veja-o através do tempo: dos lagos de {0} a {1} →"
 ]

@@ -1371,5 +1371,6 @@
 "Lisez les comparaisons avec les soins.",
 "Les points chauds, le couvert vert, le couvert d'arbres et les maisons exposées aux inondations sont comptés dans les cellules de la grille, et la taille des cellules varie d'un endroit à l'autre, d'environ {0} km2 à plus de {1} km2. Les résultats changent avec la taille des cellules, de sorte que chaque rangée montre sa grille, et vous pouvez comparer seulement les endroits avec une grille similaire.",
 "Taille des cellules de grille",
-"Ajouter un endroit à comparer (jusqu'à {0})"
+"Ajouter un endroit à comparer (jusqu'à {0})",
+"Voir dans le temps: des lacs de {0} à {1} →"
 ]

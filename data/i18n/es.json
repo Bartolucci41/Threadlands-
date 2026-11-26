@@ -1371,5 +1371,6 @@
 "Lea comparaciones basadas en células con cuidado.",
 "Los puntos calientes calientes, la cubierta verde, la cubierta de árboles y las casas propensas a inundaciones se cuentan en las células de la red, y los tamaños de las células difieren entre los lugares, de aproximadamente {0} km2 a más {1} km2. Los resultados cambian con el tamaño de la célula, por lo que cada fila muestra su rejilla, y usted puede comparar sólo lugares con una red similar.",
 "Tamaño de las celdas",
-"Añadir un lugar para comparar (hasta {0})"
+"Añadir un lugar para comparar (hasta {0})",
+"Míralo a través del tiempo: desde los lagos de {0} a {1} →"
 ]
