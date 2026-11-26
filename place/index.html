@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=29">
+<link rel="stylesheet" href="../assets/site.css?v=30">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -37,7 +37,7 @@
 <main class="wrap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-<script src="../assets/public.js"></script>
+<script src="../assets/public.js?v=2"></script>
   <div class="pf-missing" id="pf-missing" hidden></div>
   <article class="pf" id="pf" hidden>
     <section class="pf-head bleed band-deep" aria-labelledby="pf-name">
@@ -103,13 +103,18 @@
     </nav>
 
     <section class="sect pf-sec" id="pressing" aria-labelledby="pressing-h">
-      <div class="sect-top"><div><h2 id="pressing-h">Key findings</h2><p>The main things Threadlands&rsquo; data shows for this place, each linked to the map. Only the farmland measure is compared with other places for now: heat, flooding, green cover and tree cover are not yet measured the same way everywhere, so they are shown for this place alone. A finding is not necessarily the city&rsquo;s biggest risk.</p></div></div>
+      <div class="sect-top"><div><h2 id="pressing-h">Key findings</h2><p>The main things Threadlands&rsquo; data shows for this place, each linked to the map. Heat, flooding, green cover and tree cover depend on each place&rsquo;s grid size, so compare them between places on Places, where the grid is shown. A finding is not necessarily the city&rsquo;s biggest risk.</p></div></div>
       <div class="pf-press" id="pf-press"></div>
     </section>
 
     <section class="sect pf-sec" id="tied" aria-labelledby="tied-h">
       <div class="sect-top"><div><h2 id="tied-h">What it depends on</h2><p id="tied-sub">Every city lives off land and water it doesn&rsquo;t see. These are the threads that tie this one to the region around it.</p></div></div>
       <div class="pf-tied" id="pf-tied"></div>
+    </section>
+
+    <section class="sect pf-sec" id="shared" aria-labelledby="shared-h">
+      <div class="sect-top"><div><h2 id="shared-h">Shared with other places</h2><p>Who shares this land and its river basin, which places face the same problem, and where governments could act together.</p></div></div>
+      <div class="pf-shared" id="pf-shared"></div>
     </section>
 
     <section class="sect pf-sec" id="ready" aria-labelledby="ready-h">
@@ -285,12 +290,63 @@
       (r.heat != null ? bar(r.heat, 'Heat relief today') : '') + (r.habitat != null ? bar(r.habitat, 'Connected nature') : '') + '</div>' + studyArea(e, sm.study);
     $('#pf-cities').href = '../places/?sort=index';
   }
+  // Shared with other places: who shares this land, who faces the same problem, and what could be done together
+  var PNAME = { heat: 'local heat hot spots', flood: 'flood exposure', grey: 'low green cover', trees: 'low tree cover', food: 'limited nearby farmland' };
+  function nm(n) { return /^(State|District|Province|Region|Republic|Federal) of /.test(n) ? 'the ' + n : n; }
+  function band(k) { return k == null ? null : k < 1 ? 0 : k < 10 ? 1 : 2; }
+  function renderShared(e, sm) {
+    var box = $('#pf-shared'); box.innerHTML = '';
+    var top = (sm.pressures || [])[0], r0 = D.rank[SLUG] || {};
+    // 1. Places facing the same problem: same finding among their top three, similar grid first, real projects first
+    var same = '';
+    if (top) {
+      var cand = Object.keys(D.summary).filter(function (s) { return s !== SLUG && D.lib[s]; }).map(function (s) {
+        var ps = (D.summary[s].pressures || []).map(function (x) { return x.key; }), k = ps.indexOf(top.key), rk = D.rank[s] || {};
+        return k < 0 ? null : { s: s, k: k, pj: rk.projects ? rk.projects.n : 0, g: band(rk.cell_km2) === band(r0.cell_km2) ? 1 : 0, pop: D.lib[s].pop || 0 };
+      }).filter(Boolean).sort(function (a, b) { return (b.pj > 0) - (a.pj > 0) || b.g - a.g || a.k - b.k || b.pop - a.pop; }).slice(0, 3);
+      if (cand.length) same = '<article class="sh-card"><p class="eyebrow">Places facing the same problem</p><h3>' + esc(top.t) + ': ' + esc(PNAME[top.key] || top.f) + '</h3><ul class="sh-list">' + cand.map(function (c) {
+        var e2 = D.lib[c.s];
+        return '<li><a href="../place/' + (c.pj ? '?pj=' : '') + '#' + esc(c.s) + '">' + T.flag(e2.cc) + esc(e2.name) + '</a><span>' + (c.pj ? c.pj + ' project' + (c.pj > 1 ? 's' : '') + ' to learn from' : 'No projects added yet') + (c.g ? ' · similar grid' : '') + '</span></li>';
+      }).join('') + '</ul><a class="sh-more" href="../places/?sort=' + ({ heat: 'heat', flood: 'flood', grey: 'green_low', trees: 'tree', food: 'farm' }[top.key] || 'pop') + '&side=' + [SLUG].concat(cand.map(function (c) { return c.s; })).slice(0, 3).join(',') + '">Put them side by side &rarr;</a></article>';
+    }
+    box.innerHTML = same + '<article class="sh-card sh-wait"><p class="eyebrow">Who shares this land</p><p class="pf-none">Loading&hellip;</p></article>';
+    fetch('../data/shared/' + SLUG + '.json').then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (S) {
+      var lv = S.levels.county && S.levels.county.length ? S.levels.county : (S.levels.state || []), st = S.levels.state || [];
+      var tot = lv.reduce(function (a, j) { return a + j.pop; }, 0) || 1, mx = lv.length ? lv[0].pop : 1;
+      var basinJ = lv.filter(function (j) { return j.basin_km2 > 0; });
+      var land = '<article class="sh-card"><p class="eyebrow">Who shares this land</p><h3>' + (lv.length > 1 ? 'People in this region live under ' + lv.length + ' ' + (S.levels.county && S.levels.county.length ? 'county' : 'state or province') + ' governments' : 'One ' + esc((lv[0] || {}).type || 'state').toLowerCase() + ' covers this region') + '</h3>' +
+        '<ul class="sh-gov">' + lv.slice(0, 6).map(function (j) { return '<li><span class="sh-n">' + esc(j.name) + ' <i>' + esc(j.type) + '</i></span><span class="sh-b"><i style="width:' + Math.max(2, Math.round(100 * j.pop / mx)) + '%"></i></span><span class="sh-p">' + T.fmtN(j.pop) + '</span></li>'; }).join('') + '</ul>' +
+        (lv.length > 6 ? '<p class="sh-note">And ' + (lv.length - 6) + ' more.</p>' : '') +
+        (S.levels.county && st.length ? '<p class="sh-note">Spanning ' + st.map(function (j) { return esc(nm(j.name)); }).join(', ').replace(/, ([^,]*)$/, ' and $1') + '.</p>' : '') +
+        (S.basin_km2 && basinJ.length ? '<p class="sh-note"><b>The river basin</b> that drains through the city (' + S.basin_km2.toLocaleString('en-US') + ' km²) ' + (basinJ.length > 1 ? 'crosses ' + basinJ.map(function (j) { return esc(nm(j.name)) + ' (' + j.basin_km2.toLocaleString('en-US') + ' km² in the study region)'; }).join(' and ') : 'lies within ' + esc(nm(basinJ[0].name)) + ' in the study region') + '.</p>' : '') +
+        '<p class="sh-src">Boundaries: Natural Earth. People: WorldPop 2020, in the modeled region.</p></article>';
+      // 3. Could be done together: projects serving more than one government, and a basin shared between them
+      var joint = [];
+      (S.projects || []).forEach(function (p) {
+        var pr = D.projects.filter(function (x) { return x.id === p.id; })[0]; if (!pr) return;
+        if (p.serves.length > 1) joint.push('<li><a href="../place/?pj=' + esc(p.id) + '#' + esc(SLUG) + '" translate="no">' + esc(pr.name) + '</a><span>In ' + esc(nm(p.in)) + '; within 3 km live ' + p.serves.map(function (s) { return T.fmtN(s.pop) + ' people in ' + esc(nm(s.name)); }).join(' and ') + '.</span></li>');
+        else if (p.in && p.serves.length === 1 && p.serves[0].name !== p.in) joint.push('<li><a href="../place/?pj=' + esc(p.id) + '#' + esc(SLUG) + '" translate="no">' + esc(pr.name) + '</a><span>Sits in ' + esc(nm(p.in)) + ', but most people within 3 km live in ' + esc(nm(p.serves[0].name)) + '.</span></li>');
+      });
+      if (basinJ.length > 1) joint.push('<li><b>Water in the shared basin</b><span>Rain that falls in ' + basinJ.map(function (j) { return esc(nm(j.name)); }).join(' and ') + ' drains through the same city. Wetlands, storage or recharge upstream would need ' + (basinJ.length > 2 ? 'these governments' : 'both governments') + '.</span></li>');
+      if (SLUG === 'mexico-city') joint.push('<li><a href="../time/#mexico-city/2050">Wetlands on the old lakebed</a><span>Almost all the open land on the old lakebed (154 of 161 cells in the scenario) is in the State of Mexico. About 1.4 million people within 2 km live in the State of Mexico and about 190,000 in Mexico City. A modeled idea, not a plan.</span></li>');
+      var tog = joint.length ? '<article class="sh-card"><p class="eyebrow">Could be done together</p><h3>Where governments share a project or a problem</h3><ul class="sh-list">' + joint.slice(0, 4).join('') + '</ul><p class="sh-src">Candidates from the map, not agreements. Know a partnership? <button type="button" class="linkbtn" data-feedback="idea">Tell us</button>.</p></article>' : '';
+      var w = box.querySelector('.sh-wait'); if (w) w.outerHTML = land + tog;
+    }).catch(function () { var w = box.querySelector('.sh-wait'); if (w) w.remove(); });
+  }
+  // Ideas as they spread: a project's stage, and the same idea in other places (stages after USDN's innovation pathway)
+  function ideaLine(p) {
+    var ID = D.ideas || {}, SG = D.stages || {}, others = p.idea ? D.projects.filter(function (x) { return x.idea === p.idea && x.place !== p.place; }) : [];
+    var stage = others.length ? 'spreading' : p.stage;
+    if (!stage && !others.length) return '';
+    return '<span class="pjc-idea">' + (stage ? '<span class="pjc-stage s-' + stage + '">' + esc(SG[stage] || stage) + '</span>' : '') + (p.idea && ID[p.idea] ? '<span>' + esc(ID[p.idea]) + '</span>' : '') +
+      (others.length ? '<span class="pjc-also">Also in ' + others.slice(0, 3).map(function (x) { var e2 = D.lib[x.place] || {}; return '<a href="../place/?pj=' + esc(x.id) + '#' + esc(x.place) + '">' + esc(e2.name || x.place) + '</a>'; }).join(', ') + '</span>' : '') + '</span>';
+  }
   function renderProjects(e) {
     var STAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
     var mine = D.projects.filter(function (p) { return p.place === SLUG; });
     $('#pf-proj').innerHTML = mine.length ? mine.map(function (p) {
       var st = STAT[p.status] || STAT.proposed;
-      return '<article class="pjc" id="pj-' + esc(p.id) + '" style="--pc:' + st[1] + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span>' + (p.added_by_visitor ? '<span>Added by a visitor</span>' : '') + '</span><b translate="no">' + esc(p.name) + '</b><span class="pjc-sum">' + esc(p.summary || '') + '</span>' +
+      return '<article class="pjc" id="pj-' + esc(p.id) + '" style="--pc:' + st[1] + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span>' + (p.added_by_visitor ? '<span>Added by a visitor</span>' : '') + '</span><b translate="no">' + esc(p.name) + '</b><span class="pjc-sum">' + esc(p.summary || '') + '</span>' + ideaLine(p) +
         '<span class="pjc-back"><button type="button" class="btn back-btn" data-back="' + esc(p.id) + '" aria-pressed="false" hidden>Back this</button><span class="back-n" data-backn="' + esc(p.id) + '"></span></span>' +
         '<span class="pjc-links">' + (p.involved ? '<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Get involved</a>' : '') + (p.source && p.source.url ? '<a href="' + esc(p.source.url) + '" target="_blank" rel="noopener">Source</a>' : '') + '<a href="../explore/#' + esc(SLUG) + '">See it on the map</a></span></article>';
     }).join('') : '<p class="pf-none">No projects here yet. Be the first to add one.</p>';
@@ -604,7 +660,7 @@
     followUI(); $('#pf-tie').hidden = true; $('#pf-standers').hidden = true;
     T.standers(SLUG).then(showStanders).catch(function () {});
     var r = D.rank[SLUG] || {}, sm = D.summary[SLUG] || {};
-    renderWeather(e); renderToday(e); renderPressures(sm); renderTied(e, sm); setTimeout(function () {
+    renderWeather(e); renderToday(e); renderPressures(sm); renderTied(e, sm); renderShared(e, sm); setTimeout(function () {
       // Links from Get involved: ?pj=<id> opens that project, ?add=<kind> opens the map ready to pin what you know
       var qp = new URLSearchParams(location.search), pjId = qp.get('pj'), addK = qp.get('add');
       if (pjId) { var pc = document.getElementById('pj-' + pjId); if (pc) { pc.scrollIntoView({ block: 'center' }); pc.classList.add('pjc-hl'); var bb = pc.querySelector('.back-btn'); if (bb) setTimeout(function () { bb.focus({ preventScroll: true }); }, 300); } return; }

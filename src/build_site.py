@@ -343,6 +343,14 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .sd-m { margin: 0 0 10px; padding-top: 8px; border-top: 1px solid var(--line); display: grid; gap: 4px; } .sd-m div { display: flex; justify-content: space-between; gap: 10px; font-size: 0.82rem; } .sd-m dt { color: var(--ink2); } .sd-m dd { margin: 0; font-weight: 800; font-variant-numeric: tabular-nums; } .sd-m small { font-weight: 600; color: var(--ink2); margin-left: 1px; }
   .sd-warn { margin: 12px 0 0; padding: 10px 14px; border-radius: 10px; background: #F3E3C455; font-size: 0.85rem; } .sd-warn a { color: var(--accent); font-weight: 600; }
   .pf-time { display: inline-block; margin: 2px 0 10px; color: #fff; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+  .pf-shared { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; } @media (max-width: 900px) { .pf-shared { grid-template-columns: 1fr; } }
+  .sh-card { border: 1px solid var(--line); border-radius: 14px; padding: 16px; background: var(--surface); align-self: start; } .sh-card h3 { font: 800 1.08rem/1.25 var(--font-display); margin: 4px 0 10px; }
+  .sh-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; } .sh-list li { display: grid; gap: 2px; font-size: 0.9rem; } .sh-list a { font-weight: 700; color: var(--ink); } .sh-list span { color: var(--ink2); font-size: 0.85rem; line-height: 1.4; }
+  .sh-gov { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; } .sh-gov li { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 3.6rem; gap: 8px; align-items: center; font-size: 0.86rem; }
+  .sh-n i { font-style: normal; color: var(--ink2); font-size: 0.78rem; } .sh-b { height: 6px; border-radius: 3px; background: var(--surface2); overflow: hidden; } .sh-b i { display: block; height: 100%; background: var(--accent); } .sh-p { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .sh-note { margin: 10px 0 0; font-size: 0.86rem; line-height: 1.45; } .sh-src { margin: 10px 0 0; font-size: 0.78rem; color: var(--ink2); } .sh-src .linkbtn, .sh-more { color: var(--accent); font-weight: 600; } .sh-more { display: inline-block; margin-top: 10px; font-size: 0.88rem; }
+  .pjc-idea { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-size: 0.8rem; color: var(--ink2); margin-top: 6px; } .pjc-stage { font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--surface2); color: var(--ink); } .pjc-stage.s-spreading { background: #F3E3C4; } .pjc-stage.s-program { background: #DCEBE5; }
+  .pjc-also a { color: var(--accent); font-weight: 600; }
   .tm { --tm-a: #1F4E6B; --tm-b: #5B93B8; }
   .tm[data-stop="1"] { --tm-a: #5E4A2C; --tm-b: #A98953; } .tm[data-stop="2"] { --tm-a: #3B3D42; --tm-b: #7D7F84; } .tm[data-stop="3"] { --tm-a: #22323B; --tm-b: #4E6A76; } .tm[data-stop="4"] { --tm-a: #164A41; --tm-b: #3E9A86; } .tm.season { --tm-a: #3A2F4F; --tm-b: #8A6FB0; }
   .tm-hero { background: linear-gradient(160deg, var(--tm-a), var(--tm-b)); color: #fff; transition: background 0.6s; padding: 26px 0 30px; }
@@ -841,7 +849,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=29">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=30">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

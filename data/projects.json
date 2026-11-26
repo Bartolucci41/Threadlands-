@@ -1,176 +1,208 @@
 {
-  "note": "Real projects shown on the Threadlands map. Added by the Threadlands team or by visitors, after review. Each has a public source.",
-  "projects": [
-    {
-      "id": "mx-texcoco-park",
-      "place": "mexico-city",
-      "name": "Parque Ecológico Lago de Texcoco",
-      "kind": "wetland",
-      "status": "built",
-      "year": 2024,
-      "lat": 19.49,
-      "lng": -98.99,
-      "area_km2": 140,
-      "who": "Government of Mexico (Conagua)",
-      "summary": "About 14,000 hectares of restored lake, wetland and parkland on the former site of the cancelled airport, east of the city. Opened in September 2024.",
-      "source": {
-        "title": "El Imparcial: AMLO inaugura el Parque Ecológico Lago de Texcoco (2 Sep 2024)",
-        "url": "https://www.elimparcial.com/mexico/2024/09/02/entrada-gratis-y-14000-hectareas-de-naturaleza-amlo-inaugura-el-parque-ecologico-lago-de-texcoco/"
-      },
-      "involved": "",
-      "added": "2026-11-22"
-    },
-    {
-      "id": "mx-gran-canal",
-      "place": "mexico-city",
-      "name": "Parque Lineal Gran Canal",
-      "kind": "park",
-      "status": "built",
-      "year": 2021,
-      "lat": 19.452,
-      "lng": -99.113,
-      "area_km2": 0.01,
-      "who": "Government of Mexico City",
-      "summary": "A linear park on the bed of the old Gran Canal drain in Venustiano Carranza: 708 new trees and 24 wells that return rainwater to the aquifer. First stage about 840 m, opened 2021.",
-      "source": {
-        "title": "Mexico City tourism: Parque Lineal Gran Canal",
-        "url": "https://mexicocity.cdmx.gob.mx/venues/parque-lineal-gran-canal/"
-      },
-      "involved": "",
-      "added": "2026-11-22"
-    },
-    {
-      "id": "mx-tlallipan",
-      "place": "mexico-city",
-      "name": "Jardín Flotante Tlallipan",
-      "kind": "corridor",
-      "status": "built",
-      "year": 2026,
-      "lat": 19.417,
-      "lng": -99.134,
-      "area_km2": 0.03,
-      "who": "Government of Mexico City",
-      "summary": "A 1.8 km elevated garden and walking route over Calzada de Tlalpan, between Pino Suárez and Chabacano: 176 trees, thousands of shrubs and more than 80,000 pollinator plants. Opened June 2026.",
-      "source": {
-        "title": "México Desconocido: Jardín Flotante Tlallipan (June 2026)",
-        "url": "https://www.mexicodesconocido.com.mx/jardin-flotante-tlallipan.html"
-      },
-      "involved": "",
-      "added": "2026-11-22"
-    },
-    {
-      "id": "mx-cosecha-lluvia",
-      "place": "mexico-city",
-      "name": "Cosecha de Lluvia (rain harvesting at home)",
-      "kind": "rain",
-      "status": "underway",
-      "year": 2019,
-      "lat": 19.357,
-      "lng": -99.06,
-      "area_km2": 0,
-      "who": "SEDEMA, Government of Mexico City",
-      "summary": "Free rooftop rainwater systems for homes with poor water service, started in Iztapalapa and Xochimilco: 73,021 systems installed since 2019, about 1.7 billion liters harvested (August 2024).",
-      "source": {
-        "title": "Mexico Business News: SEDEMA installs 73,000 rain harvesting systems (26 Aug 2024)",
-        "url": "https://mexicobusiness.news/agribusiness/news/sedema-installs-73000-rain-harvesting-systems"
-      },
-      "involved": "https://www.sedema.cdmx.gob.mx/",
-      "added": "2026-11-22"
-    },
-    {
-      "id": "bkk-chula-centenary",
-      "place": "bangkok",
-      "name": "Chulalongkorn University Centenary Park",
-      "kind": "park",
-      "status": "built",
-      "year": 2017,
-      "lat": 13.7394,
-      "lng": 100.5242,
-      "area_km2": 0.045,
-      "who": "Chulalongkorn University; designed by Landprocess",
-      "summary": "A 4.5 ha park in central Bangkok built to hold rainwater: a tilted lawn, retention ponds and a constructed wetland catch storm runoff, holding about a million gallons, so the surrounding streets flood less.",
-      "source": {
-        "title": "Wikipedia: Chulalongkorn University Centenary Park",
-        "url": "https://en.wikipedia.org/wiki/Chulalongkorn_University_Centenary_Park"
-      },
-      "involved": "",
-      "added": "2026-11-22"
-    },
-    {
-      "id": "mtl-pierre-bedard",
-      "place": "montreal",
-      "name": "Parc résilient Pierre-Bédard (sponge park)",
-      "kind": "park",
-      "status": "built",
-      "year": 2025,
-      "lat": 45.583,
-      "lng": -73.535,
-      "area_km2": 0,
-      "who": "Ville de Montréal, borough of Mercier–Hochelaga-Maisonneuve",
-      "summary": "Montreal's largest sponge park: it can hold about 5,700 cubic meters of rainwater during heavy storms, with bioswales on the surrounding streets. Opened August 2025; over $15 million. Map pin approximate.",
-      "source": {
-        "title": "Ville de Montréal: Pierre-Bédard becomes the city's largest sponge park (30 Aug 2025)",
-        "url": "https://montreal.ca/communiques-de-presse/le-parc-pierre-bedard-devient-le-plus-grand-parc-eponge-de-la-ville-de-montreal"
-      },
-      "involved": "",
-      "added": "2026-11-22"
-    },
-    {
-      "id": "sf-india-basin",
-      "place": "san-francisco",
-      "name": "India Basin Waterfront Park",
-      "kind": "park",
-      "status": "underway",
-      "year": 2025,
-      "lat": 37.7355,
-      "lng": -122.3775,
-      "area_km2": 0.04,
-      "who": "San Francisco Recreation and Parks",
-      "summary": "A 10-acre waterfront park in Bayview–Hunters Point joining India Basin Shoreline Park with 900 Innes: restored shoreline habitat, a gravel beach, a pier and a boathouse. Final phase broke ground August 2025, due late 2027 or early 2028.",
-      "source": {
-        "title": "SF.gov: Mayor Lurie breaks ground on final phase of India Basin Waterfront Park (19 Aug 2025)",
-        "url": "https://www.sf.gov/news-mayor-lurie-breaks-ground-on-final-phase-of-india-basin-waterfront-park-project-upgrading-open-space-in-bayview-hunters-points"
-      },
-      "involved": "https://www.sfrecpark.org/1153/India-Basin-Shoreline-Park",
-      "added": "2026-11-22"
-    },
-    {
-      "id": "mil-forestami",
-      "place": "milan",
-      "name": "ForestaMi: 3 million trees for greater Milan",
-      "kind": "trees",
-      "status": "underway",
-      "year": 2019,
-      "lat": 45.528,
-      "lng": 9.208,
-      "area_km2": 0,
-      "who": "Comune di Milano, Città Metropolitana, Regione Lombardia, Parco Nord, Parco Agricolo Sud and partners; research by Politecnico di Milano",
-      "summary": "Planting across the metropolitan area since 2019, with a goal of 3 million trees and shrubs: about 640,000 planted by October 2026. Covers the whole metro area; map pin at Parco Nord.",
-      "source": {
-        "title": "Euronews: Milan, from one of Europe's most polluted cities to a model for nature restoration (29 Oct 2026)",
-        "url": "https://it.euronews.com/2026/10/29/da-una-delle-citta-piu-inquinate-deuropa-a-modello-per-il-ripristino-della-natura"
-      },
-      "involved": "https://forestami.org/",
-      "added": "2026-11-22"
-    },
-    {
-      "id": "bo-talea",
-      "place": "bologna",
-      "name": "TALEA: green cells against urban heat",
-      "kind": "trees",
-      "status": "underway",
-      "year": 2024,
-      "lat": 44.49,
-      "lng": 11.36,
-      "area_km2": 0,
-      "who": "Comune di Bologna with Università di Bologna and partners; EU Urban Initiative",
-      "summary": "A network of compact green climate refuges in public spaces to cool heat islands, with three pilot areas between the Fossolo district and the historic center. Over €6.2 million, running December 2024 to May 2028. Map pin approximate.",
-      "source": {
-        "title": "Quotidiano.net: TALEA, Bologna's green cells against heat islands (Feb 2026)",
-        "url": "https://www.quotidiano.net/speciali/cohesion-challenge/talea-le-cellule-verdi-di-bologna-contro-le-isole-di-calore-una-rete-diffusa-di-rifugi-climatici-per-il-benessere-urbano-3af04970"
-      },
-      "involved": "",
-      "added": "2026-11-22"
-    }
-  ]
+ "note": "Real projects shown on the Threadlands map. Added by the Threadlands team or by visitors, after review. Each has a public source.",
+ "projects": [
+  {
+   "id": "mx-texcoco-park",
+   "place": "mexico-city",
+   "name": "Parque Ecológico Lago de Texcoco",
+   "kind": "wetland",
+   "status": "built",
+   "year": 2024,
+   "lat": 19.49,
+   "lng": -98.99,
+   "area_km2": 140,
+   "who": "Government of Mexico (Conagua)",
+   "summary": "About 14,000 hectares of restored lake, wetland and parkland on the former site of the cancelled airport, east of the city. Opened in September 2024.",
+   "source": {
+    "title": "El Imparcial: AMLO inaugura el Parque Ecológico Lago de Texcoco (2 Sep 2024)",
+    "url": "https://www.elimparcial.com/mexico/2024/09/02/entrada-gratis-y-14000-hectareas-de-naturaleza-amlo-inaugura-el-parque-ecologico-lago-de-texcoco/"
+   },
+   "involved": "",
+   "added": "2026-11-22",
+   "stage": "tried",
+   "idea": "wetland-restoration"
+  },
+  {
+   "id": "mx-gran-canal",
+   "place": "mexico-city",
+   "name": "Parque Lineal Gran Canal",
+   "kind": "park",
+   "status": "built",
+   "year": 2021,
+   "lat": 19.452,
+   "lng": -99.113,
+   "area_km2": 0.01,
+   "who": "Government of Mexico City",
+   "summary": "A linear park on the bed of the old Gran Canal drain in Venustiano Carranza: 708 new trees and 24 wells that return rainwater to the aquifer. First stage about 840 m, opened 2021.",
+   "source": {
+    "title": "Mexico City tourism: Parque Lineal Gran Canal",
+    "url": "https://mexicocity.cdmx.gob.mx/venues/parque-lineal-gran-canal/"
+   },
+   "involved": "",
+   "added": "2026-11-22",
+   "stage": "tried",
+   "idea": "infrastructure-to-park"
+  },
+  {
+   "id": "mx-tlallipan",
+   "place": "mexico-city",
+   "name": "Jardín Flotante Tlallipan",
+   "kind": "corridor",
+   "status": "built",
+   "year": 2026,
+   "lat": 19.417,
+   "lng": -99.134,
+   "area_km2": 0.03,
+   "who": "Government of Mexico City",
+   "summary": "A 1.8 km elevated garden and walking route over Calzada de Tlalpan, between Pino Suárez and Chabacano: 176 trees, thousands of shrubs and more than 80,000 pollinator plants. Opened June 2026.",
+   "source": {
+    "title": "México Desconocido: Jardín Flotante Tlallipan (June 2026)",
+    "url": "https://www.mexicodesconocido.com.mx/jardin-flotante-tlallipan.html"
+   },
+   "involved": "",
+   "added": "2026-11-22",
+   "stage": "tried",
+   "idea": "green-route"
+  },
+  {
+   "id": "mx-cosecha-lluvia",
+   "place": "mexico-city",
+   "name": "Cosecha de Lluvia (rain harvesting at home)",
+   "kind": "rain",
+   "status": "underway",
+   "year": 2019,
+   "lat": 19.357,
+   "lng": -99.06,
+   "area_km2": 0,
+   "who": "SEDEMA, Government of Mexico City",
+   "summary": "Free rooftop rainwater systems for homes with poor water service, started in Iztapalapa and Xochimilco: 73,021 systems installed since 2019, about 1.7 billion liters harvested (August 2024).",
+   "source": {
+    "title": "Mexico Business News: SEDEMA installs 73,000 rain harvesting systems (26 Aug 2024)",
+    "url": "https://mexicobusiness.news/agribusiness/news/sedema-installs-73000-rain-harvesting-systems"
+   },
+   "involved": "https://www.sedema.cdmx.gob.mx/",
+   "added": "2026-11-22",
+   "stage": "program",
+   "idea": "rain-harvesting"
+  },
+  {
+   "id": "bkk-chula-centenary",
+   "place": "bangkok",
+   "name": "Chulalongkorn University Centenary Park",
+   "kind": "park",
+   "status": "built",
+   "year": 2017,
+   "lat": 13.7394,
+   "lng": 100.5242,
+   "area_km2": 0.045,
+   "who": "Chulalongkorn University; designed by Landprocess",
+   "summary": "A 4.5 ha park in central Bangkok built to hold rainwater: a tilted lawn, retention ponds and a constructed wetland catch storm runoff, holding about a million gallons, so the surrounding streets flood less.",
+   "source": {
+    "title": "Wikipedia: Chulalongkorn University Centenary Park",
+    "url": "https://en.wikipedia.org/wiki/Chulalongkorn_University_Centenary_Park"
+   },
+   "involved": "",
+   "added": "2026-11-22",
+   "stage": "tried",
+   "idea": "rain-park"
+  },
+  {
+   "id": "mtl-pierre-bedard",
+   "place": "montreal",
+   "name": "Parc résilient Pierre-Bédard (sponge park)",
+   "kind": "park",
+   "status": "built",
+   "year": 2025,
+   "lat": 45.583,
+   "lng": -73.535,
+   "area_km2": 0,
+   "who": "Ville de Montréal, borough of Mercier–Hochelaga-Maisonneuve",
+   "summary": "Montreal's largest sponge park: it can hold about 5,700 cubic meters of rainwater during heavy storms, with bioswales on the surrounding streets. Opened August 2025; over $15 million. Map pin approximate.",
+   "source": {
+    "title": "Ville de Montréal: Pierre-Bédard becomes the city's largest sponge park (30 Aug 2025)",
+    "url": "https://montreal.ca/communiques-de-presse/le-parc-pierre-bedard-devient-le-plus-grand-parc-eponge-de-la-ville-de-montreal"
+   },
+   "involved": "",
+   "added": "2026-11-22",
+   "stage": "tried",
+   "idea": "rain-park"
+  },
+  {
+   "id": "sf-india-basin",
+   "place": "san-francisco",
+   "name": "India Basin Waterfront Park",
+   "kind": "park",
+   "status": "underway",
+   "year": 2025,
+   "lat": 37.7355,
+   "lng": -122.3775,
+   "area_km2": 0.04,
+   "who": "San Francisco Recreation and Parks",
+   "summary": "A 10-acre waterfront park in Bayview–Hunters Point joining India Basin Shoreline Park with 900 Innes: restored shoreline habitat, a gravel beach, a pier and a boathouse. Final phase broke ground August 2025, due late 2027 or early 2028.",
+   "source": {
+    "title": "SF.gov: Mayor Lurie breaks ground on final phase of India Basin Waterfront Park (19 Aug 2025)",
+    "url": "https://www.sf.gov/news-mayor-lurie-breaks-ground-on-final-phase-of-india-basin-waterfront-park-project-upgrading-open-space-in-bayview-hunters-points"
+   },
+   "involved": "https://www.sfrecpark.org/1153/India-Basin-Shoreline-Park",
+   "added": "2026-11-22",
+   "stage": "tried",
+   "idea": "waterfront-park"
+  },
+  {
+   "id": "mil-forestami",
+   "place": "milan",
+   "name": "ForestaMi: 3 million trees for greater Milan",
+   "kind": "trees",
+   "status": "underway",
+   "year": 2019,
+   "lat": 45.528,
+   "lng": 9.208,
+   "area_km2": 0,
+   "who": "Comune di Milano, Città Metropolitana, Regione Lombardia, Parco Nord, Parco Agricolo Sud and partners; research by Politecnico di Milano",
+   "summary": "Planting across the metropolitan area since 2019, with a goal of 3 million trees and shrubs: about 640,000 planted by October 2026. Covers the whole metro area; map pin at Parco Nord.",
+   "source": {
+    "title": "Euronews: Milan, from one of Europe's most polluted cities to a model for nature restoration (29 Oct 2026)",
+    "url": "https://it.euronews.com/2026/10/29/da-una-delle-citta-piu-inquinate-deuropa-a-modello-per-il-ripristino-della-natura"
+   },
+   "involved": "https://forestami.org/",
+   "added": "2026-11-22",
+   "stage": "program",
+   "idea": "greening-for-heat"
+  },
+  {
+   "id": "bo-talea",
+   "place": "bologna",
+   "name": "TALEA: green cells against urban heat",
+   "kind": "trees",
+   "status": "underway",
+   "year": 2024,
+   "lat": 44.49,
+   "lng": 11.36,
+   "area_km2": 0,
+   "who": "Comune di Bologna with Università di Bologna and partners; EU Urban Initiative",
+   "summary": "A network of compact green climate refuges in public spaces to cool heat islands, with three pilot areas between the Fossolo district and the historic center. Over €6.2 million, running December 2024 to May 2028. Map pin approximate.",
+   "source": {
+    "title": "Quotidiano.net: TALEA, Bologna's green cells against heat islands (Feb 2026)",
+    "url": "https://www.quotidiano.net/speciali/cohesion-challenge/talea-le-cellule-verdi-di-bologna-contro-le-isole-di-calore-una-rete-diffusa-di-rifugi-climatici-per-il-benessere-urbano-3af04970"
+   },
+   "involved": "",
+   "added": "2026-11-22",
+   "stage": "program",
+   "idea": "greening-for-heat"
+  }
+ ],
+ "ideas": {
+  "rain-park": "Parks built to hold rainwater",
+  "greening-for-heat": "Trees and green space against heat",
+  "rain-harvesting": "Rain harvesting at home",
+  "wetland-restoration": "Wetland restoration",
+  "infrastructure-to-park": "Old infrastructure turned into parks",
+  "green-route": "Green walking routes",
+  "waterfront-park": "Waterfront parks"
+ },
+ "stages": {
+  "tried": "Tried here",
+  "program": "Running as a program",
+  "spreading": "Spreading to other places"
+ }
 }

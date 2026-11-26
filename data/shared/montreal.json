@@ -1,0 +1,1 @@
+{"slug":"montreal","name":"Montreal","basin_km2":1368,"levels":{"state":[{"id":"CAN-683","name":"Quebec","type":"Province","country":"Canada","region":null,"pop":3260000,"km2":2813,"city_pop":1521150,"basin_km2":973}]},"projects":[{"id":"mtl-pierre-bedard","in":"Quebec","level":"state","serves":[{"name":"Quebec","type":"Province","pop":122743}]}]}

@@ -25,7 +25,7 @@
     return Promise.all([data('index'), soft('ranking', { places: [] }), soft('summary', { places: {} }), soft('news', { places: {}, top: [] }), soft('projects', { projects: [] })]).then(function (x) {
       var rk = {}; (x[1].places || []).forEach(function (p, k) { if (p && p.slug) { rk[p.slug] = p; if (!p.rank) p.rank = k + 1; } });
       var lib = {}; (x[0].places || []).forEach(function (e) { if (e && e.slug) lib[e.slug] = e; });
-      return { lib: lib, list: x[0].places || [], rank: rk, rankN: (x[1].places || []).length, rankUpdated: x[1].updated, summary: x[2].places || {}, news: x[3], projects: x[4].projects || [] };
+      return { lib: lib, list: x[0].places || [], rank: rk, rankN: (x[1].places || []).length, rankUpdated: x[1].updated, summary: x[2].places || {}, news: x[3], projects: x[4].projects || [], ideas: x[4].ideas || {}, stages: x[4].stages || {} };
     });
   }
 
