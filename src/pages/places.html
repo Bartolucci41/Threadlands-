@@ -166,7 +166,7 @@
   function where(e) { var ps = String(e.display || '').split(', '), st = ps.length >= 3 ? ps[ps.length - 2] : (/^New York/.test(e.name) ? 'New York' : ''); return (/^(US|CA|AU)$/.test(e.cc) && st && st !== e.name ? st + ' \u00b7 ' : '') + e.country; }
   function fmtN(n) { return n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : Math.round(n / 1e3) + 'K'; }
   function fmtPop(e) { var c = e.city_pop, r = e.pop; if (!r) return ''; if (!c || c >= r * 0.9) return fmtN(r) + ' people'; return fmtN(c) + ' in the city, ' + fmtN(r) + ' in the region'; }
-  var PRESS = { heat: ['Heat', 'High surface temperatures'], flood: ['Flooding', 'High modeled exposure'], grey: ['Trees & green space', 'Little green where people live'], trees: ['Trees & green space', 'Low tree cover where people live'], food: ['Food', 'Limited nearby farmland capacity'] };
+  var PRESS = { heat: ['Heat', 'High surface temperatures'], flood: ['Flooding', 'High modeled exposure'], grey: ['Trees & green space', 'Low green cover in home areas'], trees: ['Trees & green space', 'Low tree cover in home areas'], food: ['Food', 'Limited nearby farmland capacity'] };
   var SORT = 'pop', REGION = 'All', LASTKEY = '';
   // Measured values, each in its own units, ordered so the end worth learning from comes first
   var MEAS = {

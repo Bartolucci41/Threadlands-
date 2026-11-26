@@ -3,7 +3,7 @@
 (function (root) {
   function num(v) { return typeof v === 'number' && isFinite(v) ? v : 0; }
   function measure(data) {
-    var c = data.cells || {}, n = (c.pop || []).length, R = data.regional || {};
+    var c = data.cells || {}, n = (c.pop || []).length, R = data.regional || {}, cellKm2 = +data.hex_km2 || null;
     var P = 0, heatP = 0, floodP = 0, greyP = 0, crowdP = 0, treeW = 0, hotTreeW = 0, hotP = 0, coolTreeW = 0, coolP = 0;
     var floodLowInc = 0, lstN = 0, rows = [];
     for (var i = 0; i < n; i++) {
@@ -32,7 +32,7 @@
       pop: P,
       heat: lstN ? heatP / P : null,
       flood: floodP / P,
-      grey: greyP / P,
+      grey: greyP / P, cellKm2: cellKm2,
       crowd: crowdP / P,
       trees: treeW / P,
       food: food,
@@ -52,6 +52,7 @@
   function pct(v, list) { if (!list || !list.length) return null; var k = 0; while (k < list.length && list[k] <= v) k++; return Math.round(100 * k / list.length); }
   function pctTxt(x) { return Math.round(x * 100) + '%'; }
   function deg(x) { return (x > 0 ? '+' : '') + x.toFixed(1) + '°C'; }
+  function cellTxt(m) { var a = m.cellKm2; return a ? ' (about ' + (a < 0.5 ? a.toFixed(1) : a < 10 ? Math.round(a) : Math.round(a / 5) * 5) + ' km\u00b2)' : ''; }
   function describe(key, m) {
     var d = m.dense, ppl = function (s) { var v = s * m.pop; return v >= 1e6 ? (v / 1e6).toFixed(1) + ' million' : v >= 1e3 ? Math.round(v / 1e3) + ',000' : Math.round(v); };
     switch (key) {
@@ -59,11 +60,11 @@
         who: d.lst !== null && d.lstRest !== null ? 'The most densely populated fifth of residents average ' + deg(d.lst - d.lstRest) + ' compared with everyone else, with ' + pctTxt(d.tree) + ' tree cover against ' + pctTxt(d.treeRest) + '.' : '' };
       case 'flood': return { t: 'Flooding', f: 'High modeled exposure', layer: 'flood', what: 'The model places ' + ppl(m.flood) + ' people (' + pctTxt(m.flood) + ') on low ground close to rivers or the sea, where water collects first.',
         who: d.fl > d.flRest * 1.2 && d.fl >= 0.05 ? 'High population density adds to the exposure: ' + pctTxt(d.fl) + ' of the most densely populated fifth of residents live on that low ground, against ' + pctTxt(d.flRest) + ' of everyone else.' : 'The model works in grid cells, not streets, so it shows where water tends to collect, not which streets flood.' };
-      case 'grey': return { t: 'Trees & green space', f: 'Little green where people live', layer: 'green', what: ppl(m.grey) + ' people (' + pctTxt(m.grey) + ') live where less than a tenth of the ground is trees, grass, shrubs or wetland.',
-        who: 'Little green ground usually means more heat and more runoff.' };
+      case 'grey': return { t: 'Trees & green space', f: 'Low green cover in home areas', layer: 'green', what: ppl(m.grey) + ' people (' + pctTxt(m.grey) + ') live in grid cells' + cellTxt(m) + ' where less than a tenth of the ground is mapped as trees, grass, shrubs or wetland.',
+        who: 'It looks only at the cell around each home: parks, open space and water nearby are not counted.' };
       case 'crowd': return { t: 'Population', f: 'High population density', layer: null, what: pctTxt(m.crowd) + ' of people live at more than 15,000 per km².',
         who: 'Dense neighborhoods have the least room for parks, drainage or trees.' };
-      case 'trees': return { t: 'Trees & green space', f: 'Low tree cover where people live', layer: 'green', what: 'The average resident has ' + pctTxt(m.trees) + ' tree cover around them.',
+      case 'trees': return { t: 'Trees & green space', f: 'Low tree cover in home areas', layer: 'green', what: 'The average resident has ' + pctTxt(m.trees) + ' tree cover in the grid cell' + cellTxt(m) + ' around their home.',
         who: d.treeRest > d.tree ? 'The most densely populated fifth of residents get ' + pctTxt(d.tree) + ', against ' + pctTxt(d.treeRest) + ' for everyone else.' : 'Trees are spread fairly evenly between dense and open neighborhoods.' };
       case 'food': return { t: 'Food', f: 'Limited nearby farmland capacity', layer: null, what: 'Farmland within 50 km could feed ' + (m.food < 0.01 ? 'less than 1%' : 'about ' + pctTxt(Math.min(1, m.food))) + ' of the region’s people.',
         who: 'This measures farmland capacity nearby, not where the city’s food actually comes from.' };
