@@ -233,7 +233,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .lib-map canvas { display: block; width: 100%; }
   .lib-zoom { position: absolute; top: 10px; right: 10px; display: grid; gap: 6px; }
   .lib-zoom .chip { width: 40px; min-height: 40px; padding: 0; font-size: 1.15rem; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
-  .lib-zoom .chip:disabled { opacity: 0.45; }
+  .lib-zoom .chip:disabled { opacity: 1; background: var(--surface); color: color-mix(in srgb, var(--ink) 30%, var(--surface)); cursor: default; }
   .lib-tip a { color: var(--bg); text-decoration: underline; }
   .lib-tip { position: absolute; pointer-events: none; padding: 4px 8px; border-radius: 6px; background: var(--ink); color: var(--bg); font: 500 0.8125rem var(--font-body); transform: translate(-50%, -130%); white-space: nowrap; }
   .hero-eyebrow { margin: 0 0 14px; font: 600 0.8rem var(--font-body, system-ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
@@ -948,7 +948,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=50">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=51">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

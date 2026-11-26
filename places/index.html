@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=50">
+<link rel="stylesheet" href="../assets/site.css?v=51">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -149,11 +149,12 @@
     ctx.beginPath(); ctx.moveTo(0, Y(0)); ctx.lineTo(W, Y(0)); ctx.stroke(); ctx.setLineDash([]);
     var ids = {}; shown.forEach(function (e) { ids[e.slug] = 1; });
     dots = [];
+    var DK = Math.max(0.5, Math.min(1, W / 900));   // narrower map, smaller dots: a phone shows the same world at about a third of the width
     // Smaller places appear as you zoom in, so the world view stays readable however many towns are added
     var filtering = shown.length < LIB.length, minPop = filtering ? 0 : 1e6 / (V.z * V.z);
     LIB.slice().sort(function (a, b) { return b.pop - a.pop; }).forEach(function (e) {
       if ((e.pop || 0) < minPop) return;
-      var x = X(e.lng), y = Y(e.lat), r = Math.max(3, Math.min(11, Math.sqrt(e.pop / 1e6) * 2.4 + 2.5)), on = ids[e.slug];
+      var x = X(e.lng), y = Y(e.lat), r = Math.max(2.2, Math.min(11, Math.sqrt(e.pop / 1e6) * 2.4 + 2.5) * DK), on = ids[e.slug];
       ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.globalAlpha = on ? 0.85 : 0.18; ctx.fillStyle = color('--accent'); ctx.fill();
       ctx.globalAlpha = on ? 1 : 0.3; ctx.strokeStyle = color('--surface'); ctx.lineWidth = 1.2; ctx.stroke();
