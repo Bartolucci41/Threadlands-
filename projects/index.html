@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=45">
+<link rel="stylesheet" href="../assets/site.css?v=46">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -45,6 +45,7 @@
     <p class="page-lead">Parks, wetlands, trees and water projects that are proposed, approved, under way or built, each with a public source. Back the ones you want to see happen: every count shows city teams and funders where public support is.</p>
   </header>
 
+  <p class="pj-only" id="pj-only" hidden></p>
   <div class="filters" id="pj-status" role="group" aria-label="Status">
     <span class="eyebrow" style="margin-right:4px">Status</span>
     <button type="button" class="chip" data-st="all" aria-pressed="true">All</button>
@@ -89,9 +90,11 @@
   function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   var STAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
   var KIND = { trees: 'Trees', park: 'Park', wetland: 'Wetland', corridor: 'Green corridor', rain: 'Rainwater', farm: 'Farm', river: 'River', transit: 'Transit or cycling', other: 'Other' };
-  var ALL = [], NAMES = {}, CC = {}, FILTER = 'all', MAP = null, MARK = {};
+  var ALL = [], NAMES = {}, CC = {}, FILTER = 'all', MAP = null, MARK = {}, PLACE = new URLSearchParams(location.search).get('place') || '';
+  function keep(p) { return (FILTER === 'all' || p.status === FILTER) && (!PLACE || p.place === PLACE); }
   function cards() {
-    var list = ALL.filter(function (p) { return FILTER === 'all' || p.status === FILTER; });
+    var list = ALL.filter(keep);
+    var only = $('#pj-only'); only.hidden = !PLACE; if (PLACE) only.innerHTML = 'Showing projects in <b>' + esc(NAMES[PLACE] || PLACE) + '</b> (' + ALL.filter(function (p) { return p.place === PLACE; }).length + '). <a href="./">See projects in every place</a>';
     $('#pj-list').innerHTML = list.map(function (p) {
       var st = STAT[p.status] || STAT.proposed;
       return '<li class="pjc" id="pjc-' + esc(p.id) + '" style="--pc:' + st[1] + '"><button type="button" class="pjc-go" data-id="' + esc(p.id) + '"><span class="pjc-top"><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span><span>' + (window.TLP ? TLP.flag(CC[p.place]) : '') + esc(NAMES[p.place] || p.place) + ' · ' + (KIND[p.kind] || 'Other') + '</span></span>' +
@@ -101,7 +104,7 @@
         '<span class="pjc-back"><button type="button" class="btn back-btn" data-back="' + esc(p.id) + '" aria-pressed="false" hidden>Back this</button><span class="back-n" data-backn="' + esc(p.id) + '"></span></span></li>';
     }).join('') || '<li class="rk-none">No projects with this status yet.</li>';
     if (window.TLP) TLP.wireBacking($('#pj-list'));
-    if (MAP) Object.keys(MARK).forEach(function (id) { var p = MARK[id].p, on = FILTER === 'all' || p.status === FILTER; if (on) MARK[id].m.addTo(MAP); else MARK[id].m.remove(); });
+    if (MAP) Object.keys(MARK).forEach(function (id) { var p = MARK[id].p, on = keep(p); if (on) MARK[id].m.addTo(MAP); else MARK[id].m.remove(); });
   }
   function focus(id) {
     var o = MARK[id]; if (!o) return;

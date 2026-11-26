@@ -101,6 +101,7 @@
         <button type="button" role="listitem" class="gi-w" id="gi-follow"><b>Follow for updates</b><span>See new projects and changes here on your Get involved page.</span></button>
       </div>
       <div class="pf-proj" id="pf-proj"></div>
+      <p class="pf-allpj" id="pf-allpj"></p>
       <div class="pf-add"><p><b>Know a project that belongs here?</b> A new park, a wetland, a tree-planting drive, a flood barrier. Add it with a link to a public source and it is checked before it appears.</p><a class="btn" id="pf-add" href="{B}explore/?add=1">Add a project</a></div>
     </section>
 
@@ -373,6 +374,10 @@
     else if (gp && window.TLF) TLF.open({ kind: 'idea', context: { Place: (D.lib[SLUG] || {}).name, Asking: 'Suggest a partner' } });
     else if (gf) { var sv = $('#pf-save'); if (sv && sv.getAttribute('aria-pressed') !== 'true') sv.click(); gf.querySelector('b').textContent = 'Following'; }
   });
+  function allProjectsLink(e) {
+    var n = D.projects.filter(function (p) { return p.place === SLUG; }).length, el = $('#pf-allpj');
+    el.innerHTML = (n ? '<a class="btn ghost" href="{B}projects/?place=' + esc(SLUG) + '">View all projects in ' + esc(e.name) + ' (' + n + ') &rarr;</a>' : '') + '<a class="pf-allpj-w" href="{B}projects/">Projects in every place</a>';
+  }
   function renderProjects(e) {
     var STAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };
     var mine = D.projects.filter(function (p) { return p.place === SLUG; });
@@ -698,7 +703,7 @@
       if (pjId) { var pc = document.getElementById('pj-' + pjId); if (pc) { pc.scrollIntoView({ block: 'center' }); pc.classList.add('pjc-hl'); var bb = pc.querySelector('.back-btn'); if (bb) setTimeout(function () { bb.focus({ preventScroll: true }); }, 300); } return; }
       if (addK) { PRESET = /^(heat|water|shade|green|change|idea|other)$/.test(addK) ? addK : 'other'; var hint = document.querySelector('.here-hint'); if (hint) hint.innerHTML = '<b>Tap the map where it is</b>, then choose \u201cAdd what you know here\u201d.'; var g = document.querySelector('.here-grid'); g.insertAdjacentHTML('beforebegin', '<p class="here-addnote" id="here-addnote"><b>Add what you know:</b> tap the map where it is. You can drag and zoom to find the spot first.</p>'); document.getElementById('here-addnote').scrollIntoView({ block: 'start' }); return; }
     }, 0);
-    setTimeout(function () { var sh = new URLSearchParams(location.search).get('show'), p = sh && PRESS_NOW.filter(function (x) { return x.key === sh; })[0]; if (!p) return; if (p.layer) { setLayer(p.layer); showWhy(p.key); document.getElementById('here').scrollIntoView({ block: 'start' }); } else { var t = document.getElementById(p.key === 'food' ? 'tied' : 'pressing'); if (t) t.scrollIntoView({ block: 'start' }); } }, 0); renderReady(e, r, sm); renderProjects(e); renderNews(e);
+    setTimeout(function () { var sh = new URLSearchParams(location.search).get('show'), p = sh && PRESS_NOW.filter(function (x) { return x.key === sh; })[0]; if (!p) return; if (p.layer) { setLayer(p.layer); showWhy(p.key); document.getElementById('here').scrollIntoView({ block: 'start' }); } else { var t = document.getElementById(p.key === 'food' ? 'tied' : 'pressing'); if (t) t.scrollIntoView({ block: 'start' }); } }, 0); renderReady(e, r, sm); renderProjects(e); allProjectsLink(e); renderNews(e);
     try { loadMap(e); } catch (err) { /* the map is extra */ }
     window.scrollTo(0, 0);
   }

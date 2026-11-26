@@ -691,6 +691,8 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .nw2-tag b { font-weight: 700; } .lb-now .nw2-tag b { color: #A04A28 !important; } .lb-decide .nw2-tag b { color: #5B4B8A !important; } .lb-progress .nw2-tag b { color: var(--accent) !important; }
   .nw2-why { display: block; font-size: 0.84rem; line-height: 1.45; color: var(--ink2); padding-left: 10px; border-left: 2px solid var(--line); } .nw2-why b { color: var(--ink); font-weight: 700; } .nw2-why a { color: var(--accent); font-weight: 600; }
   .nw2-pic { display: block; margin: 0 0 4px; text-decoration: none; } .nw2-pic img { display: block; width: 100%; height: 220px; object-fit: cover; border-radius: 10px; } .nw2-pic span { display: block; margin-top: 4px; font-size: 0.74rem; color: var(--ink2); }
+  .pf-allpj { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin: 16px 0 6px; } .pf-allpj-w { color: var(--accent); font-weight: 600; }
+  .pj-only { margin: 0 0 12px; padding: 10px 14px; border-radius: 10px; background: var(--surface2); } .pj-only a { color: var(--accent); font-weight: 600; margin-left: 6px; }
   .gi-ways { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0 0 18px; } @media (max-width: 860px) { .gi-ways { grid-template-columns: 1fr 1fr; } } @media (max-width: 480px) { .gi-ways { grid-template-columns: 1fr; } }
   .gi-w { display: grid; gap: 3px; text-align: left; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; font: inherit; cursor: pointer; } .gi-w:hover { border-color: var(--accent); } .gi-w b { color: var(--accent); } .gi-w span { font-size: 0.85rem; color: var(--ink2); line-height: 1.4; }
   .pjc-who { font-size: 0.82rem; color: var(--ink2); margin-top: 4px; } .pjc-who i { font-style: normal; font-weight: 700; color: var(--ink); } .pjc-links .linkbtn { color: var(--accent); font-weight: 600; font-size: inherit; }
@@ -936,7 +938,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=45">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=46">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
