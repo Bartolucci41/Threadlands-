@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 OUT = os.path.join(ROOT, 'assets', 'img', 'pj'); os.makedirs(OUT, exist_ok=True)
 FD = '/usr/share/fonts/opentype/inter/'
-F1 = ImageFont.truetype(FD + 'Inter-SemiBold.otf', 23); F2 = ImageFont.truetype(FD + 'Inter-Medium.otf', 20); F3 = ImageFont.truetype(FD + 'Inter-Medium.otf', 18)
+F1 = ImageFont.truetype(FD + 'Inter-SemiBold.otf', 23); F2 = ImageFont.truetype(FD + 'Inter-Medium.otf', 20); F3 = ImageFont.truetype(FD + 'Inter-Medium.otf', 18); F4 = ImageFont.truetype(FD + 'Inter-Medium.otf', 16)
 # Built land is kept pale so parks, farmland and water stand out
 COL = {'built': (226, 221, 211), 'tree': (58, 118, 72), 'shrub': (120, 150, 92), 'grass': (150, 186, 104), 'crop': (222, 202, 120), 'bare': (214, 196, 166), 'water': (52, 128, 190), 'wetland': (78, 156, 156)}
 W, H, SPAN_KM = 480, 255, 30
@@ -71,7 +71,8 @@ for p in json.load(open(os.path.join(ROOT, 'data', 'projects.json')))['projects'
         dr.ellipse([W/2-rr-3, H/2-rr-3, W/2+rr+3, H/2+rr+3], outline=(255, 255, 255), width=3)
         dr.ellipse([W/2-rr, H/2-rr, W/2+rr, H/2+rr], outline=PIN, width=4)
     dr.ellipse([W/2-13, H/2-13, W/2+13, H/2+13], fill=(255, 255, 255)); dr.ellipse([W/2-9, H/2-9, W/2+9, H/2+9], fill=PIN)
-    L = 5 * s; SB = (W - 42 - L, H - 44, W - 10, H - 10); BUSY.extend([SB, (W/2-14, H/2-14, W/2+14, H/2+14)])
+    L = 5 * s; SB = (W - 42 - L, H - 44, W - 10, H - 10); KW = dr.textlength('Built-up', font=F4) + 46; KB = (10, H - 44, 10 + KW, H - 10)   # key: pale = built-up land
+    BUSY.extend([SB, KB, (W/2-14, H/2-14, W/2+14, H/2+14)])
     # Landmark: marked if in frame, otherwise named at the edge with its direction and distance
     lm = LANDMARK.get(p['place'])
     if lm:
@@ -92,6 +93,8 @@ for p in json.load(open(os.path.join(ROOT, 'data', 'projects.json')))['projects'
     if OUTLAB:
         ox, oy = OUTLAB; place(dr, [(ox, oy - 16, 'c'), (ox, oy - 36, 'c'), (ox, oy + 4, 'c'), (ox - 20, oy - 16, 'r'), (ox + 20, oy - 16, 'l')], 'Outside this map', F3)
     # Scale
+    dr.rounded_rectangle(KB, radius=8, fill=(255, 255, 255)); dr.rounded_rectangle([KB[0] + 10, KB[1] + 9, KB[0] + 28, KB[1] + 25], radius=3, fill=COL['built'], outline=(150, 145, 136))
+    dr.text((KB[0] + 36, KB[1] + 7), 'Built-up', font=F4, fill=INK)
     X0 = W - 32 - L; dr.rounded_rectangle([X0 - 10, H - 44, W - 10, H - 10], radius=8, fill=(255, 255, 255))
     dr.line([X0, H - 18, X0 + L, H - 18], fill=INK, width=3); dr.text((X0, H - 42), '5 km', font=ImageFont.truetype(FD + 'Inter-Medium.otf', 16), fill=INK)
     im.save(os.path.join(OUT, p['id'] + '.jpg'), quality=82, optimize=True)
