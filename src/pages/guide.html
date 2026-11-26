@@ -1,0 +1,32 @@
+<!-- title: How to use Threadlands -->
+<!-- description: Find your place, read the map, add what you notice, back projects, and test changes in ThreadLab. -->
+
+<main class="wrap mth">
+  <header class="mth-head">
+    <h1 class="page-h">How to use Threadlands</h1>
+    <p class="page-lede">Where to click, from finding your place to testing a plan. For the data and formulas behind the numbers, see <a href="{B}how-it-works/">How the calculations work &rarr;</a></p>
+  </header>
+  <div class="mth-body">
+    <nav class="mth-nav" aria-label="On this page"><p>On this page</p><a href="#place">Your place</a><a href="#map">The map</a><a href="#act">Take part</a><a href="#lab">ThreadLab</a><a href="#studio">Studio</a></nav>
+    <div class="mth-main">
+      <section class="mth-sec" id="place"><h2>Find your place</h2><p class="mth-sum">Search on the home page or open <a href="{B}places/">All places</a>. Each place has its own page: today&rsquo;s weather and news, key findings, what it depends on, and what&rsquo;s changing. Not listed? Search for it in Explore and it builds itself in about ten minutes.</p></section>
+      <section class="mth-sec" id="map"><h2>Read the map</h2><p class="mth-sum">On a place page, <b>What&rsquo;s here?</b> shows heat, flooding or green space. Tap any spot to see what the data says about the area around it and the projects nearby. Start with a question, such as <i>Where does the rain go from here?</i>, to follow one thread.</p></section>
+      <section class="mth-sec" id="act"><h2>Take part</h2><p class="mth-sum">Use <b>Get involved</b> on any place page: back a project, pin what you notice on the map, suggest a partner, or follow the place. <b>Stand with</b> tells others how you are connected to it. Reports and suggestions go to a private queue and are reviewed by hand.</p></section>
+      <section class="mth-sec" id="lab"><h2>Test changes in ThreadLab</h2><p class="mth-sum">In <a href="{B}explore/">Explore</a>, choose a goal such as cooling the hottest streets, or move the levers yourself. Switch the climate to 2050, compare the plan with doing nothing, and download a decision brief. For places you follow, your last plan is kept on this device.</p></section>
+      <section class="mth-sec" id="studio"><h2>Design street by street in Studio</h2><div class="prose">
+      <p>Studio lets you design a place element by element. From above, you paint whole hexes; zoom in to street level, over an OpenStreetMap street map, and you draw real shapes instead: a rectangle or outline for an urban farm, park, pond, rain garden, green roof, solar array or housing site, and a line for street trees, a transit route or a wildlife corridor. Each shape is measured in square meters or meters, priced from those quantities, and spread across the hexes it touches. Every element changes the same Threadlands model the Explore page uses:</p>
+      <ul>
+        <li><b>Street trees, green roofs and urban farms</b> add shade and greenery to a built-up hex, which lowers its heat load and adds a little rain storage. Farm plots and full urban farms also grow food. Urban farms yield about as much per square meter as field crops (Payen and others, 2022), and Studio counts people fed at about 0.19 ha of cropland per person. Redeveloping built land into a farm or park includes the cost of clearing it.</li>
+        <li><b>Rain gardens</b> cut the flood exposure of the homes in their hex and add to the region&rsquo;s storage.</li>
+        <li><b>Ponds, wetlands, forests and corridors</b> change the land itself: they store floodwater, cool their neighbors and join up wildlife habitat.</li>
+        <li><b>Regenerative farming</b> helps farmland hold water and survive drought.</li>
+        <li><b>Transit lines</b> raise the low-carbon travel score. <b>Infill housing</b> makes room for more people in existing neighborhoods, so the farthest sprawl can stay unbuilt.</li>
+        <li><b>Solar roofs</b> report clean power from the roof area and the place&rsquo;s latitude.</li>
+      </ul>
+      <p>At street level, Studio loads the real buildings, parking lots, vacant lots, parks and streets from OpenStreetMap, so you can click a real place to transform it, or draw with points that snap to real corners. The 3D view raises every building to its mapped height, or an estimate from its type and neighborhood where none is mapped. New buildings rise to the floors you set, adding homes; sea walls and levees rise to the height you set, shielding flood-prone land up to about 3 km behind them.</p>
+      <p>Everything exports for GIS. On Explore, <b>Download GIS layers</b> saves every hex of a place, with its land cover, people, elevation, heat, flooding and habitat, as one GeoJSON file that opens in QGIS or ArcGIS. In Studio, <b>Download design for GIS</b> saves every element you placed, with its size, cost and settings.</p>
+      <p>Things take time. Trees reach full canopy in about 15 years, wetlands mature in about 8, forests in about 20, and transit takes about 5 years to build. The year slider grows each element and warms the climate step by step toward the middle-path 2050 scenario, and every score is compared with doing nothing in the same year. Costs come from published US studies, adjusted to each country, and are listed with sources on the Studio page.</p>
+    </div></section>
+    </div>
+  </div>
+</main>

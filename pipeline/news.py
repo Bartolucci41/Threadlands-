@@ -243,14 +243,24 @@ def main():
     # The biggest stories across all places: the city named in the headline, newest first, hazards first; one per place
     top = [dict(it, place=slug) for slug, items in out.items() for it in items if it["named"]]
     top.sort(key=lambda x: (x["date"], PRIORITY.get(x["topic"], 0)), reverse=True)
+    # A balanced front page: progress and decisions take up to half the slots, so it is not only floods and heat
     picked, used = [], set()
-    for it in top:
-        if it["place"] in used:
-            continue
-        used.add(it["place"])
-        picked.append(it)
-        if len(picked) >= 12:
-            break
+    def take(pool, n):
+        for it in pool:
+            if len(picked) >= n:
+                break
+            if it["place"] in used:
+                continue
+            used.add(it["place"])
+            picked.append(it)
+    good = [it for it in top if it.get("tone") in ("gain", "update")]
+    take(good, 6)
+    take(top, 12)
+    picked.sort(key=lambda x: (x.get("tone") == "concern", x["date"]), reverse=False)
+    picked.sort(key=lambda x: x["date"], reverse=True)
+    # interleave so risks and progress alternate down the page
+    risk = [x for x in picked if x.get("tone") == "concern"]; rest = [x for x in picked if x.get("tone") != "concern"]
+    picked = [x for pair in zip(risk, rest) for x in pair] + risk[len(rest):] + rest[len(risk):]
     data = {"updated": time.strftime("%Y-%m-%d"), "source": "Google News", "top": picked, "places": out,
             "regions": reg_out, "place_region": place_region, "next": (first + done) % max(1, len(places)) if done < len(places) else 0}
     json.dump(data, open(os.path.join(ROOT, "data", "news.json"), "w"), ensure_ascii=False, separators=(",", ":"))

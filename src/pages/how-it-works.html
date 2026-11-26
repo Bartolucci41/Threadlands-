@@ -1,62 +1,38 @@
-<!-- title: How it works | Threadlands -->
-<!-- description: Where Threadlands gets its data, how a place is built, and how every score and stress test is calculated. -->
+<!-- title: Method | Threadlands -->
+<!-- description: How Threadlands builds a picture of a place from open data, how its measures, scenarios and costs are calculated, and what the numbers can and cannot support. -->
 
-<main class="wrap">
-  <h1 class="page-h">How it works</h1>
-  <p class="page-lede">The short version, then the detail for anyone who wants it.</p>
-  <ul class="short-list">
-    <li><b>Open data, whole planet.</b> Satellite land cover, elevation, population, rivers and heat, free for anywhere on Earth.</li>
-    <li><b>The city and its land as one system.</b> Every place comes with the river basin it drinks from, the farmland around it and its wild places.</li>
-    <li><b>Simple, published formulas.</b> Heat, flooding, food, habitat and travel scores, checked against satellite heat readings.</li>
-    <li><b>Real prices.</b> Costs from published studies, adjusted to each country&rsquo;s price level.</li>
-    <li><b>A screening tool.</b> Built for comparing options and starting conversations, not for engineering a site.</li>
-  </ul>
-  <p class="hint">Open any section below for the full method and sources.</p>
+<main class="wrap mth">
+  <header class="mth-head">
+    <h1 class="page-h">How the calculations work</h1>
+    <p class="page-lede">How Threadlands builds a picture of a place, and how every measure, scenario and cost is worked out. Looking for where to click? <a href="{B}guide/">How to use Threadlands &rarr;</a></p>
+  </header>
 
-  <section class="story" aria-labelledby="data-h" style="margin-top:24px">
-    <details class="how-sec">
-      <summary><h2 id="data-h">Where the data comes from</h2><span>Open satellite and map data, free for the whole planet.</span></summary>
-    <dl class="defs">
-      <div><dt>Place outlines</dt><dd>OpenStreetMap, through its Nominatim search service. Rivers and streams also come from OpenStreetMap, because satellites miss narrow ones.</dd></div>
-      <div id="shared"><dt>Shared land</dt><dd>Each grid cell is placed in its state or province (Natural Earth admin-1) and, in the United States, its county (Natural Earth admin-2). People, area and river-basin area are then counted per government, within the modeled region only. A project &ldquo;serves&rdquo; the people living within 3 km of it. Candidates for joint projects come from the map: a project whose neighbors live under more than one government, or a river basin that crosses more than one. They are prompts for conversation, not agreements.</dd></div>
-      <div id="stages"><dt>Project stages and relationships</dt><dd>Two separate things. A project&rsquo;s <b>stage</b> says how developed it is, adapted from the innovation pathway of the Urban Sustainability Directors Network: <b>Tried here</b> (a first project in one place), <b>Running as a program</b> (many sites or a city-wide program) and <b>Expanding to other places</b> (the same program reaching new places). A project&rsquo;s <b>relationship</b> to others says where it sits among similar work: <b>Similar approach elsewhere</b> when projects in different places take the same approach, such as parks built to hold rainwater, which does not mean one learned from the other; and <b>Learned from</b> a named project, only when a source documents it. A new pilot can have learned from elsewhere, and an established program can have developed on its own.</dd></div>
-      <div><dt>Land cover</dt><dd>ESA WorldCover 2021, a 10-meter map of trees, shrubs, grass, cropland, built-up land, bare ground, water and wetland for the whole planet.</dd></div>
-      <div><dt>Elevation</dt><dd>Copernicus DEM GLO-30, a 30-meter elevation model from the European Space Agency.</dd></div>
-      <div><dt>Population</dt><dd>WorldPop 2020, about 1 km resolution, counted country by country.</dd></div>
-      <div><dt>River basins</dt><dd>HydroBASINS from WWF HydroSHEDS. Threadlands follows every sub-basin upstream of the city to outline the land that drains toward it.</dd></div>
-      <div><dt>Surface heat</dt><dd>Landsat 8 and 9 Collection 2 surface temperature from USGS and NASA, 2021 to 2025, clear skies only.</dd></div>
-      <div id="hot-spot"><dt>Local heat hot spot</dt><dd>&ldquo;Typical&rdquo; is the median daytime surface temperature of all land in the place&rsquo;s modeled region on the same day. For each clear Landsat pass (about 10:30 in the morning, up to 20 passes from 2021 to 2025, in the three hottest months, or all year in the tropics), every patch of about 1 km&sup2; is compared with that regional median, and the middle value across passes is kept. A patch at least 2&deg;C above it is a local heat hot spot. Because each region is compared with itself, a hot-climate region can have few hot spots, and a cool one can have many. It measures ground temperature, not air temperature or health risk.</dd></div>
-      <div><dt>This week</dt><dd>Twice a week, a robot finds the latest clear Landsat pass over every place in the library, from the past six weeks, and compares its surface temperature with passes in the same weeks of up to six earlier years. Landsat crosses each place about every eight days at mid-morning, so a reading can be a few days old, and clouds can hide a place for weeks.</dd></div>
-      <div><dt>Climate</dt><dd>The IPCC Sixth Assessment Report for warming, heavy rain and sea level; Zhao and others, 2017, for crop yields under heat.</dd></div>
-    </dl>
-    <p class="hint" style="margin-top:10px">Satellite and map data are reached through Microsoft Planetary Computer.</p>
-    </details>
-  </section>
+  <ol class="mth-steps">
+    <li><b>We assemble a picture of a place from open data.</b><span>Satellite land cover, heat, elevation, population, rivers and the river basin, laid on a grid of small cells.</span></li>
+    <li><b>You explore conditions and test changes.</b><span>See heat, flooding and green space where you live, then try street trees, wetlands, corridors or farming.</span></li>
+    <li><b>You compare the results and share a brief.</b><span>Each plan is scored against doing nothing in the same climate, and exports as a short brief with its sources and assumptions.</span></li>
+  </ol>
 
-  <section class="story" aria-labelledby="studio-h">
-    <details class="how-sec">
-      <summary><h2 id="studio-h">How Studio works</h2><span>Real streets, real prices, growing year by year to 2050.</span></summary>
-    <div class="prose">
-      <p>Studio lets you design a place element by element. From above, you paint whole hexes; zoom in to street level, over an OpenStreetMap street map, and you draw real shapes instead: a rectangle or outline for an urban farm, park, pond, rain garden, green roof, solar array or housing site, and a line for street trees, a transit route or a wildlife corridor. Each shape is measured in square meters or meters, priced from those quantities, and spread across the hexes it touches. Every element changes the same Threadlands model the Explore page uses:</p>
-      <ul>
-        <li><b>Street trees, green roofs and urban farms</b> add shade and greenery to a built-up hex, which lowers its heat load and adds a little rain storage. Farm plots and full urban farms also grow food. Urban farms yield about as much per square meter as field crops (Payen and others, 2022), and Studio counts people fed at about 0.19 ha of cropland per person. Redeveloping built land into a farm or park includes the cost of clearing it.</li>
-        <li><b>Rain gardens</b> cut the flood exposure of the homes in their hex and add to the region&rsquo;s storage.</li>
-        <li><b>Ponds, wetlands, forests and corridors</b> change the land itself: they store floodwater, cool their neighbors and join up wildlife habitat.</li>
-        <li><b>Regenerative farming</b> helps farmland hold water and survive drought.</li>
-        <li><b>Transit lines</b> raise the low-carbon travel score. <b>Infill housing</b> makes room for more people in existing neighborhoods, so the farthest sprawl can stay unbuilt.</li>
-        <li><b>Solar roofs</b> report clean power from the roof area and the place&rsquo;s latitude.</li>
-      </ul>
-      <p>At street level, Studio loads the real buildings, parking lots, vacant lots, parks and streets from OpenStreetMap, so you can click a real place to transform it, or draw with points that snap to real corners. The 3D view raises every building to its mapped height, or an estimate from its type and neighborhood where none is mapped. New buildings rise to the floors you set, adding homes; sea walls and levees rise to the height you set, shielding flood-prone land up to about 3 km behind them.</p>
-      <p>Everything exports for GIS. On Explore, <b>Download GIS layers</b> saves every hex of a place, with its land cover, people, elevation, heat, flooding and habitat, as one GeoJSON file that opens in QGIS or ArcGIS. In Studio, <b>Download design for GIS</b> saves every element you placed, with its size, cost and settings.</p>
-      <p>Things take time. Trees reach full canopy in about 15 years, wetlands mature in about 8, forests in about 20, and transit takes about 5 years to build. The year slider grows each element and warms the climate step by step toward the middle-path 2050 scenario, and every score is compared with doing nothing in the same year. Costs come from published US studies, adjusted to each country, and are listed with sources on the Studio page.</p>
-    </div>
-    </details>
-  </section>
+  <figure class="mth-ex">
+    <img src="{B}assets/img/how-trees.png" alt="Two maps of the same Mexico City neighborhoods: heat load today, mostly dark red, and with more street trees, mostly light orange" loading="lazy" width="1140" height="629">
+    <figcaption><b>An example: street trees in eastern Mexico City.</b> Each hexagon is a patch of about 0.85 km&sup2;. Its heat load comes mostly from paving and roofs, and partly from how many people live there. Adding street trees to 60% of what is possible lowers it across the area; the city-wide heat relief score rises from 47 to 71. A model result to compare options with, not a temperature forecast.</figcaption>
+  </figure>
 
-  <section class="story" aria-labelledby="build-h">
-    <details class="how-sec">
-      <summary><h2 id="build-h">How a place gets built</h2><span>Any place builds itself automatically in about ten minutes.</span></summary>
-    <ol class="steps">
+  <div class="mth-body">
+    <nav class="mth-nav" aria-label="On this page">
+      <p>On this page</p>
+      <a href="#data">Data sources</a><a href="#measures">Measures and scores</a><a href="#scenarios">Testing scenarios</a><a href="#costs">Costs</a><a href="#checks">Checks and limitations</a>
+    </nav>
+    <div class="mth-main">
+
+      <section class="mth-sec" id="data" aria-labelledby="data-h">
+        <h2 id="data-h">Data sources</h2>
+        <p class="mth-sum">Everything comes from open data that covers the whole planet, so any place can be built the same way.</p>
+        <div class="tablewrap"><table class="mth-tbl"><tbody>
+          <tr><th scope="row">Land cover</th><td>ESA WorldCover 2021, a 10-meter map of trees, shrubs, grass, cropland, built-up land, bare ground, water and wetland for the whole planet.</td></tr><tr><th scope="row">Elevation</th><td>Copernicus DEM GLO-30, a 30-meter elevation model from the European Space Agency.</td></tr><tr><th scope="row">Population</th><td>WorldPop 2020, about 1 km resolution, counted country by country.</td></tr><tr><th scope="row">River basins</th><td>HydroBASINS from WWF HydroSHEDS. Threadlands follows every sub-basin upstream of the city to outline the land that drains toward it.</td></tr><tr><th scope="row">Surface heat</th><td>Landsat 8 and 9 Collection 2 surface temperature from USGS and NASA, 2021 to 2025, clear skies only.</td></tr><tr><th scope="row">Outlines and rivers</th><td>OpenStreetMap, through its Nominatim search service. Rivers and streams also come from OpenStreetMap, because satellites miss narrow ones.</td></tr><tr><th scope="row">Climate</th><td>The IPCC Sixth Assessment Report for warming, heavy rain and sea level; Zhao and others, 2017, for crop yields under heat.</td></tr>
+        </tbody></table></div>
+        <p class="mth-note">Satellite and map data are reached through Microsoft Planetary Computer.</p>
+        <details class="mth-more"><summary>How a place gets built, step by step</summary><ol class="steps">
       <li><span><b>Find the outline.</b> The place is looked up in OpenStreetMap. Small places get a ring of surrounding land, so a town brings its farms, rivers and forests with it.</span></li>
       <li><span><b>Lay a grid of hexes.</b> The hex size adapts to the area, from about half a square kilometer for a city to much larger for a country.</span></li>
       <li><span><b>Fill each hex.</b> Land cover, elevation, population, rivers and a flood screening value are averaged into every hex.</span></li>
@@ -64,29 +40,14 @@
       <li><span><b>Check the heat against satellites.</b> Up to 20 clear Landsat scenes are averaged into a measured surface temperature for each hex.</span></li>
       <li><span><b>Save it to the library.</b> A robot on GitHub does all of this in a few minutes, and the place then opens instantly for everyone.</span></li>
     </ol>
-    <p class="hint" style="margin-top:10px">The same steps also run as free Google Colab notebooks, for anyone who wants to build a place by hand or check the work. They are in the <a href="https://github.com/Bartolucci41/Threadlands-">project on GitHub</a>.</p>
-    </details>
-  </section>
+    <p class="hint" style="margin-top:10px">The same steps also run as free Google Colab notebooks, for anyone who wants to build a place by hand or check the work. They are in the <a href="https://github.com/Bartolucci41/Threadlands-">project on GitHub</a>.</p></details>
+        <details class="mth-more"><summary>Shared land, project stages and this week&rsquo;s heat</summary><div id="shared" class="mx-def"><h4>Shared land</h4><p>Each grid cell is placed in its state or province (Natural Earth admin-1) and, in the United States, its county (Natural Earth admin-2). People, area and river-basin area are then counted per government, within the modeled region only. A project &ldquo;serves&rdquo; the people living within 3 km of it. Candidates for joint projects come from the map: a project whose neighbors live under more than one government, or a river basin that crosses more than one. They are prompts for conversation, not agreements.</p></div><div id="stages" class="mx-def"><h4>Project stages and relationships</h4><p>Two separate things. A project&rsquo;s <b>stage</b> says how developed it is, adapted from the innovation pathway of the Urban Sustainability Directors Network: <b>Tried here</b> (a first project in one place), <b>Running as a program</b> (many sites or a city-wide program) and <b>Expanding to other places</b> (the same program reaching new places). A project&rsquo;s <b>relationship</b> to others says where it sits among similar work: <b>Similar approach elsewhere</b> when projects in different places take the same approach, such as parks built to hold rainwater, which does not mean one learned from the other; and <b>Learned from</b> a named project, only when a source documents it. A new pilot can have learned from elsewhere, and an established program can have developed on its own.</p></div><div class="mx-def"><h4>This week</h4><p>Twice a week, a robot finds the latest clear Landsat pass over every place in the library, from the past six weeks, and compares its surface temperature with passes in the same weeks of up to six earlier years. Landsat crosses each place about every eight days at mid-morning, so a reading can be a few days old, and clouds can hide a place for weeks.</p></div></details>
+      </section>
 
-  <section class="story" aria-labelledby="method-h" style="margin-top:40px">
-    <details class="how-sec">
-      <summary><h2 id="method-h">How the model works</h2><span>The formulas behind every score, and how they were checked.</span></summary>
-    <div class="prose">
-      <p>Every place is a set of hexes. Each hex carries its share of built-up land, trees, shrubs, grass, cropland, bare ground, water and wetland, plus its population, elevation and a flood screening value. The levers change the cover of specific hexes, and five scores are computed from the new map. Scores run from 0 to 100 and compare scenarios within one place. The weights are modelling choices made so that the levers trade off against each other. They are not forecasts.</p>
-    </div>
-    <dl class="defs">
-      <div><dt>Reading the map</dt><dd>A hex counts as built up when a quarter or more of it is buildings and paving. Built-up hexes split into dense core, mid-density and sprawl edge by population per km². Green hexes surrounded by city on three or more sides become city parks. Where none exist, new park sites go in the densest districts.</dd></div>
-      <div><dt>Heat relief</dt><dd>Each built-up hex gets a heat load, set three quarters by how much of it is paved or roofed and one quarter by population density. Street trees lower it, and so do cool neighbors such as forest, wetland, water, parks, greenways and farmland. Compact growth raises density because the same people live on less land.</dd></div>
-      <div><dt>Flood safety</dt><dd>A hex is flood-prone when a river runs through it, or when it sits within about 2 km of a river, lake or sea and less than 5 m above it. Rivers come from OpenStreetMap, because satellites miss narrow ones. Canals and small streams are drawn on the map but are not treated as flood sources, since most are controlled channels. People living in flood-prone built-up hexes carry the exposure. Restored wetlands hold the most water, with street trees and regenerative soils adding a little.</dd></div>
-      <div><dt>Habitat network</dt><dd>Forest, wetland, open grassland, water, parks, corridors and regenerative farms count as habitat. The score blends how much habitat exists, how much of it sits in one connected network, and how many city parks join that network. Corridors follow the cheapest path from the largest natural area to each park, avoiding dense districts where they can.</dd></div>
-      <div><dt>Local food</dt><dd>Cropland in the region is compared with what its people would need at about 0.19 hectares each, roughly the world average. Regenerative farms yield slightly less in a normal year and hold up much better in a drought. Farms near restored wetlands keep more water in a dry year.</dd></div>
-      <div><dt>Satellite heat check</dt><dd>The place builder adds measured surface temperature from Landsat 8 and 9 (2021 to 2025, clear skies only; the three hottest months outside the tropics, the whole year inside them). Each scene is compared with its own typical land temperature, and the median across scenes is kept, so hotter and cooler days can be pooled. The page then compares that measured pattern with the model’s heat estimate using a rank correlation over built-up hexes. The first check, on Milan, showed the model leaning too hard on population density (correlation 0.38): warehouses and rail yards with few residents were among the hottest ground. Heat intensity now follows built-up surface for three quarters and population density for one quarter, which lifts Milan to 0.62. Without further tuning, the same change lifts San Francisco from 0.28 to 0.49 and Bangkok from 0.74 to 0.81. Land within a few kilometers of a large sea, bay or lake also gets a modest sea-breeze cooling. San Francisco’s fog is a different matter: built-up land on the Pacific side measures about 0.7 °C below typical land, while the Bay shore runs 2 to 3 °C above it, because the fog comes from cold upwelling ocean water and the prevailing wind, not from nearness to water. No simple rule captures that, so wherever a place has satellite readings, the model corrects each built-up hex toward the measured value (70% of the gap, less where few clear scenes exist). The match figures shown are for the model before that correction, so the check stays honest.</dd></div>
-      <div><dt>2050 stress test</dt><dd>The climate switch reruns every score for about 2050. Global warming reaches about 2.0 °C on a middle path (SSP2-4.5) and 2.4 °C at high emissions (SSP5-8.5), compared with 1.09 °C in 2011–2020, and land warms about 1.46 times as fast as the global average. That gives about 1.3 °C or 1.9 °C of extra summer heat over land. Heat load rises 10% per degree, and the harm from heat rises a further 20% per degree, because dangerous hot days multiply faster than average warming: the average city gains about 29 more days above 35 °C at 3 °C than at 1.5 °C (World Resources Institute, from CMIP6), and heat deaths are projected to rise 370% by 2050 at 2 °C (Lancet Countdown, 2023). Heavy rain grows about 7% more intense per degree, and flood harm rises with it a second time, because storms overflow drains sized for today. Seas rise about 20 to 23 cm, which counts heavily on low coastal land: floods that came once a century are projected to come every year at many coasts by 2050 (IPCC SROCC). Crop yields fall about 4% per degree, and twice that on conventional farms in a dry year, while living soils hold up better. Climate figures come from the IPCC Sixth Assessment Report; crop figures from Zhao and others, 2017.</dd></div>
-      <div><dt>Where to start</dt><dd>Each action gets its own ranking on today's map. Street trees go first where heat load and population are highest. Wetlands go first on low floodplain land with the most people in flood-prone homes within two hex rings. Corridors start with parks that are cut off from the main habitat, favoring short links near many people. Regenerative farming starts on farmland in the floodplain or next to habitat. Compact growth starts with the outermost sprawl, sooner where it floods. Sites that touch a site already listed are skipped, so each list covers more ground.</dd></div>
-      <div><dt>Costs and benefits</dt><dd>The Explore page turns each plan into rough sizes, costs and yearly benefits: street trees counted at up to about 850 per km&sup2; of built-up land, and hectares of new wetland, corridor and regenerative farmland counted from the hexes that change. Unit costs and benefits come from published US studies, listed with links under &ldquo;Sources and assumptions&rdquo; on the Explore page. They are order-of-magnitude figures for comparing plans, scaled to each country&rsquo;s price level with World Bank data and shown in US dollars.</dd></div>
-      <div><dt>Low-carbon travel</dt><dd>Rises as sprawl is pulled back, with a small bonus for greenways and shade that make walking easier.</dd></div>
-    </dl>
-    <div class="tablewrap">
+      <section class="mth-sec" id="measures" aria-labelledby="measures-h">
+        <h2 id="measures-h">Measures and scores</h2>
+        <p class="mth-sum">Five scores from 0 to 100, one each for heat relief, flood safety, habitat, local food and low-carbon travel. Three stress tests combine them, and the resilience index combines the tests.</p>
+        <div class="tablewrap">
       <table>
         <thead><tr><th>Stress test</th><th>Made of</th></tr></thead>
         <tbody>
@@ -97,14 +58,32 @@
         </tbody>
       </table>
     </div>
-    <div class="prose">
-      <p>Levers cost different amounts per point: shade 0.9, corridors 0.6, wetlands 0.85, regenerative farming 0.8 and compact growth 1.6, against a cap of 240. The best-mix search tries every combination in steps of 20 that fits the cap. Several quite different mixes often score within a point or two of the best, so there is usually more than one good route.</p>
-    </div>
-    </details>
+        <details class="mth-more"><summary>How each score is calculated</summary>
+          <div class="mth-p"><p>Every place is a set of hexes. Each hex carries its share of built-up land, trees, shrubs, grass, cropland, bare ground, water and wetland, plus its population, elevation and a flood screening value. The levers change the cover of specific hexes, and five scores are computed from the new map. Scores run from 0 to 100 and compare scenarios within one place. The weights are modelling choices made so that the levers trade off against each other. They are not forecasts.</p></div>
+          <div class="mx-def"><h4>Reading the map</h4><p>A hex counts as built up when a quarter or more of it is buildings and paving. Built-up hexes split into dense core, mid-density and sprawl edge by population per km². Green hexes surrounded by city on three or more sides become city parks. Where none exist, new park sites go in the densest districts.</p></div><div class="mx-def"><h4>Heat relief</h4><p>Each built-up hex gets a heat load, set three quarters by how much of it is paved or roofed and one quarter by population density. Street trees lower it, and so do cool neighbors such as forest, wetland, water, parks, greenways and farmland. Compact growth raises density because the same people live on less land.</p></div><div class="mx-def"><h4>Flood safety</h4><p>A hex is flood-prone when a river runs through it, or when it sits within about 2 km of a river, lake or sea and less than 5 m above it. Rivers come from OpenStreetMap, because satellites miss narrow ones. Canals and small streams are drawn on the map but are not treated as flood sources, since most are controlled channels. People living in flood-prone built-up hexes carry the exposure. Restored wetlands hold the most water, with street trees and regenerative soils adding a little.</p></div><div class="mx-def"><h4>Habitat network</h4><p>Forest, wetland, open grassland, water, parks, corridors and regenerative farms count as habitat. The score blends how much habitat exists, how much of it sits in one connected network, and how many city parks join that network. Corridors follow the cheapest path from the largest natural area to each park, avoiding dense districts where they can.</p></div><div class="mx-def"><h4>Local food</h4><p>Cropland in the region is compared with what its people would need at about 0.19 hectares each, roughly the world average. Regenerative farms yield slightly less in a normal year and hold up much better in a drought. Farms near restored wetlands keep more water in a dry year.</p></div><div class="mx-def"><h4>Low-carbon travel</h4><p>Rises as sprawl is pulled back, with a small bonus for greenways and shade that make walking easier.</p></div><div id="hot-spot" class="mx-def"><h4>Local heat hot spot</h4><p>&ldquo;Typical&rdquo; is the median daytime surface temperature of all land in the place&rsquo;s modeled region on the same day. For each clear Landsat pass (about 10:30 in the morning, up to 20 passes from 2021 to 2025, in the three hottest months, or all year in the tropics), every patch of about 1 km&sup2; is compared with that regional median, and the middle value across passes is kept. A patch at least 2&deg;C above it is a local heat hot spot. Because each region is compared with itself, a hot-climate region can have few hot spots, and a cool one can have many. It measures ground temperature, not air temperature or health risk.</p></div>
+        </details>
+      </section>
 
-    <details class="how-sec" id="limits">
-      <summary><h2 id="limits-h">Known limitations</h2><span>What the numbers can and cannot support yet, and what is being fixed.</span></summary>
-      <div class="how-lims">
+      <section class="mth-sec" id="scenarios" aria-labelledby="scenarios-h">
+        <h2 id="scenarios-h">Testing scenarios</h2>
+        <p class="mth-sum">Five levers change the land: street trees, corridors, wetlands, regenerative farming and compact growth. Every plan is compared with doing nothing in the same climate, today or in 2050.</p>
+        <details class="mth-more"><summary>The 2050 climate, where to start, and the best-mix search</summary>
+          <div class="mx-def"><h4>2050 stress test</h4><p>The climate switch reruns every score for about 2050. Global warming reaches about 2.0 °C on a middle path (SSP2-4.5) and 2.4 °C at high emissions (SSP5-8.5), compared with 1.09 °C in 2011–2020, and land warms about 1.46 times as fast as the global average. That gives about 1.3 °C or 1.9 °C of extra summer heat over land. Heat load rises 10% per degree, and the harm from heat rises a further 20% per degree, because dangerous hot days multiply faster than average warming: the average city gains about 29 more days above 35 °C at 3 °C than at 1.5 °C (World Resources Institute, from CMIP6), and heat deaths are projected to rise 370% by 2050 at 2 °C (Lancet Countdown, 2023). Heavy rain grows about 7% more intense per degree, and flood harm rises with it a second time, because storms overflow drains sized for today. Seas rise about 20 to 23 cm, which counts heavily on low coastal land: floods that came once a century are projected to come every year at many coasts by 2050 (IPCC SROCC). Crop yields fall about 4% per degree, and twice that on conventional farms in a dry year, while living soils hold up better. Climate figures come from the IPCC Sixth Assessment Report; crop figures from Zhao and others, 2017.</p></div><div class="mx-def"><h4>Where to start</h4><p>Each action gets its own ranking on today's map. Street trees go first where heat load and population are highest. Wetlands go first on low floodplain land with the most people in flood-prone homes within two hex rings. Corridors start with parks that are cut off from the main habitat, favoring short links near many people. Regenerative farming starts on farmland in the floodplain or next to habitat. Compact growth starts with the outermost sprawl, sooner where it floods. Sites that touch a site already listed are skipped, so each list covers more ground.</p></div>
+          <div class="mx-def"><h4>The best-mix search</h4><p>Levers cost different amounts per point: shade 0.9, corridors 0.6, wetlands 0.85, regenerative farming 0.8 and compact growth 1.6, against a cap of 240. The best-mix search tries every combination in steps of 20 that fits the cap. Several quite different mixes often score within a point or two of the best, so there is usually more than one good route.</p></div>
+        </details>
+      </section>
+
+      <section class="mth-sec" id="costs" aria-labelledby="costs-h">
+        <h2 id="costs-h">Costs</h2>
+        <p class="mth-sum">Rough sizes, costs and yearly benefits for each plan, from published studies, adjusted to each country&rsquo;s price level. They are for comparing options, not for budgets.</p>
+        <details class="mth-more"><summary>Cost assumptions</summary><div class="mx-def"><h4>Costs and benefits</h4><p>The Explore page turns each plan into rough sizes, costs and yearly benefits: street trees counted at up to about 850 per km&sup2; of built-up land, and hectares of new wetland, corridor and regenerative farmland counted from the hexes that change. Unit costs and benefits come from published US studies, listed with links under &ldquo;Sources and assumptions&rdquo; on the Explore page. They are order-of-magnitude figures for comparing plans, scaled to each country&rsquo;s price level with World Bank data and shown in US dollars.</p></div></details>
+      </section>
+
+      <section class="mth-sec" id="checks" aria-labelledby="checks-h">
+        <h2 id="checks-h">Checks and limitations</h2>
+        <p class="mth-sum">Modeled heat is checked against satellite readings. Other measures are not yet validated against local data, and some depend on grid-cell size, so treat them as indicative.</p>
+        <details class="mth-more"><summary>The satellite heat check</summary><div class="mx-def"><h4>Satellite heat check</h4><p>The place builder adds measured surface temperature from Landsat 8 and 9 (2021 to 2025, clear skies only; the three hottest months outside the tropics, the whole year inside them). Each scene is compared with its own typical land temperature, and the median across scenes is kept, so hotter and cooler days can be pooled. The page then compares that measured pattern with the model’s heat estimate using a rank correlation over built-up hexes. The first check, on Milan, showed the model leaning too hard on population density (correlation 0.38): warehouses and rail yards with few residents were among the hottest ground. Heat intensity now follows built-up surface for three quarters and population density for one quarter, which lifts Milan to 0.62. Without further tuning, the same change lifts San Francisco from 0.28 to 0.49 and Bangkok from 0.74 to 0.81. Land within a few kilometers of a large sea, bay or lake also gets a modest sea-breeze cooling. San Francisco’s fog is a different matter: built-up land on the Pacific side measures about 0.7 °C below typical land, while the Bay shore runs 2 to 3 °C above it, because the fog comes from cold upwelling ocean water and the prevailing wind, not from nearness to water. No simple rule captures that, so wherever a place has satellite readings, the model corrects each built-up hex toward the measured value (70% of the gap, less where few clear scenes exist). The match figures shown are for the model before that correction, so the check stays honest.</p></div></details>
+        <details class="mth-more" id="limits"><summary>Known limitations, and what is being fixed</summary><div class="how-lims">
       <h3>Grid cells differ in size between places</h3>
       <p>Each place is divided into hexagonal grid cells, but the cell size was chosen per place: about 0.1 km² for 2 places, 0.5 to 0.9 km² for 44, 4 to 6 km² for 66, 25 to 42 km² for 14 and about 250 km² for 1. Measures that count residents in cells above or below a threshold (heat hot spots, flood-prone ground, green cover, tree cover) change with the cell size, so they are not compared between places for now. Only the farmland measure, the river basin and the distance to forest or wetland are compared. The overall index combines cell-based measures and is shown as a first look only.</p>
       <h3>How population is placed in small cells</h3>
@@ -117,13 +96,18 @@
       <p>Removing comparisons does not make a single place&rsquo;s numbers reliable. Surface heat has been checked against satellite readings; green cover, tree cover and the population figures inside a place have not been checked against local data, and flood exposure is a screening estimate from ground height and distance to water, not a flood model. Treat all of them as indicative.</p>
       <h3>Inputs for future features</h3>
       <p>Cost estimates, the 2050 climate scenarios and counts of support (Stand with, Back this) exist on the site, but none has been validated as an input for decisions. Each needs its own review before it is used to steer plans.</p>
-      </div>
-    </details>
-  </section>
+      </div></details>
+      </section>
+    </div>
+  </div>
 </main>
 <!--SCRIPT-->
 (function () {
   // A link such as how-it-works/#hot-spot opens the section that holds it
-  function openHash() { var el = location.hash && document.getElementById(location.hash.slice(1)); if (!el) return; var d = el.closest('details'); if (d) d.open = true; el.scrollIntoView(); }
+  function openHash() { var el = location.hash && document.getElementById(location.hash.slice(1)); if (!el) return; var d = el.closest('details'); if (d) d.open = true; if (el.tagName === 'DETAILS') el.open = true; el.scrollIntoView(); }
   openHash(); window.addEventListener('hashchange', openHash);
+  // Highlight the section being read
+  var links = document.querySelectorAll('.mth-nav a');
+  if ('IntersectionObserver' in window) { var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) links.forEach(function (a) { a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id); }); }); }, { rootMargin: '-30% 0px -60% 0px' });
+    document.querySelectorAll('.mth-sec').forEach(function (s) { io.observe(s); }); }
 })();
