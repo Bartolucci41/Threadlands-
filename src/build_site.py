@@ -666,7 +666,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   @media (max-width: 560px) { .home-search.mp-search { flex-wrap: wrap; } .home-search input { flex: 1 1 100%; min-height: 56px; font-size: 1.05rem; } .home-search .btn { min-height: 50px; } }
   .topnav a { white-space: nowrap; }
   @media (max-width: 430px) { .topnav { gap: 6px 11px; font-size: 0.88rem; } .topnav .nav-home { display: none; } .topnav a.nav-lab { padding: 3px 9px; } }
-  @media (max-width: 380px) { .topnav { gap: 6px 8px; font-size: 0.82rem; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; } .topnav a.nav-lab { padding: 3px 7px; gap: 4px; } .topnav a.nav-lab::before { display: none; } }
+  @media (max-width: 380px) { .topnav { gap: 6px 8px; font-size: 0.82rem; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); padding-right: 18px; } .topnav.at-end { -webkit-mask-image: none; mask-image: none; } .topnav a.nav-lab { padding: 3px 7px; gap: 4px; } .topnav a.nav-lab::before { display: none; } }
   .ab-more, .ab-li { margin: 10px 0 0; } .ab-more > summary, .ab-li > summary { cursor: pointer; list-style: none; } .ab-more > summary { display: inline-flex; gap: 8px; align-items: center; font-weight: 700; color: var(--accent); padding: 6px 0; }
   .ab-more > summary::after, .ab-li > summary::after { content: '+'; font-weight: 700; color: var(--accent); margin-left: 6px; } .ab-more[open] > summary::after, .ab-li[open] > summary::after { content: '–'; }
   .ab-svg { display: block; width: 100%; max-width: 720px; height: auto; margin: 10px 0 14px; } .ab-bg { fill: var(--surface2); } .ab-river { fill: none; stroke: #4F8DB5; stroke-width: 9; stroke-linecap: round; } .ab-aq { stroke: #4F8DB5; stroke-width: 4; stroke-dasharray: 2 7; stroke-linecap: round; opacity: .7; }
@@ -921,7 +921,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=41">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=42">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
@@ -955,7 +955,9 @@ def footer(base):
 
 
 def page(rel, base, here, title, desc, body, script=""):
-    doc = head(base, title, desc) + nav(base, here) + body + footer(base) + (f"<script>\n{script}\n</script>\n" if script else "") + "</body>\n</html>\n"
+    navfade = ("<script>(function(){var n=document.querySelector('.topnav');if(!n)return;function f(){n.classList.toggle('at-end',n.scrollLeft+n.clientWidth>=n.scrollWidth-4);}"
+               "n.addEventListener('scroll',f,{passive:true});window.addEventListener('resize',f);f();})();</script>\n")
+    doc = head(base, title, desc) + nav(base, here) + navfade + body + footer(base) + (f"<script>\n{script}\n</script>\n" if script else "") + "</body>\n</html>\n"
     return write(rel, doc)
 
 
