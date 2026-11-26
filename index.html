@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=31">
+<link rel="stylesheet" href="assets/site.css?v=32">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="assets/i18n.js" defer></script>
 <script src="assets/feedback.js?v=1" defer></script>
@@ -46,33 +46,31 @@
         <label class="sr-only" for="hs-q">Find your place</label>
         <input id="hs-q" type="search" placeholder="Find your place: a city, town or region" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="hs-sugg" aria-autocomplete="list">
         <button class="btn" type="submit">Find</button>
+        <a class="hs-all" href="places/">All places</a>
         <ul class="sugg" id="hs-sugg" role="listbox" hidden></ul>
       </form>
       <p class="hs-try" aria-live="polite"><span id="hs-count"></span> <span class="hs-tl">Try</span> <span id="hs-ex"></span></p>
-      <div class="doors">
-        <a class="door door-places" href="#hs-q" id="door-find">
-          <span class="door-k">Start here</span>
-          <b class="door-t">Explore your place</b>
-          <span class="door-d">See where rain goes, where heat builds up, and what people are doing about it.</span>
-          <span class="door-go">Find your place <span aria-hidden="true">&rarr;</span></span>
-        </a>
-        <a class="door door-lab" href="lab/">
-          <span class="door-k">ThreadLab</span>
-          <b class="door-t">Test climate solutions</b>
-          <span class="door-d">Compare what shade, wetlands, and other changes could do for a place.</span>
-          <span class="door-go">Open ThreadLab <span aria-hidden="true">&rarr;</span></span>
-        </a>
-      </div>
-      <p class="doors-link"><span aria-hidden="true">&#8644;</span> The two meet on every place&rsquo;s page: what you learn there links straight to projects you can back and to scenarios you can test in ThreadLab.</p>
+
     </div>
   </section>
 
   <section class="sect news" id="news" aria-labelledby="news-h" hidden>
     <div class="sect-top">
-      <div><h2 id="news-h">Across the world today</h2><p id="news-sub">Risks, progress and decisions in cities around the world, updated every day.</p></div>
+      <div><h2 id="news-h">Across the world today</h2><p id="news-sub">Risks, progress and decisions in cities around the world.</p></div>
     </div>
     <ol class="nw2-grid" id="news-list"></ol>
     <p class="news-note">Headlines gathered automatically from <a href="https://news.google.com/" target="_blank" rel="noopener">Google News</a> searches. Each links to the original story; Threadlands does not write or check them.</p>
+  </section>
+
+  <section class="sect story" aria-labelledby="story-h">
+    <a class="story-img" href="time/#mexico-city"><img src="assets/img/mx-regional.jpg" alt="Map of the Valley of Mexico: terrain, heat hot spots, likely flooding and the water that remains" loading="lazy"></a>
+    <div class="story-txt">
+      <p class="hero3-kick">One place&rsquo;s story &middot; Mexico City</p>
+      <h2 id="story-h">A city built over its lakes</h2>
+      <p>Explore how water shaped Mexico City, what remains of its lake landscape, and the projects working with water today.</p>
+      <ul class="story-pj" id="story-pj"></ul>
+      <a class="btn" href="time/#mexico-city">Explore Mexico City &rarr;</a>
+    </div>
   </section>
 
   <section class="sect bleed band-deep pro-band" aria-labelledby="pro-h">
@@ -105,6 +103,10 @@
   var h = location.hash.replace('#', '');
   if (h && !/^(top|news-h|pro-h)$/.test(h)) { location.replace('place/#' + h); return; }
   var T = window.TLP, $ = function (s) { return document.querySelector(s); }, esc = T.esc;
+  fetch('data/projects.json').then(function (r) { return r.json(); }).then(function (j) {
+    var pj = (j.projects || []).filter(function (p) { return p.place === 'mexico-city' && (p.kind === 'wetland' || p.kind === 'rain'); });
+    document.getElementById('story-pj').innerHTML = pj.map(function (p) { return '<li><a href="place/?pj=' + esc(p.id) + '#mexico-city" translate="no">' + esc(p.name) + '</a><span>' + esc(p.who || '') + (p.status === 'underway' ? ' \u00b7 under way' : p.status === 'built' ? ' \u00b7 built' : '') + '</span></li>'; }).join('');
+  }).catch(function () {});
   T.setBase('');
   // ---- Find your place: search the library; anything else is built in Explore
   var LIST = [], form = $('#hs-form'), input = $('#hs-q'), list = $('#hs-sugg'), items = [], active = -1;
@@ -126,7 +128,6 @@
   form.addEventListener('submit', function (ev) { ev.preventDefault(); if (!input.value.trim()) return; items = T.matches(LIST, input.value, 7); go(active >= 0 && items[active] ? items[active].slug : items[0] ? items[0].slug : ''); });
   list.addEventListener('mousedown', function (ev) { var li = ev.target.closest('[data-slug],[data-world]'); if (!li) return; ev.preventDefault(); go(li.dataset.slug || ''); });
   input.addEventListener('blur', function () { setTimeout(close, 120); });
-  $('#door-find').addEventListener('click', function (ev) { ev.preventDefault(); input.focus(); input.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
   // A few places from different parts of the world, changing every few seconds
   var POOL = ['lagos', 'bologna', 'lima', 'jakarta', 'montreal', 'nairobi', 'hanoi', 'mexico-city', 'sao-paulo', 'oslo', 'dhaka', 'cairo', 'melbourne', 'bogota', 'seoul', 'lisbon', 'johannesburg', 'chennai'];
   function examples() {

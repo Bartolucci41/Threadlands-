@@ -18,6 +18,7 @@
             <button type="button" class="btn" id="pf-save" aria-pressed="false">Follow this place</button>
             <button type="button" class="btn ghost-inv" id="pf-follow" aria-pressed="false" aria-expanded="false" aria-controls="pf-tie">Stand with</button>
             <button type="button" class="btn ghost-inv" id="pf-share">Share</button>
+            <a class="btn ghost-inv" href="#changing">Get involved</a>
           </div>
           <div class="pf-tie" id="pf-tie" role="group" aria-labelledby="pf-tie-q" hidden>
             <p id="pf-tie-q">How are you connected to <span class="pf-tie-name"></span>?</p>
@@ -326,11 +327,11 @@
   function ideaLine(p) {
     var ID = D.ideas || {}, SG = D.stages || {}, others = p.idea ? D.projects.filter(function (x) { return x.idea === p.idea && x.place !== p.place; }) : [];
     var link = function (x) { var e2 = D.lib[x.place] || {}; return '<a href="{B}place/?pj=' + esc(x.id) + '#' + esc(x.place) + '">' + esc(e2.name || x.place) + '</a>'; };
-    var from = p.from ? D.projects.filter(function (x) { return x.id === p.from; })[0] : null;
+    var from = p.learned_from ? D.projects.filter(function (x) { return x.id === p.learned_from; })[0] : null;
     if (!p.stage && !others.length && !from) return '';
     return '<span class="pjc-idea">' + (p.stage ? '<span class="pjc-stage s-' + p.stage + '">' + esc(SG[p.stage] || p.stage) + '</span>' : '') + (p.idea && ID[p.idea] ? '<span>' + esc(ID[p.idea]) + '</span>' : '') +
-      (from ? '<span class="pjc-also">Spread from ' + link(from) + '</span>' : '') +
-      (others.length ? '<span class="pjc-also">Similar projects elsewhere: ' + others.slice(0, 3).map(link).join(', ') + '</span>' : '') + '</span>';
+      (from ? '<span class="pjc-also">Learned from ' + link(from) + '</span>' : '') +
+      (others.length ? '<span class="pjc-also">Similar approach elsewhere: ' + others.slice(0, 3).map(link).join(', ') + '</span>' : '') + '</span>';
   }
   function renderProjects(e) {
     var STAT = { built: ['Built', '#2f7a4a'], underway: ['Under way', '#b7791f'], approved: ['Approved', '#2E6E8E'], proposed: ['Proposed', '#6b7280'] };

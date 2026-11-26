@@ -621,6 +621,12 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .door-d { font-size: 1rem; line-height: 1.5; opacity: 0.85; max-width: 40ch; }
   .door-go { margin-top: auto; padding-top: 10px; font: 700 1rem var(--font-body); }
   .home-search { max-width: 40rem; margin-top: 4px; } .home-search input { font-size: 1.05rem; min-height: 54px; }
+  .hs-all { align-self: center; margin-left: 4px; color: #fff; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+  .story { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 34px; align-items: center; }
+  .story-img img { display: block; width: 100%; max-height: 600px; object-fit: contain; }
+  .story-txt h2 { font: 800 clamp(1.8rem, 3.6vw, 2.6rem)/1.08 var(--font-display); margin: 6px 0 12px; } .story-txt > p { font-size: 1.05rem; line-height: 1.55; color: var(--ink2); max-width: 36rem; } .story-txt .hero3-kick { color: var(--accent); }
+  .story-pj { list-style: none; margin: 18px 0 22px; padding: 0; display: grid; gap: 10px; } .story-pj li { display: grid; gap: 2px; padding-left: 12px; border-left: 3px solid var(--accent); } .story-pj a { font-weight: 700; color: var(--ink); } .story-pj span { font-size: 0.88rem; color: var(--ink2); }
+  @media (max-width: 820px) { .story { grid-template-columns: 1fr; gap: 18px; } }
   .hs-try { margin: 12px 0 0; color: #a9c6bd; font-size: 0.9rem; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
   .hs-tl { color: #fff; font-weight: 600; }
   .hs-chip { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.35); color: #fff !important; text-decoration: none; margin-right: 6px; }
@@ -856,7 +862,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=31">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=32">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
