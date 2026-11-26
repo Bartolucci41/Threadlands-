@@ -356,7 +356,7 @@
     }
     HLAYER = L.layerGroup(group).addTo(HM);
     var kt = keyTxt[LY];
-    if (HK) HK.innerHTML = '<div class="hk-bar hk-' + LY + '"></div><div class="hk-l"><span>' + kt[0] + '</span><span>' + kt[1] + '</span></div><p class="hk-n">' + kt[2] + ' Each patch is about 1 km\u00b2.</p>';
+    if (HK) HK.innerHTML = '<div class="hk-bar hk-' + LY + '"></div><div class="hk-l"><span>' + kt[0] + '</span><span>' + kt[1] + '</span></div><p class="hk-n">' + kt[2] + ' Each patch is ' + patchTxt() + '.</p>';
   }
   function setLayer(ly) { LY = ly; drawLayer(); }
   document.querySelector('.here-layers').addEventListener('click', function (ev) { var b = ev.target.closest('[data-ly]'); if (b) setLayer(b.dataset.ly); });
@@ -387,11 +387,16 @@
     if (p <= 0.25) return w[3] + ' than three quarters of the modeled region';
     return 'around the middle for the modeled region';
   }
+  // Grid cells differ in size between places (from about 0.1 km² to tens of km²), so say the real size
+  function patchTxt() {
+    var a = HDATA && HDATA.place && +HDATA.place.hex_km2; if (!a) return 'a grid cell';
+    return 'about ' + (a < 0.5 ? a.toFixed(1) : a < 10 ? Math.round(a) : Math.round(a / 5) * 5) + ' km\u00b2';
+  }
   // What a data report from the map attaches: the place, the tapped area and the layer on screen
   var HERE_FB = null, LY_NAME = { heat: 'Heat', flood: 'Flooding', green: 'Green and nature', none: 'Streets only' };
   window.TLF_CONTEXT = function () {
     var e = D && D.lib && D.lib[SLUG], c = { Place: e ? e.name + (e.country ? ', ' + e.country : '') : SLUG, Layer: LY_NAME[LY] || LY };
-    if (HERE_FB) { c.Area = HERE_FB.lat.toFixed(4) + ', ' + HERE_FB.lng.toFixed(4) + ' (about 1 km² around it)'; if (HERE_FB.cell >= 0 && HDATA) c.Patch = String(HDATA.place.cells.id[HERE_FB.cell]); }
+    if (HERE_FB) { c.Area = HERE_FB.lat.toFixed(4) + ', ' + HERE_FB.lng.toFixed(4) + ' (' + patchTxt() + ' around it)'; if (HERE_FB.cell >= 0 && HDATA) c.Patch = String(HDATA.place.cells.id[HERE_FB.cell]); }
     if (Q) c.Question = 'Where does the rain go from here? (step ' + (Q.step + 1) + ')';
     return c;
   };
@@ -410,7 +415,7 @@
     var obs = OBSV.filter(function (o) { return o.place === SLUG; }).map(function (o) { return [kmBetween(lat, lng, o.lat, o.lng), o]; }).filter(function (x) { return x[0] < 2; }).sort(function (a, b) { return a[0] - b[0]; }).slice(0, 3);
     var goal = hp != null && hp >= 0.75 ? 'heat' : fp >= 0.75 && (+c.flood[i] || 0) > 0 ? 'flood' : gp <= 0.25 ? 'habitat' : 'heat';
     var gw = { heat: 'cool this region', flood: 'reduce flooding in this region', habitat: 'bring nature back to this region' };
-    HERE_FB = { lat: lat, lng: lng, cell: i }; $('#here-card').innerHTML = '<div class="here-card-top"><h3>About this area</h3><button type="button" class="fb-mini" data-feedback="data">Report a data issue</button></div><p class="here-scale">The area of about 1 km\u00b2 around the spot you tapped. For what happens on a single street or corner, local knowledge is what the map needs.</p><ul class="here-facts">' + out.join('') + '</ul>' +
+    HERE_FB = { lat: lat, lng: lng, cell: i }; $('#here-card').innerHTML = '<div class="here-card-top"><h3>About this area</h3><button type="button" class="fb-mini" data-feedback="data">Report a data issue</button></div><p class="here-scale">The area of ' + patchTxt() + ' around the spot you tapped. For what happens on a single street or corner, local knowledge is what the map needs.</p><ul class="here-facts">' + out.join('') + '</ul>' +
       '<h4>Nearby projects</h4>' + (near.length ? '<ul class="here-pj">' + near.map(function (x) { var p = x[1]; return '<li><a href="#pj-' + esc(p.id) + '" translate="no">' + esc(p.name) + '</a><span>' + (x[0] < 1 ? 'under 1 km' : x[0].toFixed(1) + ' km') + ' away</span></li>'; }).join('') + '</ul>' : '<p class="here-none">No projects within 5 km on the map yet.</p>') +
       (obs.length ? '<h4>What people have noticed nearby</h4><ul class="here-pj">' + obs.map(function (x) { var o = x[1]; return '<li><span class="ob-k">' + esc(KIND_OBS[o.kind] || 'Note') + '</span> ' + esc(o.text) + '<span class="ob-r">' + (o.review === 'corroborated' ? 'Corroborated by a local partner' : o.source_url ? 'Location and source checked' : 'Location checked') + '</span></li>'; }).join('') + '</ul>' : '') +
       '<div class="here-acts"><button type="button" class="btn" id="here-add">Add what you know here</button><a class="btn ghost" href="../explore/?goal=' + goal + '#' + esc(SLUG) + '">Explore ways to ' + gw[goal] + ' &rarr;</a></div>' +
@@ -493,7 +498,7 @@
       qAdd(L.circleMarker([c.lat[t.end], c.lng[t.end]], { radius: 9, color: '#fff', weight: 3, fillColor: '#2E6E8E', fillOpacity: 1 }));
       body = '<p>Water runs downhill. The blue lines are the paths most of it follows across the region, thicker where more land drains into them.</p>' +
         (pl.length > 1 ? '<p>The dotted line is the <b>likely downhill route across this area</b>, not the path from one street. From ' + from + ', it runs <b>' + (t.km < 1 ? 'less than 1 km' : 'about ' + Math.round(t.km) + ' km') + '</b> to ' + (endNear ? 'a low spot next to a river or lake' : 'a low spot where it pools') + ' (the blue dot).</p><p>Street drains, pipes and canals can change where water actually goes. If you know where it goes or collects on your street, that is exactly what the map can&rsquo;t see at this scale.</p>' : '<p>' + from.charAt(0).toUpperCase() + from.slice(1) + ' sits in a low spot already: water from around it flows here.</p>') +
-        '<p class="q-note">Worked out from ground height in patches of about 1 km\u00b2.</p>';
+        '<p class="q-note">Worked out from ground height in patches of ' + patchTxt() + '.</p>';
     } else if (Q.step === 2) {
       // Where it collects: the most flood-exposed areas and who lives there
       title = 'Where it collects';
