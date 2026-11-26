@@ -29,6 +29,7 @@
     <div class="tm-mapcard">
       <canvas id="tm-map" role="img" aria-label="Map of the Valley of Mexico"></canvas>
       <div class="tm-legend" id="tm-legend"></div>
+      <label class="tm-lake" id="tm-lake-l" hidden><input type="checkbox" id="tm-lake" checked> Show the old lake under today&rsquo;s city</label>
       <p class="tm-cap" id="tm-cap"></p>
     </div>
     <div class="tm-cards" id="tm-cards"></div>
@@ -75,9 +76,9 @@
     { era: '1950 to 1985', short: '1950', q: 'What changed?', big: 'The city moves onto the lakebed', sub: function () { return 'As the lakes dried, neighborhoods spread across the old bed. Wells pumped the water underneath, and the ground began to sink.'; },
       cap: 'Shows today’s built-up land over the old shoreline. We do not yet have a map of the city in these decades.' },
     { era: 'Today', short: 'Today', q: 'What is here now?', big: function () { return fmt(T.pop_lakebed) + ' people live on the old lake'; }, sub: function () { return 'That is ' + Math.round(100 * T.pop_lakebed / T.pop_region) + '% of the ' + fmt(T.pop_region) + ' people in the region. About ' + T.water_km2_now + ' km² of open water and wetland is left on the old lakebed.'; },
-      cap: 'Built-up land, green space and water from 2021, with local heat hot spots in orange.' },
-    { era: '2050, one possible future', short: '2050', q: 'What could come next?', big: 'Let the lakebed hold water again', sub: function () { return 'A tested idea: wetlands on ' + F.wetland_km2 + ' km² of unbuilt lakebed and more street trees. The overall index rises from ' + F.bau.index + ' to ' + F.plan.index + ' against business as usual in 2050.'; },
-      cap: 'Teal: wetlands in the scenario. One modeled idea, not a forecast or a plan.' }
+      cap: 'Today\u2019s city from 2021 data, over the old lake in a blue wash. Orange: local heat hot spots.' },
+    { era: '2050, one possible future', short: '2050', q: 'What could come next?', big: 'Wetlands and shade on the old lakebed', sub: function () { return 'A tested idea: bring wetland back to ' + F.wetland_km2 + ' km\u00b2 of unbuilt lakebed, to hold rain where it falls, and plant street trees for shade where people live. About ' + fmt(F.pop_near_wetland) + ' people live within 2 km of the new wetlands.'; },
+      cap: 'Teal: wetlands in the scenario. Blue wash: the old lake. One modeled idea, not a forecast or a plan.' }
   ];
 
   var CARDS = [
@@ -86,28 +87,28 @@
       function () { return { v: 'About a third left by 1803', l: 'When Humboldt mapped the valley', m: '<p>By one recent estimate, the lakes had shrunk to about a third of their old size by the time Alexander von Humboldt measured them in 1803.</p><p>Texcoco lost most of its area over the next two centuries.</p>' }; },
       function () { return { v: 'Texcoco nearly dry', l: 'A salty, dusty bed east of the city', m: '<p>The dry bed of Lake Texcoco became a source of dust storms. In 1983 the Nabor Carrillo reservoir was dug into a small part of it, to hold water again.</p>' }; },
       function () { return { v: T.water_km2_now + ' km² of water and wetland', l: 'Left on the old lakebed, about ' + Math.round(100 * T.water_km2_now / T.lake_km2) + '% of it', m: '<p>In our 2021 land cover, about ' + T.water_km2_now + ' km² of open water and wetland remains inside the old shoreline. López-López and colleagues estimate the lakes today at 2.83% of their former area.</p><p>Texcoco and Xochimilco are now protected Ramsar wetlands.</p>' }; },
-      function () { return { v: '+' + F.wetland_km2 + ' km² of wetland', l: 'On unbuilt land of the old lakebed', m: '<p>The scenario turns open and bare land on the old lakebed back into wetland: about ' + F.wetland_km2 + ' km², close to the 14,000 hectares of the Parque Ecológico Lago de Texcoco, opened in 2024.</p><p>Nature score in the model: ' + F.bau.nature + ' → ' + F.plan.nature + '.</p>' }; }
+      function () { return { v: F.wetland_km2 + ' km\u00b2 of wetland back', l: 'On open and bare land of the old lakebed, where nothing is built', m: '<p>The scenario turns open and bare land inside the old shoreline back into wetland: about ' + F.wetland_km2 + ' km\u00b2, close to the 14,000 hectares of the Parque Ecol\u00f3gico Lago de Texcoco, opened in 2024. No homes are moved.</p><p>Wetlands store rain in the wet season and give birds and other wildlife a place in the valley again. In the model, the nature score moves from ' + F.bau.nature + ' to ' + F.plan.nature + '.</p>' }; }
     ] },
     { k: 'people', t: 'People and place', s: [
       function () { return { v: 'Tenochtitlan', l: 'An island city, linked to shore by causeways', m: '<p>The Mexica founded Tenochtitlan around 1325. In the fresh southern lakes, farmers built <b>chinampas</b>: raised fields made of lake mud, branches and plants, with channels about 1.5 m deep between them.</p><p>Some chinampas still farm in Xochimilco today.</p>' }; },
       function () { return { v: '160,000 people in 1803', l: 'The colonial city, by Humboldt’s count', m: '<p>The Spanish rebuilt the city on the ruins of Tenochtitlan in 1521 and, after the floods, set out to drain the valley. By 1800 Mexico City was the largest city in the Western Hemisphere.</p>' }; },
-      function () { return { v: 'New neighborhoods on the dry bed', l: 'Such as Ciudad Nezahualcóyotl, on old Lake Texcoco', m: '<p>People arriving from across the country settled on cheap land of the old lakebed, often before water, drainage or paving arrived. Many of today’s densest neighborhoods began this way.</p>' }; },
+      function () { return { v: 'New neighborhoods on the dry bed', l: 'Such as Ciudad Nezahualc\u00f3yotl, on old Lake Texcoco', m: '<p>Settlement on the marshy southern shore of the old lake began after 1900. From 1946, cheap lots were sold there without public services, and people arriving from across the country built homes before water, drainage or paving arrived. Nezahualc\u00f3yotl became a municipality in 1963. Many of today\u2019s densest neighborhoods began this way.</p>' }; },
       function () { return { v: fmt(T.pop_lakebed), l: 'People living inside the old shoreline today', m: '<p>' + Math.round(100 * T.pop_lakebed / T.pop_region) + '% of the region’s ' + fmt(T.pop_region) + ' people live on the old lakebed, on about ' + T.lakebed_built_km2 + ' km² of built-up land.</p>' }; },
-      function () { return { v: 'Who would gain', l: 'Lakebed neighborhoods carry the most heat and least green', m: '<p>The neighborhoods on the old lakebed have the least green and the most heat (see Heat and shade). They would gain most from water and trees coming back, if the plans include them.</p><p>Equity and affordability are not measured in the model yet.</p>' }; }
+      function () { return { v: 'Shade where people walk', l: fmt(F.hot_lakebed_pop) + ' lakebed residents live in heat hot spots today', m: '<p>The street trees in the scenario go where people live, and the old lakebed has the least green and the most heat in the region. About ' + fmt(F.hot_lakebed_pop) + ' people on the lakebed live in local heat hot spots today.</p><p>About ' + fmt(F.pop_near_wetland) + ' people live within 2 km of the new wetlands, close enough for a walk to open water and green space.</p><p>Whether they gain depends on who is included in the plans. Equity and affordability are not measured in the model yet.</p>' }; }
     ] },
     { k: 'water', t: 'Water', s: [
-      function () { return { v: 'Rain filled the valley', l: 'A closed basin, with no river out', m: '<p>The valley has no natural outlet, so rain and springs gathered in the lakes. In 1449 a dike about 16 km long, built under Nezahualcóyotl, held Texcoco’s salty water away from the fresh lakes around the city.</p>' }; },
-      function () { return { v: '1607: the first drain north', l: 'Then the flood of 1629, and the Gran Canal in 1900', m: '<p>Work on a tunnel to send water north out of the valley began on November 28, 1607, led by Enrico Martínez. It did not stop the flood of 1629, in which scholars estimate more than 30,000 people died.</p><p>A new canal and tunnel, the Gran Canal, opened around 1900. Floods continued.</p>' }; },
+      function () { return { v: 'Rain filled the valley', l: 'A closed basin, with no river out', m: '<p>The valley has no natural outlet, so rain and springs gathered in the lakes. After a great flood in the mid-1400s, a dike about 16 km long was built under Nezahualc\u00f3yotl, east of the city. Its gates held back floodwater and controlled how the lake\u2019s salty and fresher waters mixed.</p>' }; },
+      function () { return { v: '1607: the first drain north', l: 'Then the flood of 1629, and the Gran Canal in 1900', m: '<p>Work on a tunnel to send water north out of the valley began on November 28, 1607, led by Enrico Mart\u00ednez. It did not stop the flood of 1629, in which scholars estimate more than 30,000 people died.</p><p>On March 17, 1900, President Porfirio D\u00edaz opened the Gran Canal del Desag\u00fce, 47.5 km long, followed by a tunnel to Tequixquiac. Floods continued.</p>' }; },
       function () { return { v: 'Pumping, and sinking', l: 'Deep drainage tunnels in the 1970s', m: '<p>Wells drew water from the clay under the old lakes, and the ground above began to sink. In the 1970s a system of deep drainage tunnels cut flooding sharply.</p>' }; },
       function () { return { v: 'Too much and too little', l: 'Floods in the rainy season, shortages in the dry one', m: '<p>About 60% of the city’s water is pumped from the aquifer beneath it, and the rest is pumped uphill from outside the valley. About 40% is lost to leaks on the way.</p><p>Pumping makes parts of the city sink by up to about 35 cm a year, which cracks pipes and drains and makes floods worse.</p><p class="tm-note"><b>A limit of our data:</b> our flood screen counts rivers and coasts, not water pooling on the flat lakebed, so it misses much of Mexico City’s flooding. It finds ' + T.flood_lake + '% of lakebed residents flood-prone, versus ' + T.flood_off + '% elsewhere in the region.</p>' }; },
-      function () { return { v: 'Flood score ' + F.bau.flood + ' → ' + F.plan.flood, l: 'Against business as usual in 2050', m: '<p>In the model, wetlands and trees hold rain where it falls. The share of rain held in the land rises from ' + F.bau.storage + ' to ' + F.plan.storage + ' on the model’s scale, and the flood score from ' + F.bau.flood + ' to ' + F.plan.flood + '.</p><p>Already under way: about 73,000 homes with rain harvesting systems, installed by the city by 2024.</p>' }; }
+      function () { return { v: 'Rain held where it falls', l: 'Flood score ' + F.bau.flood + ' \u2192 ' + F.plan.flood + ' against business as usual in 2050', m: '<p>Wetlands soak up storm water on the lakebed, and trees and soil slow it on the streets, so less runs into drains that are already overloaded. In the model, the share of rain held in the land rises from ' + F.bau.storage + ' to ' + F.plan.storage + ' on its scale, and the flood score from ' + F.bau.flood + ' to ' + F.plan.flood + '.</p><p>Already under way: about 73,000 homes with rain harvesting systems, installed by the city by 2024.</p>' }; }
     ] },
     { k: 'heat', t: 'Heat and shade', s: [
       function () { return { v: 'No measurements', l: 'Open water and wetland covered the valley floor', m: '<p>There is no temperature record for the valley before the Spanish arrived. Open water and wetland, which cool the air around them, covered much of the floor.</p>' }; },
       function () { return { v: 'No measurements', l: 'Satellite heat records start in the 1980s', m: '<p>We have no comparable heat data for these years.</p>' }; },
       function () { return { v: 'No measurements yet', l: 'Satellite heat records start in the 1980s', m: '<p>A Landsat record of how the lakebed warmed as it was built over is possible, and is on our list.</p>' }; },
       function () { return { v: T.hot_lake + '% vs ' + T.hot_off + '%', l: 'Residents in local heat hot spots: on the old lakebed vs elsewhere', m: '<p>' + T.hot_lake + '% of people on the old lakebed live in a local heat hot spot, ground at least 2°C hotter than the region’s typical, compared with ' + T.hot_off + '% elsewhere in the region.</p><p>' + T.lowgreen_lake + '% of lakebed residents live in cells with under a tenth green cover, compared with ' + T.lowgreen_off + '% elsewhere.</p><p><a href="{B}how-it-works/#hot-spot">How a hot spot is defined &rarr;</a></p>' }; },
-      function () { return { v: 'Heat relief ' + F.bau.heat + ' → ' + F.plan.heat, l: 'With 20% more tree cover on streets', m: '<p>Most of the heat gain in the scenario comes from street trees. The wetlands on the far side of the lakebed do little for heat in the dense neighborhoods.</p>' }; }
+      function () { return { v: 'Cooler streets', l: '20% more tree cover on streets; heat relief ' + F.bau.heat + ' \u2192 ' + F.plan.heat, m: '<p>Street trees shade sidewalks, bus stops and the walls of homes, which is where heat reaches people. Most of the heat gain in the scenario comes from them. The wetlands, on the far side of the lakebed, do little for heat in the dense neighborhoods.</p><p>In the model, heat relief moves from ' + F.bau.heat + ' to ' + F.plan.heat + ' against business as usual in 2050.</p>' }; }
     ] },
     { k: 'notice', t: 'What people notice', s: [
       function () { return { v: 'Stories of the lake', l: 'Do you know a place name, a story or a map from this time?', m: '<p>Many places still carry lake names. Share what you know and we will add it here, with your name if you like.</p>', a: ['Share a story', 'change'] }; },
@@ -121,7 +122,7 @@
       function () { return { v: 'A choice was made', l: 'Drain the valley', m: '<p>Draining solved one problem and created others: dust, sinking ground and a city that must pump its water uphill.</p>' }; },
       function () { return { v: 'Holding water again', l: 'The Nabor Carrillo reservoir, 1983', m: '<p>The first large step back toward the lake: a reservoir dug into the dry bed of Texcoco.</p>' }; },
       function () { return { v: PJ.length + ' projects on the map', l: 'Built or under way since 2021', m: PJ.map(function (p) { return '<p><b>' + esc(p.name) + '</b> · ' + esc(p.status === 'built' ? 'Built' : 'Under way') + (p.source && p.source.url ? ' · <a href="' + esc(p.source.url) + '">source</a>' : '') + '</p>'; }).join('') + '<p><a href="{B}place/#mexico-city">See them on the map &rarr;</a></p>' }; },
-      function () { return { v: 'Index ' + F.bau.index + ' → ' + F.plan.index, l: 'Overall index, provisional, against business as usual in 2050', m: '<p>Business as usual in 2050, on the middle climate path, scores ' + F.bau.index + '. The scenario scores ' + F.plan.index + '. Test restoration, public space, housing or water ideas of your own.</p><p><a class="btn" href="{B}explore/#mexico-city">Open ThreadLab for Mexico City</a></p>' }; }
+      function () { return { v: 'Water and shade, together', l: 'Overall index ' + F.bau.index + ' \u2192 ' + F.plan.index + ', provisional, against business as usual in 2050', m: '<p>The two changes do different jobs: wetlands for water and nature, trees for heat. Together they move the overall index from ' + F.bau.index + ' to ' + F.plan.index + ' in 2050, on the middle climate path. The index is a provisional reading; the changes on the ground are the point.</p><p>Test restoration, public space, housing or water ideas of your own.</p><p><a class="btn" href="{B}explore/#mexico-city">Open ThreadLab for Mexico City</a></p>' }; }
     ] }
   ];
   var ICON = { land: '◒', people: '●', water: '≋', heat: '☀', notice: '✎', future: '→' };
@@ -171,7 +172,8 @@
     for (var i = 0; i < n; i++) if (c.lake[i] && EDGE[i]) { var x = PROJ.x(c.lng[i]), y = PROJ.y(c.lat[i]); ctx.moveTo(x + d, y); ctx.arc(x, y, d, 0, 6.283); }
     ctx.fill(); ctx.restore();
   }
-  var EDGE = null;
+  var EDGE = null, LAKEON = true;
+  $('#tm-lake').addEventListener('change', function () { LAKEON = this.checked; setStop(STOP); draw(); });
   function edges() {
     // A lake cell is on the shore when a neighbour within 1.6 cell widths is not lake
     var c = D.cells, n = c.lat.length, g = {}, k = PROJ.r * 1.9, e = new Uint8Array(n);
@@ -198,6 +200,10 @@
       ctx.beginPath(); hex(ctx, PROJ.x(c.lng[i]), PROJ.y(c.lat[i]), PROJ.r); ctx.fill();
     }
     var s = Math.round(POS);
+    if (s >= 2 && LAKEON) { // the old lake, washed over today's city
+      ctx.fillStyle = 'rgba(56,128,190,' + (0.34 * Math.min(1, POS - 1.5) / 1) + ')'; ctx.beginPath();
+      for (var j = 0; j < n; j++) if (c.lake[j]) hex(ctx, PROJ.x(c.lng[j]), PROJ.y(c.lat[j]), PROJ.r); ctx.fill();
+    }
     if (s >= 1) shoreline(ctx);
     if (s === 0) { // the island city
       var x = PROJ.x(-99.1332), y = PROJ.y(19.4326), rr = Math.max(5, PROJ.r * 1.7);
@@ -240,7 +246,8 @@
     $('#tm').dataset.stop = s;
     $('#tm-era').textContent = st.era; $('#tm-big').textContent = val(st.big); $('#tm-sub').textContent = val(st.sub); $('#tm-q').textContent = st.q;
     $('#tm-cap').textContent = st.cap;
-    $('#tm-legend').innerHTML = LEG[s].map(function (l) { return '<span>' + (l[1] === 'dash' ? '<i class="tm-dash"></i>' : '<i style="background:' + l[1] + '"></i>') + l[0] + '</span>'; }).join('');
+    $('#tm-lake-l').hidden = s < 2;
+    $('#tm-legend').innerHTML = LEG[s].concat(s >= 2 && LAKEON ? [['The old lake', 'rgba(56,128,190,0.45)']] : []).map(function (l) { return '<span>' + (l[1] === 'dash' ? '<i class="tm-dash"></i>' : '<i style="background:' + l[1] + '"></i>') + l[0] + '</span>'; }).join('');
     document.querySelectorAll('.tm-stop').forEach(function (b, k) { b.setAttribute('aria-current', k === s ? 'true' : 'false'); });
     $('#tm-range').setAttribute('aria-valuetext', st.era);
     if (changed || !$('#tm-cards').childElementCount) renderCards();

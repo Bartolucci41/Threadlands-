@@ -365,6 +365,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .tm-mapcard canvas { display: block; width: 100%; }
   .tm-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 10px 14px 0; font-size: 0.82rem; color: #2B3236; }
   .tm-legend span { display: inline-flex; align-items: center; gap: 6px; } .tm-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; } .tm-legend i.tm-dash { width: 18px; height: 0; border-top: 3px dotted #184A78; border-radius: 0; }
+  .tm-lake { display: flex; align-items: center; gap: 8px; padding: 8px 14px 0; font-size: 0.85rem; font-weight: 600; color: #2B3236; cursor: pointer; } .tm-lake input { accent-color: #2F6FA8; width: 16px; height: 16px; }
   .tm-cap { margin: 0; padding: 6px 14px 12px; font-size: 0.82rem; color: #4A5257; }
   .tm-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 18px 0 8px; }
   @media (max-width: 900px) { .tm-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } } @media (max-width: 560px) { .tm-cards { grid-template-columns: 1fr; } }
@@ -840,7 +841,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=28">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=29">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

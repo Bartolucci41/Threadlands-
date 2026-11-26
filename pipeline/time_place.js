@@ -44,7 +44,15 @@ let wkm = 0;
 PP.base.forEach((b, i) => { if (lake[i] && CFG.future.wetland.includes(b)) { PP.paint.set(i, 'wetland'); fut[i] = 1; wkm += num(c.area[i]); } });
 const plan = PP.evaluate({ canopy: CFG.future.canopy, corridors: 0, wetlands: 0, regen: 0, compact: 0 });
 const r1 = v => +(+v).toFixed(1), pick = r => ({ index: r1(r.index), heat: r1(r.metrics.heat), flood: r1(r.metrics.flood), nature: r1(r.metrics.habitat), storage: r1(r.metrics.storage) });
-const future = { climate: CFG.future.climate, wetland_km2: Math.round(wkm), canopy: CFG.future.canopy, bau: pick(bau), plan: pick(plan) };
+// Who lives near the new wetlands (within about 2 km) and how many lakebed residents live in heat hot spots today
+let nearWet = 0, hotLakePop = 0; const W = []; for (let i = 0; i < N; i++) if (fut[i]) W.push(i);
+for (let i = 0; i < N; i++) {
+  const p = num(c.pop[i]); if (!p) continue;
+  if (lake[i] && typeof c.lst_rel[i] === 'number' && c.lst_rel[i] >= 2) hotLakePop += p;
+  const ky = 111.32, kx = 111.32 * Math.cos(c.lat[i] * Math.PI / 180);
+  for (const j of W) { const dy = (c.lat[j] - c.lat[i]) * ky, dx = (c.lng[j] - c.lng[i]) * kx; if (dx * dx + dy * dy <= 4) { nearWet += p; break; } }
+}
+const future = { climate: CFG.future.climate, wetland_km2: Math.round(wkm), pop_near_wetland: Math.round(nearWet), hot_lakebed_pop: Math.round(hotLakePop), canopy: CFG.future.canopy, bau: pick(bau), plan: pick(plan) };
 // Cells inside the dashboard frame, compact
 const B = CFG.bbox, cells = { lat: [], lng: [], lake: [], elev: [], built: [], green: [], water: [], hot: [], flood: [], pop: [], fut: [] };
 for (let i = 0; i < N; i++) {
