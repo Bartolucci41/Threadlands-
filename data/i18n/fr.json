@@ -1308,5 +1308,14 @@
 "· Faible couvert d'arbres où vivent les gens",
 "Petit vert où vivent les gens",
 "Faible couvert d'arbres où vivent les gens",
-"Arbres et espace vert · Faible couvert d'arbres où vivent les gens"
+"Arbres et espace vert · Faible couvert d'arbres où vivent les gens",
+"Arbres et espace vert · Faible couverture verte dans les zones d'habitation",
+"· Faible couverture verte dans les zones d'habitation",
+"· Faible couvert forestier dans les zones d'origine",
+"Faible couverture verte dans les zones d'habitation",
+"{0} millions de personnes ({1}) vivent dans des mailles (environ {2} km2) où moins d'un dixième du sol est cartographié comme arbres, herbe, arbustes ou zones humides.",
+"Il regarde seulement la cellule autour de chaque maison: les parcs, l'espace ouvert et l'eau à proximité ne sont pas comptés.",
+"Faible couvert forestier dans les zones d'origine",
+"Le résident moyen a {0} couvert d'arbres dans la cellule de grille (environ {1} km2) autour de leur maison.",
+"Arbres & espace vert · Faible couvert forestier dans les zones d'habitation"
 ]
