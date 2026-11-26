@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=44">
+<link rel="stylesheet" href="../assets/site.css?v=45">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -38,7 +38,7 @@
 <main class="wrap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-<script src="../assets/public.js?v=3"></script>
+<script src="../assets/public.js?v=4"></script>
   <div class="pf-missing" id="pf-missing" hidden></div>
   <article class="pf" id="pf" hidden>
     <section class="pf-head bleed band-deep" aria-labelledby="pf-name">
@@ -439,7 +439,7 @@
     $('#pf-scope').hidden = opts.length < 2;
     $('#pf-scope').innerHTML = opts.map(function (o) { return '<button type="button" class="chip" data-scope="' + esc(o[0]) + '" aria-pressed="' + (o[0] === SCOPE) + '">' + esc(o[1]) + '</button>'; }).join('');
     var cur = opts.filter(function (o) { return o[0] === SCOPE; })[0] || opts[0]; $('#gz-city').textContent = e.name;
-    $('#pf-news').innerHTML = cur[2].length ? cur[2].map(function (it) { return T.headline(it, null); }).join('') : '<li class="pf-none">No headlines in the last two weeks.</li>';
+    $('#pf-news').innerHTML = cur[2].length ? cur[2].map(function (it) { return T.headline(it, null, null, SLUG); }).join('') : '<li class="pf-none">No headlines in the last two weeks.</li>';
     if (nw.updated) $('#pf-news-sub').textContent = 'Risks, progress and decisions from the last two weeks. Updated ' + T.ndate(nw.updated.replace(/-/g, '')) + '.';
   }
   $('#pf-scope').addEventListener('click', function (ev) { var b = ev.target.closest('[data-scope]'); if (!b) return; SCOPE = b.dataset.scope; renderNews(D.lib[SLUG]); });

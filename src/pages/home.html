@@ -2,7 +2,7 @@
 <!-- description: A civic climate map. See what’s happening where you live, map what you notice, and explore what could change. -->
 
 <main class="wrap">
-<script src="{B}assets/public.js?v=3"></script>
+<script src="{B}assets/public.js?v=4"></script>
   <section class="mp-hero bleed band-deep" aria-labelledby="mp-h">
     <div class="mp-hero-in">
       <p class="hero3-kick mp-kick">Threadlands &middot; <strong>A civic climate map</strong></p>
@@ -101,6 +101,8 @@
     var top = (d.news.top || []).slice(0, 8);
     if (top.length) {
       $('#news-list').innerHTML = top.map(function (it) { return T.headline(it, names, ccs); }).join('');
+      var lead = $('#news-list .nw2'), l0 = top[0];
+      if (lead && l0 && l0.place) lead.insertAdjacentHTML('afterbegin', '<a class="nw2-pic" href="{B}place/#' + esc(l0.place) + '"><img src="{B}assets/img/thumb/' + esc(l0.place) + '.jpg" alt="" loading="lazy"><span>' + esc(names[l0.place] || l0.place) + ' in Threadlands&rsquo; land-cover data</span></a>');
       $('#gz-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
       if (d.news.updated) $('#news-sub').textContent = 'Risks, progress and decisions in cities around the world. Updated ' + T.ndate(d.news.updated.replace(/-/g, '')) + '.';
       $('#news').hidden = false;

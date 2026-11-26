@@ -25,6 +25,7 @@
     return Promise.all([data('index'), soft('ranking', { places: [] }), soft('summary', { places: {} }), soft('news', { places: {}, top: [] }), soft('projects', { projects: [] })]).then(function (x) {
       var rk = {}; (x[1].places || []).forEach(function (p, k) { if (p && p.slug) { rk[p.slug] = p; if (!p.rank) p.rank = k + 1; } });
       var lib = {}; (x[0].places || []).forEach(function (e) { if (e && e.slug) lib[e.slug] = e; });
+      CTX = { rank: rk, summary: x[2].places || {}, projects: x[4].projects || [] };
       return { lib: lib, list: x[0].places || [], rank: rk, rankN: (x[1].places || []).length, rankUpdated: x[1].updated, summary: x[2].places || {}, news: x[3], projects: x[4].projects || [], ideas: x[4].ideas || {}, stages: x[4].stages || {} };
     });
   }
@@ -108,12 +109,34 @@
     return [kick, w.slice(0, cut).join(' ').replace(/[,;]$/, ''), cap(deck)];
   }
   function cap(x) { return x.charAt(0).toUpperCase() + x.slice(1); }
-  function headline(it, names, ccs) {
-    var tone = it.tone || (/(flood|heat|drought|fire|water)/.test(it.topic) ? 'concern' : 'update'), h = splitHead(it.title);
-    return '<li class="nw2 tone-' + tone + '"><span class="nw2-tag"><b>' + (TONE[tone] || '') + '</b>' + (TOPIC[it.topic] ? ' · ' + TOPIC[it.topic] : '') + '</span>' +
+  var CTX = null;
+  // Three plain labels. "Being decided" only when the headline names a formal decision.
+  var DECIDE = /\b(vot(e|es|ed|ing)|approv(e|es|ed|al)|pass(es|ed)|reject(s|ed)?|rul(es|ed|ing)|adopt(s|ed)|bill|ordinance|referendum|permit(s|ted)?|budget (passed|approved)|aprueb\w*|aprob\w*|vot(a|an|ó|ación)|rechaz\w*|dictamen|consulta pública|approv(a|ato|ata)|delibera|beschlie(ß|ss)\w*|genehmig\w*|adopt(e|é|ée)|vote(nt)?)\b/i;
+  function label(it) { if (DECIDE.test(it.title || '')) return ['decide', 'Being decided']; if (it.tone === 'gain') return ['progress', 'Making progress']; return ['now', 'Happening now']; }
+  // Why it matters here: a measured finding about the same place on the same topic, or a project there on it
+  var TKEY = { flood: ['flood'], water: ['flood'], heat: ['heat'], greening: ['grey', 'trees'], drought: ['food'], fire: [] };
+  var PKIND = { flood: ['wetland', 'rain', 'drain'], water: ['rain', 'wetland'], heat: ['trees', 'park', 'corridor'], greening: ['trees', 'park', 'corridor'], drought: ['rain', 'farm'] };
+  function why(it, slug) {
+    if (!CTX || !slug) return '';
+    var keys = TKEY[it.topic] || [], sm = (CTX.summary[slug] || {}).pressures || [], f = null;
+    for (var k = 0; k < sm.length && !f; k++) if (keys.indexOf(sm[k].key) >= 0) f = sm[k];
+    var rk = CTX.rank[slug], v = rk && rk.vals || {}, line = '';
+    if (f) line = f.what;
+    else if (it.topic === 'flood' || it.topic === 'water') { if (v.flood != null) line = Math.round(v.flood) + '% of residents in this region live in grid cells Threadlands screens as flood-prone.'; }
+    else if (it.topic === 'heat') { if (v.heat != null) line = Math.round(v.heat) + '% of residents live in local heat hot spots, ground at least 2°C hotter than the region’s typical.'; }
+    else if (it.topic === 'greening') { if (v.tree != null) line = 'Tree cover where people live averages ' + Math.round(v.tree) + '%.'; }
+    var pj = (CTX.projects || []).filter(function (p) { return p.place === slug && (PKIND[it.topic] || []).indexOf(p.kind) >= 0; })[0];
+    if (!line && !pj) return '';
+    return '<span class="nw2-why"><b>Why it matters here</b> ' + esc(line) + (pj ? (line ? ' ' : '') + 'Related project: <a href="' + BASE + 'place/?pj=' + esc(pj.id) + '#' + esc(slug) + '" translate="no">' + esc(pj.name) + '</a>.' : '') + ' <a href="' + BASE + 'place/#' + esc(slug) + '">See it on the map</a></span>';
+  }
+  function headline(it, names, ccs, slug) {
+    var L = label(it), h = splitHead(it.title), sl = it.place || slug;
+    return '<li class="nw2 lb-' + L[0] + '"><span class="nw2-tag"><b>' + L[1] + '</b>' + (TOPIC[it.topic] ? ' · ' + TOPIC[it.topic] : '') + '</span>' +
       '<a class="nw2-h" translate="no" href="' + esc(it.url) + '" target="_blank" rel="noopener">' + (h[0] ? '<span class="nw2-kick">' + esc(h[0]) + '</span>' : '') + '<span class="nw2-hd">' + esc(h[1]) + '</span>' + (h[2] ? '<span class="nw2-dk">' + esc(h[2]) + '</span>' : '') + '</a>' +
+      why(it, sl) +
       '<span class="nw2-m">' + (names && it.place ? '<a href="' + BASE + 'place/#' + esc(it.place) + '">' + flag(ccs && ccs[it.place]) + esc(names[it.place] || it.place) + '</a> · ' : '') + esc(it.source) + (it.date ? ' · ' + ndate(it.date) : '') + '</span></li>';
   }
+
   // Library search: names first, then anything in the address
   function matches(list, q, n) {
     var k = norm(q), a = [], b = [];
