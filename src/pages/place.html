@@ -4,7 +4,7 @@
 <main class="wrap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-<script src="{B}assets/public.js?v=6"></script>
+<script src="{B}assets/public.js?v=7"></script>
 <script src="{B}assets/propose.js?v=4"></script>
   <div class="pf-missing" id="pf-missing" hidden></div>
   <article class="pf" id="pf" hidden>
@@ -117,7 +117,7 @@
     <section class="sect pf-sec gazette" id="news-sec" aria-labelledby="pf-news-h">
       <header class="gz-head">
         <h2 id="pf-news-h" class="gz-mast">In the news</h2>
-        <p class="gz-date"><span class="gz-city" id="gz-city"></span><span id="pf-news-sub">Risks, progress and decisions from the last two weeks.</span><details class="hl-about"><summary>About these headlines</summary><p>Headlines are collected automatically through Google News and link to the original publishers.</p></details></p>
+        <p class="gz-date"><span class="gz-city" id="gz-city"></span><span id="pf-news-sub">Risks, progress and decisions from the last two weeks.</span><span class="hl-orig">Headlines stay in the language they were published in.</span><details class="hl-about"><summary>About these headlines</summary><p>Headlines are collected automatically through Google News and link to the original publishers.</p></details></p>
       </header>
       <div class="filters" id="pf-scope" role="group" aria-label="Area" hidden></div>
       <ol class="nw2-list" id="pf-news"></ol>
@@ -183,17 +183,17 @@
     T.weather(e.lat, e.lng).then(function (w) {
       var c = w.current || {}, d = w.daily || {};
       $('#pf-now').innerHTML = '<div class="pf-now-main">' + T.icon(c.weather_code, 44) + '<span class="pf-temp">' + T.temp(c.temperature_2m) + '</span></div>' +
-        '<p class="pf-sky">' + esc(T.sky(c.weather_code)[0]) + ' · feels like ' + T.temp(c.apparent_temperature) + '</p>' +
-        '<p class="pf-meta">Humidity ' + Math.round(c.relative_humidity_2m || 0) + '% · Wind ' + Math.round(c.wind_speed_10m || 0) + ' km/h' + (d.uv_index_max ? ' · UV ' + Math.round(d.uv_index_max[0]) : '') + '<span id="pf-aqi"></span></p>' +
+        '<p class="pf-sky"><span>' + esc(T.sky(c.weather_code)[0]) + '</span> · <span>feels like ' + T.temp(c.apparent_temperature) + '</span></p>' +
+        '<p class="pf-meta"><span>Humidity ' + Math.round(c.relative_humidity_2m || 0) + '%</span> · <span>Wind ' + Math.round(c.wind_speed_10m || 0) + ' km/h</span>' + (d.uv_index_max ? ' · <span>UV ' + Math.round(d.uv_index_max[0]) + '</span>' : '') + '<span id="pf-aqi"></span></p>' +
         '<div class="mp-units" role="group" aria-label="Temperature units"><button type="button" class="chip" data-u="c" aria-pressed="' + (T.units() === 'c') + '">&deg;C</button><button type="button" class="chip" data-u="f" aria-pressed="' + (T.units() === 'f') + '">&deg;F</button></div>';
       $('#pf-week').innerHTML = (d.time || []).map(function (t, k) {
-        return '<li><span class="pw-d">' + (k === 0 ? 'Today' : T.day(t)) + '</span>' + T.icon(d.weather_code[k], 24) + '<span class="pw-t"><b>' + T.temp(d.temperature_2m_max[k]) + '</b> ' + T.temp(d.temperature_2m_min[k]) + '</span><span class="pw-r">' + (d.precipitation_sum[k] >= 1 ? T.rain(d.precipitation_sum[k]) : '') + '</span></li>';
+        return '<li><span class="pw-d">' + (k === 0 ? 'Today' : T.day(t, false, document.documentElement.lang || 'en')) + '</span>' + T.icon(d.weather_code[k], 24) + '<span class="pw-t"><b>' + T.temp(d.temperature_2m_max[k]) + '</b> ' + T.temp(d.temperature_2m_min[k]) + '</span><span class="pw-r">' + (d.precipitation_sum[k] >= 1 ? T.rain(d.precipitation_sum[k]) : '') + '</span></li>';
       }).join('');
       var al = T.alerts(w), d0 = d.time ? 0 : -1;
-      $('#td-wx').innerHTML = '<span class="td-k">Weather and warnings</span><p class="td-big">' + T.icon(c.weather_code, 22) + ' ' + T.temp(c.temperature_2m) + ' \u00b7 ' + esc(T.sky(c.weather_code)[0]) + (d0 >= 0 ? ' \u00b7 high ' + T.temp(d.temperature_2m_max[0]) : '') + '</p>' +
+      $('#td-wx').innerHTML = '<span class="td-k">Weather and warnings</span><p class="td-big">' + T.icon(c.weather_code, 22) + ' ' + T.temp(c.temperature_2m) + ' \u00b7 <span>' + esc(T.sky(c.weather_code)[0]) + '</span>' + (d0 >= 0 ? ' \u00b7 <span>high ' + T.temp(d.temperature_2m_max[0]) + '</span>' : '') + '</p>' +
         (al.length ? al.map(function (a) { var ly = a.kind === 'heat' ? 'heat' : 'flood'; return '<p class="td-al al-' + a.kind + '">' + esc(a.text) + ' ' + (ly === 'flood' ? '<button type="button" class="linkbtn" data-q="rain">Where does the rain go from here? &rarr;</button>' : '<button type="button" class="linkbtn" data-goto-ly="heat">See the hottest areas &rarr;</button>') + '</p>'; }).join('') : '<p class="td-none">No warnings for the next few days.</p>');
       $('#pf-alerts').innerHTML = T.alerts(w).map(function (a) { return '<p class="pf-alert al-' + a.kind + '"><b>' + (a.kind === 'rain' ? 'Rain warning' : a.kind === 'heat' ? 'Heat warning' : 'Storms') + '</b> ' + esc(a.text) + '</p>'; }).join('');
-      T.air(e.lat, e.lng).then(function (a) { if (a.us_aqi != null) $('#pf-aqi').textContent = ' · Air ' + Math.round(a.us_aqi) + ' (' + T.aqiWord(a.us_aqi).toLowerCase() + ')'; }).catch(function () {});
+      T.air(e.lat, e.lng).then(function (a) { if (a.us_aqi != null) $('#pf-aqi').innerHTML = ' · <span>Air ' + Math.round(a.us_aqi) + '</span> (<span>' + T.aqiWord(a.us_aqi).toLowerCase() + '</span>)'; }).catch(function () {});
     }).catch(function () { $('#pf-now').innerHTML = '<p class="pf-wait">The weather could not be loaded right now.</p>'; $('#td-wx').innerHTML = '<span class="td-k">Weather and warnings</span><p class="td-none">The weather could not be loaded right now.</p>'; });
   }
   $('#pf-now').addEventListener('click', function (ev) { var b = ev.target.closest('[data-u]'); if (!b) return; T.setUnits(b.dataset.u); renderWeather(D.lib[SLUG]); });
@@ -577,7 +577,7 @@
     }
     HLAYER = L.layerGroup(group).addTo(HM);
     var kt = keyTxt[LY];
-    if (HK) HK.innerHTML = '<div class="hk-bar hk-' + LY + '"></div><div class="hk-l"><span>' + kt[0] + '</span><span>' + kt[1] + '</span></div><p class="hk-n">' + kt[2] + ' Each patch is ' + patchTxt() + '.</p>';
+    if (HK) HK.innerHTML = '<div class="hk-bar hk-' + LY + '"></div><div class="hk-l"><span>' + kt[0] + '</span><span>' + kt[1] + '</span></div><p class="hk-n"><span>' + kt[2] + '</span> <span>Each patch is ' + patchTxt() + '.</span></p>';
   }
   function setLayer(ly) { LY = ly; drawLayer(); }
   document.querySelector('.here-layers').addEventListener('click', function (ev) { var b = ev.target.closest('[data-ly]'); if (b) setLayer(b.dataset.ly); });
@@ -625,11 +625,11 @@
     if (HPIN) HM.removeLayer(HPIN);
     HPIN = L.circleMarker([lat, lng], { radius: 9, color: '#fff', weight: 3, fillColor: '#123B38', fillOpacity: 1 }).addTo(HM);
     var i = nearestCell(lat, lng), out = [];
-    if (i < 0) { $('#here-card').innerHTML = '<p class="here-hint">That spot is outside the area Threadlands models for ' + esc(D.lib[SLUG].name) + '. Tap inside the colored area.</p>' + $('#here-key').outerHTML; return; }
+    if (i < 0) { $('#here-card').innerHTML = '<p class="here-hint"><span>That spot is outside the area Threadlands models for</span> <span>' + esc(D.lib[SLUG].name) + '</span>. <span>Tap inside the colored area.</span></p>' + $('#here-key').outerHTML; return; }
     var c = HDATA.place.cells, hp = HCELLS.heat[i] != null ? pctOf(HCELLS.heat, HCELLS.heat[i]) : null, fp = pctOf(HCELLS.flood, HCELLS.flood[i]), gp = pctOf(HCELLS.green, HCELLS.green[i]);
     var hs = standing(hp, ['hottest', 'hotter', 'coolest', 'cooler']), fs = (+c.flood[i] || 0) > 0 ? standing(fp, ['most flood-exposed', 'more flood-exposed', 'least flood-exposed', 'less flood-exposed']) : null, gs = standing(gp, ['greenest', 'greener', 'least green', 'less green']);
     if (hs) out.push('<li><b>Heat:</b> this area is ' + hs + ', from satellite readings of surface heat.</li>');
-    out.push('<li><b>Flooding:</b> ' + (fs ? 'this area is ' + fs + '.' + ((+c.water_km[i] || 99) < 1 ? ' Water is less than 1 km away.' : '') : 'little flood exposure here: it sits away from or above nearby water.') + '</li>');
+    out.push('<li><b>Flooding:</b> ' + (fs ? '<span>this area is ' + fs + '.</span>' + ((+c.water_km[i] || 99) < 1 ? ' <span>Water is less than 1 km away.</span>' : '') : 'little flood exposure here: it sits away from or above nearby water.') + '</li>');
     out.push('<li><b>Green:</b> ' + Math.round(100 * Math.min(1, HCELLS.green[i])) + '% trees, grass, wetland or farmland; ' + gs + '.</li>');
     if (+c.pop[i]) out.push('<li><b>People:</b> about ' + T.fmtN(+c.pop[i]) + ' live in this patch.</li>');
     var near = D.projects.filter(function (p) { return p.place === SLUG && isFinite(p.lat); }).map(function (p) { return [kmBetween(lat, lng, p.lat, p.lng), p]; }).filter(function (x) { return x[0] < 5; }).sort(function (a, b) { return a[0] - b[0]; }).slice(0, 3);
@@ -637,7 +637,7 @@
     var goal = hp != null && hp >= 0.75 ? 'heat' : fp >= 0.75 && (+c.flood[i] || 0) > 0 ? 'flood' : gp <= 0.25 ? 'habitat' : 'heat';
     var gw = { heat: 'cool this region', flood: 'reduce flooding in this region', habitat: 'bring nature back to this region' };
     HERE_FB = { lat: lat, lng: lng, cell: i }; $('#here-card').innerHTML = '<div class="here-card-top"><h3>About this area</h3><button type="button" class="fb-mini" data-feedback="data">Report a data issue</button></div><p class="here-scale">The area of ' + patchTxt() + ' around the spot you tapped. For what happens on a single street or corner, local knowledge is what the map needs.</p><ul class="here-facts">' + out.join('') + '</ul>' +
-      '<h4>Nearby projects</h4>' + (near.length ? '<ul class="here-pj">' + near.map(function (x) { var p = x[1]; return '<li><a href="#pj-' + esc(p.id) + '">' + esc(p.name) + '</a><span>' + (x[0] < 1 ? 'under 1 km' : x[0].toFixed(1) + ' km') + ' away</span></li>'; }).join('') + '</ul>' : '<p class="here-none">No projects within 5 km on the map yet.</p>') +
+      '<h4>Nearby projects</h4>' + (near.length ? '<ul class="here-pj">' + near.map(function (x) { var p = x[1]; return '<li><a href="#pj-' + esc(p.id) + '">' + esc(p.name) + '</a><span>' + (x[0] < 1 ? 'under 1 km away' : x[0].toFixed(1) + ' km away') + '</span></li>'; }).join('') + '</ul>' : '<p class="here-none">No projects within 5 km on the map yet.</p>') +
       (obs.length ? '<h4>What people have noticed nearby</h4><ul class="here-pj">' + obs.map(function (x) { var o = x[1]; return '<li><span class="ob-k">' + esc(KIND_OBS[o.kind] || 'Note') + '</span> ' + esc(o.text) + '<span class="ob-r">' + (o.review === 'corroborated' ? 'Corroborated by a local partner' : o.source_url ? 'Location and source checked' : 'Location checked') + '</span></li>'; }).join('') + '</ul>' : '') +
       '<div class="here-acts"><button type="button" class="btn" id="here-add">Add what you know here</button><a class="btn ghost" href="{B}explore/?goal=' + goal + '#' + esc(SLUG) + '">Explore ways to ' + gw[goal] + ' &rarr;</a></div>' +
       '<form class="here-form" id="here-form" hidden>' +
@@ -700,8 +700,8 @@
       var rings = bs.rings || [], ll = []; for (var k = 0; k + 1 < rings.length; k += 2) ll.push([rings[k], rings[k + 1]]);
       if (ll.length > 2) { var poly = qAdd(L.polygon(ll, { color: '#2E6E8E', weight: 2.5, fillColor: '#2E6E8E', fillOpacity: 0.12 })); HM.flyToBounds(poly.getBounds(), { padding: [20, 20], duration: 1.2 }); }
       var sh = bs.shares || {}, built = Math.round(100 * (sh.built || 0)), forest = Math.round(100 * ((sh.forest || 0) + (sh.wetland || 0)));
-      body = '<p>Rain that falls inside the blue outline, about <b>' + (bs.area_km2 || 0).toLocaleString('en-US') + ' km\u00b2</b>, drains toward ' + esc(e.name) + '.</p>' +
-        '<p>' + (built >= 25 ? '<b>' + built + '%</b> of that land is built over, so rain runs off roofs and streets fast instead of soaking in.' : 'Only <b>' + built + '%</b> of that land is built over, so much of the rain can soak in.') + (forest ? ' <b>' + forest + '%</b> is forest or wetland, which holds water back and lets it out slowly.' : '') + '</p>';
+      body = '<p>Rain that falls inside the blue outline, about <b>' + (bs.area_km2 || 0).toLocaleString('en-US') + ' km\u00b2</b>, <span>drains toward</span> <span>' + esc(e.name) + '</span>.</p>' +
+        '<p>' + (built >= 25 ? '<span>Of that land,</span> <b>' + built + '%</b> <span>is built over, so rain runs off roofs and streets fast instead of soaking in.</span>' : 'Only <b>' + built + '%</b> of that land is built over, so much of the rain can soak in.') + (forest ? ' <span>Another</span> <b>' + forest + '%</b> <span>is forest or wetland, which holds water back and lets it out slowly.</span>' : '') + '</p>';
     } else if (Q.step === 1) {
       // Where it goes: downhill paths, and the path from the chosen spot
       title = 'Where it goes';
@@ -718,7 +718,7 @@
       var endNear = (+c.water_km[t.end] || 99) < 1;
       qAdd(L.circleMarker([c.lat[t.end], c.lng[t.end]], { radius: 9, color: '#fff', weight: 3, fillColor: '#2E6E8E', fillOpacity: 1 }));
       body = '<p>Water runs downhill. The blue lines are the paths most of it follows across the region, thicker where more land drains into them.</p>' +
-        (pl.length > 1 ? '<p>The dotted line is the <b>likely downhill route across this area</b>, not the path from one street. From ' + from + ', it runs <b>' + (t.km < 1 ? 'less than 1 km' : 'about ' + Math.round(t.km) + ' km') + '</b> to ' + (endNear ? 'a low spot next to a river or lake' : 'a low spot where it pools') + ' (the blue dot).</p><p>Street drains, pipes and canals can change where water actually goes. If you know where it goes or collects on your street, that is exactly what the map can&rsquo;t see at this scale.</p>' : '<p>' + from.charAt(0).toUpperCase() + from.slice(1) + ' sits in a low spot already: water from around it flows here.</p>') +
+        (pl.length > 1 ? '<p>The dotted line is the <b>likely downhill route across this area</b>, not the path from one street. ' + (HERE_LL ? '<span>From the spot you picked, it runs</span>' : '<span>From the center of</span> <span>' + esc(e.name) + '</span><span>, it runs</span>') + ' <b>' + (t.km < 1 ? 'less than 1 km' : 'about ' + Math.round(t.km) + ' km') + '</b> <span>' + (endNear ? 'to a low spot next to a river or lake (the blue dot).' : 'to a low spot where it pools (the blue dot).') + '</span></p><p>Street drains, pipes and canals can change where water actually goes. If you know where it goes or collects on your street, that is exactly what the map can&rsquo;t see at this scale.</p>' : '<p>' + (HERE_LL ? 'The spot you picked sits in a low spot already: water from around it flows here.' : '<span>The center of</span> <span>' + esc(e.name) + '</span> <span>sits in a low spot already: water from around it flows here.</span>') + '</p>') +
         '<p class="q-note">Worked out from ground height in patches of ' + patchTxt() + '.</p>';
     } else if (Q.step === 2) {
       // Where it collects: the most flood-exposed areas and who lives there
@@ -731,7 +731,7 @@
       }
       var grp = qAdd(L.featureGroup(g)); if (g.length) HM.flyToBounds(grp.getBounds(), { padding: [20, 20], duration: 1.2 });
       body = '<p>The dark blue areas are where water collects first: low ground near rivers, lakes or the sea. They are the most flood-exposed quarter of the places with any exposure.</p>' +
-        '<p>About <b>' + T.fmtN(people) + ' people</b> live in them.</p>' +
+        '<p><span>Roughly</span> <b>' + T.fmtN(people) + ' people</b> <span>live in them.</span></p>' +
         '<p class="q-note">A screening of exposure from height and distance to water, not a flood forecast. Local flood maps and people who live there know the details.</p>';
     } else {
       // What is being done, and one thing to do
@@ -749,7 +749,7 @@
     }
     var dots = ''; for (var s2 = 0; s2 < steps; s2++) dots += '<i' + (s2 === Q.step ? ' class="on"' : '') + '></i>';
     $('#here-card').innerHTML = '<p class="q-kick">Where does the rain go from here? <span class="q-dots" aria-label="Step ' + (Q.step + 1) + ' of ' + steps + '">' + dots + '</span></p><h3>' + title + '</h3>' + body +
-      '<div class="q-nav">' + (Q.step > 0 ? '<button type="button" class="btn ghost" data-qnav="-1">Back</button>' : '') + (Q.step < steps - 1 ? '<button type="button" class="btn" data-qnav="1">Next: ' + ['Where it goes', 'Where it collects', 'What\u2019s being done'][Q.step] + '</button>' : '') + '<button type="button" class="linkbtn" data-qnav="x">Back to the map</button></div>';
+      '<div class="q-nav">' + (Q.step > 0 ? '<button type="button" class="btn ghost" data-qnav="-1">Previous</button>' : '') + (Q.step < steps - 1 ? '<button type="button" class="btn" data-qnav="1">Next: ' + ['Where it goes', 'Where it collects', 'What\u2019s being done'][Q.step] + '</button>' : '') + '<button type="button" class="linkbtn" data-qnav="x">Back to the map</button></div>';
     document.querySelectorAll('[data-q]').forEach(function (b) { b.classList.add('on'); });
   }
   document.addEventListener('click', function (ev) {

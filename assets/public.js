@@ -31,7 +31,7 @@
   }
 
   // Weather codes from the World Meteorological Organization, in plain words, with a small icon
-  var WMO = { 0: ['Clear', 'sun'], 1: ['Mostly clear', 'sun'], 2: ['Partly cloudy', 'part'], 3: ['Cloudy', 'cloud'], 45: ['Fog', 'fog'], 48: ['Fog', 'fog'],
+  var WMO = { 0: ['Clear sky', 'sun'], 1: ['Mostly clear', 'sun'], 2: ['Partly cloudy', 'part'], 3: ['Cloudy', 'cloud'], 45: ['Fog', 'fog'], 48: ['Fog', 'fog'],
     51: ['Light drizzle', 'rain'], 53: ['Drizzle', 'rain'], 55: ['Heavy drizzle', 'rain'], 56: ['Freezing drizzle', 'rain'], 57: ['Freezing drizzle', 'rain'],
     61: ['Light rain', 'rain'], 63: ['Rain', 'rain'], 65: ['Heavy rain', 'rain'], 66: ['Freezing rain', 'rain'], 67: ['Freezing rain', 'rain'],
     71: ['Light snow', 'snow'], 73: ['Snow', 'snow'], 75: ['Heavy snow', 'snow'], 77: ['Snow grains', 'snow'], 80: ['Showers', 'rain'], 81: ['Showers', 'rain'], 82: ['Violent showers', 'rain'],
@@ -69,12 +69,12 @@
     var rain3 = 0; for (var i = 0; i < Math.min(3, d.time.length); i++) rain3 += d.precipitation_sum[i] || 0;
     if (rain3 >= 20) out.push({ kind: 'rain', text: 'Heavy rain ahead: ' + rain(rain3) + ' over the next 3 days. Low streets and drains may flood.' });
     var hot = -1; for (var j = 0; j < d.time.length; j++) if (d.temperature_2m_max[j] >= 35) { hot = j; break; }
-    if (hot >= 0) out.push({ kind: 'heat', text: 'Extreme heat ' + (hot === 0 ? 'today' : 'on ' + day(d.time[hot])) + ': up to ' + temp(d.temperature_2m_max[hot]) + '. Check on older neighbours and anyone working outside.' });
+    if (hot >= 0) out.push({ kind: 'heat', text: 'Extreme heat ' + (hot === 0 ? 'today' : 'on ' + day(d.time[hot], true)) + ': up to ' + temp(d.temperature_2m_max[hot]) + '. Check on older neighbours and anyone working outside.' });
     var st = -1; for (var s = 0; s < Math.min(3, d.time.length); s++) if (d.weather_code[s] >= 95) { st = s; break; }
-    if (st >= 0) out.push({ kind: 'storm', text: 'Thunderstorms ' + (st === 0 ? 'today' : 'on ' + day(d.time[st])) + '.' });
+    if (st >= 0) out.push({ kind: 'storm', text: 'Thunderstorms ' + (st === 0 ? 'today' : 'on ' + day(d.time[st], true)) + '.' });
     return out;
   }
-  function day(iso, long) { var dt = new Date(iso + 'T12:00:00'); return dt.toLocaleDateString('en-US', { weekday: long ? 'long' : 'short' }); }
+  function day(iso, long, loc) { var dt = new Date(iso + 'T12:00:00'); try { return dt.toLocaleDateString(loc || 'en-US', { weekday: long ? 'long' : 'short' }); } catch (e) { return dt.toLocaleDateString('en-US', { weekday: long ? 'long' : 'short' }); } }
 
   // Plain words
   var PRESS = { heat: 'Heat', flood: 'Flooding', grey: 'Trees & green space', trees: 'Trees & green space', food: 'Food' };

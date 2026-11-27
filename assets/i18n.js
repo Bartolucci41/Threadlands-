@@ -43,21 +43,38 @@
     if (!core) return s;
     var vals = [], key = core.replace(NUM, function (v) { vals.push(v); return '{' + (vals.length - 1) + '}'; });
     var t = DICT[key];
+    if (t != null && COMMA[lang]) vals = vals.map(lnum);
     if (t == null) {
       // English dates ("Nov 27", "November 27, 2026", "Friday, November 27") are written in the reader's language
-      var dates = [], dcore = core.replace(DATE, function () { dates.push(ldate.apply(null, arguments)); return '\u0000'; });
+      var dates = [], dcore = core.replace(DATE, function () { dates.push(ldate.apply(null, arguments)); return '\u0000'; })
+        .replace(WDAY, function (w) { dates.push(lwday(w)); return '\u0000'; });
       if (dates.length) {
         var dv = [], dkey = dcore.replace(NUM, function (v) { dv.push(v); return '{' + (dv.length - 1) + '}'; }).replace(/\u0000/g, '{date}');
-        var dt = DICT[dkey], di = 0;
+        var dt = DICT[dkey], di = 0; if (COMMA[lang]) dv = dv.map(lnum);
         if (dt != null) return m[1] + dt.replace(/\{(\d+|date)\}/g, function (_, i) { return i === 'date' ? (dates[di++] || '') : (dv[+i] != null ? dv[+i] : ''); }) + m[3];
         di = 0; return m[1] + dcore.replace(/\u0000/g, function () { return dates[di++]; }) + m[3];
       }
+      // A number on its own ("1,365", "13.6") is written the reader's way
+      if (COMMA[lang] && !/[A-Za-z]/.test(key)) return m[1] + core.replace(NUM, lnum) + m[3];
       var R = regionMap(), c = R && R[core];
       if (c) { try { t = new Intl.DisplayNames([lang], { type: 'region' }).of(c); } catch (e) { t = null; } }
       if (t == null) return s;
       return m[1] + t + m[3];
     }
     return m[1] + t.replace(/\{(\d+)\}/g, function (_, i) { return vals[+i] != null ? vals[+i] : ''; }) + m[3];
+  }
+  // Languages that write 1.365 and 13,6 where English writes 1,365 and 13.6
+  var COMMA = { it: 1, fr: 1, pt: 1 };
+  function lnum(v) {
+    var t = v.match(/^([\s\S]*?)(,*)$/), n = t[1];
+    if (!/\d[,.]\d/.test(n)) return v;
+    var sep = lang === 'fr' ? '\u202f' : '.';
+    return n.replace(/[,.]/g, function (c) { return c === ',' ? '\u0001' : ','; }).replace(/\u0001/g, sep) + t[2];
+  }
+  var WDAY = /\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/g;
+  function lwday(w) {
+    var i = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].indexOf(w);
+    try { return new Date(2024, 0, 1 + i, 12).toLocaleDateString(lang, { weekday: 'long' }); } catch (e) { return w; }
   }
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   var DATE = /\b(?:(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),? )?(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)\.?(?: (\d{1,2})(?!\d))?(?:,? (\d{4}))?\b/g;

@@ -664,6 +664,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .gz-head { border-bottom: 2px solid var(--ink); padding-bottom: 10px; margin-bottom: 0; }
   .gz-mast { font: 800 clamp(1.9rem, 4.4vw, 2.9rem)/1.02 var(--font-display); letter-spacing: -0.015em; margin: 0 0 8px; }
   .gz-date { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; font: 500 0.74rem var(--font-mono, 'IBM Plex Mono', monospace); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink2); } .gz-date span:first-child { color: var(--accent); font-weight: 600; }
+  .gz-date .hl-orig { display: none; } html:not([lang="en"]) .gz-date .hl-orig { display: inline; }
   .gazette .nw2-grid, .gazette .nw2-list { border-top: 0; max-width: none; gap: 0; } .gazette .nw2-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); } .gazette .nw2-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
   .gazette .nw2 { padding: 16px 18px 16px 0; margin-right: 18px; border-bottom: 1px solid var(--line); gap: 6px; }
   .gazette .nw2-h { display: grid; gap: 6px; color: var(--ink); text-decoration: none; } .gazette .nw2-h:hover .nw2-hd { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
@@ -1012,7 +1013,7 @@ PRO_PAGES = ("lab/", "explore/", "studio/", "how-it-works/", "guide/")
 
 def APP(base):
     # Installable app: icon, manifest and offline support
-    return (f'<script src="{base}assets/i18n.js?v=2" defer></script>\n<script src="{base}assets/feedback.js?v=1" defer></script>\n'
+    return (f'<script src="{base}assets/i18n.js?v=3" defer></script>\n<script src="{base}assets/feedback.js?v=1" defer></script>\n'
             f'<link rel="manifest" href="{base}manifest.webmanifest">\n'
             '<meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">\n'
             '<meta name="theme-color" content="#0D1613" media="(prefers-color-scheme: dark)">\n'
@@ -1032,7 +1033,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=70">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=71">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
