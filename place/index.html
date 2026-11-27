@@ -401,6 +401,12 @@
   }
   // A place's own identity, where one has been made by hand: its landscape, its neighborhoods and what sustains it
   var IDN = null, PROPS = [], GROUPS = [];
+  // Built isn't the same as available: ideas and notes open only when the relay reports its private review queues are on
+  var OPEN = false;
+  fetch('https://threadlands-relay.rob41pitt.workers.dev/?features=1').then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }).then(function (f) {
+    OPEN = !!(f && f.ideas && f.notes && f.privateQueue); document.documentElement.classList.toggle('tl-open', OPEN);
+    if (D && D.lib[SLUG]) renderIdeas(D.lib[SLUG]);
+  });
   // Visit and explore: ways to see and support a place, hand-picked with sources; only where a file exists
   function loadVisit(e) {
     var box = $('#visit'); box.hidden = true;
@@ -437,7 +443,9 @@
   function renderIdeas(e) {
     var name = e.name, list = PROPS.filter(function (p) { return p.place === SLUG; }), mine = window.TLPropose ? TLPropose.mine(SLUG) : [];
     document.querySelectorAll('.pp-cn').forEach(function (n) { n.textContent = name; });
-    var cs = document.querySelector('.pp-cta > div > span'); if (cs) cs.textContent = IDN && IDN.pilot ? 'In ' + name + ' we\u2019re starting with three kinds of change: safer cycling, food access, and shade or water. You\u2019ll see who is already asking or working on it before you post.' : 'Suggest a simple change, like more shade, a safe crossing or fresh food nearby. You\u2019ll see who is already asking or working on it before you post.';
+    var ob = document.getElementById('pp-open'); if (ob) { ob.disabled = !OPEN; ob.textContent = OPEN ? 'Suggest a change' : 'Opening soon'; }
+    var ha = document.getElementById('here-add'); if (ha) { ha.disabled = !OPEN; ha.textContent = OPEN ? 'Add what you know here' : 'Notes open soon'; }
+    var cs = document.querySelector('.pp-cta > div > span'); if (cs) cs.textContent = !OPEN ? 'Suggestions open here once the private review queue is switched on. Until then you can explore the ideas, projects and organizations below.' : IDN && IDN.pilot ? 'In ' + name + ' we\u2019re starting with three kinds of change: safer cycling, food access, and shade or water. You\u2019ll see who is already asking or working on it before you post.' : 'Suggest a simple change, like more shade, a safe crossing or fresh food nearby. You\u2019ll see who is already asking or working on it before you post.';
     var TT = (window.TLPropose || {}).TOPICS || {}, link = function (k, id) {
       if (k === 'project') { var pr = D.projects.filter(function (x) { return x.id === id; })[0]; return pr ? '<a href="#pj-' + esc(id) + '">' + esc(pr.name) + '</a>' : ''; }
       if (k === 'group') { var g = GROUPS.filter(function (x) { return x.id === id; })[0]; return g ? '<a href="' + esc(g.url) + '" target="_blank" rel="noopener">' + esc(g.name) + '</a>' : ''; }
@@ -467,7 +475,7 @@
         (j.length ? '<span class="pfi-by">Support from ' + parts.join(' · ') + '</span>' : '') +
         (why.length ? '<details class="pfi-j"><summary>' + (why.length === 1 ? 'The reason shared' : why.length + ' reasons people shared') + '</summary><ul>' + why.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul></details>' : '') +
         (links.length ? '<span class="pfi-l">Linked to ' + links.join(', ') + '</span>' : '') + pathHtml(p) +
-        '<span class="pjc-act">' + (have ? '<span class="pfi-have">&#10003; You support this</span>' : '<button type="button" class="btn" data-idea-join="' + esc(p.id) + '">I want this too</button>') + '</span></article>';
+        '<span class="pjc-act">' + (!OPEN ? '' : have ? '<span class="pfi-have">&#10003; You support this</span>' : '<button type="button" class="btn" data-idea-join="' + esc(p.id) + '">I want this too</button>') + '</span></article>';
     }
     var waiting = mine.map(function (m) {
       return '<article class="pfi wait"><b>' + esc(m.idea) + '</b><span class="pfi-m">' + esc(m.area || (m.scope === 'city' ? 'Across ' + name : 'Pinned on the map')) + '</span><span class="pfi-w">Your idea' + (m.link ? (m.mode === 'join' ? ', added to \u201c' : ', connected to \u201c') + esc(m.link) + '\u201d' : '') + ' \u00b7 waiting for review (only you can see this)</span></article>';
@@ -483,13 +491,13 @@
         var L = list.filter(function (p) { return k === 'other' ? pilot.indexOf(p.type) < 0 : p.type === k; });
         if (k === 'other' && !L.length) return '';
         return '<section class="pfi-col"><h4>' + esc(k === 'other' ? 'Other ideas' : TY[k].label) + '</h4>' + (L.length ? L.map(card).join('') : '<p class="pf-none">No ' + esc(TY[k].label.toLowerCase()) + ' ideas yet.</p>') +
-          (k !== 'other' ? '<button type="button" class="linkbtn pfi-add" data-idea-type="' + k + '">Suggest ' + esc(TY[k].label.toLowerCase()) + ' &rarr;</button>' : '') + orgs(k) + '</section>';
+          (k !== 'other' && OPEN ? '<button type="button" class="linkbtn pfi-add" data-idea-type="' + k + '">Suggest ' + esc(TY[k].label.toLowerCase()) + ' &rarr;</button>' : '') + orgs(k) + '</section>';
       }).join('') + '</div>' + (waiting ? '<div class="pfi-list">' + waiting + '</div>' : '');
     } else html = list.length || waiting ? '<div class="pfi-list">' + list.map(card).join('') + waiting + '</div>' : '<p class="pf-none">No ideas here yet. What would you change first?</p>';
-    if (pilot && GROUPS.some(function (g) { return g.place === SLUG; })) html += '<p class="pfi-rule">Organizations are listed because their public work is related. Being listed doesn\u2019t mean they have endorsed or taken on any idea here.</p>';
-    $('#pf-ideas').innerHTML = html + '<p class="pfi-rule"><b>One support per browser and network. No paid boosts.</b> Counts are support among people using Threadlands, not a citywide vote. Ideas gain weight by reaching the groups and decision-makers who can act on them, shown on each idea&rsquo;s path. &ldquo;Connected with a group&rdquo; appears only when that group has agreed to take the idea up.</p>';
+    if (pilot && GROUPS.some(function (g) { return g.place === SLUG; })) html += '<p class="pfi-rule">Organizations are listed because their public work is related: a starting list, not a complete directory. Being listed doesn\u2019t mean they have endorsed or taken on any idea here. <button type="button" class="linkbtn" data-fb-open="idea">Suggest another organization</button></p>';
+    $('#pf-ideas').innerHTML = html + '<p class="pfi-rule"><b>One support per browser and network. No paid boosts.</b> Totals are participation signals on Threadlands, not counts of unique residents and not a citywide mandate. Ideas gain weight by reaching the groups and decision-makers who can act on them, shown on each idea&rsquo;s path. &ldquo;Connected with a group&rdquo; appears only when that group has agreed to take the idea up.</p>';
     // How many support it: the person who posted it, everyone added after review, and anyone added since who is still waiting
-    var cnt = function (c) { document.querySelectorAll('[data-idea-n]').forEach(function (n) { var k = Math.max(+n.dataset.base, (c[n.dataset.ideaN] || 0) + 1); n.textContent = k + (k === 1 ? ' Threadlands participant supports this' : ' Threadlands participants support this'); }); };
+    var cnt = function (c) { document.querySelectorAll('[data-idea-n]').forEach(function (n) { var k = Math.max(+n.dataset.base, (c[n.dataset.ideaN] || 0) + 1); n.textContent = k === 1 ? 'Supported once on Threadlands' : 'Supported ' + k + ' times on Threadlands'; }); };
     cnt({}); T.support().then(cnt).catch(function () {});
   }
   function proposeCtx(e, extra) {
@@ -499,6 +507,8 @@
   }
   document.addEventListener('click', function (ev) {
     var e = D && D.lib[SLUG]; if (!e || !window.TLPropose) return;
+    if (ev.target.closest('[data-org-suggest]') && window.TLF) { TLF.open({ kind: 'idea', context: { Place: e.name, Asking: 'Suggest an organization (name, what they do, public link)' } }); return; }
+    if (!OPEN && ev.target.closest('#pp-open, [data-idea-type], [data-idea-join]')) return;
     if (ev.target.closest('#pp-open')) TLPropose.open(proposeCtx(e));
     var ty = ev.target.closest('[data-idea-type]'); if (ty) TLPropose.open(proposeCtx(e, { type: ty.dataset.ideaType }));
     var j = ev.target.closest('[data-idea-join]'); if (j) { var p = PROPS.filter(function (x) { return x.id === j.dataset.ideaJoin; })[0]; if (p) TLPropose.open(proposeCtx(e, { idea: p.idea, join: { id: p.id, name: p.idea } })); }
@@ -782,6 +792,7 @@
     Q.step = Math.max(0, Math.min(3, Q.step + (+nb.dataset.qnav))); qShow();
   });
   document.addEventListener('click', function (ev) {
+    if (ev.target.closest('#here-add') && !OPEN) return;
     if (ev.target.closest('#here-add')) { var an = document.getElementById('here-addnote'); if (an) an.remove(); $('#here-form').hidden = false; if (PRESET) { var r = document.querySelector('#here-form input[value="' + PRESET + '"]'); if (r) r.checked = true; PRESET = null; } $('#here-txt').focus(); }
     if (ev.target.closest('#here-cancel')) $('#here-form').hidden = true;
     var ad = ev.target.closest('[data-add-kind]');

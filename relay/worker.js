@@ -338,6 +338,8 @@ export default {
     // Approximate location from the connection, city level, for when the browser can't share one.
     // Cloudflare estimates it from the connection. This worker does not write it to storage or log it;
     // Cloudflare's own request logs may still hold request details for a short time (Workers Logs: up to 7 days).
+    // What this relay can take: the site keeps the idea and note forms closed until both private queues are on
+    if (request.method === 'GET' && new URL(request.url).searchParams.has('features')) return reply({ ideas: !!env.SUPPORT, notes: !!env.SUPPORT, privateQueue: true }, 200, origin);
     if (request.method === 'GET' && new URL(request.url).searchParams.has('where')) {
       const cf = request.cf || {};
       if (cf.latitude == null) return reply({ error: 'unknown' }, 404, origin);
