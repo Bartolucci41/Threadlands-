@@ -1688,5 +1688,13 @@
 "uma vez por navegador e rede. A página mostra apenas os totais: com que frequência as pessoas estiveram com",
 "E quantos disseram que vivem aqui. São sinais de participação, não uma contagem de residentes. Nenhum nome é mostrado ou compartilhado.",
 "Chave",
-"A sua (desvanecer-se ao ser construído)"
+"A sua (desvanecer-se ao ser construído)",
+"Desenhar parques, fazendas urbanas, lagoas, linhas de árvores e muros do mar no mapa real, com uma visão inclinada de nível de rua, custos locais, manutenção e carbono. Execute uma oficina onde as equipes se revezam em uma tela.",
+"Inclinado",
+"view",
+"Vista inclinada.",
+"No nível da rua, os edifícios se erguem em suas alturas reais, do OpenStreetMap, ou estimados onde não são mapeados. É uma visão inclinada simples, não uma cena {0}D completa.",
+"Vista inclinada",
+"Vista inclinada: edifícios, paredes e árvores se erguem ao nível da rua",
+"Tecla de visualização inclinada"
 ]

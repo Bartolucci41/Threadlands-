@@ -1688,5 +1688,13 @@
 "une fois par navigateur et réseau. La page ne montre que les totaux: combien de fois les gens ont tenu avec",
 ", et combien ont dit qu'ils vivaient ici. Ce sont des signaux de participation, pas un nombre de résidents. Aucun nom n'est affiché ou partagé.",
 "Clé",
-"Le vôtre (fade pendant sa construction)"
+"Le vôtre (fade pendant sa construction)",
+"Dessiner des parcs, des fermes urbaines, des étangs, des lignes d'arbres et des murs de mer sur la carte réelle, avec une vue inclinée sur la rue, les coûts locaux, l'entretien et le carbone. Exécuter un atelier où les équipes prennent tour à tour sur un écran.",
+"Tilted",
+"vue",
+"Vue inclinée.",
+"Au niveau de la rue, les bâtiments se dressent à leurs vraies hauteurs, depuis OpenStreetMap, ou estimés où ils ne sont pas cartographiés. C'est une simple vue inclinée, pas une scène pleine {0}D.",
+"Vue inclinée",
+"Vue inclinée : bâtiments, murs et arbres se dressent au niveau de la rue",
+"Clé de vue inclinée"
 ]

@@ -1688,5 +1688,13 @@
 "una vez por navegador y red. La página muestra sólo los totales: con qué frecuencia se ha mantenido la gente",
 "Y cuántos dijeron que viven aquí. Son señales de participación, no un recuento de residentes. No se muestran ni comparten nombres.",
 "Clave",
-"El suyo (fallecido mientras se construye)"
+"El suyo (fallecido mientras se construye)",
+"Parques, fincas urbanas, estanques, líneas de árboles y paredes marinas en el mapa real, con una vista inclinada a nivel de la calle, costos locales, mantenimiento y carbono. Ejecute un taller donde los equipos se turnan en una pantalla.",
+"Tilted",
+"vista",
+"Vista empundida.",
+"A nivel de la calle, los edificios se levantan en sus alturas reales, desde OpenStreetMap, o se calculan donde no se mapean. Es una simple vista inclinada, no una escena completa {0}D.",
+"Tilted view",
+"Vista Tilted: edificios, paredes y árboles se levantan a nivel de calle",
+"Tecla de la vista"
 ]

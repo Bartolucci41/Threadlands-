@@ -1688,5 +1688,13 @@
 "una volta per browser e rete. La pagina mostra solo i totali: quanto spesso le persone hanno resistito",
 ", e quanti hanno detto che vivono qui. Questi sono segnali di partecipazione, non un conteggio di residenti. Nessun nome è mostrato o condiviso.",
 "Chiave",
-"La tua (fasata durante la costruzione)"
+"La tua (fasata durante la costruzione)",
+"Disegnare parchi, fattorie urbane, stagni, linee di alberi e pareti marine sulla mappa reale, con una vista a livello di strada inclinata, costi locali, upkeep e carbonio. Eseguire un workshop in cui le squadre a turno su uno schermo.",
+"Til",
+"vista",
+"Vista limitata.",
+"A livello di strada, gli edifici si alzano alle loro altezze reali, da OpenStreetMap, o stimato dove non sono mappati. È una semplice vista inclinata, non una scena completa {0}D.",
+"Vista panoramica",
+"Vista limitata: edifici, pareti e alberi si alzano a livello stradale",
+"Chiave di visualizzazione limitata"
 ]
