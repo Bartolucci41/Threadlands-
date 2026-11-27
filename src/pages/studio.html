@@ -38,7 +38,7 @@
           <select id="st-base" class="st-select small" title="What shows under the model">
             <option value="streets">Background: streets</option>
             <option value="satellite">Background: satellite</option>
-            <option value="none">Background: none</option>
+            <option value="terrain">Background: terrain</option>
           </select>
           <button type="button" class="chip" id="st-share">Share</button>
           <button type="button" class="chip" id="st-wsbtn">Workshop</button>
@@ -329,6 +329,9 @@
     // Esri World Imagery through ArcGIS Location Platform: 512 px tiles. The key is limited to threadlands.org, so it is safe in the page.
     satellite: { max: 18, size: 512, url: function (z, x, y) { return 'https://static-map-tiles-api.arcgis.com/arcgis/rest/services/static-basemap-tiles-service/v1/arcgis/imagery/labels/static/tile/' + z + '/' + y + '/' + x + '?token=' + ESRI_KEY; },
       attr: 'Imagery: <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a>, Maxar, Earthstar Geographics and the GIS user community' },
+    // Terrain: OpenTopoMap (contours and hill shading from OpenStreetMap and SRTM)
+    terrain: { max: 17, url: function (z, x, y) { return 'https://' + 'abc'.charAt((x + y) % 3) + '.tile.opentopomap.org/' + z + '/' + x + '/' + y + '.png'; },
+      attr: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, SRTM &middot; style &copy; <a href="https://opentopomap.org" target="_blank" rel="noopener">OpenTopoMap</a> (CC-BY-SA)' },
     // Fallback if Esri tiles fail: Sentinel-2 cloudless, sharp to about 10 m
     sentinel: { max: 14, url: function (z, x, y) { return 'https://e.tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/GoogleMapsCompatible/' + z + '/' + y + '/' + x + '.jpg'; },
       attr: '<a href="https://s2maps.eu" target="_blank" rel="noopener">Sentinel-2 cloudless</a> by EOX IT Services GmbH (contains modified Copernicus Sentinel data 2016 &amp; 2017)' }
@@ -924,28 +927,41 @@
   }
   var osmT = null;
   function osmSoon() { clearTimeout(osmT); osmT = setTimeout(function () { loadOSM(); blockSummary(); }, 250); }
+  // Load real places a small square (about 1 km) at a time, nearest the middle of the view first. Buildings come first,
+  // in a light request, so they (and the tilted view) appear quickly; lots, parks and streets follow. Two at a time, since
+  // public servers queue requests, and a backup server is asked when one is slow (see overpass()).
+  var OSMQ = [], OSMBUSY = 0;
+  function osmPump() {
+    while (OSMBUSY < 2 && OSMQ.length) {
+      var job = OSMQ.shift(); OSMBUSY++;
+      (function (job) {
+        overpass(job.q).then(function (j) { addOSM(j.elements || []); job.ok(); }).catch(function () { job.fail(); })
+          .then(function () { OSMBUSY--; OSM.loading--; modeChanged(); blockSummary(); scheduleDraw(); osmPump(); });
+      })(job);
+    }
+  }
   function loadOSM() {
     if (!view || view.z < OSM_Z - 1 || !S.P) return;   // start one zoom level early, so streets are usually ready on arrival
     var lat0 = uny(wy(view.H)), lat1 = uny(wy(0)), lng0 = unx(wx(0)), lng1 = unx(wx(view.W)), cells = [];
+    var cla = (lat0 + lat1) / 2, cln = (lng0 + lng1) / 2;
+    if (view.z < OSM_Z) { lat0 = lat1 = cla; lng0 = lng1 = cln; }   // one zoom out: only the square in the middle, ready for arrival
     for (var a = Math.floor(lat0 / CELL); a <= Math.floor(lat1 / CELL); a++) for (var b = Math.floor(lng0 / CELL); b <= Math.floor(lng1 / CELL); b++) cells.push([a, b]);
     if (cells.length > 16) return;
     var now = Date.now();
-    var need = cells.filter(function (c) { var st = OSM.cells[c[0] + ':' + c[1]]; return !(st === 'ok' || st === 'loading' || (typeof st === 'number' && now - st < 30000)); });
-    if (!need.length) return;
-    // All missing cells in one request (public servers queue each request, so one is much faster than several)
-    var a0 = Math.min.apply(null, need.map(function (c) { return c[0]; })), a1 = Math.max.apply(null, need.map(function (c) { return c[0]; }));
-    var b0 = Math.min.apply(null, need.map(function (c) { return c[1]; })), b1 = Math.max.apply(null, need.map(function (c) { return c[1]; }));
-    var keys = need.map(function (c) { return c[0] + ':' + c[1]; });
-    keys.forEach(function (key) { OSM.cells[key] = 'loading'; }); OSM.loading++; modeChanged();
-    [0].forEach(function () {
-      var bb = '(' + [a0 * CELL, b0 * CELL, (a1 + 1) * CELL, (b1 + 1) * CELL].map(function (v) { return v.toFixed(4); }).join(',') + ')';
-      var q = '[out:json][timeout:25];(way["building"]' + bb + ';way["amenity"="parking"]' + bb + ';way["landuse"~"^(brownfield|greenfield|vacant|construction|grass)$"]' + bb +
-        ';way["leisure"~"^(park|garden|playground|pitch)$"]' + bb + ';way["waterway"~"^(river|canal|stream)$"]' + bb + ';way["natural"="coastline"]' + bb + ';way["highway"~"^(primary|secondary|tertiary|residential|unclassified|living_street|pedestrian)$"]' + bb + ';);out geom;';
-      overpass(q)
-        .then(function (j) { keys.forEach(function (key) { OSM.cells[key] = 'ok'; }); addOSM(j.elements || []); })
-        .catch(function () { keys.forEach(function (key) { OSM.cells[key] = Date.now(); }); })
-        .then(function () { OSM.loading--; modeChanged(); blockSummary(); scheduleDraw(); });
+    cells = cells.filter(function (c) { var st = OSM.cells[c[0] + ':' + c[1]]; return !(st === 'ok' || st === 'loading' || (typeof st === 'number' && now - st < 30000)); });
+    cells.sort(function (p, q) { return Math.hypot((p[0] + 0.5) * CELL - cla, (p[1] + 0.5) * CELL - cln) - Math.hypot((q[0] + 0.5) * CELL - cla, (q[1] + 0.5) * CELL - cln); });
+    cells.forEach(function (c) {
+      var key = c[0] + ':' + c[1], bb = '(' + [c[0] * CELL, c[1] * CELL, (c[0] + 1) * CELL, (c[1] + 1) * CELL].map(function (v) { return v.toFixed(4); }).join(',') + ')', left = 2, bad = false;
+      OSM.cells[key] = 'loading';
+      var done = function () { if (--left === 0) OSM.cells[key] = bad ? Date.now() : 'ok'; }, fail = function () { bad = true; OSM.failedAt = Date.now(); done(); };
+      OSM.loading += 2;
+      OSMQ.push({ q: '[out:json][timeout:20];way["building"]' + bb + ';out geom;', ok: done, fail: fail });
+      OSMQ.push({ q: '[out:json][timeout:25];(way["amenity"="parking"]' + bb + ';way["landuse"~"^(brownfield|greenfield|vacant|construction|grass)$"]' + bb +
+        ';way["leisure"~"^(park|garden|playground|pitch)$"]' + bb + ';way["waterway"~"^(river|canal|stream)$"]' + bb + ';way["natural"="coastline"]' + bb + ';way["highway"~"^(primary|secondary|tertiary|residential|unclassified|living_street|pedestrian)$"]' + bb + ';);out geom;', ok: done, fail: fail });
     });
+    // buildings for every square first, then the rest
+    OSMQ.sort(function (p, q) { return (p.q.indexOf('"building"]') > 0 && p.q.indexOf('parking') < 0 ? 0 : 1) - (q.q.indexOf('"building"]') > 0 && q.q.indexOf('parking') < 0 ? 0 : 1); });
+    modeChanged(); osmPump();
   }
   function inView(f) { var b = f.bb; return b[2] >= wx(0) && b[0] <= wx(view.W) && b[3] >= wy(0) && b[1] <= wy(view.H); }
   function osmPath(f) {
@@ -1149,7 +1165,7 @@
   function canPick() { return view && view.z >= OSM_Z; }
   function modeChanged() {
     var sm = streetMode(), c = BYK[S.tool];
-    $('#st-mode').textContent = !sm ? 'Region view: zoom in to reach street level' : view.z < OSM_Z ? 'Street level: zoom in once more to load buildings' : OSM.loading ? 'Street level: loading buildings and streets\u2026' : S.view3d ? 'Tilted view, street level' : 'Street level';
+    $('#st-mode').textContent = !sm ? 'Region view: zoom in to reach street level' : view.z < OSM_Z ? 'Street level: zoom in once more to load buildings' : OSM.loading && !OSM.list.length ? 'Street level: loading buildings\u2026' : !OSM.list.length && OSM.failedAt ? 'Street level: the building data server is busy. Move the map a little to try again.' : S.view3d ? 'Tilted view, street level' : 'Street level';
     var show = !!c && drawsShapes(S.tool);
     $('#st-shape').hidden = !show;
     if (show) {
@@ -1794,8 +1810,10 @@
   $('#st-zout').addEventListener('click', function () { if (view) zoomBy(0.5); });
   cv.addEventListener('wheel', function (ev) { if (!view) return; ev.preventDefault(); var pt = evPos(ev); zoomBy(Math.pow(2, -ev.deltaY / 300), pt.x, pt.y); }, { passive: false });
   $('#st-pan').addEventListener('click', function () { panning = !panning; this.setAttribute('aria-pressed', panning ? 'true' : 'false'); cv.style.cursor = panning ? 'grab' : 'crosshair'; });
+  // One background choice across the site's maps (Streets, Satellite, Terrain), remembered in this browser
+  (function () { var b = null; try { b = localStorage.getItem('threadlands:basemap'); } catch (e) {} if (b === 'satellite' || b === 'terrain') { S.basemap = b; $('#st-base').value = b; $('#st-attr').innerHTML = b === 'none' ? '' : BASES[b].attr; $('#st-attr').hidden = b === 'none'; } })();
   $('#st-base').addEventListener('change', function () {
-    S.basemap = this.value;
+    S.basemap = this.value; try { localStorage.setItem('threadlands:basemap', this.value); } catch (e) {}
     $('#st-attr').innerHTML = S.basemap === 'none' ? '' : BASES[S.basemap].attr;
     $('#st-attr').hidden = S.basemap === 'none';
     draw();

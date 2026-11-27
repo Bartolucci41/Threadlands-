@@ -151,6 +151,24 @@
   }
 
   // "Back this project": counts come from the Threadlands relay; this device remembers what it backed
+  // Map backgrounds, the same three everywhere: Streets (default), Satellite, Terrain. They change the backdrop only;
+  // Threadlands' heat, water, land and project layers draw on top and the scores don't change.
+  var ESRI_KEY = 'AAPTaocneTrJayeMxPQ9Sg5fUdw..O1VrUkUA0lfRD0N6gwf52PmxyLiPrNNyJ-5w5JgY1-4tQHO8XN13FgFY3diYhkzKcdfa76L6G6wzBN0EmY5e96evsF59JucvA6itv1Ny7COxNQ52H6h6WOrUi9LuwMYmGPKgT_PH4swdHd6p6uz0guauG5P';
+  function mapBackgrounds(L, map) {
+    var OSMA = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+    var B = {
+      Streets: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: OSMA }),
+      Satellite: L.tileLayer('https://static-map-tiles-api.arcgis.com/arcgis/rest/services/static-basemap-tiles-service/v1/arcgis/imagery/labels/static/tile/{z}/{y}/{x}?token=' + ESRI_KEY, { maxZoom: 19, tileSize: 512, zoomOffset: -1, attribution: 'Imagery: <a href="https://www.esri.com">Esri</a>, Maxar, Earthstar Geographics' }),
+      Terrain: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, subdomains: 'abc', attribution: 'Map data ' + OSMA + ', SRTM &middot; style &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)' })
+    };
+    var keyOf = { Streets: 'streets', Satellite: 'satellite', Terrain: 'terrain' }, saved = null;
+    try { saved = localStorage.getItem('threadlands:basemap'); } catch (e) { /* ignore */ }
+    var start = saved === 'satellite' ? 'Satellite' : saved === 'terrain' ? 'Terrain' : 'Streets';
+    B[start].addTo(map);
+    L.control.layers(B, null, { position: 'topright', collapsed: true }).addTo(map);
+    map.on('baselayerchange', function (e) { try { localStorage.setItem('threadlands:basemap', keyOf[e.name] || 'streets'); } catch (err) { /* ignore */ } });
+    return B;
+  }
   var RELAY = 'https://threadlands-relay.rob41pitt.workers.dev/', BACKED = 'threadlands:backed', countsP = null;
   function backed() { try { var a = JSON.parse(store(BACKED) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
   function relayData() {
@@ -205,5 +223,5 @@
 
   window.TLP = { follows: follows, follow: follow, unfollow: unfollow, isFollowed: isFollowed, setFollows: setFollows, units: units, setUnits: setUnits, temp: temp, rain: rain,
     setBase: setBase, data: data, all: all, weather: weather, air: air, aqiWord: aqiWord, alerts: alerts, sky: sky, icon: icon, day: day,
-    PRESS: PRESS, PRESS_F: PRESS_F, TOPIC: TOPIC, TONE: TONE, esc: esc, norm: norm, ndate: ndate, fmtN: fmtN, where: where, headline: headline, flag: flag, matches: matches, nearest: nearest, support: support, relayData: relayData, TIES: TIES, TIE_SHORT: TIE_SHORT, ties: ties, tieOf: tieOf, standWith: standWith, stepBack: stepBack, standers: standers, backProject: backProject, wireBacking: wireBacking, backed: backed };
+    PRESS: PRESS, PRESS_F: PRESS_F, TOPIC: TOPIC, TONE: TONE, esc: esc, norm: norm, ndate: ndate, fmtN: fmtN, where: where, headline: headline, flag: flag, matches: matches, nearest: nearest, support: support, relayData: relayData, TIES: TIES, TIE_SHORT: TIE_SHORT, ties: ties, tieOf: tieOf, standWith: standWith, stepBack: stepBack, standers: standers, backProject: backProject, wireBacking: wireBacking, backed: backed, mapBackgrounds: mapBackgrounds };
 })();

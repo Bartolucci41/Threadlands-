@@ -38,7 +38,7 @@
 <main class="wrap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-<script src="../assets/public.js?v=5"></script>
+<script src="../assets/public.js?v=6"></script>
 <script src="../assets/propose.js?v=4"></script>
   <div class="pf-missing" id="pf-missing" hidden></div>
   <article class="pf" id="pf" hidden>
@@ -817,7 +817,7 @@
     if (!window.L) { $('#here-map').innerHTML = '<p class="here-none" style="padding:16px">The map could not be loaded.</p>'; return; }
     if (!HM) {
       HM = L.map('here-map', { scrollWheelZoom: false, zoomControl: true });
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(HM);
+      T.mapBackgrounds(L, HM);
       HM.on('click', function (ev) {
         if (!HDATA) return; if (Q) { qClear(); Q = null; }
         var mark = MARK; MARK = null; document.getElementById('here-map').classList.remove('marking');

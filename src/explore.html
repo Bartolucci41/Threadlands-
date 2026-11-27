@@ -583,9 +583,9 @@
         </div>
         <label class="sr-only" for="basemap">Background map</label>
         <select id="basemap" class="mapbase" title="What shows under the model">
-          <option value="none">Background: none</option>
           <option value="streets">Background: streets</option>
           <option value="satellite">Background: satellite</option>
+          <option value="terrain">Background: terrain</option>
         </select>
         <span class="mapattr" id="mapattr" hidden></span>
         <div class="badge">
@@ -1053,6 +1053,9 @@
       attr: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors' },
     satellite: { max: 18, size: 512, url: function (z, x, y) { return 'https://static-map-tiles-api.arcgis.com/arcgis/rest/services/static-basemap-tiles-service/v1/arcgis/imagery/labels/static/tile/' + z + '/' + y + '/' + x + '?token=' + ESRI_KEY; },
       attr: 'Imagery: <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a>, Maxar, Earthstar Geographics and the GIS user community' },
+    // Terrain: OpenTopoMap (contours and hill shading from OpenStreetMap and SRTM)
+    terrain: { max: 17, url: function (z, x, y) { return 'https://' + 'abc'.charAt((x + y) % 3) + '.tile.opentopomap.org/' + z + '/' + x + '/' + y + '.png'; },
+      attr: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, SRTM &middot; style &copy; <a href="https://opentopomap.org" target="_blank" rel="noopener">OpenTopoMap</a> (CC-BY-SA)' },
     sentinel: { max: 14, url: function (z, x, y) { return 'https://e.tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/GoogleMapsCompatible/' + z + '/' + y + '/' + x + '.jpg'; },
       attr: '<a href="https://s2maps.eu" target="_blank" rel="noopener">Sentinel-2 cloudless</a> by EOX IT Services GmbH (contains modified Copernicus Sentinel data 2016 &amp; 2017)' }
   };
@@ -1064,7 +1067,7 @@
     $('#basemap').value = v === 'sentinel' ? 'satellite' : v;
     scheduleDraw();
   }
-  (function () { var b = null; try { b = localStorage.getItem('threadlands:basemap'); } catch (e) { /* ignore */ } setBasemap(b === 'none' || b === 'satellite' ? b : 'streets'); })();
+  (function () { var b = null; try { b = localStorage.getItem('threadlands:basemap'); } catch (e) { /* ignore */ } setBasemap(b === 'satellite' || b === 'terrain' ? b : 'streets'); })();
   function drawTiles() {
     if (BASEMAP === 'none' || !P || !P.MERC || kind === 'demo') return;
     var B0 = BASES[BASEMAP], K = P.MERC.K, z = Math.log2(K * S / 256);

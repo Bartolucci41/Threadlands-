@@ -38,7 +38,7 @@
 <main class="wrap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-<script src="../assets/public.js?v=5"></script>
+<script src="../assets/public.js?v=6"></script>
   <header class="page-head">
     <p class="page-kicker">Get involved</p>
     <h1>Real projects changing cities</h1>
@@ -124,7 +124,7 @@
     $('#pj-city').innerHTML = '<option value="">Choose a city</option>' + (x[1].places || []).slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).map(function (e) { return '<option value="' + esc(e.slug) + '">' + esc(e.name) + ', ' + esc(e.country) + '</option>'; }).join('');
     if (window.L) {
       MAP = L.map('pj-map', { worldCopyJump: true, scrollWheelZoom: false }).setView([25, 10], 2);
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(MAP);
+      if (window.TLP) TLP.mapBackgrounds(L, MAP); else L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "&copy; OpenStreetMap contributors" }).addTo(MAP);
       ALL.forEach(function (p) {
         var st = STAT[p.status] || STAT.proposed;
         var m = L.circleMarker([p.lat, p.lng], { radius: 8, color: '#fff', weight: 2.5, fillColor: st[1], fillOpacity: 1 })
