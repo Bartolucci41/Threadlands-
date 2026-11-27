@@ -624,6 +624,13 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .restored { margin: 8px 0; padding: 8px 12px; border-radius: 10px; background: var(--surface2); font-size: 0.88rem; } .restored .linkbtn { color: var(--accent); font-weight: 600; }
   .lib-bg { position: absolute; left: 10px; top: 10px; display: flex; gap: 6px; padding: 6px 8px; border-radius: 999px; background: rgba(255,255,255,0.85); box-shadow: 0 1px 4px rgba(0,0,0,0.12); z-index: 2; }
   .lib-sw { width: 20px; height: 20px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.15); background: var(--sw); padding: 0; cursor: pointer; } .lib-sw[aria-pressed="true"] { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (max-width: 600px) {   /* phones: the controls sit in a strip under the map instead of covering it */
+    .lib-map { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+    .lib-map canvas { flex: 0 0 100%; }
+    .lib-map .lib-bg, .lib-map .lib-zoom { position: static; margin: 8px 10px; box-shadow: none; }
+    .lib-map .lib-bg { background: none; padding: 0; gap: 8px; } .lib-map .lib-sw { width: 22px; height: 22px; }
+    .lib-map .lib-zoom { display: flex; gap: 6px; } .lib-map .lib-zoom .chip { width: 38px; min-height: 38px; box-shadow: none; border: 1px solid var(--line); }
+  }
   .lib-map.dark .lib-tip { background: #111; color: #fff; }
   /* The news, editorial: a big head the eye lands on, the rest of the same words as a quieter deck */
   .gazette { padding: 0; }
@@ -948,7 +955,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=51">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=52">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

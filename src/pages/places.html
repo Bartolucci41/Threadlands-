@@ -81,7 +81,7 @@
   function drawMap() {
     W = cv.parentNode.clientWidth;
     if (!W) return;
-    H = Math.round(W * (W < 600 ? 0.7 : 0.42)); var dpr = window.devicePixelRatio || 1;
+    H = Math.round(W * 135 / 360 * 1.15); var dpr = window.devicePixelRatio || 1;   // a fixed shape, so continents aren't stretched on narrow screens
     cv.width = W * dpr; cv.height = H * dpr; cv.style.height = H + 'px';
     var ctx = cv.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -102,7 +102,7 @@
     ctx.beginPath(); ctx.moveTo(0, Y(0)); ctx.lineTo(W, Y(0)); ctx.stroke(); ctx.setLineDash([]);
     var ids = {}; shown.forEach(function (e) { ids[e.slug] = 1; });
     dots = [];
-    var DK = Math.max(0.5, Math.min(1, W / 900));   // narrower map, smaller dots: a phone shows the same world at about a third of the width
+    var DK = Math.max(0.42, Math.min(1, W / 900));   // narrower map, smaller dots: a phone shows the same world at about a third of the width
     // Smaller places appear as you zoom in, so the world view stays readable however many towns are added
     var filtering = shown.length < LIB.length, minPop = filtering ? 0 : 1e6 / (V.z * V.z);
     LIB.slice().sort(function (a, b) { return b.pop - a.pop; }).forEach(function (e) {
@@ -157,18 +157,39 @@
   $('#lz-fit').addEventListener('click', function () { V = { z: 1, lng: 0, lat: 7.5 }; tip.hidden = true; drawMap(); });
   cv.addEventListener('wheel', function (ev) { ev.preventDefault(); var b = cv.getBoundingClientRect(); zoomAt(Math.pow(2, -ev.deltaY / 300), ev.clientX - b.left, ev.clientY - b.top); }, { passive: false });
   cv.addEventListener('dblclick', function (ev) { ev.preventDefault(); var b = cv.getBoundingClientRect(); zoomAt(2.5, ev.clientX - b.left, ev.clientY - b.top); });
-  var drag = null;
-  cv.addEventListener('pointerdown', function (ev) { drag = { x: ev.clientX, y: ev.clientY, lng: V.lng, lat: V.lat, moved: false }; try { cv.setPointerCapture(ev.pointerId); } catch (e) { /* ignore */ } });
+  var drag = null, PTS = {}, pinch = null;
+  function rel(ev) { var b = cv.getBoundingClientRect(); return { x: ev.clientX - b.left, y: ev.clientY - b.top }; }
+  function two() { var k = Object.keys(PTS); if (k.length < 2) return null; var a = PTS[k[0]], b = PTS[k[1]]; return { d: Math.hypot(a.x - b.x, a.y - b.y), x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
+  cv.addEventListener('pointerdown', function (ev) {
+    PTS[ev.pointerId] = rel(ev);
+    var t = two();
+    if (t) { pinch = t; drag = null; cv.style.touchAction = 'none'; return; }   // second finger: pinch, not drag
+    drag = { x: ev.clientX, y: ev.clientY, lng: V.lng, lat: V.lat, moved: false }; try { cv.setPointerCapture(ev.pointerId); } catch (e) { /* ignore */ }
+  });
   cv.addEventListener('pointermove', function (ev) {
+    if (PTS[ev.pointerId]) PTS[ev.pointerId] = rel(ev);
+    if (pinch) {
+      var t = two(); if (!t || !pinch.d) return;
+      // pan with the fingers' midpoint, then zoom about it
+      V.lng -= (t.x - pinch.x) / (W * V.z) * 360; V.lat += (t.y - pinch.y) / (H * V.z) * 135; clampV();
+      zoomAt(t.d / pinch.d, t.x, t.y); pinch = t; return;
+    }
     if (!drag) return;
     var dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
     if (!drag.moved && Math.hypot(dx, dy) > 5 && V.z > 1.001) drag.moved = true;
     if (drag.moved) { V.lng = drag.lng - dx / (W * V.z) * 360; V.lat = drag.lat + dy / (H * V.z) * 135; clampV(); tip.hidden = true; drawMap(); }
   });
+  function lift(ev) {
+    delete PTS[ev.pointerId];
+    if (pinch) { if (!two()) { pinch = null; drag = null; cv.style.touchAction = V.z > 1.001 ? 'none' : 'pan-y'; } return true; }
+    return false;
+  }
   cv.addEventListener('pointerup', function (ev) {
+    if (lift(ev)) return;
     var dr = drag; drag = null;
     if (dr && !dr.moved) { var d = hit(ev); if (d) { if (ev.pointerType === 'mouse') location.href = '{B}place/#' + d.e.slug; else showTip(d, true); } }
   });
+  cv.addEventListener('pointercancel', function (ev) { lift(ev); drag = null; });
   function showTip(d, tap) {
     tip.hidden = false; tip.innerHTML = '';
     tip.style.pointerEvents = tap ? 'auto' : 'none';
