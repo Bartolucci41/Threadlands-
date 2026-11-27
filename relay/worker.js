@@ -83,14 +83,18 @@ async function observation(b, request, env, origin) {
 }
 
 // "What would make this place better?": a simple idea with where it would help and, optionally, why.
-// It may join an existing idea (same thing, own location and reason) or connect to a related idea, project or group.
-// Like observations, it opens a GitHub issue for review; nothing is public until it is checked (see proposal-reviewed.yml).
+// It may join an existing idea (same thing, own neighborhood and reason) or connect to a related idea, project or group.
+// Privacy: ideas wait in a PRIVATE queue here (Workers KV), readable only with the inbox key. Nothing goes to GitHub,
+// which is public, until a reviewer publishes it; then only the public parts are sent, and the private copy is deleted.
+//  - a pin is for the public spot the idea is about, rounded to about 100 m
+//  - someone joining an idea is published as a count and a neighborhood, never a pin
+//  - a reason is published only if the person ticked "Show my reason"
 const TOPIC_KEYS = ['food', 'mobility', 'trees', 'heat', 'water', 'parks', 'safety', 'waste', 'air'];
-async function proposal(b, request, env, origin) {
-  const num = (v) => (v === null || v === '' || v === undefined || !isFinite(Number(v))) ? null : Math.round(Number(v) * 1e4) / 1e4;
+function ideaFields(b) {
+  const num = (v) => (v === null || v === '' || v === undefined || !isFinite(Number(v))) ? null : Math.round(Number(v) * 1e3) / 1e3;
   const o = {
     place: String(b.place || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 80),
-    idea: text(b.idea, 120), why: text(b.why, 280), area: text(b.area, 80),
+    idea: text(b.idea, 120), why: text(b.why, 280), show_why: b.show_why === true, area: text(b.area, 80),
     scope: ['pin', 'area', 'city'].includes(b.scope) ? b.scope : '',
     topic: (Array.isArray(b.topic) ? b.topic : []).filter((t) => TOPIC_KEYS.includes(t)).slice(0, 4),
     lat: num(b.lat), lng: num(b.lng),
@@ -98,22 +102,56 @@ async function proposal(b, request, env, origin) {
     link_kind: ['proposal', 'project', 'group'].includes(b.link_kind) ? b.link_kind : '', link_id: String(b.link_id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40),
   };
   if (o.scope !== 'pin') { o.lat = null; o.lng = null; }
+  if (o.mode !== 'new' && (!o.link_kind || !o.link_id)) o.mode = 'new';
+  if (o.mode === 'join' && o.link_kind !== 'proposal') o.mode = 'connect';
+  return o;
+}
+async function proposal(b, request, env, origin) {
+  if (!env.SUPPORT) return reply({ error: 'Ideas are not switched on yet.' }, 503, origin);
+  const o = ideaFields(b);
   if (!o.place || o.idea.length < 4 || !o.scope) return reply({ error: 'Write your idea and say where it would help.' }, 400, origin);
   if (o.scope === 'pin' && (o.lat === null || o.lng === null || Math.abs(o.lat) > 90 || Math.abs(o.lng) > 180)) return reply({ error: 'Tap the map to drop a pin.' }, 400, origin);
   if (o.scope === 'area' && !o.area) return reply({ error: 'Choose a neighborhood.' }, 400, origin);
-  if (o.mode !== 'new' && (!o.link_kind || !o.link_id)) o.mode = 'new';
   if (!(await knownPlaces(env)).has(o.place)) return reply({ error: 'Unknown place.' }, 400, origin);
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown', now = Date.now();
   const times = (recent.get('i' + ip) || []).filter((t) => now - t < 3600e3);
   if (times.length >= 8) return reply({ error: 'You have sent several ideas in the last hour. Please try again later.' }, 429, origin);
   times.push(now); recent.set('i' + ip, times);
+  const id = String(9999999999999 - now).padStart(13, '0') + '-' + Math.random().toString(36).slice(2, 8);
+  const item = Object.assign({ id, at: new Date(now).toISOString(), status: 'new' }, o);
+  // Unreviewed ideas are deleted after 90 days
+  await env.SUPPORT.put('pq:' + id, JSON.stringify(item), { expirationTtl: 60 * 60 * 24 * 90, metadata: { place: o.place, at: item.at } });
+  return reply({ ok: true }, 201, origin);
+}
+async function ideasInbox(request, env, origin) {
+  if (!inboxOk(request, env)) return reply({ error: 'Wrong inbox key.' }, 401, origin);
+  const list = await env.SUPPORT.list({ prefix: 'pq:', limit: 200 });
+  const items = await Promise.all(list.keys.map((k) => env.SUPPORT.get(k.name, { type: 'json' })));
+  return reply({ items: items.filter(Boolean) }, 200, origin);
+}
+// The reviewer publishes (optionally after editing) or rejects. Either way the private copy is deleted.
+async function ideaReview(b, request, env, origin) {
+  if (!inboxOk(request, env)) return reply({ error: 'Wrong inbox key.' }, 401, origin);
+  const key = 'pq:' + String(b.id || '').replace(/[^0-9a-z-]/g, '');
+  const item = await env.SUPPORT.get(key, { type: 'json' });
+  if (!item) return reply({ error: 'Not found.' }, 404, origin);
+  if (b.action === 'reject') { await env.SUPPORT.delete(key); return reply({ ok: true }, 200, origin); }
+  if (b.action !== 'publish') return reply({ error: 'Choose publish or reject.' }, 400, origin);
+  const o = ideaFields(Object.assign({}, item, b.edits || {}, { show_why: (b.edits || {}).show_why === undefined ? item.show_why : (b.edits || {}).show_why === true }));
+  const why = o.show_why ? o.why : '';
+  const pub = o.mode === 'join'
+    ? { mode: 'join', place: o.place, link_id: o.link_id, area: o.area, why }
+    : { mode: o.mode, place: o.place, idea: o.idea, why, area: o.area, scope: o.scope, topic: o.topic, lat: o.lat, lng: o.lng,
+        links: o.link_kind && o.link_id ? [{ kind: o.link_kind, id: o.link_id }] : [] };
+  pub.id = 'i' + item.id.slice(-6) + Date.now().toString(36).slice(-3);
   const r = await fetch(`https://api.github.com/repos/${env.REPO || 'Bartolucci41/Threadlands-'}/dispatches`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${env.GITHUB_TOKEN}`, 'Accept': 'application/vnd.github+json', 'User-Agent': 'threadlands-relay', 'Content-Type': 'application/json' },
-    body: JSON.stringify({ event_type: 'proposal-submitted', client_payload: { proposal: o } }),
+    body: JSON.stringify({ event_type: 'proposal-approved', client_payload: { proposal: pub } }),
   });
-  if (r.status !== 204) return reply({ error: 'Your idea could not be sent right now.', status: r.status }, 502, origin);
-  return reply({ ok: true }, 202, origin);
+  if (r.status !== 204) return reply({ error: 'Could not publish right now.', status: r.status }, 502, origin);
+  await env.SUPPORT.delete(key);
+  return reply({ ok: true, id: pub.id }, 200, origin);
 }
 
 // "Back this project": one count per project, one back per visitor per project.
@@ -246,6 +284,7 @@ export default {
     }
     // The private feedback inbox (needs the inbox key)
     if (request.method === 'GET' && new URL(request.url).searchParams.has('inbox')) return inbox(request, env, origin);
+    if (request.method === 'GET' && new URL(request.url).searchParams.has('ideas')) return ideasInbox(request, env, origin);
     // Approximate location from the connection, city level, for when the browser can't share one.
     // Cloudflare estimates it from the connection. This worker does not write it to storage or log it;
     // Cloudflare's own request logs may still hold request details for a short time (Workers Logs: up to 7 days).
@@ -268,6 +307,7 @@ export default {
     if (b.type === 'proposal') return proposal(b, request, env, origin);
     if (b.type === 'feedback') return feedback(b, request, env, origin);
     if (b.type === 'inbox-status') return inboxStatus(b, request, env, origin);
+    if (b.type === 'idea-review') return ideaReview(b, request, env, origin);
     // Build a new place. Only an OpenStreetMap record chosen from the search results is accepted: the relay looks the
     // record up itself and takes its name, country and kind from there, never from what the visitor typed.
     const osm = String(b.osm || '').toUpperCase();

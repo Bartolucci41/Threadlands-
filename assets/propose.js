@@ -54,13 +54,14 @@
       '<label><input type="radio" name="ppw" value="pin"><span>Pin it on the map</span></label>' +
       '<label class="pp-w-area"><input type="radio" name="ppw" value="area"><span>Choose a neighborhood</span></label>' +
       '<label><input type="radio" name="ppw" value="city"><span>Across the whole place</span></label></div>' +
-      '<div class="pp-pin" hidden><div class="pp-map" id="pp-map"></div><p class="pp-note"><button type="button" class="linkbtn" id="pp-loc">Use my location</button> <span id="pp-pin-t">Tap the map to drop a pin. It doesn’t need to be exact.</span></p></div>' +
+      '<div class="pp-pin" hidden><div class="pp-map" id="pp-map"></div><p class="pp-note"><span id="pp-pin-t">Tap the public spot you mean: a corner, a park, a bus stop. Not your home.</span> The pin is shown to the nearest 100 m or so.</p></div>' +
       '<div class="pp-area" hidden><label class="sr-only" for="pp-area">Neighborhood</label><select id="pp-area" class="pp-in"></select>' +
       '<input id="pp-area-o" class="pp-in" type="text" maxlength="80" placeholder="Name of the neighborhood" hidden></div></section>' +
       // 3 why
       '<section class="pp-s" data-s="3" hidden><label class="fb-l" for="pp-why">Why does it matter? <span>(optional, one sentence)</span></label>' +
       '<textarea id="pp-why" rows="3" maxlength="280" placeholder="The nearest fresh food is a 40-minute walk, so most people here buy from corner shops."></textarea>' +
-      '<p class="pp-note">Please don’t include names, phone numbers or private home addresses.</p></section>' +
+      '<label class="pp-ok"><input type="checkbox" id="pp-show"><span>Show my reason on the page. Your name is never shown. If you leave this unticked, only the person reviewing ideas reads it.</span></label>' +
+      '<p class="pp-note">Please don\u2019t include names, phone numbers or home addresses.</p></section>' +
       // 4 related
       '<section class="pp-s" data-s="4" hidden><p class="fb-l" id="pp-rel-h">Before you post</p><div id="pp-rel"></div><div class="pp-choice" id="pp-choice" hidden></div></section>' +
       '<p class="fb-err" id="pp-err" hidden></p></div>' +
@@ -76,12 +77,6 @@
     $('#pp-idea').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); next(); } });
     $('.pp-where').addEventListener('change', where);
     $('#pp-area').addEventListener('change', function () { $('#pp-area-o').hidden = this.value !== '_other'; if (!$('#pp-area-o').hidden) $('#pp-area-o').focus(); });
-    $('#pp-loc').addEventListener('click', function () {
-      if (!navigator.geolocation) return;
-      $('#pp-pin-t').textContent = 'Finding you…';
-      navigator.geolocation.getCurrentPosition(function (p) { drop(p.coords.latitude, p.coords.longitude); MAP.setView([S.lat, S.lng], 15); },
-        function () { $('#pp-pin-t').textContent = 'Your location isn’t available. Tap the map instead.'; }, { timeout: 8000, maximumAge: 600000 });
-    });
     $('#pp-rel').addEventListener('click', function (e) { var b = e.target.closest('[data-pick]'); if (!b) return; var p = b.dataset.pick.split('|'); S.link = p[1] ? { mode: p[0], kind: p[1], id: p[2], name: b.dataset.name } : null; related(); });
   }
 
@@ -98,7 +93,7 @@
     }
   }
   function drop(lat, lng) {
-    S.lat = Math.round(lat * 1e4) / 1e4; S.lng = Math.round(lng * 1e4) / 1e4;   // about 10 m: enough to place it, no more
+    S.lat = Math.round(lat * 1e3) / 1e3; S.lng = Math.round(lng * 1e3) / 1e3;   // about 100 m: enough to find the spot, not a doorstep
     if (PIN) PIN.setLatLng([S.lat, S.lng]); else PIN = L.circleMarker([S.lat, S.lng], { radius: 9, color: '#fff', weight: 3, fillColor: '#C0542C', fillOpacity: 1 }).addTo(MAP);
     $('#pp-pin-t').textContent = 'Pinned. Tap again to move it.';
   }
@@ -122,7 +117,7 @@
       if (S.scope === 'area' && !areaName()) return err('Choose or type a neighborhood.');
       S.area = S.scope === 'area' ? areaName() : ''; return go(3);
     }
-    if (S.step === 3) { S.why = $('#pp-why').value.trim(); return go(4); }
+    if (S.step === 3) { S.why = $('#pp-why').value.trim(); S.show = $('#pp-show').checked; return go(4); }
     if (S.step === 4) return post();
   }
 
@@ -147,7 +142,7 @@
     var KL = { proposal: 'An idea from people here', project: 'A project here', group: 'A local group' };
     var L = S.link;
     $('#pp-rel-h').textContent = items.length ? 'Before you post: related ' + (items.length === 1 ? 'work' : 'work') + ' in ' + c.name : 'Before you post';
-    $('#pp-rel').innerHTML = (items.length ? '<p class="pp-note">Join forces where it fits. Your idea keeps its own location and reason either way.</p>' : '<p class="pp-none">Nothing similar here yet. Yours would be the first.</p>') +
+    $('#pp-rel').innerHTML = (items.length ? '<p class="pp-note">Join forces where it fits. If you add yourself to an idea, the page shows you in its count and your neighborhood, never a pin.</p>' : '<p class="pp-none">Nothing similar here yet. Yours would be the first.</p>') +
       items.map(function (it) {
         var on = L && L.id === it.id, acts = it.kind === 'proposal'
           ? '<button type="button" class="pp-act' + (on && L.mode === 'join' ? ' on' : '') + '" data-pick="join|proposal|' + esc(it.id) + '" data-name="' + esc(it.name) + '">Same idea: add me</button><button type="button" class="pp-act' + (on && L.mode === 'connect' ? ' on' : '') + '" data-pick="connect|proposal|' + esc(it.id) + '" data-name="' + esc(it.name) + '">Related: connect mine</button>'
@@ -161,7 +156,7 @@
   function postLabel() { var L = S.link; return !L ? 'Post my idea' : L.mode === 'join' ? 'Add me to this idea' : 'Post and connect'; }
 
   function post() {
-    var L = S.link, b = { type: 'proposal', place: S.ctx.slug, idea: S.idea, why: S.why || '', topic: topicsOf(S.idea + ' ' + (S.why || '')), scope: S.scope, area: S.area || '',
+    var L = S.link, b = { type: 'proposal', place: S.ctx.slug, idea: S.idea, why: S.why || '', show_why: !!(S.show && S.why), topic: topicsOf(S.idea + ' ' + (S.why || '')), scope: S.scope, area: S.area || '',
       lat: S.scope === 'pin' ? S.lat : null, lng: S.scope === 'pin' ? S.lng : null, mode: L ? L.mode : 'new', link_kind: L ? L.kind : '', link_id: L ? L.id : '' };
     $('#pp-next').disabled = true; $('#pp-next').textContent = 'Sending…';
     fetch(RELAY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) })
@@ -171,8 +166,8 @@
         var a = []; try { a = JSON.parse(store(MINE) || '[]'); } catch (e) {}
         a.push({ place: b.place, idea: b.idea, area: b.area, scope: b.scope, mode: b.mode, link: L ? L.name : '', sent: new Date().toISOString().slice(0, 10) }); store(MINE, JSON.stringify(a.slice(-20)));
         $('.fb-form').hidden = true; $('#pp-done').hidden = false;
-        $('#pp-done-t').innerHTML = (L && L.mode === 'join' ? 'You’re added to “' + esc(L.name) + '”. Your location and reason will show with it' : L ? 'Your idea is sent, connected to “' + esc(L.name) + '”. It will appear' : 'Your idea is sent. It will appear on this page') +
-          ' after a quick check, usually within a few days. Until then you’ll see it here marked as waiting.';
+        $('#pp-done-t').innerHTML = (L && L.mode === 'join' ? 'You\u2019re added to \u201c' + esc(L.name) + '\u201d. Your neighborhood' + (b.show_why ? ' and reason' : '') + ' will show with it' : L ? 'Your idea is sent, connected to \u201c' + esc(L.name) + '\u201d. It will appear' : 'Your idea is sent. It will appear on this page') +
+          ' after a quick check, usually within a few days. It stays private until then, and you\u2019ll see it here marked as waiting.';
         if (S.ctx.onPosted) S.ctx.onPosted();
       })
       .catch(function (e) { err(e.message === 'failed' ? 'It couldn’t be sent right now. Please try again in a minute.' : e.message); })
@@ -183,7 +178,7 @@
     if (!dlg) build();
     S = { ctx: ctx, step: 1, link: ctx.join ? { mode: 'join', kind: 'proposal', id: ctx.join.id, name: ctx.join.name } : null, scope: null, lat: null, lng: null };
     $('#pp-h').textContent = 'What would make ' + ctx.name + ' better?';
-    $('#pp-idea').value = ctx.idea || ''; $('#pp-why').value = '';
+    $('#pp-idea').value = ctx.idea || ''; $('#pp-why').value = ''; $('#pp-show').checked = false;
     dlg.querySelectorAll('input[name=ppw]').forEach(function (i) { i.checked = false; }); $('.pp-pin').hidden = true; $('.pp-area').hidden = true;
     var A = ctx.areas || [];
     $('#pp-area').innerHTML = '<option value="">Choose…</option>' + A.map(function (a) { return '<option>' + esc(a) + '</option>'; }).join('') + '<option value="_other">' + (A.length ? 'Somewhere else' : 'Type a name') + '</option>';

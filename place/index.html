@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=59">
+<link rel="stylesheet" href="../assets/site.css?v=60">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -39,7 +39,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="../assets/public.js?v=4"></script>
-<script src="../assets/propose.js?v=1"></script>
+<script src="../assets/propose.js?v=2"></script>
   <div class="pf-missing" id="pf-missing" hidden></div>
   <article class="pf" id="pf" hidden>
     <section class="pf-head bleed band-deep" aria-labelledby="pf-name">
@@ -421,12 +421,16 @@
       var q = PROPS.filter(function (x) { return x.id === id; })[0]; return q ? '<a href="#idea-' + esc(id) + '">' + esc(q.idea) + '</a>' : '';
     };
     var html = list.map(function (p) {
-      var j = p.joined || [], where = p.area || (p.scope === 'city' ? 'Across ' + name : 'Pinned on the map');
+      var j = p.joined || [], where = p.area || (p.scope === 'city' ? 'Across ' + name : 'Near the pin on the map');
       var links = (p.links || []).map(function (l) { return link(l.kind, l.id); }).filter(Boolean);
+      // Who's asking, by neighborhood only; reasons only where people agreed to show them
+      var by = {}; [{ area: p.area }].concat(j).forEach(function (x) { var k = x.area || ''; by[k] = (by[k] || 0) + 1; });
+      var parts = Object.keys(by).filter(Boolean).sort(function (a, b) { return by[b] - by[a]; }).map(function (k) { return esc(k) + ' ' + by[k]; }); if (by['']) parts.push((parts.length ? 'elsewhere ' : 'no neighborhood given ') + by['']);
+      var why = [p.why].concat(j.map(function (x) { return x.why; })).filter(Boolean);
       return '<article class="pfi" id="idea-' + esc(p.id) + '"><b>' + esc(p.idea) + '</b><span class="pfi-m">' + esc(where) + (p.lat != null ? ' <button type="button" class="linkbtn" data-idea-map="' + p.lat + ',' + p.lng + '">See on the map</button>' : '') +
-        ((p.topic || []).length ? ' · ' + p.topic.map(function (t) { return esc((TT[t] || [t])[0]); }).join(', ') : '') + '</span>' + (p.why ? '<p class="pfi-why">' + esc(p.why) + '</p>' : '') +
-        (j.length ? '<details class="pfi-j"><summary>' + j.length + (j.length === 1 ? ' more person' : ' more people') + ' asking' + (j.some(function (x) { return x.area; }) ? ' in ' + j.map(function (x) { return x.area; }).filter(Boolean).filter(function (a, i, A) { return A.indexOf(a) === i; }).slice(0, 4).map(esc).join(', ') : '') + '</summary><ul>' +
-          j.map(function (x) { return '<li>' + esc(x.area || (x.lat != null ? 'Pinned on the map' : 'Across ' + name)) + (x.why ? ': ' + esc(x.why) : '') + '</li>'; }).join('') + '</ul></details>' : '') +
+        ((p.topic || []).length ? ' · ' + p.topic.map(function (t) { return esc((TT[t] || [t])[0]); }).join(', ') : '') + '</span>' +
+        (j.length ? '<span class="pfi-by">Asking from: ' + parts.join(' · ') + '</span>' : '') +
+        (why.length ? '<details class="pfi-j"><summary>' + (why.length === 1 ? 'The reason shared' : why.length + ' reasons people shared') + '</summary><ul>' + why.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul></details>' : '') +
         (links.length ? '<span class="pfi-l">Connected to ' + links.join(', ') + '</span>' : '') +
         '<span class="pjc-act"><button type="button" class="btn" data-idea-join="' + esc(p.id) + '">I want this too</button><span class="pfi-n" data-idea-n="' + esc(p.id) + '" data-base="' + (j.length + 1) + '"></span></span></article>';
     }).join('') + mine.map(function (m) {

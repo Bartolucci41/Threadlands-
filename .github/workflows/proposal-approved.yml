@@ -1,0 +1,43 @@
+name: Idea published
+# A reviewer published an idea from the private inbox (threadlands.org/inbox/). The relay sends only its public
+# parts here; unreviewed ideas never reach GitHub. A "join" is added to the idea it joins as a neighborhood and,
+# if the person agreed, their reason. It never carries a pin.
+on:
+  repository_dispatch:
+    types: [proposal-approved]
+permissions:
+  contents: write
+concurrency: { group: proposals, cancel-in-progress: false }
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add the idea
+        env:
+          P: ${{ toJSON(github.event.client_payload.proposal) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, datetime
+          o = json.loads(os.environ['P'])
+          today = datetime.date.today().isoformat()
+          path = 'data/proposals.json'
+          d = json.load(open(path)) if os.path.exists(path) else {'proposals': []}
+          P = d.setdefault('proposals', [])
+          if o.get('mode') == 'join':
+              t = next((p for p in P if p.get('id') == o.get('link_id')), None)
+              if t is None: raise SystemExit('The idea to join is not published: ' + str(o.get('link_id')))
+              t.setdefault('joined', []).append({'id': o['id'], 'area': o.get('area', ''), 'why': o.get('why', ''), 'added': today})
+          else:
+              keep = {k: o.get(k) for k in ['id', 'place', 'idea', 'why', 'area', 'scope', 'topic', 'lat', 'lng', 'links']}
+              keep['joined'] = []; keep['added'] = today
+              P[:] = [x for x in P if x.get('id') != keep['id']] + [keep]
+          json.dump(d, open(path, 'w'), indent=1, ensure_ascii=False)
+          PY
+      - name: Commit
+        run: |
+          git config user.name "threadlands-bot"
+          git config user.email "threadlands-bot@users.noreply.github.com"
+          git add data/proposals.json
+          git commit -m "Publish an idea" || exit 0
+          git pull --rebase origin main && git push

@@ -848,6 +848,8 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .pfi-m { font-size: 0.85rem; color: var(--ink2); } .pfi-m .linkbtn { color: var(--accent); font-weight: 600; font-size: inherit; } .pfi-why { margin: 0; font-size: 0.92rem; line-height: 1.45; }
   .pfi-j { font-size: 0.85rem; } .pfi-j summary { cursor: pointer; font-weight: 600; } .pfi-j ul { margin: 6px 0 0; padding-left: 18px; color: var(--ink2); }
   .pfi-l { font-size: 0.85rem; color: var(--ink2); } .pfi-l a { color: var(--accent); font-weight: 600; } .pfi-n { font-size: 0.85rem; color: var(--ink2); }
+  .ib-note { font-size: .9rem; color: var(--ink2); max-width: 60rem; } .ib-l { display: grid; gap: 4px; font-weight: 600; font-size: .85rem; margin: 8px 0; } .ib-in { font: inherit; font-weight: 400; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; width: 100%; } .ib-meta { font-size: .85rem; color: var(--ink2); } .ib-ok { display: flex; gap: 8px; font-size: .85rem; align-items: center; }
+  .pfi-by { font-size: 0.85rem; color: var(--ink); } .pp-ok { display: flex; gap: 10px; align-items: flex-start; margin-top: 10px; font-size: 0.9rem; line-height: 1.45; cursor: pointer; } .pp-ok input { margin-top: 3px; width: 18px; height: 18px; flex: none; accent-color: var(--accent); }
   .pfi.wait { border-left-color: var(--line); opacity: .85; } .pfi-w { font-size: 0.8rem; font-weight: 600; color: var(--ink2); }
   .pjc-back { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 16px 0; } .pf-proj .pjc-back { padding: 6px 0 0; }
   .back-btn { min-height: 36px; padding: 0 16px; font-size: 0.88rem; }
@@ -985,7 +987,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=59">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=60">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

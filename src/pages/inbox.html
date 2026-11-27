@@ -4,8 +4,8 @@
 <main class="wrap inbox">
   <header class="page-head">
     <p class="page-kicker">Private</p>
-    <h1>Feedback inbox</h1>
-    <p class="page-lead">Reports sent from the site. Only someone with the inbox key can read them; the key stays in this browser tab.</p>
+    <h1>Inbox</h1>
+    <p class="page-lead">Feedback and ideas sent from the site. Only someone with the inbox key can read them; the key stays in this browser tab.</p>
     <form class="search" id="ib-form">
       <label class="sr-only" for="ib-key">Inbox key</label>
       <input id="ib-key" type="password" placeholder="Inbox key" autocomplete="current-password">
@@ -13,12 +13,16 @@
     </form>
     <p class="ib-msg" id="ib-msg" role="status"></p>
   </header>
+  <div class="ib-filters" id="ib-tabs" hidden><button type="button" class="chip" data-tab="reports" aria-pressed="true">Feedback</button><button type="button" class="chip" data-tab="ideas" aria-pressed="false">Ideas to review <span id="ib-ideas-n"></span></button></div>
+  <section id="ib-ideas" hidden><p class="ib-note">Ideas from &ldquo;What would make this place better?&rdquo;. They stay private here until you publish one. Publishing sends only the public parts to the site and deletes the private copy; rejecting deletes it. Unreviewed ideas are deleted after 90 days. Remove names, phone numbers and home addresses before publishing.</p><ol class="ib-list" id="ib-ideas-list"></ol></section>
+  <div id="ib-reports">
   <div class="ib-filters" id="ib-filters" hidden>
     <button type="button" class="chip" data-st="open" aria-pressed="true">Open</button>
     <button type="button" class="chip" data-st="fixed" aria-pressed="false">Fixed</button>
     <button type="button" class="chip" data-st="all" aria-pressed="false">All</button>
   </div>
   <ol class="ib-list" id="ib-list"></ol>
+  </div>
 </main>
 <!--SCRIPT-->
 (function () {
@@ -35,7 +39,7 @@
   function load() {
     $('#ib-msg').textContent = 'Loading…';
     api('?inbox=1').then(function (j) {
-      ITEMS = j.items || []; $('#ib-filters').hidden = false; $('#ib-form').hidden = true;
+      ITEMS = j.items || []; $('#ib-filters').hidden = false; $('#ib-tabs').hidden = false; $('#ib-form').hidden = true; loadIdeas();
       try { sessionStorage.setItem('tl-inbox', KEY); } catch (e) { /* ignore */ }
       render();
     }).catch(function (e) { $('#ib-msg').textContent = e.message; $('#ib-form').hidden = false; });
@@ -73,6 +77,41 @@
     var b = e.target.closest('[data-shot]'); if (!b) return; b.disabled = true;
     api('?inbox=' + encodeURIComponent(b.dataset.shot)).then(function (it) { b.closest('li').querySelector('.ib-img').innerHTML = it.shot ? '<img src="' + it.shot + '" alt="Screenshot sent with the report">' : ''; b.remove(); })
       .catch(function (err) { b.disabled = false; alert(err.message); });
+  });
+  // ---- Ideas to review
+  var IDEAS = [];
+  var TOPIC = { food: 'Food', mobility: 'Getting around', trees: 'Trees and shade', heat: 'Heat', water: 'Water and flooding', parks: 'Parks and public space', safety: 'Safety and lighting', waste: 'Waste and recycling', air: 'Air' };
+  function loadIdeas() {
+    api('?ideas=1').then(function (j) { IDEAS = j.items || []; $('#ib-ideas-n').textContent = IDEAS.length ? '(' + IDEAS.length + ')' : ''; renderIdeas(); }).catch(function () { $('#ib-ideas-n').textContent = ''; });
+  }
+  function renderIdeas() {
+    $('#ib-ideas-list').innerHTML = IDEAS.length ? IDEAS.map(function (it) {
+      var where = it.scope === 'pin' ? 'Pin at ' + it.lat + ', ' + it.lng + ' <a href="https://www.openstreetmap.org/?mlat=' + it.lat + '&mlon=' + it.lng + '#map=16/' + it.lat + '/' + it.lng + '" target="_blank" rel="noopener">check on a map</a>' : it.scope === 'area' ? 'Neighborhood: ' + esc(it.area) : 'Across the whole place';
+      var how = it.mode === 'join' ? 'Adds this person to published idea <b>' + esc(it.link_id) + '</b> (published as a count and neighborhood only)' : it.mode === 'connect' ? 'New idea, connected to ' + esc(it.link_kind) + ' <b>' + esc(it.link_id) + '</b>' : 'New idea';
+      return '<li class="ib-item" data-idea="' + esc(it.id) + '"><div class="ib-top"><span class="ib-kind">' + esc(it.place) + '</span><span class="ib-at">' + esc(new Date(it.at).toLocaleString()) + '</span></div>' +
+        (it.mode === 'join' ? '<p class="ib-text">' + esc(it.idea) + '</p>' : '<label class="ib-l">Idea <input class="ib-in" data-f="idea" maxlength="120" value="' + esc(it.idea) + '"></label>') +
+        '<p class="ib-meta">' + where + ' · ' + how + ' · Topics: ' + ((it.topic || []).map(function (t) { return TOPIC[t] || t; }).join(', ') || 'none') + '</p>' +
+        (it.why ? '<label class="ib-l">Reason <textarea class="ib-in" data-f="why" rows="2" maxlength="280">' + esc(it.why) + '</textarea></label><label class="ib-ok"><input type="checkbox" data-f="show_why"' + (it.show_why ? ' checked' : ' disabled') + '> ' + (it.show_why ? 'They agreed to show this reason. Untick to keep it private.' : 'They did not agree to show it. It stays private.') + '</label>' : '') +
+        '<div class="ib-act"><button type="button" class="btn" data-pub="' + esc(it.id) + '">Publish</button><button type="button" class="btn ghost" data-rej="' + esc(it.id) + '">Reject and delete</button></div></li>';
+    }).join('') : '<li class="ib-empty">No ideas waiting.</li>';
+  }
+  function review(id, action) {
+    var li = document.querySelector('[data-idea="' + id + '"]'), edits = {};
+    li.querySelectorAll('[data-f]').forEach(function (f) { edits[f.dataset.f] = f.type === 'checkbox' ? f.checked : f.value; });
+    li.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
+    api('', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'idea-review', id: id, action: action, edits: edits }) })
+      .then(function () { IDEAS = IDEAS.filter(function (i) { return i.id !== id; }); $('#ib-ideas-n').textContent = IDEAS.length ? '(' + IDEAS.length + ')' : ''; renderIdeas(); })
+      .catch(function (err) { alert(err.message); li.querySelectorAll('button').forEach(function (b) { b.disabled = false; }); });
+  }
+  $('#ib-ideas-list').addEventListener('click', function (e) {
+    var p = e.target.closest('[data-pub]'), r = e.target.closest('[data-rej]');
+    if (p) review(p.dataset.pub, 'publish');
+    if (r && confirm('Delete this idea? This can\u2019t be undone.')) review(r.dataset.rej, 'reject');
+  });
+  $('#ib-tabs').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tab]'); if (!b) return;
+    document.querySelectorAll('[data-tab]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    $('#ib-ideas').hidden = b.dataset.tab !== 'ideas'; $('#ib-reports').hidden = b.dataset.tab === 'ideas';
   });
   if (KEY) load();
 })();
