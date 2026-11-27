@@ -3471,7 +3471,24 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     var area = [a.state || a.region || a.county, a.country].filter(Boolean).filter(function (t) { return t !== name; });
     var kind = KIND_WORDS[h.addresstype] || KIND_WORDS[h.type] || (h.addresstype || h.type || 'Place').replace(/_/g, ' ');
     return { name: name, country: a.country || parts[parts.length - 1] || '', title: [name].concat(area).join(', '), kind: kind.charAt(0).toUpperCase() + kind.slice(1),
-      display: h.display_name, osm: (h.osm_type || '').charAt(0).toUpperCase() + h.osm_id, lat: Number(h.lat), lng: Number(h.lon) };
+      display: h.display_name, osm: (h.osm_type || '').charAt(0).toUpperCase() + h.osm_id, lat: Number(h.lat), lng: Number(h.lon), g: h.geojson || null };
+  }
+  // Already in Threadlands? Match the OpenStreetMap record first (built places end in -<osm id>), then name and country
+  function inLibrary(h) {
+    var tail = '-' + String(h.osm || '').toLowerCase();
+    return LIB.filter(function (e) { return tail.length > 2 && String(e.slug).slice(-tail.length) === tail; })[0] ||
+      LIB.filter(function (e) { return norm(e.display) === norm(h.display) || (norm(e.name) === norm(h.name) && norm(e.country) === norm(h.country)); })[0] || null;
+  }
+  // A small outline of the record, so people can see which place it is before choosing
+  function miniOutline(h) {
+    var rs = rings(h.g), W = 44, H = 34;
+    if (!rs.length) return '<svg class="s-shape" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true"><circle cx="22" cy="17" r="4" class="s-pt"/></svg>';
+    var kx = Math.cos(h.lat * Math.PI / 180), pts = []; rs.forEach(function (r) { r.forEach(function (q) { pts.push([q[0] * kx, -q[1]]); }); });
+    var xs = pts.map(function (q) { return q[0]; }), ys = pts.map(function (q) { return q[1]; }), x0 = Math.min.apply(null, xs), y0 = Math.min.apply(null, ys);
+    var sc = Math.min((W - 6) / Math.max(1e-6, Math.max.apply(null, xs) - x0), (H - 6) / Math.max(1e-6, Math.max.apply(null, ys) - y0));
+    var ox = (W - (Math.max.apply(null, xs) - x0) * sc) / 2, oy = (H - (Math.max.apply(null, ys) - y0) * sc) / 2;
+    var d = rs.map(function (r) { var step = Math.max(1, Math.floor(r.length / 120)); return 'M' + r.filter(function (q, i) { return i % step === 0; }).map(function (q) { return (ox + (q[0] * kx - x0) * sc).toFixed(1) + ',' + (oy + (-q[1] - y0) * sc).toFixed(1); }).join('L') + 'Z'; }).join('');
+    return '<svg class="s-shape" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true"><path d="' + d + '"/></svg>';
   }
   // Before building, show the study area the robot would use: the place's own outline, or, when OpenStreetMap has only a
   // point, the surrounding district it falls back to (or a 5 km circle). Same rules and sizes as pipeline/run_place.py.
@@ -3527,7 +3544,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
       }
       box.innerHTML = '<p><b>' + esc(h.title) + '</b> is not in the library yet. This is the area that would be built:</p>' + pic + info +
         '<p>Building takes about 10 to 15 minutes, and then it is saved for everyone.</p>' +
-        '<div class="row">' + (REQUEST_URL ? '<button class="btn" type="button" data-req="go">Build this area</button>' : '<span class="tag" style="margin:0">Building on request is coming soon</span>') +
+        '<div class="row">' + (REQUEST_URL ? '<button class="btn" type="button" data-req="go">Build this place &middot; about 10&ndash;15 minutes</button>' : '<span class="tag" style="margin:0">Building on request is coming soon</span>') +
         '<button class="btn ghost" type="button" data-req="close">Not this one</button></div>';
     });
     box.onclick = function (ev) {
@@ -3577,9 +3594,10 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
       }).join('');
       if (world && world.q === q) {
         if (world.loading) html += '<li class="s-none">Searching everywhere…</li>';
-        else if (!world.hits.length) html += '<li class="s-none">Nothing was found for “' + esc(q) + '”. Try adding the country or state.</li>';
-        else html += '<li class="s-head">Anywhere on Earth</li>' + world.hits.map(function (h, k) {
-          return '<li role="option" data-world="' + k + '"><span class="s-name">' + esc(h.title) + '</span><span class="s-sub">' + esc(h.kind) + ' · <b>Build it →</b></span></li>';
+        else if (!world.hits.length) html += '<li class="s-none">No town, city, county, province or region called “' + esc(q) + '” was found. Try adding the country or state.</li>';
+        else html += '<li class="s-head">Places in OpenStreetMap</li>' + world.hits.map(function (h, k) {
+          var have = inLibrary(h);
+          return '<li role="option" class="s-rec" data-world="' + k + '">' + miniOutline(h) + '<span class="s-txt"><span class="s-name">' + esc(h.title) + '</span><span class="s-sub">' + esc(h.kind) + (h.country ? ' · ' + esc(h.country) : '') + (rings(h.g).length ? '' : ' · point only') + ' · <b>' + (have ? 'In Threadlands: open it →' : 'Choose to build →') + '</b></span></span></li>';
         }).join('');
       } else {
         if (!items.length) html += '<li class="s-none">Not in the library yet.</li>';
@@ -3594,7 +3612,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
       if (!q) return;
       world = { q: q, loading: true, hits: [] };
       show();
-      fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&accept-language=en&q=' + encodeURIComponent(q))
+      fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=8&accept-language=en&featureType=settlement&polygon_geojson=1&polygon_threshold=0.01&q=' + encodeURIComponent(q))
         .then(function (r) { return r.json(); })
         .then(function (hits) {
           world = { q: q, loading: false, hits: (hits || []).map(worldHit) };
@@ -3603,7 +3621,7 @@ if (typeof module !== 'undefined') module.exports = ThreadModel;
     }
     function chooseWorld(h) {
       close(); input.blur();
-      var same = LIB.filter(function (e) { return norm(e.display) === norm(h.display) || (norm(e.name) === norm(h.name) && norm(e.country) === norm(h.country)); })[0];
+      var same = inLibrary(h);
       if (same) { input.value = ''; openLibrary(same.slug, false, scroll); return; }
       showRequest(reqId, h);
     }
