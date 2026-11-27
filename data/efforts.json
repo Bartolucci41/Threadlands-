@@ -1,5 +1,5 @@
 {
- "about": "Shared local efforts: a finding on the map that people take forward together, linked to related work, organizations and the governments that might act. 'example' marks a sample made by Threadlands to preview the page: nobody proposed it and nobody has been contacted. An effort stays 'proposed' until a person or organization has actually taken responsibility for its next step.",
+ "about": "Shared local efforts: a finding on the map that people take forward together, linked to related work, organizations and the governments that might act. 'example' marks an illustrative example made by Threadlands to show the page: nobody submitted it and nobody has been contacted, so it is never labelled 'proposed'. A real effort is 'proposed' once someone submits it, and stays so until a person or organization has actually taken responsibility for its next step.",
  "fields": {
   "status": "proposed | taken-on | delivered | response",
   "responsible": "who has taken responsibility for the next step, only once they have agreed: {name, kind: organization|person|office, since}",
@@ -13,21 +13,45 @@
    "example": true,
    "place": "mexico-city",
    "type": "shade-water",
-   "title": "Shade and water in eastern Iztapalapa",
-   "ask": "More street trees and shade, and a public drinking-water point, in one of the hottest, least green parts of eastern Iztapalapa.",
-   "area": "Eastern Iztapalapa",
+   "title": "Street-tree shade for one hot area of eastern Iztapalapa",
+   "ask": "Plant street trees to shade the sidewalks across the area outlined on the map, about 1 km² of eastern Iztapalapa where trees cover very little of the ground.",
+   "area": "About 1 km² of eastern Iztapalapa, outlined on the map",
    "lat": 19.3637,
    "lng": -99.0368,
    "status": "proposed",
    "responsible": null,
-   "next": { "text": "A person or organization takes responsibility for the next step: walking the area with the people who raised it and choosing the first stretch to work on.", "by": null },
-   "related": { "projects": ["mx-cosecha-lluvia"], "groups": ["g-reforestamos", "g-isla-urbana"] },
+   "next": {
+    "text": "A person or organization takes responsibility for the next step: walking the area with people who live there and choosing the first street to plant.",
+    "by": null
+   },
+   "related": {
+    "projects": [],
+    "groups": [
+     "g-reforestamos"
+    ]
+   },
    "jurisdictions": [
-    { "name": "Alcaldía Iztapalapa", "level": "Borough government" },
-    { "name": "Gobierno de la Ciudad de México", "level": "City government" }
+    {
+     "name": "Alcaldía Iztapalapa",
+     "level": "Borough government"
+    },
+    {
+     "name": "Gobierno de la Ciudad de México",
+     "level": "City government"
+    }
    ],
-   "path": [ { "step": "suggested", "date": "2026-11-27", "who": "Threadlands (example)" } ],
-   "record": [ { "date": "2026-11-27", "text": "Example created from the heat map to preview this page. Not a real proposal; no one has been contacted." } ],
+   "path": [
+    {
+     "step": "suggested",
+     "date": "2026-11-27"
+    }
+   ],
+   "record": [
+    {
+     "date": "2026-11-27",
+     "text": "Created as a Threadlands example from the heat map, to show how an effort page works. Not a real effort; no one has been contacted."
+    }
+   ],
    "changed": []
   }
  ]

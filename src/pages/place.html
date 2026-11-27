@@ -416,7 +416,7 @@
       var mine = list.filter(function (x) { return x.place === e.slug; });
       box.hidden = !mine.length; if (!mine.length) return;
       box.innerHTML = '<h3 class="pfi-h">Shared efforts</h3>' + mine.map(function (x) {
-        return '<a class="pf-ef" href="{B}effort/#' + esc(x.id) + '"><b>' + esc(x.title) + '</b><span>' + (x.example ? '<span class="pf-ef-ex">Example</span> ' : '') + '<span>' + (x.responsible ? 'Taken on' : 'Proposed') + '</span> · <span>' + esc(x.area) + '</span></span></a>';
+        return '<a class="pf-ef" href="{B}effort/#' + esc(x.id) + '"><b>' + esc(x.title) + '</b><span>' + (x.example ? '<span class="pf-ef-ex">Illustrative example</span> <span>' : '<span>' + (x.responsible ? 'Taken on' : 'Proposed') + '</span> · <span>') + esc(x.area) + '</span></span></a>';
       }).join('');
     }).catch(function () { box.hidden = true; });
   }

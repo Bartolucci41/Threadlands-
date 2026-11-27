@@ -8,7 +8,7 @@
   <p class="ef-missing wrap" id="ef-missing" hidden></p>
   <div id="ef-body" hidden>
     <aside class="ef-sample" id="ef-sample" hidden>
-      <div class="wrap"><b>Example effort.</b> <span>This page previews how efforts will work. Threadlands made it from its own map data: nobody has proposed it yet, no one has been contacted, and joining is switched off.</span></div>
+      <div class="wrap"><b>Illustrative example.</b> <span>This page shows how an effort will work. Threadlands made it from its own map data: it is not a real effort, nobody has submitted it, no one has been contacted, and joining is switched off.</span></div>
     </aside>
     <header class="ef-head">
       <div class="wrap">
@@ -28,7 +28,7 @@
       </div>
       <div class="ef-mapcol">
         <div class="ef-map" id="ef-map" role="img" aria-label="Map of the effort’s area and the heat around it"></div>
-        <div class="ef-key"><div class="ef-key-bar"></div><div class="ef-key-l"><span>Cooler</span><span>Hotter</span></div><p>Measured surface heat from Landsat, compared across the region. Grey: no reading.</p><p><span class="ef-sw ef-sw-area"></span><span>The effort’s area</span> <span class="ef-sw ef-sw-pj"></span><span>Related existing work</span></p></div>
+        <div class="ef-key"><div class="ef-key-bar"></div><div class="ef-key-l"><span>Cooler</span><span>Hotter</span></div><p>Measured surface heat from Landsat, compared across the region. Grey: no reading.</p><p><span class="ef-sw ef-sw-area"></span><span>The effort’s area</span> <span class="ef-sw ef-sw-pj" data-pjkey></span><span data-pjkey>Related existing work</span></p></div>
       </div>
     </section>
 
@@ -110,9 +110,9 @@
     $('#ef-place').textContent = place.name; $('#ef-place').href = '{B}place/#' + place.slug;
     $('#ef-title').textContent = ef.title; $('#ef-ask').textContent = ef.ask;
     var taken = !!ef.responsible;
-    $('#ef-pill').textContent = taken ? 'Taken on' : 'Proposed'; $('#ef-pill').className = 'ef-pill ' + (taken ? 'on' : 'prop');
-    $('#ef-status-note').textContent = taken ? 'A person or organization has agreed to take the next step.' : 'Proposed until a person or organization takes responsibility for the next step.';
-    $('#ef-where').innerHTML = '<b>' + esc(ef.area) + '</b>, <span>' + esc(place.name) + '</span>';
+    $('#ef-pill').textContent = ef.example ? 'Illustrative example' : taken ? 'Taken on' : 'Proposed'; $('#ef-pill').className = 'ef-pill ' + (ef.example ? 'ex' : taken ? 'on' : 'prop');
+    $('#ef-status-note').textContent = ef.example ? 'Not a real effort. A real one is marked “Proposed” once someone submits it, until a person or organization takes responsibility for the next step.' : taken ? 'A person or organization has agreed to take the next step.' : 'Proposed until a person or organization takes responsibility for the next step.';
+    $('#ef-where').innerHTML = '<b>' + esc(ef.area) + '</b><span class="ef-by">' + esc(place.name) + '</span>';
     $('#ef-who').innerHTML = taken ? '<b>' + esc(ef.responsible.name) + '</b>' + (ef.responsible.since ? '<span class="ef-by">Since ' + esc(day(ef.responsible.since)) + '</span>' : '') : '<b>No one yet</b>';
     $('#ef-next').textContent = ef.next ? ef.next.text : '';
     $('#ef-by').textContent = ef.next && ef.next.by ? 'By ' + day(ef.next.by) : 'No date set';
@@ -121,7 +121,7 @@
     var last = STEPS.filter(function (s) { return got[s[0]]; }).pop();
     $('#ef-path').innerHTML = '<ol class="pfi-path">' + STEPS.map(function (s) {
       var g = got[s[0]];
-      return '<li class="' + (g ? 'done' : '') + (last && s[0] === last[0] ? ' cur' : '') + '"><span>' + s[1] + '</span>' + (g ? '<i>' + esc(day(g.date)) + (g.who ? ' · ' + esc(g.who) : '') + '</i>' : '<i>Not yet</i>') + '</li>';
+      return '<li class="' + (g ? 'done' : '') + (last && s[0] === last[0] ? ' cur' : '') + '"><span>' + (s[0] === 'suggested' && ef.example ? 'Created as a Threadlands example' : s[1]) + '</span>' + (g ? '<i>' + esc(day(g.date)) + (g.who ? ' · ' + esc(g.who) : '') + '</i>' : '<i>Not yet</i>') + '</li>';
     }).join('') + '</ol>';
 
     var rel = ef.related || {};
@@ -129,7 +129,7 @@
     $('#ef-projects').innerHTML = pj.length ? pj.map(function (p) {
       var st = { proposed: 'Proposed', approved: 'Approved', underway: 'Under way', built: 'Built' }[p.status] || '';
       return '<li><a href="{B}place/#' + esc(place.slug) + '" data-pj="' + esc(p.id) + '"><b>' + esc(p.name) + '</b></a><span>' + st + (p.year ? ' · ' + p.year : '') + (p.org ? ' · ' + esc(p.org) : '') + '</span></li>';
-    }).join('') : '<li class="ef-none">None listed yet.</li>';
+    }).join('') : '<li class="ef-none">No existing work listed in this area yet.</li>';
     var gs = groups.filter(function (g) { return (rel.groups || []).indexOf(g.id) >= 0; });
     $('#ef-groups').innerHTML = gs.length ? gs.map(function (g) {
       return '<li><a href="' + esc(g.url) + '" target="_blank" rel="noopener"><b>' + esc(g.name) + '</b></a><span>' + esc(g.what) + '</span></li>';
@@ -180,6 +180,7 @@
     var bp = c.poly[best], bl = []; for (var j = 0; j < bp.length; j += 2) bl.push([bp[j], bp[j + 1]]);
     var area = L.polygon(bl, { color: '#123B38', weight: 3, fill: false }).addTo(m);
     area.bindTooltip('The effort’s area', { permanent: true, direction: 'top', className: 'ef-lbl' });
+    if (!pj.some(function (p) { return isFinite(p.lat); })) document.querySelectorAll('[data-pjkey]').forEach(function (x) { x.hidden = true; });
     pj.forEach(function (p) { if (isFinite(p.lat)) L.circleMarker([p.lat, p.lng], { radius: 8, color: '#fff', weight: 2.5, fillColor: '#C0603A', fillOpacity: 1 }).addTo(m).bindTooltip(p.name); });
   }
 })();

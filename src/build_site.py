@@ -39,7 +39,7 @@ css += """
   .ef-status-row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
   .ef-pill { display: inline-flex; align-items: center; min-height: 30px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.02em; }
   .ef-pill.prop { background: transparent; color: #fff; border: 1.5px dashed rgba(255,255,255,0.7); }
-  .ef-pill.on { background: #8fd3bf; color: #0b2624; }
+  .ef-pill.on { background: #8fd3bf; color: #0b2624; } .ef-pill.ex { background: #FFF4D6; color: #5a4300; }
   .ef-status-note { font-size: 0.92rem; color: rgba(255,255,255,0.8); }
   .ef-top { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; padding-top: 26px; }
   @media (min-width: 900px) { .ef-top { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; } }
@@ -55,7 +55,7 @@ css += """
   .ef-key-bar { height: 10px; border-radius: 5px; background: linear-gradient(90deg, hsl(48,70%,82%), hsl(26,80%,65%), hsl(4,90%,48%)); }
   .ef-key-l { display: flex; justify-content: space-between; margin-top: 4px; }
   .ef-sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; } .ef-sw-area { border: 3px solid #123B38; } .ef-sw-pj { border-radius: 50%; background: #C0603A; margin-left: 10px; }
-  .ef-lbl { font-weight: 700; }
+  .ef-lbl { font-weight: 700; } .ef-key [hidden] { display: none; }
   .ef-sec { padding-top: 44px; }
   .ef-sec h2 { margin: 0 0 8px; font-size: clamp(1.5rem, 3.6vw, 2.1rem); letter-spacing: -0.02em; line-height: 1.1; }
   .ef-sec h3 { margin: 26px 0 6px; font-size: 1.12rem; }
@@ -1079,7 +1079,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=74">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=76">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
