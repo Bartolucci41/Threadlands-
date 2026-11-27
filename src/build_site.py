@@ -629,12 +629,13 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
     .lib-map canvas { flex: 0 0 100%; } .lib-map .lib-key { order: 5; flex: 0 0 100%; }
     .lib-map .lib-bg, .lib-map .lib-zoom { position: static; margin: 8px 10px; box-shadow: none; }
     .lib-map .lib-bg { background: none; padding: 0; gap: 8px; } .lib-map .lib-sw { width: 22px; height: 22px; }
-    .lib-map .lib-zoom { display: flex; gap: 6px; } .lib-map .lib-zoom .chip { width: 38px; min-height: 38px; box-shadow: none; border: 1px solid var(--line); }
+    .lib-map .lib-zoom { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 6px; margin: 0; } .lib-map .lib-zoom .chip { width: 36px; min-height: 36px; font-size: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
   }
   .lib-find { margin: 4px 0 12px; } .lib-find label { flex: 1 1 280px; max-width: 34rem; } .lib-find input { width: 100%; min-height: 48px; font-size: 1rem; }
+  .lib-bg { align-items: center; } .lib-bg-h { font: 700 0.72rem var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); margin-right: 4px; white-space: nowrap; }
   .lib-key { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; padding: 10px 14px; font-size: 0.85rem; color: var(--ink2); border-top: 1px solid var(--line); background: var(--surface); }
-  .lib-key span { display: inline-flex; align-items: center; gap: 8px; } .lib-key i { display: inline-grid; place-items: center; font-style: normal; background: var(--accent); border: 1.5px solid #fff; border-radius: 50%; }
-  .lib-key .k-dot { width: 11px; height: 11px; } .lib-key .k-grp { width: 22px; height: 22px; font: 700 0.7rem var(--font-body); color: #fff; }
+  .lib-key span { display: inline-flex; align-items: center; gap: 8px; } .lib-key i { display: inline-grid; place-items: center; font-style: normal; background: var(--mapdot, var(--accent)); border: 1.5px solid #fff; border-radius: 50%; }
+  .lib-key .k-dot { width: 11px; height: 11px; } .lib-key .k-grp { width: 22px; height: 22px; font: 700 0.7rem var(--font-body); color: var(--mapnum, #fff); }
   .lib-hint { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: rgba(20,24,22,.78); color: #fff; padding: 10px 16px; border-radius: 10px; font-weight: 600; pointer-events: none; z-index: 3; }
   .lib-map.dark .lib-tip { background: #111; color: #fff; }
   /* The news, editorial: a big head the eye lands on, the rest of the same words as a quieter deck */
@@ -960,7 +961,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=55">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=57">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=55">
+<link rel="stylesheet" href="../assets/site.css?v=57">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -43,7 +43,7 @@
   </header>
   <div class="filters lib-find"><label><span class="sr-only">Find a city</span><input type="search" id="rk-q" placeholder="Find a city or country"></label><span class="rk-count" id="rk-count"></span></div>
   <div class="lib-map" id="lib-map"><canvas id="lib-canvas" role="img" aria-label="World map of the places in Threadlands"></canvas><span class="lib-tip" id="lib-tip" hidden></span><span class="lib-hint" id="lib-hint" hidden>Hold Ctrl or &#8984; and scroll to zoom</span>
-    <div class="lib-bg" role="group" aria-label="Map background"><button type="button" class="lib-sw" data-bg="light" style="--sw:#D9E5EA" aria-label="Light background" title="Light" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="gray" style="--sw:#2B2E30" aria-label="Dark gray background" title="Dark gray" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="green" style="--sw:#2E6150" aria-label="Dark green background" title="Dark green" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="red" style="--sw:#6B3236" aria-label="Dark red background" title="Dark red" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="purple" style="--sw:#4F3E7A" aria-label="Dark purple background" title="Dark purple" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="blue" style="--sw:#2B5C88" aria-label="Blue background" title="Blue" aria-pressed="false"></button></div>
+    <div class="lib-bg" role="group" aria-labelledby="lib-bg-h"><span class="lib-bg-h" id="lib-bg-h">Map colors</span><button type="button" class="lib-sw" data-bg="blue" style="--sw:#2B5C88" aria-label="Blue background" title="Blue" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="green" style="--sw:#2E6150" aria-label="Dark green background" title="Dark green" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="red" style="--sw:#6B3236" aria-label="Dark red background" title="Dark red" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="purple" style="--sw:#4F3E7A" aria-label="Dark purple background" title="Dark purple" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="gray" style="--sw:#2B2E30" aria-label="Dark gray background" title="Dark gray" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="light" style="--sw:#D9E5EA" aria-label="White background" title="White" aria-pressed="false"></button></div>
     <p class="lib-key"><span><i class="k-dot"></i>A place in Threadlands</span><span><i class="k-grp">5</i>Places close together: tap to zoom in</span></p>
     <div class="lib-zoom"><button type="button" class="chip" id="lz-in" aria-label="Zoom in">+</button><button type="button" class="chip" id="lz-out" aria-label="Zoom out">&minus;</button><button type="button" class="chip" id="lz-fit" aria-label="Show the whole world" title="Show the whole world">&#8634;</button></div></div>
 
@@ -129,8 +129,8 @@
   fetch('../assets/land.json').then(function (r) { return r.json(); }).then(function (l) { LAND = l; drawMap(); }).catch(function () { /* map without coastlines */ });
   // Map backgrounds: chosen once, remembered on this device
   var BGS = { gray: ['#2B2E30', '#3E4245', '#54595C', '#F2A65A', '#C9CDCF'], green: ['#2E6150', '#43806B', '#589584', '#F2B56B', '#B9D3C8'], red: ['#6B3236', '#8E4A48', '#A65F58', '#F6C36A', '#E2C2BE'], purple: ['#4F3E7A', '#6E5D9B', '#8576AF', '#F2B56B', '#D2C8E6'], blue: ['#2B5C88', '#4479A8', '#5B8DBA', '#F2B56B', '#C3D4E6'] };
-  var MAPBG = 'light'; try { MAPBG = localStorage.getItem('threadlands:mapbg') || 'light'; } catch (e) {}
-  if (MAPBG !== 'light' && !BGS[MAPBG]) MAPBG = 'light';
+  var MAPBG = 'blue'; try { MAPBG = localStorage.getItem('threadlands:mapbg') || 'blue'; } catch (e) {}
+  if (MAPBG !== 'light' && !BGS[MAPBG]) MAPBG = 'blue';
   function color(name) {
     var b = BGS[MAPBG];
     if (b) { var m = { '--surface': 0, '--surface2': 1, '--line': 2, '--accent': 3, '--ink2': 4 }[name]; if (m != null) return b[m];  if (name === '--ink') return '#F6F3EC'; }
@@ -156,7 +156,7 @@
     cv.width = W * dpr; cv.height = H * dpr; cv.style.height = H + 'px';
     var ctx = cv.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    var P = pal();
+    var P = pal(); var MB = document.getElementById('lib-map'); MB.style.setProperty('--mapdot', P.dot); MB.style.setProperty('--mapnum', P.num);
     ctx.fillStyle = P.sea; ctx.fillRect(0, 0, W, H);
     var X = px, Y = py;
     // Finer coastlines once zoomed in (loaded only then)
