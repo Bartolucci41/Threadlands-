@@ -67,7 +67,7 @@
   if (MAPBG !== 'light' && !BGS[MAPBG]) MAPBG = 'light';
   function color(name) {
     var b = BGS[MAPBG];
-    if (b) { var m = { '--surface': 0, '--surface2': 1, '--line': 2, '--accent': 3, '--ink2': 4 }[name]; if (m != null) return b[m]; }
+    if (b) { var m = { '--surface': 0, '--surface2': 1, '--line': 2, '--accent': 3, '--ink2': 4 }[name]; if (m != null) return b[m];  if (name === '--ink') return '#F6F3EC'; }
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   }
   function setBg(k) {
@@ -117,7 +117,7 @@
     // Names, biggest places first, wherever they fit without overlapping
     if (V.z >= 2.5) {
       var boxes = [];
-      ctx.font = '600 12px ' + (color('--font-body') || 'system-ui'); ctx.textBaseline = 'middle';
+      ctx.font = '600 ' + (W < 600 ? 13 : 12) + 'px ' + (color('--font-body') || 'system-ui'); ctx.textBaseline = 'middle';
       dots.forEach(function (d) {
         if (d.x < -20 || d.x > W + 20 || d.y < -10 || d.y > H + 10) return;
         var t = d.e.name, w = ctx.measureText(t).width, bx = d.x + d.r + 4, by = d.y - 8, bw = w + 6, bh = 16;
