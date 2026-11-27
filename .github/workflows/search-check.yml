@@ -1,0 +1,34 @@
+name: Search check
+# Runs the same OpenStreetMap search the Explore page uses, for a handful of real names, and prints what comes back:
+# type, country, whether there is a boundary outline. A live check of the "build a place" search, run by hand.
+on:
+  workflow_dispatch:
+    inputs:
+      names:
+        description: 'Names to search, separated by |'
+        default: 'Toluca|Marin County|Lombardy|Iztapalapa|Valle de Bravo|Lagos|Kibera|Starbucks Seattle|Golden Gate Bridge'
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Search
+        env:
+          NAMES: ${{ github.event.inputs.names }}
+        run: |
+          python3 - <<'PY'
+          import json, os, time, urllib.parse, urllib.request
+          out = []
+          for q in os.environ['NAMES'].split('|'):
+              u = 'https://nominatim.openstreetmap.org/search?' + urllib.parse.urlencode({'format': 'jsonv2', 'addressdetails': 1, 'limit': 8, 'accept-language': 'en', 'featureType': 'settlement', 'polygon_geojson': 1, 'polygon_threshold': 0.01, 'q': q})
+              req = urllib.request.Request(u, headers={'User-Agent': 'Threadlands search check (threadlands.org)'})
+              hits = json.load(urllib.request.urlopen(req, timeout=30))
+              out.append(f'## {q}: {len(hits)} result(s)')
+              for h in hits:
+                  a = h.get('address') or {}; g = (h.get('geojson') or {}).get('type', '-')
+                  out.append(f"- {h.get('name')} | {h.get('addresstype')} | {a.get('state') or a.get('county') or ''} | {a.get('country')} | {h.get('osm_type')}/{h.get('osm_id')} | {'outline' if 'Polygon' in g else 'point only'}")
+              time.sleep(1.2)   # Nominatim's usage policy: at most one request a second
+          text = '\n'.join(out); print(text)
+          open(os.environ['GITHUB_STEP_SUMMARY'], 'a').write(text + '\n')
+          PY
