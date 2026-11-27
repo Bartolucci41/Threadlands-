@@ -161,8 +161,8 @@
 
   // "Stand with" a place: the places you stand with, and how you are connected to each
   var TIES_KEY = 'threadlands:ties';
-  var TIES = { live: 'I live here', from: 'I\u2019m from here', work: 'I work or study here', care: 'I care about it' };
-  var TIE_SHORT = { live: 'You live here', from: 'You\u2019re from here', work: 'You work or study here', care: 'You care about it' };
+  var TIES = { live: 'I live here', work: 'I work or study here', from: 'I grew up here', care: 'I care about this place' };   // key 'from' kept for saved choices
+  var TIE_SHORT = { live: 'You live here', work: 'You work or study here', from: 'You grew up here', care: 'You care about this place' };
   function ties() { try { var o = JSON.parse(store(TIES_KEY) || '{}'); return o && typeof o === 'object' ? o : {}; } catch (e) { return {}; } }
   function tieOf(slug) { return ties()[slug] || null; }
   function post(body) { return fetch(RELAY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }).catch(function () { return null; }); }
