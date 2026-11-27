@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=57">
+<link rel="stylesheet" href="../assets/site.css?v=58">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -297,17 +297,18 @@
     tip.style.left = d.x + 'px'; tip.style.top = d.y + 'px';
   }
   function hit(ev) {
-    var b = cv.getBoundingClientRect(), x = ev.clientX - b.left, y = ev.clientY - b.top, best = null, bd = 14;
+    var b = cv.getBoundingClientRect(), x = ev.clientX - b.left, y = ev.clientY - b.top, best = null, bd = ev.pointerType === 'mouse' ? 12 : 22;   // fingers get a bigger target
     dots.forEach(function (d) { var dd = Math.hypot(d.x - x, d.y - y) - d.r; if (dd < bd) { bd = dd; best = d; } });
     return best;
   }
-  cv.addEventListener('mousemove', function (ev) {
-    if (drag && drag.moved) return;
+  // Hover names for a mouse only: a tap on a phone also sends mouse events, which would replace the tapped link
+  cv.addEventListener('pointermove', function (ev) {
+    if (ev.pointerType !== 'mouse' || (drag && drag.moved)) return;
     var d = hit(ev);
     if (!d) { tip.hidden = true; cv.style.cursor = V.z > 1.001 ? 'grab' : 'default'; return; }
     cv.style.cursor = 'pointer'; showTip(d, false);
   });
-  cv.addEventListener('mouseleave', function () { tip.hidden = true; });
+  cv.addEventListener('pointerleave', function (ev) { if (ev.pointerType === 'mouse') tip.hidden = true; });
 
   var REG = { Africa: 'AO CD EG ET GH KE MA NG RW SN TN TZ UG ZA', Asia: 'BD CN HK ID IN JP KR KZ LK MN MY NP PH PK SG TH TW UZ VN', Europe: 'AT CH CZ DE DK ES FI FR GB GR HU IE IT NL NO PL PT SE', 'Middle East': 'AE IL IR JO SA TR', 'North America': 'CA US', 'Latin America': 'AR BO BR CL CO CU EC GT MX PA PE UY', Oceania: 'AU NZ' };
   var ORDER = ['Africa', 'Asia', 'Europe', 'Latin America', 'Middle East', 'North America', 'Oceania'], CC2R = {}, VIS = 'Added by visitors';
