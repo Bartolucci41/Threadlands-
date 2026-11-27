@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=67">
+<link rel="stylesheet" href="../assets/site.css?v=68">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -132,12 +132,12 @@
         <div class="st-zoom">
           <button type="button" class="chip" id="st-zin" aria-label="Zoom in">+</button>
           <button type="button" class="chip" id="st-zout" aria-label="Zoom out">&minus;</button>
-          <button type="button" class="chip st-3d" id="st-3d" aria-pressed="false" title="Show buildings, walls and trees in 3D">3D</button>
+          <button type="button" class="chip st-3d" id="st-3d" aria-pressed="false" title="Tilted view: buildings, walls and trees stand up at street level" aria-label="Tilted view">Tilted<br>view</button>
           <button type="button" class="chip st-3d adv" id="st-grid" aria-pressed="false" title="Show the analysis grid the scores are worked out on">Grid</button>
         </div>
         <span class="st-mode" id="st-mode">Region view</span>
         <div class="st-guide3d" id="st-guide3d" hidden role="note">
-          <p><b>You&rsquo;re in 3D.</b> Buildings stand at their real heights, from OpenStreetMap, or estimated where they aren&rsquo;t mapped.</p>
+          <p><b>Tilted view.</b> At street level, buildings stand up at their real heights, from OpenStreetMap, or estimated where they aren&rsquo;t mapped. It&rsquo;s a simple tilted view, not a full 3D scene.</p>
           <ul>
             <li><b>Look around:</b> drag to move, scroll or + and &minus; to zoom.</li>
             <li><b>Build:</b> pick something from the menu above, then click a building, lot or street.</li>
@@ -145,7 +145,7 @@
           </ul>
           <p class="st-g3-row"><button type="button" class="chip" id="st-g3-ok">Got it</button><button type="button" class="chip" id="st-g3-flat">Back to flat map</button></p>
         </div>
-        <details class="st-legend3d" id="st-legend3d" hidden aria-label="3D key"><summary>Key</summary>
+        <details class="st-legend3d" id="st-legend3d" hidden aria-label="Tilted view key"><summary>Key</summary>
           <span><i style="background:#d8d3c8"></i>Today&rsquo;s buildings</span>
           <span><i style="background:var(--accent)"></i>Yours (faded while being built)</span>
           <span><i style="background:var(--m-forest)"></i>Trees, green roofs</span>
@@ -296,7 +296,7 @@
     { k: 'housing', name: 'Infill housing', group: 'City', color: '--m-mid', draw: 'area', where: 'urban', grow: 10, start: 0.1,
       desc: 'More homes in existing neighborhoods, so the farthest sprawl never needs building. At street level, outline the sites: about 20,000 residents per km².' },
     { k: 'build', name: 'New building', group: 'City', color: '--m-core', draw: 'area', where: 'urban', grow: 3, start: 0, streetOnly: true,
-      desc: 'Design a new building at street level: pick a parking lot, vacant lot or old building, or draw a footprint, then set its floors. About one resident per 35 m\u00b2 of floor space, so the farthest sprawl never needs building. Turn on 3D to see it rise.' },
+      desc: 'Design a new building at street level: pick a parking lot, vacant lot or old building, or draw a footprint, then set its floors. About one resident per 35 m\u00b2 of floor space, so the farthest sprawl never needs building. Turn on the tilted view to see it rise.' },
     { k: 'solar', name: 'Solar roofs', group: 'City', color: '--h1', draw: 'area', where: 'urban', grow: 0, start: 1,
       desc: 'Panels on roofs. Clean power; no direct effect on heat or floods.' }
   ];
@@ -1197,7 +1197,7 @@
   function canPick() { return view && view.z >= OSM_Z; }
   function modeChanged() {
     var sm = streetMode(), c = BYK[S.tool];
-    $('#st-mode').textContent = !sm ? 'Region view: zoom in to reach street level' : view.z < OSM_Z ? 'Street level: zoom in once more to load buildings' : OSM.loading ? 'Street level: loading buildings and streets\u2026' : S.view3d ? '3D, street level' : 'Street level';
+    $('#st-mode').textContent = !sm ? 'Region view: zoom in to reach street level' : view.z < OSM_Z ? 'Street level: zoom in once more to load buildings' : OSM.loading ? 'Street level: loading buildings and streets\u2026' : S.view3d ? 'Tilted view, street level' : 'Street level';
     var show = !!c && drawsShapes(S.tool);
     $('#st-shape').hidden = !show;
     if (show) {

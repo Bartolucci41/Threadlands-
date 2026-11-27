@@ -80,7 +80,7 @@ css += """
   .st-opts:not([hidden]) { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: -4px 0 12px; }
   .st-opts input { width: 5rem; min-height: 36px; padding: 0 8px; border-radius: 8px; border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink); font: 500 0.9375rem var(--font-body); }
   .st-opts [hidden] { display: none; }
-  .st-zoom .st-3d { font-size: 0.875rem; font-weight: 700; }
+  .st-zoom .chip.st-3d { width: auto; min-width: 40px; padding: 4px 8px; font-size: 0.7rem; font-weight: 700; line-height: 1.1; justify-self: end; border-radius: 14px; }
   .st-zoom .st-3d[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
   .st-guide3d { position: absolute; left: 10px; top: 46px; z-index: 3; width: min(340px, calc(100% - 80px)); padding: 12px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 6px 20px rgba(0,0,0,0.18); font-size: 0.875rem; color: var(--ink); }
   .st-guide3d p { margin: 0 0 6px; } .st-guide3d ul { margin: 0 0 8px; padding-left: 1.1rem; display: grid; gap: 4px; color: var(--ink2); } .st-guide3d ul b { color: var(--ink); }
@@ -122,7 +122,7 @@ css += """
   .how-sec > summary span { color: var(--ink2); }
   .st-zoom { position: absolute; top: 10px; right: 10px; display: grid; gap: 6px; z-index: 2; }
   .st-zoom .chip { width: 40px; min-height: 40px; padding: 0; font-size: 1.25rem; background: var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
-  .st-mode { position: absolute; left: 10px; top: 10px; z-index: 2; padding: 5px 10px; border-radius: 99px; background: var(--ink); color: var(--bg); font-size: 0.8125rem; font-weight: 600; }
+  .st-mode { position: absolute; left: 10px; top: 10px; z-index: 2; max-width: calc(100% - 82px); padding: 5px 10px; border-radius: 14px; background: var(--ink); color: var(--bg); font-size: 0.8125rem; font-weight: 600; line-height: 1.3; pointer-events: none; }   /* never covers the zoom buttons on a phone */
   .st-attr { position: absolute; right: 0; bottom: 0; z-index: 2; padding: 2px 6px; background: var(--surface); opacity: 0.9; font-size: 0.6875rem; color: var(--ink2); border-top-left-radius: 6px; }
   .st-attr a { color: inherit; }
   .st-steps { margin: 0 0 14px; padding-left: 1.3rem; display: grid; gap: 4px; color: var(--ink2); max-width: 46rem; }
@@ -1024,7 +1024,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=67">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=68">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
