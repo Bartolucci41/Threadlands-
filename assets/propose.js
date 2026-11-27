@@ -146,14 +146,14 @@
     (c.groups || []).forEach(function (g) { var sc = score(g.name + ' ' + (g.what || ''), g.topic || [], g.lat, g.lng, g.area); if (sc) items.push({ kind: 'group', id: g.id, sc: sc, name: g.name, where: g.area || '', what: g.what, url: g.url }); });
     if (S.link) items.forEach(function (it) { if (it.id === S.link.id) it.sc += 100; });
     items.sort(function (a, b) { return b.sc - a.sc; }); items = items.slice(0, 5);
-    var KL = { proposal: 'An idea from people here', project: 'A project here', group: 'A local group' };
+    var KL = { proposal: 'An idea from people here', project: 'A project here', group: 'A related organization' };
     var L = S.link;
     $('#pp-rel-h').textContent = items.length ? 'Before you post: related ' + (items.length === 1 ? 'work' : 'work') + ' in ' + c.name : 'Before you post';
     $('#pp-rel').innerHTML = (items.length ? '<p class="pp-note">Join forces where it fits. If you add yourself to an idea, the page shows you in its count and your neighborhood, never a pin.</p>' : '<p class="pp-none">Nothing similar here yet. Yours would be the first.</p>') +
       items.map(function (it) {
         var on = L && L.id === it.id, acts = it.kind === 'proposal'
           ? '<button type="button" class="pp-act' + (on && L.mode === 'join' ? ' on' : '') + '" data-pick="join|proposal|' + esc(it.id) + '" data-name="' + esc(it.name) + '">Same idea: add me</button><button type="button" class="pp-act' + (on && L.mode === 'connect' ? ' on' : '') + '" data-pick="connect|proposal|' + esc(it.id) + '" data-name="' + esc(it.name) + '">Related: connect mine</button>'
-          : '<button type="button" class="pp-act' + (on ? ' on' : '') + '" data-pick="connect|' + it.kind + '|' + esc(it.id) + '" data-name="' + esc(it.name) + '">Connect my idea to this</button>';
+          : '<button type="button" class="pp-act' + (on ? ' on' : '') + '" data-pick="connect|' + it.kind + '|' + esc(it.id) + '" data-name="' + esc(it.name) + '">' + (it.kind === 'group' ? 'Mark mine as related' : 'Connect my idea to this') + '</button>' + (it.kind === 'group' ? '<span class="pp-m">Listed because their public work is related. They aren\u2019t notified and haven\u2019t endorsed any idea.</span>' : '');
         return '<div class="pp-rel' + (on ? ' on' : '') + '"><span class="pp-k">' + KL[it.kind] + '</span><b>' + esc(it.name) + '</b>' +
           (it.where || it.who || it.n > 1 ? '<span class="pp-m">' + [it.where, it.who ? 'Run by ' + it.who : '', it.n > 1 ? it.n + ' people asking' : ''].filter(Boolean).map(esc).join(' · ') + '</span>' : '') +
           (it.what ? '<span class="pp-m">' + esc(it.what) + '</span>' : '') + '<span class="pp-acts">' + acts + (it.url ? '<a href="' + esc(it.url) + '" target="_blank" rel="noopener">See it</a>' : '') + '</span></div>';

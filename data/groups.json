@@ -1,5 +1,5 @@
 {
- "about": "Local groups, campaigns and networks working on something in a place, each with a public link. Added by hand after checking; shown when someone suggests a related idea.",
+ "about": "Organizations whose public work relates to a kind of change in a place, each with a public page. Listed by Threadlands after checking their own site; being listed does not mean they have endorsed, or taken on, any idea here. An idea's path says 'Connected with a group' only when that group has agreed.",
  "fields": {
   "id": "short id",
   "place": "place slug",
@@ -9,7 +9,77 @@
   "area": "neighborhood, if local",
   "lat": "optional",
   "lng": "optional",
-  "url": "public page"
+  "url": "public page",
+  "type": "pilot kind of change this relates to (cycling, food, shade-water)",
+  "checked": "month their public page was checked"
  },
- "groups": []
+ "groups": [
+  {
+   "id": "g-bicitekas",
+   "place": "mexico-city",
+   "type": "cycling",
+   "topic": [
+    "mobility"
+   ],
+   "name": "Bicitekas",
+   "what": "Nonprofit working on urban cycling and sustainable mobility since 1998: group rides, road safety and public policy.",
+   "area": "",
+   "url": "https://avanza.bicitekas.org/",
+   "checked": "2026-11"
+  },
+  {
+   "id": "g-alimento-para-todos",
+   "place": "mexico-city",
+   "type": "food",
+   "topic": [
+    "food"
+   ],
+   "name": "Alimento para Todos",
+   "what": "Mexico City food bank that recovers food fit to eat and supplies it to people and institutions facing food insecurity.",
+   "area": "",
+   "url": "https://www.alimentoparatodos.org.mx",
+   "checked": "2026-11"
+  },
+  {
+   "id": "g-cultiva-ciudad",
+   "place": "mexico-city",
+   "type": "food",
+   "topic": [
+    "food",
+    "parks"
+   ],
+   "name": "Cultiva Ciudad (Huerto Tlatelolco)",
+   "what": "Urban-agriculture organization running Huerto Tlatelolco, a community garden with workshops, school visits and a volunteer program.",
+   "area": "Cuauhtémoc",
+   "url": "https://cultivaciudad.org",
+   "checked": "2026-11"
+  },
+  {
+   "id": "g-reforestamos",
+   "place": "mexico-city",
+   "type": "shade-water",
+   "topic": [
+    "trees",
+    "heat"
+   ],
+   "name": "Reforestamos México",
+   "what": "Nonprofit working on forests and, through its Árboles y Ciudades program, on urban trees in Mexican cities.",
+   "area": "",
+   "url": "https://www.reforestamosmexico.org",
+   "checked": "2026-11"
+  },
+  {
+   "id": "g-isla-urbana",
+   "place": "mexico-city",
+   "type": "shade-water",
+   "topic": [
+    "water"
+   ],
+   "name": "Isla Urbana",
+   "what": "Designs and installs rainwater-harvesting systems, mainly where people lack reliable water, including in Mexico City.",
+   "area": "Coyoacán",
+   "url": "https://islaurbana.org",
+   "checked": "2026-11"
+  }
+ ]
 }

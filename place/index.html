@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=64">
+<link rel="stylesheet" href="../assets/site.css?v=65">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -39,7 +39,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="../assets/public.js?v=4"></script>
-<script src="../assets/propose.js?v=3"></script>
+<script src="../assets/propose.js?v=4"></script>
   <div class="pf-missing" id="pf-missing" hidden></div>
   <article class="pf" id="pf" hidden>
     <section class="pf-head bleed band-deep" aria-labelledby="pf-name">
@@ -472,16 +472,22 @@
     var waiting = mine.map(function (m) {
       return '<article class="pfi wait"><b>' + esc(m.idea) + '</b><span class="pfi-m">' + esc(m.area || (m.scope === 'city' ? 'Across ' + name : 'Pinned on the map')) + '</span><span class="pfi-w">Your idea' + (m.link ? (m.mode === 'join' ? ', added to \u201c' : ', connected to \u201c') + esc(m.link) + '\u201d' : '') + ' \u00b7 waiting for review (only you can see this)</span></article>';
     }).join('');
+    // Organizations whose public work relates to each kind of change: listed, not endorsing
+    function orgs(k) {
+      var G = GROUPS.filter(function (g) { return g.place === SLUG && g.type === k; }); if (!G.length) return '';
+      return '<div class="pfi-orgs"><span class="pfi-ok">Organizations working on this</span>' + G.map(function (g) { return '<a href="' + esc(g.url) + '" target="_blank" rel="noopener"><b>' + esc(g.name) + '</b><span>' + esc(g.what) + '</span></a>'; }).join('') + '</div>';
+    }
     var html;
     if (pilot) {   // a pilot place: one column per kind of change, each inviting the first idea if empty
       html = '<div class="pfi-cols">' + pilot.concat(['other']).map(function (k) {
         var L = list.filter(function (p) { return k === 'other' ? pilot.indexOf(p.type) < 0 : p.type === k; });
         if (k === 'other' && !L.length) return '';
         return '<section class="pfi-col"><h4>' + esc(k === 'other' ? 'Other ideas' : TY[k].label) + '</h4>' + (L.length ? L.map(card).join('') : '<p class="pf-none">No ' + esc(TY[k].label.toLowerCase()) + ' ideas yet.</p>') +
-          (k !== 'other' ? '<button type="button" class="linkbtn pfi-add" data-idea-type="' + k + '">Suggest ' + esc(TY[k].label.toLowerCase()) + ' &rarr;</button>' : '') + '</section>';
+          (k !== 'other' ? '<button type="button" class="linkbtn pfi-add" data-idea-type="' + k + '">Suggest ' + esc(TY[k].label.toLowerCase()) + ' &rarr;</button>' : '') + orgs(k) + '</section>';
       }).join('') + '</div>' + (waiting ? '<div class="pfi-list">' + waiting + '</div>' : '');
     } else html = list.length || waiting ? '<div class="pfi-list">' + list.map(card).join('') + waiting + '</div>' : '<p class="pf-none">No ideas here yet. What would you change first?</p>';
-    $('#pf-ideas').innerHTML = html + '<p class="pfi-rule"><b>One person, one voice.</b> Each person can support an idea once, and no one can pay to boost one. Counts are support among people using Threadlands, not a citywide vote. Ideas gain weight by reaching the groups and decision-makers who can act on them, shown on each idea&rsquo;s path.</p>';
+    if (pilot && GROUPS.some(function (g) { return g.place === SLUG; })) html += '<p class="pfi-rule">Organizations are listed because their public work is related. Being listed doesn\u2019t mean they have endorsed or taken on any idea here.</p>';
+    $('#pf-ideas').innerHTML = html + '<p class="pfi-rule"><b>One support per browser and network. No paid boosts.</b> Counts are support among people using Threadlands, not a citywide vote. Ideas gain weight by reaching the groups and decision-makers who can act on them, shown on each idea&rsquo;s path. &ldquo;Connected with a group&rdquo; appears only when that group has agreed to take the idea up.</p>';
     // How many support it: the person who posted it, everyone added after review, and anyone added since who is still waiting
     var cnt = function (c) { document.querySelectorAll('[data-idea-n]').forEach(function (n) { var k = Math.max(+n.dataset.base, (c[n.dataset.ideaN] || 0) + 1); n.textContent = k + (k === 1 ? ' Threadlands participant supports this' : ' Threadlands participants support this'); }); };
     cnt({}); T.support().then(cnt).catch(function () {});
