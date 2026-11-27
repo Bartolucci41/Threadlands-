@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=52">
+<link rel="stylesheet" href="../assets/site.css?v=53">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -41,8 +41,8 @@
     <h1>Every place has a story in its data.</h1>
     <p class="page-lead">Open any place to see its key findings, and where they are on the map. Don&rsquo;t see yours? <a href="../explore/">Search for it in Explore</a> and build it in about ten minutes.</p>
   </header>
-  <div class="lib-map" id="lib-map"><canvas id="lib-canvas" role="img" aria-label="World map with a dot for every city"></canvas><span class="lib-tip" id="lib-tip" hidden></span>
-    <div class="lib-bg" role="group" aria-label="Map background"><button type="button" class="lib-sw" data-bg="light" style="--sw:#ECEAE3" aria-label="Light background" title="Light" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="gray" style="--sw:#2B2E30" aria-label="Dark gray background" title="Dark gray" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="green" style="--sw:#123B30" aria-label="Dark green background" title="Dark green" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="red" style="--sw:#3A1517" aria-label="Dark red background" title="Dark red" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="purple" style="--sw:#2A1D40" aria-label="Dark purple background" title="Dark purple" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="blue" style="--sw:#12304F" aria-label="Blue background" title="Blue" aria-pressed="false"></button></div>
+  <div class="lib-map" id="lib-map"><canvas id="lib-canvas" role="img" aria-label="World map with a dot for every city"></canvas><span class="lib-tip" id="lib-tip" hidden></span><span class="lib-hint" id="lib-hint" hidden>Hold Ctrl or &#8984; and scroll to zoom</span>
+    <div class="lib-bg" role="group" aria-label="Map background"><button type="button" class="lib-sw" data-bg="light" style="--sw:#ECEAE3" aria-label="Light background" title="Light" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="gray" style="--sw:#2B2E30" aria-label="Dark gray background" title="Dark gray" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="green" style="--sw:#1E4A3C" aria-label="Dark green background" title="Dark green" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="red" style="--sw:#4E2226" aria-label="Dark red background" title="Dark red" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="purple" style="--sw:#3A2A5C" aria-label="Dark purple background" title="Dark purple" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="blue" style="--sw:#1D4469" aria-label="Blue background" title="Blue" aria-pressed="false"></button></div>
     <div class="lib-zoom"><button type="button" class="chip" id="lz-in" aria-label="Zoom in">+</button><button type="button" class="chip" id="lz-out" aria-label="Zoom out">&minus;</button><button type="button" class="chip" id="lz-fit" aria-label="Show the whole world" title="Show the whole world">&#8634;</button></div></div>
 
   <div class="filters" role="group" aria-label="Sort by">
@@ -106,10 +106,20 @@
   function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function norm(t) { return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
   var LIB = [], shown = [], dots = [], LAND = null, cv = $('#lib-canvas'), tip = $('#lib-tip');
-  var V = { z: 1, lng: 0, lat: 7.5 }, W = 0, H = 0;
+  var V = null, W = 0, H = 0, LW = 0;
+  // Uniform scale in both directions (latitude drawn 1.15x, a gentle stretch like most world maps), so shapes stay true
+  var SY = 1.15, LAT0 = -62, LAT1 = 80;
+  function ppd() { return W * V.z / 360; }
+  // Home view: fill the frame top to bottom with the inhabited world; on a phone, start on the reader's own side of it
+  function home() {
+    var z = Math.max(1, H * 360 / ((LAT1 - LAT0) * SY * W)), lng = 24;
+    if (360 / z < 300) { var tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+      lng = /^America/.test(tz) ? -78 : /^(Asia\/(Kolkata|Calcutta|Dhaka|Karachi|Colombo|Kathmandu)|Indian)/.test(tz) ? 80 : /^Asia/.test(tz) ? 110 : /^(Australia|Pacific)/.test(tz) ? 140 : 15; }
+    return { z: z, lng: lng, lat: (LAT0 + LAT1) / 2 };
+  }
   fetch('../assets/land.json').then(function (r) { return r.json(); }).then(function (l) { LAND = l; drawMap(); }).catch(function () { /* map without coastlines */ });
   // Map backgrounds: chosen once, remembered on this device
-  var BGS = { gray: ['#2B2E30', '#3E4245', '#54595C', '#F2A65A', '#C9CDCF'], green: ['#10261F', '#1F3F34', '#2E5446', '#F2B56B', '#B9D3C8'], red: ['#2A1214', '#46201F', '#5E2C2A', '#F6C36A', '#E2C2BE'], purple: ['#1E1530', '#33274D', '#463A63', '#F2B56B', '#D2C8E6'], blue: ['#0F2236', '#1C3A58', '#2A4C6E', '#F2B56B', '#C3D4E6'] };
+  var BGS = { gray: ['#2B2E30', '#3E4245', '#54595C', '#F2A65A', '#C9CDCF'], green: ['#1E4A3C', '#2F6553', '#41796A', '#F2B56B', '#B9D3C8'], red: ['#4E2226', '#6E3533', '#85463F', '#F6C36A', '#E2C2BE'], purple: ['#3A2A5C', '#544379', '#695A90', '#F2B56B', '#D2C8E6'], blue: ['#1D4469', '#2F5E8A', '#42739E', '#F2B56B', '#C3D4E6'] };
   var MAPBG = 'light'; try { MAPBG = localStorage.getItem('threadlands:mapbg') || 'light'; } catch (e) {}
   if (MAPBG !== 'light' && !BGS[MAPBG]) MAPBG = 'light';
   function color(name) {
@@ -128,7 +138,12 @@
   function drawMap() {
     W = cv.parentNode.clientWidth;
     if (!W) return;
-    H = Math.round(W * 135 / 360 * 1.15); var dpr = window.devicePixelRatio || 1;   // a fixed shape, so continents aren't stretched on narrow screens
+    if (W !== LW) {   // a big map: most of a phone screen, most of a laptop screen (fixed per width, so phone toolbars don't make it jump)
+      var vh = window.innerHeight || 800;
+      H = Math.round(W < 600 ? Math.max(380, Math.min(640, vh * 0.66)) : Math.max(440, Math.min(vh * 0.78, W * 0.62)));
+      var first = !LW; LW = W; if (first || !V) V = home(); clampV();
+    }
+    var dpr = window.devicePixelRatio || 1;
     cv.width = W * dpr; cv.height = H * dpr; cv.style.height = H + 'px';
     var ctx = cv.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -149,9 +164,9 @@
     ctx.beginPath(); ctx.moveTo(0, Y(0)); ctx.lineTo(W, Y(0)); ctx.stroke(); ctx.setLineDash([]);
     var ids = {}; shown.forEach(function (e) { ids[e.slug] = 1; });
     dots = [];
-    var DK = Math.max(0.42, Math.min(1, W / 900));   // narrower map, smaller dots: a phone shows the same world at about a third of the width
+    var DK = Math.max(0.42, Math.min(1, W / 900)) * Math.min(1.6, Math.sqrt(V.z));   // a little bigger as you zoom in   // narrower map, smaller dots: a phone shows the same world at about a third of the width
     // Smaller places appear as you zoom in, so the world view stays readable however many towns are added
-    var filtering = shown.length < LIB.length, minPop = filtering ? 0 : 1e6 / (V.z * V.z);
+    var filtering = shown.length < LIB.length, minPop = filtering ? 0 : 1e6 / Math.pow(360 / (W / ppd()), 2);
     LIB.slice().sort(function (a, b) { return b.pop - a.pop; }).forEach(function (e) {
       if ((e.pop || 0) < minPop) return;
       var x = X(e.lng), y = Y(e.lat), r = Math.max(2.2, Math.min(11, Math.sqrt(e.pop / 1e6) * 2.4 + 2.5) * DK), on = ids[e.slug];
@@ -162,7 +177,7 @@
       if (on) dots.push({ x: x, y: y, r: r, e: e });
     });
     // Names, biggest places first, wherever they fit without overlapping
-    if (V.z >= 2.5) {
+    if (W / ppd() < 130) {   // names once the view is narrower than about a third of the world
       var boxes = [];
       ctx.font = '600 ' + (W < 600 ? 13 : 12) + 'px ' + (color('--font-body') || 'system-ui'); ctx.textBaseline = 'middle';
       dots.forEach(function (d) {
@@ -174,35 +189,41 @@
         ctx.globalAlpha = 1; ctx.fillStyle = color('--ink'); ctx.fillText(t, bx + 1, d.y);
       });
     }
-    $('#lz-out').disabled = V.z <= 1.001;
+    $('#lz-out').disabled = V.z <= 1.001;   // zoomed all the way out: the whole world's width
     cv.style.cursor = V.z > 1.001 ? 'grab' : 'default';
-    cv.style.touchAction = V.z > 1.001 ? 'none' : 'pan-y';
+    cv.style.touchAction = 'pan-y';   // one finger up and down always scrolls the page; sideways moves the map; two fingers pinch
   }
   // Equirectangular view from 60 S to 75 N at zoom 1, centered on V
-  function px(lng) { return W / 2 + (lng - V.lng) / 360 * W * V.z; }
-  function py(lat) { return H / 2 + (V.lat - lat) / 135 * H * V.z; }
+  function px(lng) { return W / 2 + (lng - V.lng) * ppd(); }
+  function py(lat) { return H / 2 + (V.lat - lat) * ppd() * SY; }
   function clampV() {
     V.z = Math.max(1, Math.min(60, V.z));
-    var hw = 180 / V.z, hh = 67.5 / V.z;
-    V.lng = Math.max(-180 + hw, Math.min(180 - hw, V.lng)); V.lat = Math.max(-60 + hh, Math.min(75 - hh, V.lat));
+    var hw = W / 2 / ppd(), hh = H / 2 / (ppd() * SY);
+    V.lng = hw >= 180 ? 0 : Math.max(-180 + hw, Math.min(180 - hw, V.lng));
+    V.lat = 2 * hh >= LAT1 - LAT0 ? (LAT0 + LAT1) / 2 : Math.max(LAT0 + hh, Math.min(LAT1 - hh, V.lat));
   }
   function zoomAt(f, x, y) {
     if (x == null) { x = W / 2; y = H / 2; }
-    var lng = V.lng + (x - W / 2) / (W * V.z) * 360, lat = V.lat - (y - H / 2) / (H * V.z) * 135;
+    var lng = V.lng + (x - W / 2) / ppd(), lat = V.lat - (y - H / 2) / (ppd() * SY);
     V.z *= f; clampV();
-    V.lng = lng - (x - W / 2) / (W * V.z) * 360; V.lat = lat + (y - H / 2) / (H * V.z) * 135; clampV();
+    V.lng = lng - (x - W / 2) / ppd(); V.lat = lat + (y - H / 2) / (ppd() * SY); clampV();
     tip.hidden = true; drawMap();
   }
   function fitTo(list) {
-    if (!list.length || list.length === LIB.length) { V = { z: 1, lng: 0, lat: 7.5 }; drawMap(); return; }
+    if (!list.length || list.length === LIB.length) { if (W) V = home(); drawMap(); return; }
     var a = Math.min.apply(null, list.map(function (e) { return e.lng; })), b = Math.max.apply(null, list.map(function (e) { return e.lng; }));
     var c = Math.min.apply(null, list.map(function (e) { return e.lat; })), d = Math.max.apply(null, list.map(function (e) { return e.lat; }));
-    V.z = Math.min(360 / Math.max(8, (b - a) * 1.4), 135 / Math.max(5, (d - c) * 1.6), 12); V.lng = (a + b) / 2; V.lat = (c + d) / 2; clampV(); drawMap();
+    V.z = Math.min(360 / Math.max(8, (b - a) * 1.4), H * 360 / (W * SY * Math.max(5, (d - c) * 1.6)), 12); V.lng = (a + b) / 2; V.lat = (c + d) / 2; clampV(); drawMap();
   }
   $('#lz-in').addEventListener('click', function () { zoomAt(2); });
   $('#lz-out').addEventListener('click', function () { zoomAt(0.5); });
-  $('#lz-fit').addEventListener('click', function () { V = { z: 1, lng: 0, lat: 7.5 }; tip.hidden = true; drawMap(); });
-  cv.addEventListener('wheel', function (ev) { ev.preventDefault(); var b = cv.getBoundingClientRect(); zoomAt(Math.pow(2, -ev.deltaY / 300), ev.clientX - b.left, ev.clientY - b.top); }, { passive: false });
+  $('#lz-fit').addEventListener('click', function () { V = home(); tip.hidden = true; drawMap(); });
+  // Scrolling over a big map scrolls the page; Ctrl/⌘ + scroll (or a trackpad pinch) zooms
+  var hintT = null;
+  cv.addEventListener('wheel', function (ev) {
+    if (!(ev.ctrlKey || ev.metaKey)) { var h = $('#lib-hint'); if (h) { h.hidden = false; clearTimeout(hintT); hintT = setTimeout(function () { h.hidden = true; }, 1400); } return; }
+    ev.preventDefault(); var b = cv.getBoundingClientRect(); zoomAt(Math.pow(2, -ev.deltaY / 200), ev.clientX - b.left, ev.clientY - b.top);
+  }, { passive: false });
   cv.addEventListener('dblclick', function (ev) { ev.preventDefault(); var b = cv.getBoundingClientRect(); zoomAt(2.5, ev.clientX - b.left, ev.clientY - b.top); });
   var drag = null, PTS = {}, pinch = null;
   function rel(ev) { var b = cv.getBoundingClientRect(); return { x: ev.clientX - b.left, y: ev.clientY - b.top }; }
@@ -218,17 +239,17 @@
     if (pinch) {
       var t = two(); if (!t || !pinch.d) return;
       // pan with the fingers' midpoint, then zoom about it
-      V.lng -= (t.x - pinch.x) / (W * V.z) * 360; V.lat += (t.y - pinch.y) / (H * V.z) * 135; clampV();
+      V.lng -= (t.x - pinch.x) / ppd(); V.lat += (t.y - pinch.y) / (ppd() * SY); clampV();
       zoomAt(t.d / pinch.d, t.x, t.y); pinch = t; return;
     }
     if (!drag) return;
     var dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
     if (!drag.moved && Math.hypot(dx, dy) > 5 && V.z > 1.001) drag.moved = true;
-    if (drag.moved) { V.lng = drag.lng - dx / (W * V.z) * 360; V.lat = drag.lat + dy / (H * V.z) * 135; clampV(); tip.hidden = true; drawMap(); }
+    if (drag.moved) { V.lng = drag.lng - dx / ppd(); V.lat = drag.lat + dy / (ppd() * SY); clampV(); tip.hidden = true; drawMap(); }
   });
   function lift(ev) {
     delete PTS[ev.pointerId];
-    if (pinch) { if (!two()) { pinch = null; drag = null; cv.style.touchAction = V.z > 1.001 ? 'none' : 'pan-y'; } return true; }
+    if (pinch) { if (!two()) { pinch = null; drag = null; cv.style.touchAction = 'pan-y'; } return true; }
     return false;
   }
   cv.addEventListener('pointerup', function (ev) {

@@ -631,6 +631,7 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
     .lib-map .lib-bg { background: none; padding: 0; gap: 8px; } .lib-map .lib-sw { width: 22px; height: 22px; }
     .lib-map .lib-zoom { display: flex; gap: 6px; } .lib-map .lib-zoom .chip { width: 38px; min-height: 38px; box-shadow: none; border: 1px solid var(--line); }
   }
+  .lib-hint { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: rgba(20,24,22,.78); color: #fff; padding: 10px 16px; border-radius: 10px; font-weight: 600; pointer-events: none; z-index: 3; }
   .lib-map.dark .lib-tip { background: #111; color: #fff; }
   /* The news, editorial: a big head the eye lands on, the rest of the same words as a quieter deck */
   .gazette { padding: 0; }
@@ -955,7 +956,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=52">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=53">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
