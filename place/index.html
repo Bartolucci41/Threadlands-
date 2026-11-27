@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="../assets/site.css?v=70">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
-<script src="../assets/i18n.js" defer></script>
+<script src="../assets/i18n.js?v=2" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
 <link rel="manifest" href="../manifest.webmanifest">
 <meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">
@@ -70,14 +70,14 @@
     </section>
 
     <nav class="jump" id="jump" aria-label="Jump to a section">
-      <details class="jump-m"><summary>Jump to section</summary><div class="jump-list"><a href="#here" data-jump="here">Map</a><a href="#pressing" data-jump="pressing">Key findings</a><a href="#tied" data-jump="tied">Depends on</a><a href="#shared" data-jump="shared">Shared land</a><a href="#ready" data-jump="ready">Readiness</a><a href="#changing" data-jump="changing">Get involved</a><a href="#pf-proj" data-jump="pf-proj">Projects</a><a href="#pf-ideas-box" data-jump="pf-ideas-box">Ideas</a><a href="#visit" data-jump="visit">Visit</a><a href="#pf-news" data-jump="pf-news">News</a></div></details>
-      <div class="jump-row"><a href="#here" data-jump="here">Map</a><a href="#pressing" data-jump="pressing">Key findings</a><a href="#tied" data-jump="tied">Depends on</a><a href="#shared" data-jump="shared">Shared land</a><a href="#ready" data-jump="ready">Readiness</a><a href="#changing" data-jump="changing">Get involved</a><a href="#pf-proj" data-jump="pf-proj">Projects</a><a href="#pf-ideas-box" data-jump="pf-ideas-box">Ideas</a><a href="#visit" data-jump="visit">Visit</a><a href="#pf-news" data-jump="pf-news">News</a></div>
+      <details class="jump-m"><summary>Jump to section</summary><div class="jump-list"><a href="#here" data-jump="here">Map</a><a href="#pressing" data-jump="pressing">Key findings</a><a href="#tied" data-jump="tied">Depends on</a><a href="#shared" data-jump="shared">Shared land</a><a href="#ready" data-jump="ready">Readiness</a><a href="#changing" data-jump="changing">Get involved</a><a href="#pf-proj" data-jump="pf-proj">Projects</a><a href="#pf-ideas-box" data-jump="pf-ideas-box">Ideas</a><a href="#visit" data-jump="visit">Visit</a><a href="#news-sec" data-jump="news-sec">News</a></div></details>
+      <div class="jump-row"><a href="#here" data-jump="here">Map</a><a href="#pressing" data-jump="pressing">Key findings</a><a href="#tied" data-jump="tied">Depends on</a><a href="#shared" data-jump="shared">Shared land</a><a href="#ready" data-jump="ready">Readiness</a><a href="#changing" data-jump="changing">Get involved</a><a href="#pf-proj" data-jump="pf-proj">Projects</a><a href="#pf-ideas-box" data-jump="pf-ideas-box">Ideas</a><a href="#visit" data-jump="visit">Visit</a><a href="#news-sec" data-jump="news-sec">News</a></div>
     </nav>
     <div class="pf-alerts" id="pf-alerts" hidden></div>
     <section class="pf-local" id="pf-local" hidden aria-labelledby="pf-local-h"></section>
 
     <section class="today" aria-labelledby="today-h">
-      <h2 id="today-h">Today in <span id="today-name" translate="no"></span></h2>
+      <h2 id="today-h">Today in <span id="today-name"></span></h2>
       <div class="today-grid">
         <div class="td-c" id="td-wx"><span class="td-k">Weather and warnings</span><p class="td-none">Loading&hellip;</p></div>
         <div class="td-c" id="td-news"><span class="td-k">What&rsquo;s happening</span></div>
@@ -148,7 +148,7 @@
       <div class="vx-grid" id="visit-body"></div>
       <p class="vx-policy" id="visit-policy"></p>
     </section>
-    <section class="sect pf-sec gazette" id="pf-news" aria-labelledby="pf-news-h">
+    <section class="sect pf-sec gazette" id="news-sec" aria-labelledby="pf-news-h">
       <header class="gz-head">
         <h2 id="pf-news-h" class="gz-mast">In the news</h2>
         <p class="gz-date"><span class="gz-city" id="gz-city"></span><span id="pf-news-sub">Risks, progress and decisions from the last two weeks.</span><details class="hl-about"><summary>About these headlines</summary><p>Headlines are collected automatically through Google News and link to the original publishers.</p></details></p>
@@ -196,7 +196,7 @@
   function followUI() {
     var tie = T.tieOf(SLUG), b = $('#pf-follow'), name = D.lib[SLUG].name;
     b.setAttribute('aria-pressed', tie ? 'true' : 'false');
-    b.innerHTML = (tie ? 'Standing with' : 'Stand with') + '<span translate="no" class="pf-nm">' + esc(name) + '</span>' + (tie ? ' \u2713' : '');
+    b.innerHTML = (tie ? 'Standing with' : 'Stand with') + '<span class="pf-nm">' + esc(name) + '</span>' + (tie ? ' \u2713' : '');
     document.querySelectorAll('.pf-tie-name').forEach(function (n) { n.textContent = name; });
     document.querySelectorAll('[data-tie]').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.tie === tie ? 'true' : 'false'); });
     $('#pf-tie-off').hidden = !tie;
@@ -255,7 +255,7 @@
     var ps = D.projects.filter(function (p) { return p.place === SLUG && KINDS[goal].indexOf(p.kind) >= 0; }).sort(function (a, b) { return (RANK[a.status] || 0) - (RANK[b.status] || 0); });
     var p = ps[0], out = [];
     if (p) {
-      out.push('<a href="#pj-' + esc(p.id) + '">' + (p.status === 'built' ? 'See' : 'Back') + ' <span translate="no">' + esc(p.name) + '</span></a>');
+      out.push('<a href="#pj-' + esc(p.id) + '">' + (p.status === 'built' ? 'See' : 'Back') + ' <span>' + esc(p.name) + '</span></a>');
       if (p.involved) out.push('<a href="' + esc(p.involved) + '" target="_blank" rel="noopener">Weigh in</a>');
     } else out.push('<a href="../explore/?add=1#' + esc(SLUG) + '">Add a project that tackles this</a>');
     out.push('<a href="../explore/?goal=' + goal + '#' + esc(SLUG) + '">Test ' + WORD[goal] + ' scenarios in ThreadLab &rarr;</a>');
@@ -355,13 +355,13 @@
       if (SLUG === 'mexico-city') opps.push({ id: 'lakebed-wetlands', t: 'Wetland restoration across the metropolitan region', d: 'Most of the open land identified on the old lakebed lies in the State of Mexico (154 of 161 cells), with nearby residents in both: about 1.4 million within 2 km in the State of Mexico and about 190,000 in Mexico City. A modeled idea, not a plan.', go: '../time/#mexico-city/2050', goT: 'Explore the site', gov: [govIx('State of Mexico'), govIx('Mexico City')] });
       (S.projects || []).forEach(function (p) {
         var pr = D.projects.filter(function (x) { return x.id === p.id; })[0]; if (!pr || !p.in) return;
-        if (p.serves.length > 1) opps.push({ id: p.id, t: pr.name + ': one program, ' + p.serves.length + ' governments', d: 'It runs in ' + esc(nm(p.in)) + ', and within 3 km live ' + p.serves.map(function (s) { return T.fmtN(s.pop) + ' people in ' + esc(nm(s.name)); }).join(' and ') + '. Extending it across the line would need both.', go: '../place/?pj=' + p.id + '#' + SLUG, goT: 'See the project', gov: p.serves.map(function (s) { return govIx(s.name); }) });
+        if (p.serves.length > 1) opps.push({ id: p.id, t: pr.name + ': one program, ' + p.serves.length + ' governments', h: '<span>' + esc(pr.name) + '</span><span>: one program, ' + p.serves.length + ' governments</span>', d: 'It runs in ' + esc(nm(p.in)) + ', and within 3 km live ' + p.serves.map(function (s) { return T.fmtN(s.pop) + ' people in ' + esc(nm(s.name)); }).join(' and ') + '. Extending it across the line would need both.', go: '../place/?pj=' + p.id + '#' + SLUG, goT: 'See the project', gov: p.serves.map(function (s) { return govIx(s.name); }) });
         else if (p.serves.length === 1 && p.serves[0].name !== p.in) opps.push({ id: p.id, t: pr.name + ': built in one government, used by another', d: 'It sits in ' + esc(nm(p.in)) + ', but most people within 3 km live in ' + esc(nm(p.serves[0].name)) + '.', go: '../place/?pj=' + p.id + '#' + SLUG, goT: 'See the project', gov: [govIx(p.in), govIx(p.serves[0].name)] });
       });
       if (basinJ.length > 1) opps.push({ id: 'shared-basin', t: 'Water across a shared river basin', d: 'Rain that falls in ' + basinJ.map(function (j) { return esc(nm(j.name)); }).join(' and ') + ' drains through the same city. Wetlands, storage or recharge upstream would need ' + (basinJ.length > 2 ? 'these governments' : 'both') + ' to take part.', go: '#here', goT: 'See it on the map', gov: basinJ.map(function (j) { return lv.indexOf(j); }) });
       OPPS = opps;
       var tog = opps.length ? '<article class="sh-card"><p class="eyebrow"><span class="sh-step">3</span>Develop an opportunity together</p><h3>Where governments share a project or a problem</h3><div class="sh-opps">' + opps.slice(0, 3).map(function (o, k) {
-        return '<div class="sh-opp" id="opp-' + esc(o.id) + '"><b translate="no">' + esc(o.t) + '</b><p>' + o.d + '</p><span class="sh-acts"><a href="' + o.go + '"' + (o.go === '#here' ? ' data-opp-map="' + k + '"' : '') + '>' + o.goT + '</a><button type="button" class="linkbtn" data-opp-map="' + k + '">Show the governments</button><button type="button" class="linkbtn" data-opp-partner="' + k + '">Suggest a partner</button><button type="button" class="linkbtn" data-opp-share="' + k + '">Share</button></span></div>';
+        return '<div class="sh-opp" id="opp-' + esc(o.id) + '"><b>' + (o.h || esc(o.t)) + '</b><p>' + o.d + '</p><span class="sh-acts"><a href="' + o.go + '"' + (o.go === '#here' ? ' data-opp-map="' + k + '"' : '') + '>' + o.goT + '</a><button type="button" class="linkbtn" data-opp-map="' + k + '">Show the governments</button><button type="button" class="linkbtn" data-opp-partner="' + k + '">Suggest a partner</button><button type="button" class="linkbtn" data-opp-share="' + k + '">Share</button></span></div>';
       }).join('') + '</div><p class="sh-src">Candidates from the map, not agreements.</p></article>' : '';
       var w = box.querySelector('.sh-wait'); if (w) w.outerHTML = land + tog;
       var oq = new URLSearchParams(location.search).get('opp'), oe = oq && document.getElementById('opp-' + oq); if (oe) { oe.classList.add('sh-hl'); oe.scrollIntoView({ block: 'center' }); }
@@ -556,7 +556,7 @@
       var more = esc(p.summary || '') + ideaLine(p) + '<span class="pjc-links">' + (p.source && p.source.url ? '<a href="' + esc(p.source.url) + '" target="_blank" rel="noopener">Source</a>' : '') + '<a href="../explore/#' + esc(SLUG) + '">See it on the map</a>' + (p.added_by_visitor ? '<span>Added by a visitor</span>' : '') + '</span>';
       return '<article class="pjc" id="pj-' + esc(p.id) + '" style="--pc:' + st[1] + '">' +
         (pic ? '<figure class="pjc-pic' + pic[2] + '"><img src="' + esc(pic[0]) + '" alt="" loading="lazy" onerror="this.parentNode.remove()"><figcaption>' + esc(pic[1]) + '</figcaption><span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span></figure>' : '<span class="pjc-st">' + st[0] + (p.year ? ' · ' + p.year : '') + '</span>') +
-        '<b translate="no">' + esc(p.name) + '</b>' + (p.area ? '<span class="pjc-area">' + esc(p.area) + '</span>' : '') + (p.who ? '<span class="pjc-who"><i>Organizer</i> ' + esc(p.who) + '</span>' : '') +
+        '<b>' + esc(p.name) + '</b>' + (p.area ? '<span class="pjc-area">' + esc(p.area) + '</span>' : '') + (p.who ? '<span class="pjc-who"><i>Organizer</i> ' + esc(p.who) + '</span>' : '') +
         (nextLine(p) || '<span class="pjc-next closed"><b>Next step</b> No open call found yet. <button type="button" class="linkbtn" data-pj-partner="' + esc(p.id) + '">Know one?</button></span>') +
         '<span class="pjc-act"><button type="button" class="btn back-btn" data-back="' + esc(p.id) + '" aria-pressed="false" hidden>Back this</button><span class="back-n" data-backn="' + esc(p.id) + '"></span>' + (p.involved ? '<a class="pjc-q" href="' + esc(p.involved) + '" target="_blank" rel="noopener">Contact the organizer</a>' : '') + '<button type="button" class="linkbtn pjc-q" data-pj-partner="' + esc(p.id) + '">Suggest a partner</button></span>' +
         '<details class="pjc-more"><summary>More about this project</summary><div>' + more + '</div></details></article>';
@@ -684,7 +684,7 @@
     var goal = hp != null && hp >= 0.75 ? 'heat' : fp >= 0.75 && (+c.flood[i] || 0) > 0 ? 'flood' : gp <= 0.25 ? 'habitat' : 'heat';
     var gw = { heat: 'cool this region', flood: 'reduce flooding in this region', habitat: 'bring nature back to this region' };
     HERE_FB = { lat: lat, lng: lng, cell: i }; $('#here-card').innerHTML = '<div class="here-card-top"><h3>About this area</h3><button type="button" class="fb-mini" data-feedback="data">Report a data issue</button></div><p class="here-scale">The area of ' + patchTxt() + ' around the spot you tapped. For what happens on a single street or corner, local knowledge is what the map needs.</p><ul class="here-facts">' + out.join('') + '</ul>' +
-      '<h4>Nearby projects</h4>' + (near.length ? '<ul class="here-pj">' + near.map(function (x) { var p = x[1]; return '<li><a href="#pj-' + esc(p.id) + '" translate="no">' + esc(p.name) + '</a><span>' + (x[0] < 1 ? 'under 1 km' : x[0].toFixed(1) + ' km') + ' away</span></li>'; }).join('') + '</ul>' : '<p class="here-none">No projects within 5 km on the map yet.</p>') +
+      '<h4>Nearby projects</h4>' + (near.length ? '<ul class="here-pj">' + near.map(function (x) { var p = x[1]; return '<li><a href="#pj-' + esc(p.id) + '">' + esc(p.name) + '</a><span>' + (x[0] < 1 ? 'under 1 km' : x[0].toFixed(1) + ' km') + ' away</span></li>'; }).join('') + '</ul>' : '<p class="here-none">No projects within 5 km on the map yet.</p>') +
       (obs.length ? '<h4>What people have noticed nearby</h4><ul class="here-pj">' + obs.map(function (x) { var o = x[1]; return '<li><span class="ob-k">' + esc(KIND_OBS[o.kind] || 'Note') + '</span> ' + esc(o.text) + '<span class="ob-r">' + (o.review === 'corroborated' ? 'Corroborated by a local partner' : o.source_url ? 'Location and source checked' : 'Location checked') + '</span></li>'; }).join('') + '</ul>' : '') +
       '<div class="here-acts"><button type="button" class="btn" id="here-add">Add what you know here</button><a class="btn ghost" href="../explore/?goal=' + goal + '#' + esc(SLUG) + '">Explore ways to ' + gw[goal] + ' &rarr;</a></div>' +
       '<form class="here-form" id="here-form" hidden>' +
@@ -789,7 +789,7 @@
       var obs = OBSV.filter(function (o) { return o.place === SLUG && o.kind === 'water'; });
       obs.forEach(function (o) { qAdd(L.circleMarker([o.lat, o.lng], { radius: 6, color: '#fff', weight: 2, fillColor: '#2E6E8E', fillOpacity: 1 }).bindTooltip(o.text)); });
       if (pj.length) HM.flyToBounds(L.featureGroup(pj.map(function (p) { return L.marker([p.lat, p.lng]); })).getBounds().pad(0.5), { duration: 1.2, maxZoom: 13 });
-      body = (pj.length ? '<p>Projects here that give water room or slow it down:</p><ul class="here-pj">' + pj.map(function (p) { return '<li><a href="#pj-' + esc(p.id) + '" translate="no">' + esc(p.name) + '</a><span>' + ({ proposed: 'Proposed', approved: 'Approved', underway: 'Under way', built: 'Built' }[p.status] || '') + (p.year ? ' \u00b7 ' + p.year : '') + '</span></li>'; }).join('') + '</ul>' : '<p>No projects on the map here yet that deal with rain and flooding.</p>') +
+      body = (pj.length ? '<p>Projects here that give water room or slow it down:</p><ul class="here-pj">' + pj.map(function (p) { return '<li><a href="#pj-' + esc(p.id) + '">' + esc(p.name) + '</a><span>' + ({ proposed: 'Proposed', approved: 'Approved', underway: 'Under way', built: 'Built' }[p.status] || '') + (p.year ? ' \u00b7 ' + p.year : '') + '</span></li>'; }).join('') + '</ul>' : '<p>No projects on the map here yet that deal with rain and flooding.</p>') +
         (obs.length ? '<p>' + obs.length + ' note' + (obs.length > 1 ? 's' : '') + ' from people who have seen water collect (small blue dots).</p>' : '') +
         '<div class="q-primary"><p><b>You know your street better than this map does.</b> Where have you seen water collect after rain?</p><button type="button" class="btn" data-mark="water">Show where you&rsquo;ve seen water collect</button></div>' +
         '<div class="here-acts q-more"><a class="linkbtn" href="../explore/?goal=flood#' + esc(SLUG) + '">Test ways to reduce flood exposure in ThreadLab &rarr;</a><a class="linkbtn" href="../explore/?add=1#' + esc(SLUG) + '">Add a project you know about</a></div>';

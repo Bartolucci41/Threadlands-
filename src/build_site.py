@@ -1012,7 +1012,7 @@ PRO_PAGES = ("lab/", "explore/", "studio/", "how-it-works/", "guide/")
 
 def APP(base):
     # Installable app: icon, manifest and offline support
-    return (f'<script src="{base}assets/i18n.js" defer></script>\n<script src="{base}assets/feedback.js?v=1" defer></script>\n'
+    return (f'<script src="{base}assets/i18n.js?v=2" defer></script>\n<script src="{base}assets/feedback.js?v=1" defer></script>\n'
             f'<link rel="manifest" href="{base}manifest.webmanifest">\n'
             '<meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">\n'
             '<meta name="theme-color" content="#0D1613" media="(prefers-color-scheme: dark)">\n'

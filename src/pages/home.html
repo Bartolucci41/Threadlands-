@@ -59,7 +59,7 @@
   var T = window.TLP, $ = function (s) { return document.querySelector(s); }, esc = T.esc;
   fetch('{B}data/projects.json').then(function (r) { return r.json(); }).then(function (j) {
     var pj = (j.projects || []).filter(function (p) { return p.place === 'mexico-city' && (p.kind === 'wetland' || p.kind === 'rain'); });
-    document.getElementById('story-pj').innerHTML = pj.map(function (p) { return '<li><a href="{B}place/?pj=' + esc(p.id) + '#mexico-city" translate="no">' + esc(p.name) + '</a><span>' + esc(p.who || '') + (p.status === 'underway' ? ' \u00b7 under way' : p.status === 'built' ? ' \u00b7 built' : '') + '</span></li>'; }).join('');
+    document.getElementById('story-pj').innerHTML = pj.map(function (p) { return '<li><a href="{B}place/?pj=' + esc(p.id) + '#mexico-city">' + esc(p.name) + '</a><span>' + esc(p.who || '') + (p.status === 'underway' ? ' \u00b7 under way' : p.status === 'built' ? ' \u00b7 built' : '') + '</span></li>'; }).join('');
   }).catch(function () {});
   T.setBase('{B}');
   // ---- Find your place: search the library; anything else is built in Explore

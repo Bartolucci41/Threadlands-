@@ -44,12 +44,28 @@
     var vals = [], key = core.replace(NUM, function (v) { vals.push(v); return '{' + (vals.length - 1) + '}'; });
     var t = DICT[key];
     if (t == null) {
+      // English dates ("Nov 27", "November 27, 2026", "Friday, November 27") are written in the reader's language
+      var dates = [], dcore = core.replace(DATE, function () { dates.push(ldate.apply(null, arguments)); return '\u0000'; });
+      if (dates.length) {
+        var dv = [], dkey = dcore.replace(NUM, function (v) { dv.push(v); return '{' + (dv.length - 1) + '}'; }).replace(/\u0000/g, '{date}');
+        var dt = DICT[dkey], di = 0;
+        if (dt != null) return m[1] + dt.replace(/\{(\d+|date)\}/g, function (_, i) { return i === 'date' ? (dates[di++] || '') : (dv[+i] != null ? dv[+i] : ''); }) + m[3];
+        di = 0; return m[1] + dcore.replace(/\u0000/g, function () { return dates[di++]; }) + m[3];
+      }
       var R = regionMap(), c = R && R[core];
       if (c) { try { t = new Intl.DisplayNames([lang], { type: 'region' }).of(c); } catch (e) { t = null; } }
       if (t == null) return s;
       return m[1] + t + m[3];
     }
     return m[1] + t.replace(/\{(\d+)\}/g, function (_, i) { return vals[+i] != null ? vals[+i] : ''; }) + m[3];
+  }
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var DATE = /\b(?:(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),? )?(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)\.?(?: (\d{1,2})(?!\d))?(?:,? (\d{4}))?\b/g;
+  function ldate(all, wd, mo, d, y) {
+    if (!d && !y) return all;                       // a month word alone ("in May") is left as it is
+    var o = { month: mo.length > 4 ? 'long' : 'short' };
+    if (d) o.day = 'numeric'; if (y) o.year = 'numeric'; if (wd) o.weekday = 'long';
+    try { return new Date(y ? +y : new Date().getFullYear(), MON.indexOf(mo.slice(0, 3)), d ? +d : 1, 12).toLocaleDateString(lang, o); } catch (e) { return all; }
   }
   function doText(n) {
     var cur = n.nodeValue;
