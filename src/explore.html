@@ -3074,6 +3074,9 @@
     var name = h.name || parts[0] || 'Place';
     var area = [a.state || a.region || a.county, a.country].filter(Boolean).filter(function (t) { return t !== name; });
     var kind = KIND_WORDS[h.addresstype] || KIND_WORDS[h.type] || (h.addresstype || h.type || 'Place').replace(/_/g, ' ');
+    // OpenStreetMap files many countries' municipalities under "county" (Mexico's municipios, for one); say what they are
+    if (h.addresstype === 'county' && !/^(us|gb|ie|ca|no|se|ro|hu|hr|ee|lv|tw|cn)$/.test(String(a.country_code || '').toLowerCase())) kind = 'Municipality';
+    if (h.addresstype === 'borough') kind = 'Borough';
     return { name: name, country: a.country || parts[parts.length - 1] || '', title: [name].concat(area).join(', '), kind: kind.charAt(0).toUpperCase() + kind.slice(1),
       display: h.display_name, osm: (h.osm_type || '').charAt(0).toUpperCase() + h.osm_id, lat: Number(h.lat), lng: Number(h.lon), g: h.geojson || null };
   }
