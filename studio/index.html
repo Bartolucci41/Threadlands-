@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=69">
+<link rel="stylesheet" href="../assets/site.css?v=70">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -136,6 +136,7 @@
           <button type="button" class="chip st-3d adv" id="st-grid" aria-pressed="false" title="Show the analysis grid the scores are worked out on">Grid</button>
         </div>
         <span class="st-mode" id="st-mode">Region view</span>
+        <button type="button" class="chip st-retry" id="st-retry" hidden>Retry loading buildings</button>
         <div class="st-guide3d" id="st-guide3d" hidden role="note">
           <p><b>Tilted view.</b> At street level, buildings stand up at their real heights, from OpenStreetMap, or estimated where they aren&rsquo;t mapped. It&rsquo;s a simple tilted view, not a full 3D scene.</p>
           <ul>
@@ -1213,7 +1214,8 @@
   function canPick() { return view && view.z >= OSM_Z; }
   function modeChanged() {
     var sm = streetMode(), c = BYK[S.tool];
-    $('#st-mode').textContent = !sm ? 'Region view: zoom in to reach street level' : view.z < OSM_Z ? 'Street level: zoom in once more to load buildings' : OSM.loading && !OSM.list.length ? 'Street level: loading buildings\u2026' : !OSM.list.length && OSM.failedAt ? 'Street level: the building data server is busy. Move the map a little to try again.' : S.view3d ? 'Tilted view, street level' : 'Street level';
+    $('#st-mode').textContent = !sm ? 'Region view: zoom in to reach street level' : view.z < OSM_Z ? 'Street level: zoom in once more to load buildings' : OSM.loading && !OSM.list.length ? 'Street level: loading buildings\u2026' : !OSM.list.length && OSM.failedAt ? 'Street level: the building data server is busy.' : S.view3d ? 'Tilted view, street level' : 'Street level';
+    $('#st-retry').hidden = !(sm && view.z >= OSM_Z && !OSM.loading && !OSM.list.length && OSM.failedAt);
     var show = !!c && drawsShapes(S.tool);
     $('#st-shape').hidden = !show;
     if (show) {
@@ -1860,6 +1862,10 @@
   $('#st-pan').addEventListener('click', function () { panning = !panning; this.setAttribute('aria-pressed', panning ? 'true' : 'false'); cv.style.cursor = panning ? 'grab' : 'crosshair'; });
   // One background choice across the site's maps (Streets, Satellite, Terrain), remembered in this browser
   (function () { var b = null; try { b = localStorage.getItem('threadlands:basemap'); } catch (e) {} if (b === 'satellite' || b === 'terrain') { S.basemap = b; $('#st-base').value = b; $('#st-attr').innerHTML = b === 'none' ? '' : BASES[b].attr; $('#st-attr').hidden = b === 'none'; } })();
+  $('#st-retry').addEventListener('click', function () {
+    Object.keys(OSM.cells).forEach(function (k) { if (typeof OSM.cells[k] === 'number') delete OSM.cells[k]; });
+    OSM.failedAt = 0; loadOSM(); modeChanged();
+  });
   $('#st-base').addEventListener('change', function () {
     S.basemap = this.value; try { localStorage.setItem('threadlands:basemap', this.value); } catch (e) {}
     $('#st-attr').innerHTML = S.basemap === 'none' ? '' : BASES[S.basemap].attr;

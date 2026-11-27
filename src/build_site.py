@@ -122,6 +122,7 @@ css += """
   .how-sec > summary span { color: var(--ink2); }
   .st-zoom { position: absolute; top: 10px; right: 10px; display: grid; gap: 6px; z-index: 2; }
   .st-zoom .chip { width: 40px; min-height: 40px; padding: 0; font-size: 1.25rem; background: var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+  .st-retry { position: absolute; left: 10px; top: 48px; z-index: 3; background: var(--surface); font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
   .st-mode { position: absolute; left: 10px; top: 10px; z-index: 2; max-width: calc(100% - 82px); padding: 5px 10px; border-radius: 14px; background: var(--ink); color: var(--bg); font-size: 0.8125rem; font-weight: 600; line-height: 1.3; pointer-events: none; }   /* never covers the zoom buttons on a phone */
   .st-attr { position: absolute; right: 0; bottom: 0; z-index: 2; padding: 2px 6px; background: var(--surface); opacity: 0.9; font-size: 0.6875rem; color: var(--ink2); border-top-left-radius: 6px; }
   .st-attr a { color: inherit; }
@@ -1031,7 +1032,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=69">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=70">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
