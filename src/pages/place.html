@@ -35,6 +35,10 @@
       <ol class="pf-week" id="pf-week" aria-label="Seven-day forecast"></ol>
     </section>
 
+    <nav class="jump" id="jump" aria-label="Jump to a section">
+      <details class="jump-m"><summary>Jump to section</summary><div class="jump-list"><a href="#here" data-jump="here">Map</a><a href="#pressing" data-jump="pressing">Key findings</a><a href="#tied" data-jump="tied">Depends on</a><a href="#shared" data-jump="shared">Shared land</a><a href="#ready" data-jump="ready">Readiness</a><a href="#changing" data-jump="changing">Get involved</a><a href="#pf-proj" data-jump="pf-proj">Projects</a><a href="#pf-ideas-box" data-jump="pf-ideas-box">Ideas</a><a href="#visit" data-jump="visit">Visit</a><a href="#pf-news" data-jump="pf-news">News</a></div></details>
+      <div class="jump-row"><a href="#here" data-jump="here">Map</a><a href="#pressing" data-jump="pressing">Key findings</a><a href="#tied" data-jump="tied">Depends on</a><a href="#shared" data-jump="shared">Shared land</a><a href="#ready" data-jump="ready">Readiness</a><a href="#changing" data-jump="changing">Get involved</a><a href="#pf-proj" data-jump="pf-proj">Projects</a><a href="#pf-ideas-box" data-jump="pf-ideas-box">Ideas</a><a href="#visit" data-jump="visit">Visit</a><a href="#pf-news" data-jump="pf-news">News</a></div>
+    </nav>
     <div class="pf-alerts" id="pf-alerts" hidden></div>
     <section class="pf-local" id="pf-local" hidden aria-labelledby="pf-local-h"></section>
 
@@ -69,9 +73,6 @@
       </div>
     </section>
 
-    <nav class="pf-jump" aria-label="On this page">
-      <a href="#here">What&rsquo;s here</a><a href="#pressing">Key findings</a><a href="#tied">What it depends on</a><a href="#ready">How ready</a><a href="#changing">What&rsquo;s changing</a><a href="#pf-news-h">News</a>
-    </nav>
 
     <section class="sect pf-sec" id="pressing" aria-labelledby="pressing-h">
       <div class="sect-top"><div><h2 id="pressing-h">Key findings</h2><p>The main things Threadlands&rsquo; data shows for this place, each linked to the map. Heat, flooding, green cover and tree cover depend on each place&rsquo;s grid size, so compare them between places on Places, where the grid is shown. A finding is not necessarily the city&rsquo;s biggest risk.</p></div></div>
@@ -113,7 +114,7 @@
       <div class="vx-grid" id="visit-body"></div>
       <p class="vx-policy" id="visit-policy"></p>
     </section>
-    <section class="sect pf-sec gazette" aria-labelledby="pf-news-h">
+    <section class="sect pf-sec gazette" id="pf-news" aria-labelledby="pf-news-h">
       <header class="gz-head">
         <h2 id="pf-news-h" class="gz-mast">In the news</h2>
         <p class="gz-date"><span class="gz-city" id="gz-city"></span><span id="pf-news-sub">Risks, progress and decisions from the last two weeks.</span><details class="hl-about"><summary>About these headlines</summary><p>Headlines are collected automatically through Google News and link to the original publishers.</p></details></p>
@@ -353,6 +354,19 @@
       ' <span class="pjc-asof">' + (asof ? 'As of ' + asof : '') + (n.source && n.source.url ? (asof ? ' · ' : '') + '<a href="' + esc(n.source.url) + '" target="_blank" rel="noopener">source</a>' : '') + (n.url ? ' · <a href="' + esc(n.url) + '" target="_blank" rel="noopener">official site</a>' : '') + (old ? ' · may be out of date' : '') + '</span></span>';
   }
   // A place's own identity, where one has been made by hand: its landscape, its neighborhoods and what sustains it
+  // Jump to section: hide links to sections that aren't shown, close the phone menu after a pick, mark where you are
+  (function () {
+    var nav = document.getElementById('jump'); if (!nav) return;
+    var links = [].slice.call(nav.querySelectorAll('[data-jump]'));
+    function sync() { links.forEach(function (l) { var t = document.getElementById(l.dataset.jump); l.hidden = !t || !!t.closest('[hidden]') || t.hidden; }); }
+    nav.addEventListener('click', function (e) { if (e.target.closest('[data-jump]')) { var d = nav.querySelector('details'); if (d) d.open = false; } });
+    setInterval(sync, 1500); sync();
+    if (!('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (en) { if (en.isIntersecting) links.forEach(function (l) { l.classList.toggle('on', l.dataset.jump === en.target.id); }); });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    setTimeout(function () { links.forEach(function (l, i) { var t = document.getElementById(l.dataset.jump); if (t && links.findIndex(function (x) { return x.dataset.jump === l.dataset.jump; }) === i) io.observe(t); }); }, 1500);
+  })();
   var IDN = null, PROPS = [], GROUPS = [];
   // Built isn't the same as available: ideas and notes open only when the relay reports its private review queues are on
   var OPEN = false;
@@ -827,4 +841,11 @@
   fetch('{B}data/observations.json').then(function (r) { return r.json(); }).then(function (j) { OBSV = j.observations || []; }).catch(function () {});
   T.all().then(function (d) { D = d; open(); }).catch(function () { $('#pf-missing').hidden = false; $('#pf-missing').innerHTML = '<p class="page-lede">This profile could not be loaded. Check your connection and refresh.</p>'; });
   window.addEventListener('hashchange', function () { if (D) open(); });
+  // Links to a section on this page scroll there; the address keeps the place (#mexico-city), so it isn't mistaken for another place
+  document.addEventListener('click', function (ev) {
+    var a = ev.target.closest('a[href^="#"]'); if (!a || ev.defaultPrevented) return;
+    var id = a.getAttribute('href').slice(1), t = id && document.getElementById(id);
+    if (!t || (D && D.lib[id])) return;
+    ev.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 })();

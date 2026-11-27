@@ -1,0 +1,47 @@
+name: Map data check
+# Times the building-data sources Studio can use, from outside: the public Overpass servers and OpenFreeMap vector tiles.
+on:
+  push:
+    branches: [main]
+    paths: ['.github/map-data-check.txt']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Time the sources
+        run: |
+          python3 - <<'PY'
+          import json, time, urllib.parse, urllib.request, os
+          out = []
+          bb = '(33.24,-111.64,33.25,-111.63)'   # Queen Creek, Arizona: one Studio square
+          q = '[out:json][timeout:20];way["building"]' + bb + ';out geom;'
+          for u in ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter', 'https://overpass.kumi.systems/api/interpreter']:
+              t = time.time()
+              try:
+                  r = urllib.request.urlopen(urllib.request.Request(u, data=urllib.parse.urlencode({'data': q}).encode(), headers={'User-Agent': 'Threadlands check', 'Origin': 'https://threadlands.org'}), timeout=40)
+                  body = r.read(); j = json.loads(body)
+                  out.append(f'{u}: {r.status} in {time.time()-t:.1f}s, {len(j.get("elements", []))} buildings, CORS {r.headers.get("Access-Control-Allow-Origin")}')
+              except Exception as e:
+                  out.append(f'{u}: FAILED after {time.time()-t:.1f}s: {e}')
+          for u in ['https://tiles.openfreemap.org/planet']:
+              t = time.time()
+              try:
+                  r = urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'Threadlands check', 'Origin': 'https://threadlands.org'}), timeout=30)
+                  j = json.loads(r.read()); out.append(f'{u}: tilejson in {time.time()-t:.1f}s, tiles {j.get("tiles")}, maxzoom {j.get("maxzoom")}, layers {[l.get("id") for l in j.get("vector_layers", [])]}, CORS {r.headers.get("Access-Control-Allow-Origin")}')
+                  tu = j['tiles'][0].replace('{z}', '14').replace('{x}', '3111').replace('{y}', '6586')
+                  t = time.time(); r = urllib.request.urlopen(urllib.request.Request(tu, headers={'User-Agent': 'Threadlands check', 'Origin': 'https://threadlands.org'}), timeout=30); b = r.read()
+                  out.append(f'tile z14 Queen Creek: {r.status} {len(b)} bytes in {time.time()-t:.1f}s, encoding {r.headers.get("Content-Encoding")}, CORS {r.headers.get("Access-Control-Allow-Origin")}')
+              except Exception as e:
+                  out.append(f'{u}: FAILED {e}')
+          text = '\n'.join(out); print(text)
+          os.makedirs('checks', exist_ok=True); open('checks/map-data-check.md', 'w').write(text + '\n')
+          PY
+      - name: Save
+        run: |
+          git config user.name "threadlands-bot"; git config user.email "threadlands-bot@users.noreply.github.com"
+          git add checks/map-data-check.md; git commit -m "Map data check result" || exit 0
+          git pull --rebase origin main && git push

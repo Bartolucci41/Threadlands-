@@ -876,6 +876,13 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .vx-sec li { display: grid; gap: 4px; padding: 12px 14px; background: var(--surface); border-radius: 12px; font-size: 0.92rem; line-height: 1.45; } .vx-sec li b { font: 700 1.02rem/1.3 var(--font-display); }
   .vx-how { color: var(--ink2); font-size: 0.86rem; } .vx-src { font-size: 0.82rem; color: var(--ink2); } .vx-src a { color: var(--accent); font-weight: 600; }
   .vx-none { font-size: 0.9rem; color: var(--ink2); margin: 0; padding: 12px 14px; border: 1px dashed var(--line); border-radius: 12px; } .vx-policy { font-size: 0.84rem; color: var(--ink2); margin: 14px 0 0; max-width: 46rem; }
+  /* Jump to section: a slim bar that stays at the top while you scroll; a small menu on phones */
+  .jump { position: sticky; top: 0; z-index: 1000; margin: 0 calc(-1 * var(--gut, 16px)); padding: 6px var(--gut, 16px); background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .jump-row { display: flex; gap: 4px 2px; flex-wrap: wrap; } .jump a { padding: 6px 10px; border-radius: 999px; color: var(--ink2); text-decoration: none; font-size: 0.88rem; font-weight: 600; white-space: nowrap; } .jump a:hover, .jump a.on { color: var(--ink); background: var(--surface2); }
+  .jump-m { display: none; } .jump-m summary { cursor: pointer; font-weight: 700; font-size: 0.92rem; padding: 6px 2px; list-style: none; } .jump-m summary::after { content: ' ▾'; color: var(--accent); }
+  .jump-list { display: grid; padding: 4px 0 8px; } .jump-list a { padding: 10px 8px; border-radius: 10px; font-size: 1rem; }
+  [id] { scroll-margin-top: 58px; }
+  @media (max-width: 760px) { .jump-row { display: none; } .jump-m { display: block; } }
   .pfi-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: start; } .pfi-col { display: grid; gap: 10px; } .pp-tg { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; } .pp-tg label { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1.5px solid var(--line); border-radius: 999px; cursor: pointer; font-weight: 600; font-size: 0.92rem; } .pp-tg label:has(input:checked) { border-color: var(--accent); background: var(--accent); color: #fff; } .pp-tg input { position: absolute; opacity: 0; pointer-events: none; }
   .pfi-col h4 { margin: 0; font-size: 0.8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink2); }
   .pfi-orgs { display: grid; gap: 6px; margin-top: 6px; } .pfi-ok { font-size: 0.72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink2); } .pfi-orgs a { display: grid; gap: 2px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; text-decoration: none; color: var(--ink); font-size: 0.85rem; line-height: 1.4; } .pfi-orgs a span { color: var(--ink2); } .pfi-orgs a:hover b { color: var(--accent); }
@@ -1024,7 +1031,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=68">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=69">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
