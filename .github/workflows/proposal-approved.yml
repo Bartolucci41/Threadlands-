@@ -29,8 +29,8 @@ jobs:
               if t is None: raise SystemExit('The idea to join is not published: ' + str(o.get('link_id')))
               t.setdefault('joined', []).append({'id': o['id'], 'area': o.get('area', ''), 'why': o.get('why', ''), 'added': today})
           else:
-              keep = {k: o.get(k) for k in ['id', 'place', 'idea', 'why', 'area', 'scope', 'topic', 'lat', 'lng', 'links']}
-              keep['joined'] = []; keep['added'] = today
+              keep = {k: o.get(k) for k in ['id', 'place', 'idea', 'why', 'area', 'scope', 'type', 'topic', 'lat', 'lng', 'links']}
+              keep['joined'] = []; keep['added'] = today; keep['path'] = []   # connected / delivered / response, added from the inbox
               P[:] = [x for x in P if x.get('id') != keep['id']] + [keep]
           json.dump(d, open(path, 'w'), indent=1, ensure_ascii=False)
           PY

@@ -67,5 +67,10 @@
     ]
    ]
   }
+ ],
+ "pilot": [
+  "cycling",
+  "food",
+  "shade-water"
  ]
 }

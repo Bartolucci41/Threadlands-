@@ -1,0 +1,38 @@
+name: Idea step
+# The reviewer marked a step on a published idea's path (connected with a group, delivered, response received).
+on:
+  repository_dispatch:
+    types: [proposal-step]
+permissions:
+  contents: write
+concurrency: { group: proposals, cancel-in-progress: false }
+jobs:
+  step:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update the path
+        env:
+          S: ${{ toJSON(github.event.client_payload.step) }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          st = json.loads(os.environ['S'])
+          path = 'data/proposals.json'
+          d = json.load(open(path))
+          p = next((x for x in d.get('proposals', []) if x.get('id') == st['id']), None)
+          if p is None: raise SystemExit('No published idea ' + st['id'])
+          steps = [x for x in p.get('path', []) if x.get('step') != st['step']]
+          if not st.get('remove'):
+              steps.append({k: st.get(k) for k in ['step', 'date', 'who', 'note', 'url']})
+          order = {'connected': 0, 'delivered': 1, 'response': 2}
+          p['path'] = sorted(steps, key=lambda x: order.get(x['step'], 9))
+          json.dump(d, open(path, 'w'), indent=1, ensure_ascii=False)
+          PY
+      - name: Commit
+        run: |
+          git config user.name "threadlands-bot"
+          git config user.email "threadlands-bot@users.noreply.github.com"
+          git add data/proposals.json
+          git commit -m "Update an idea's path" || exit 0
+          git pull --rebase origin main && git push

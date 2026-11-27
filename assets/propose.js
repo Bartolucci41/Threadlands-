@@ -33,7 +33,13 @@
   var KIND_T = { trees: ['trees', 'heat'], park: ['parks'], wetland: ['water', 'parks'], corridor: ['mobility', 'parks', 'trees'], rain: ['water'], farm: ['food'], river: ['water', 'parks'], transit: ['mobility'] };
   function km(a, b, c, d) { var r = Math.PI / 180, x = (d - b) * r * Math.cos((a + c) / 2 * r), y = (c - a) * r; return Math.sqrt(x * x + y * y) * 6371; }
 
-  var S = {}, dlg = null, MAP = null, PIN = null;
+  // Pilot types: in a pilot place, every idea starts as one of a few kinds of change, so support gathers around shared efforts
+  var TYPES = {
+    cycling: { label: 'Safer cycling', topic: ['mobility'], hint: 'A protected bike lane on our avenue', ex: ['A protected bike lane on our avenue', 'Safe bike parking at the Metro station', 'A safer crossing for bikes and people walking'] },
+    food: { label: 'Food access', topic: ['food'], hint: 'A market with fresh fruit and vegetables', ex: ['A market with fresh fruit and vegetables', 'A community kitchen or garden', 'Fresh food at the tianguis closer to home'] },
+    'shade-water': { label: 'Shade or water', topic: ['trees', 'heat', 'water'], hint: 'Shade trees along the school route', ex: ['Shade trees along the school route', 'Drinking fountains in the park', 'Fix the street that floods when it rains'] }
+  };
+  var S = {}, dlg = null, MAP = null, PIN = null, EX0 = '';
   function $(s) { return dlg.querySelector(s); }
 
   function build() {
@@ -45,7 +51,7 @@
       '<ol class="pp-steps" aria-label="Steps"><li>Idea</li><li>Where</li><li>Why</li><li>Related</li></ol>' +
       '<div class="fb-body">' +
       // 1 the idea
-      '<section class="pp-s" data-s="1"><label class="fb-l" for="pp-idea">Your idea, in a few words</label>' +
+      '<section class="pp-s" data-s="1"><div class="pp-types" id="pp-types" hidden><p class="fb-l">What kind of change?</p><div class="pp-tg" role="radiogroup" aria-label="Kind of change"></div></div><label class="fb-l" for="pp-idea">Your idea, in a few words</label>' +
       '<input id="pp-idea" class="pp-in" type="text" maxlength="120" autocomplete="off" placeholder="More e-bike stations">' +
       '<p class="pp-ex">For example: <button type="button" data-ex="Shade trees on our street">Shade trees on our street</button> <button type="button" data-ex="A grocery store with fresh food">A grocery store with fresh food</button> <button type="button" data-ex="A safe crossing near the school">A safe crossing near the school</button> <button type="button" data-ex="Fix the street that floods when it rains">Fix the street that floods when it rains</button></p></section>' +
       // 2 where
@@ -71,6 +77,7 @@
     $('.fb-x').addEventListener('click', function () { dlg.close(); });
     $('#pp-close').addEventListener('click', function () { dlg.close(); });
     dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+    $('.pp-tg').addEventListener('change', function () { var t = TYPES[(dlg.querySelector('input[name=ppt]:checked') || {}).value]; S.type = (dlg.querySelector('input[name=ppt]:checked') || {}).value; if (t) { $('#pp-idea').placeholder = t.hint; $('.pp-ex').innerHTML = 'For example: ' + t.ex.map(function (x) { return '<button type="button" data-ex="' + esc(x) + '">' + esc(x) + '</button>'; }).join(' '); } else { $('#pp-idea').placeholder = 'Your idea'; } });
     $('.pp-ex').addEventListener('click', function (e) { var b = e.target.closest('[data-ex]'); if (b) { $('#pp-idea').value = b.dataset.ex; $('#pp-idea').focus(); } });
     $('#pp-next').addEventListener('click', next);
     $('#pp-back').addEventListener('click', function () { go(S.step - 1); });
@@ -110,7 +117,7 @@
   function err(t) { $('#pp-err').textContent = t; $('#pp-err').hidden = false; }
   function areaName() { var a = $('#pp-area').value; return a === '_other' ? $('#pp-area-o').value.trim() : a; }
   function next() {
-    if (S.step === 1) { var t = $('#pp-idea').value.trim(); if (t.length < 4) return err('Write your idea in a few words.'); S.idea = t; return go(2); }
+    if (S.step === 1) { if (S.ctx.pilot && !S.type) return err('Choose what kind of change it is.'); var t = $('#pp-idea').value.trim(); if (t.length < 4) return err('Write your idea in a few words.'); S.idea = t; return go(2); }
     if (S.step === 2) {
       if (!S.scope) return err('Choose where it would help.');
       if (S.scope === 'pin' && S.lat == null) return err('Tap the map to drop a pin, or choose a neighborhood.');
@@ -123,7 +130,7 @@
 
   // Related: proposals already published here, real projects, and local groups, scored by topic, words and distance
   function related() {
-    var c = S.ctx, mineT = topicsOf(S.idea + ' ' + (S.why || '')), mineW = words(S.idea);
+    var c = S.ctx, mineT = (S.type && TYPES[S.type] ? TYPES[S.type].topic : []).concat(topicsOf(S.idea + ' ' + (S.why || ''))), mineW = words(S.idea);
     function score(text, topics, lat, lng, area) {
       var s = 0, tw = words(text);
       topics.forEach(function (t) { if (mineT.indexOf(t) >= 0) s += 3; });
@@ -134,7 +141,7 @@
       return s;
     }
     var items = [];
-    (c.proposals || []).forEach(function (p) { var sc = score(p.idea + ' ' + (p.why || ''), p.topic || topicsOf(p.idea), p.lat, p.lng, p.area); if (sc) items.push({ kind: 'proposal', id: p.id, sc: sc + 1, name: p.idea, where: p.area || (p.scope === 'city' ? 'Across ' + c.name : 'Pinned on the map'), n: (p.joined || []).length + 1 }); });
+    (c.proposals || []).forEach(function (p) { var sc = score(p.idea + ' ' + (p.why || ''), p.topic || topicsOf(p.idea), p.lat, p.lng, p.area); if (sc && S.type && p.type === S.type) sc += 2; if (sc) items.push({ kind: 'proposal', id: p.id, sc: sc + 1, name: p.idea, where: p.area || (p.scope === 'city' ? 'Across ' + c.name : 'Pinned on the map'), n: (p.joined || []).length + 1 }); });
     (c.projects || []).forEach(function (p) { var sc = score(p.name + ' ' + (p.summary || ''), KIND_T[p.kind] || [], p.lat, p.lng, p.area); if (sc) items.push({ kind: 'project', id: p.id, sc: sc, name: p.name, where: p.area || '', who: p.who, url: c.base + 'place/?pj=' + encodeURIComponent(p.id) + '#' + p.place }); });
     (c.groups || []).forEach(function (g) { var sc = score(g.name + ' ' + (g.what || ''), g.topic || [], g.lat, g.lng, g.area); if (sc) items.push({ kind: 'group', id: g.id, sc: sc, name: g.name, where: g.area || '', what: g.what, url: g.url }); });
     if (S.link) items.forEach(function (it) { if (it.id === S.link.id) it.sc += 100; });
@@ -156,7 +163,7 @@
   function postLabel() { var L = S.link; return !L ? 'Post my idea' : L.mode === 'join' ? 'Add me to this idea' : 'Post and connect'; }
 
   function post() {
-    var L = S.link, b = { type: 'proposal', place: S.ctx.slug, idea: S.idea, why: S.why || '', show_why: !!(S.show && S.why), topic: topicsOf(S.idea + ' ' + (S.why || '')), scope: S.scope, area: S.area || '',
+    var L = S.link, b = { type: 'proposal', place: S.ctx.slug, idea: S.idea, why: S.why || '', show_why: !!(S.show && S.why), ctype: S.type || '', topic: (S.type && TYPES[S.type] ? TYPES[S.type].topic : []).concat(topicsOf(S.idea + ' ' + (S.why || ''))).filter(function (t, i, A) { return A.indexOf(t) === i; }).slice(0, 4), scope: S.scope, area: S.area || '',
       lat: S.scope === 'pin' ? S.lat : null, lng: S.scope === 'pin' ? S.lng : null, mode: L ? L.mode : 'new', link_kind: L ? L.kind : '', link_id: L ? L.id : '' };
     $('#pp-next').disabled = true; $('#pp-next').textContent = 'Sending…';
     fetch(RELAY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) })
@@ -178,7 +185,12 @@
     if (!dlg) build();
     S = { ctx: ctx, step: 1, link: ctx.join ? { mode: 'join', kind: 'proposal', id: ctx.join.id, name: ctx.join.name } : null, scope: null, lat: null, lng: null };
     $('#pp-h').textContent = 'What would make ' + ctx.name + ' better?';
+    S.type = ctx.type || '';
+    $('#pp-types').hidden = !ctx.pilot;
+    if (ctx.pilot) $('.pp-tg').innerHTML = ctx.pilot.filter(function (k) { return TYPES[k]; }).map(function (k) { return '<label><input type="radio" name="ppt" value="' + k + '"' + (k === S.type ? ' checked' : '') + '><span>' + TYPES[k].label + '</span></label>'; }).join('') + '<label><input type="radio" name="ppt" value="other"' + (S.type === 'other' ? ' checked' : '') + '><span>Something else</span></label>';
     $('#pp-idea').value = ctx.idea || ''; $('#pp-why').value = ''; $('#pp-show').checked = false;
+    if (!EX0) EX0 = $('.pp-ex').innerHTML; else $('.pp-ex').innerHTML = EX0; $('#pp-idea').placeholder = 'More e-bike stations';
+    if (ctx.pilot && S.type) $('.pp-tg').dispatchEvent(new Event('change'));
     dlg.querySelectorAll('input[name=ppw]').forEach(function (i) { i.checked = false; }); $('.pp-pin').hidden = true; $('.pp-area').hidden = true;
     var A = ctx.areas || [];
     $('#pp-area').innerHTML = '<option value="">Choose…</option>' + A.map(function (a) { return '<option>' + esc(a) + '</option>'; }).join('') + '<option value="_other">' + (A.length ? 'Somewhere else' : 'Type a name') + '</option>';
@@ -189,5 +201,5 @@
     dlg.showModal(); if (!ctx.join) setTimeout(function () { $('#pp-idea').focus(); }, 30);
   }
   function mine(slug) { var a = []; try { a = JSON.parse(store(MINE) || '[]'); } catch (e) {} return a.filter(function (x) { return x.place === slug; }); }
-  window.TLPropose = { open: open, topicsOf: topicsOf, TOPICS: TOPICS, mine: mine };
+  window.TLPropose = { open: open, topicsOf: topicsOf, TOPICS: TOPICS, TYPES: TYPES, mine: mine };
 })();

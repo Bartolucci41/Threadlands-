@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=61">
+<link rel="stylesheet" href="../assets/site.css?v=62">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -48,7 +48,8 @@
     </form>
     <p class="ib-msg" id="ib-msg" role="status"></p>
   </header>
-  <div class="ib-filters" id="ib-tabs" hidden><button type="button" class="chip" data-tab="reports" aria-pressed="true">Feedback</button><button type="button" class="chip" data-tab="ideas" aria-pressed="false">Ideas to review <span id="ib-ideas-n"></span></button><button type="button" class="chip" data-tab="notes" aria-pressed="false">Notes to review <span id="ib-notes-n"></span></button></div>
+  <div class="ib-filters" id="ib-tabs" hidden><button type="button" class="chip" data-tab="reports" aria-pressed="true">Feedback</button><button type="button" class="chip" data-tab="ideas" aria-pressed="false">Ideas to review <span id="ib-ideas-n"></span></button><button type="button" class="chip" data-tab="notes" aria-pressed="false">Notes to review <span id="ib-notes-n"></span></button><button type="button" class="chip" data-tab="path" aria-pressed="false">Idea paths</button></div>
+  <section id="ib-path" hidden><p class="ib-note">Published ideas and where each one has got to. Mark a step when it happens: connected with a group, delivered to an organizer or decision-maker, response received. Each step names who and when; add a public link where there is one. Changes appear on the place page in a minute or two.</p><ol class="ib-list" id="ib-path-list"></ol></section>
   <section id="ib-notes" hidden><p class="ib-note">Notes from &ldquo;Add what you notice&rdquo;. They stay private here, with the exact pin, until you publish one. Publishing sends the note with the spot generalized as you choose and deletes the private copy; rejecting deletes it. Unreviewed notes are deleted after 90 days.</p><ol class="ib-list" id="ib-notes-list"></ol></section>
   <section id="ib-ideas" hidden><p class="ib-note">Ideas from &ldquo;What would make this place better?&rdquo;. They stay private here until you publish one. Publishing sends only the public parts to the site and deletes the private copy; rejecting deletes it. Unreviewed ideas are deleted after 90 days. Remove names, phone numbers and home addresses before publishing.</p><ol class="ib-list" id="ib-ideas-list"></ol></section>
   <div id="ib-reports">
@@ -139,7 +140,7 @@
       var how = it.mode === 'join' ? 'Adds this person to published idea <b>' + esc(it.link_id) + '</b> (published as a count and neighborhood only)' : it.mode === 'connect' ? 'New idea, connected to ' + esc(it.link_kind) + ' <b>' + esc(it.link_id) + '</b>' : 'New idea';
       return '<li class="ib-item" data-idea="' + esc(it.id) + '"><div class="ib-top"><span class="ib-kind">' + esc(it.place) + '</span><span class="ib-at">' + esc(new Date(it.at).toLocaleString()) + '</span></div>' +
         (it.mode === 'join' ? '<p class="ib-text">' + esc(it.idea) + '</p>' : '<label class="ib-l">Idea <input class="ib-in" data-f="idea" maxlength="120" value="' + esc(it.idea) + '"></label>') +
-        '<p class="ib-meta">' + where + ' · ' + how + ' · Topics: ' + ((it.topic || []).map(function (t) { return TOPIC[t] || t; }).join(', ') || 'none') + '</p>' +
+        '<p class="ib-meta">' + ({ cycling: 'Safer cycling · ', food: 'Food access · ', 'shade-water': 'Shade or water · ', other: 'Something else · ' }[it.ctype] || '') + where + ' · ' + how + ' · Topics: ' + ((it.topic || []).map(function (t) { return TOPIC[t] || t; }).join(', ') || 'none') + '</p>' +
         (it.why ? '<label class="ib-l">Reason <textarea class="ib-in" data-f="why" rows="2" maxlength="280">' + esc(it.why) + '</textarea></label><label class="ib-ok"><input type="checkbox" data-f="show_why"' + (it.show_why ? ' checked' : ' disabled') + '> ' + (it.show_why ? 'They agreed to show this reason. Untick to keep it private.' : 'They did not agree to show it. It stays private.') + '</label>' : '') +
         '<div class="ib-act"><button type="button" class="btn" data-pub="' + esc(it.id) + '">Publish</button><button type="button" class="btn ghost" data-rej="' + esc(it.id) + '">Reject and delete</button></div></li>';
     }).join('') : '<li class="ib-empty">No ideas waiting.</li>';
@@ -160,7 +161,7 @@
   $('#ib-tabs').addEventListener('click', function (e) {
     var b = e.target.closest('[data-tab]'); if (!b) return;
     document.querySelectorAll('[data-tab]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
-    $('#ib-ideas').hidden = b.dataset.tab !== 'ideas'; $('#ib-notes').hidden = b.dataset.tab !== 'notes'; $('#ib-reports').hidden = b.dataset.tab !== 'reports';
+    $('#ib-ideas').hidden = b.dataset.tab !== 'ideas'; $('#ib-notes').hidden = b.dataset.tab !== 'notes'; $('#ib-path').hidden = b.dataset.tab !== 'path'; $('#ib-reports').hidden = b.dataset.tab !== 'reports'; if (b.dataset.tab === 'path') loadPaths();
   });
   // ---- Notes to review
   var NOTES = [], NK = { heat: 'Too hot here', water: 'Water collects here', shade: 'Needs shade or trees', green: 'Green space matters here', change: 'Something is changing here', idea: 'An idea for this spot', other: 'Something else' };
@@ -188,6 +189,32 @@
     var p = e.target.closest('[data-npub]'), r = e.target.closest('[data-nrej]');
     if (p) reviewNote(p.dataset.npub, 'publish');
     if (r && confirm('Delete this note? This can\u2019t be undone.')) reviewNote(r.dataset.nrej, 'reject');
+  });
+  // ---- Idea paths
+  var PUB = [], STEP = { connected: 'Connected with a group', delivered: 'Delivered to an organizer or decision-maker', response: 'Response received' };
+  function loadPaths() {
+    fetch('../data/proposals.json?t=' + Date.now()).then(function (r) { return r.json(); }).then(function (d) { PUB = d.proposals || []; renderPaths(); }).catch(function () { $('#ib-path-list').innerHTML = '<li class="ib-empty">Could not load the published ideas.</li>'; });
+  }
+  function renderPaths() {
+    $('#ib-path-list').innerHTML = PUB.length ? PUB.map(function (p) {
+      var have = {}; (p.path || []).forEach(function (x) { have[x.step] = x; });
+      return '<li class="ib-item" data-path="' + esc(p.id) + '"><div class="ib-top"><span class="ib-kind">' + esc(p.place) + ' · ' + esc(p.id) + '</span><span class="ib-at">published ' + esc(p.added || '') + '</span></div><p class="ib-text">' + esc(p.idea) + '</p>' +
+        '<ul class="ib-steps">' + Object.keys(STEP).map(function (k) { var x = have[k]; return '<li>' + STEP[k] + ': ' + (x ? '<b>' + esc(x.who) + '</b> · ' + esc(x.date) + (x.note ? ' · ' + esc(x.note) : '') + ' <button type="button" class="linkbtn" data-unstep="' + k + '">Remove</button>' : '<span class="ib-meta">not yet</span>') + '</li>'; }).join('') + '</ul>' +
+        '<div class="ib-stepform"><select class="ib-in" data-k>' + Object.keys(STEP).map(function (k) { return '<option value="' + k + '">' + STEP[k] + '</option>'; }).join('') + '</select>' +
+        '<input class="ib-in" data-who maxlength="120" placeholder="Who (a group, an office, an official\u2019s role)"><input class="ib-in" data-date type="date" value="' + new Date().toISOString().slice(0, 10) + '">' +
+        '<input class="ib-in" data-note maxlength="400" placeholder="One line on what happened (optional)"><input class="ib-in" data-url type="url" placeholder="Public link (optional)"><button type="button" class="btn" data-step="' + esc(p.id) + '">Add step</button></div></li>';
+    }).join('') : '<li class="ib-empty">No published ideas yet.</li>';
+  }
+  function sendStep(id, body, li) {
+    li.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
+    api('', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ type: 'idea-step', id: id }, body)) })
+      .then(function () { var p = PUB.filter(function (x) { return x.id === id; })[0]; p.path = (p.path || []).filter(function (x) { return x.step !== body.step; }); if (!body.remove) p.path.push(body); renderPaths(); })
+      .catch(function (err) { alert(err.message); li.querySelectorAll('button').forEach(function (b) { b.disabled = false; }); });
+  }
+  $('#ib-path-list').addEventListener('click', function (e) {
+    var li = e.target.closest('[data-path]'); if (!li) return;
+    if (e.target.closest('[data-step]')) { var who = li.querySelector('[data-who]').value.trim(); if (!who) { li.querySelector('[data-who]').focus(); return; } sendStep(li.dataset.path, { step: li.querySelector('[data-k]').value, who: who, date: li.querySelector('[data-date]').value, note: li.querySelector('[data-note]').value.trim(), url: li.querySelector('[data-url]').value.trim() }, li); }
+    var u = e.target.closest('[data-unstep]'); if (u && confirm('Remove this step?')) sendStep(li.dataset.path, { step: u.dataset.unstep, remove: true }, li);
   });
   if (KEY) load();
 })();

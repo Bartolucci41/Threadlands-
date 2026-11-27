@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="{B}assets/public.js?v=4"></script>
-<script src="{B}assets/propose.js?v=2"></script>
+<script src="{B}assets/propose.js?v=3"></script>
   <div class="pf-missing" id="pf-missing" hidden></div>
   <article class="pf" id="pf" hidden>
     <section class="pf-head bleed band-deep" aria-labelledby="pf-name">
@@ -104,7 +104,7 @@
       </div>
       <div class="pf-proj" id="pf-proj"></div>
       <p class="pf-allpj" id="pf-allpj"></p>
-      <div class="pf-ideas" id="pf-ideas-box"><h3 class="pfi-h">Ideas from people here</h3><div class="pfi-list" id="pf-ideas"></div></div>
+      <div class="pf-ideas" id="pf-ideas-box"><h3 class="pfi-h">Ideas from people here</h3><div id="pf-ideas"></div></div>
       <div class="pf-add"><p><b>Know a project that belongs here?</b> A new park, a wetland, a tree-planting drive, a flood barrier. Add it with a link to a public source and it is checked before it appears.</p><a class="btn" id="pf-add" href="{B}explore/?add=1">Add a project</a></div>
     </section>
 
@@ -354,7 +354,7 @@
     var head = $('.pf-head'), kick = $('#pf-kick'), box = $('#pf-local');
     head.classList.remove('local'); head.style.removeProperty('--mark'); head.style.removeProperty('--city'); kick.hidden = true; box.hidden = true; box.innerHTML = '';
     fetch('{B}data/identity/' + SLUG + '.json').then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (I) {
-      if (I.slug !== SLUG) return; IDN = I;
+      if (I.slug !== SLUG) return; IDN = I; if (D && D.lib[SLUG]) renderIdeas(D.lib[SLUG]);
       head.classList.add('local'); head.style.setProperty('--mark', 'url({B}' + I.mark + ')'); head.style.setProperty('--city', I.accent);
       kick.textContent = I.kicker; kick.hidden = false;
       var ICO = { water: '≋', food: '❦', nature: '▲' };
@@ -368,40 +368,64 @@
   function renderIdeas(e) {
     var name = e.name, list = PROPS.filter(function (p) { return p.place === SLUG; }), mine = window.TLPropose ? TLPropose.mine(SLUG) : [];
     document.querySelectorAll('.pp-cn').forEach(function (n) { n.textContent = name; });
+    var cs = document.querySelector('.pp-cta > div > span'); if (cs) cs.textContent = IDN && IDN.pilot ? 'In ' + name + ' we\u2019re starting with three kinds of change: safer cycling, food access, and shade or water. You\u2019ll see who is already asking or working on it before you post.' : 'Suggest a simple change, like more shade, a safe crossing or fresh food nearby. You\u2019ll see who is already asking or working on it before you post.';
     var TT = (window.TLPropose || {}).TOPICS || {}, link = function (k, id) {
       if (k === 'project') { var pr = D.projects.filter(function (x) { return x.id === id; })[0]; return pr ? '<a href="#pj-' + esc(id) + '">' + esc(pr.name) + '</a>' : ''; }
       if (k === 'group') { var g = GROUPS.filter(function (x) { return x.id === id; })[0]; return g ? '<a href="' + esc(g.url) + '" target="_blank" rel="noopener">' + esc(g.name) + '</a>' : ''; }
       var q = PROPS.filter(function (x) { return x.id === id; })[0]; return q ? '<a href="#idea-' + esc(id) + '">' + esc(q.idea) + '</a>' : '';
     };
-    var html = list.map(function (p) {
+    var TY = (window.TLPropose || {}).TYPES || {}, mineB = T.backed(), pilot = IDN && IDN.pilot ? IDN.pilot : null;
+    // The path every idea can travel: suggested, connected with a group, delivered to whoever can act, response received
+    var STEPS = [['suggested', 'Suggested'], ['connected', 'Connected with a group'], ['delivered', 'Delivered'], ['response', 'Response received']];
+    function pathHtml(p) {
+      var got = { suggested: { date: p.added } }; (p.path || []).forEach(function (x) { got[x.step] = x; });
+      var last = STEPS.filter(function (st) { return got[st[0]]; }).pop()[0];
+      return '<ol class="pfi-path" aria-label="Where this idea is">' + STEPS.map(function (st) {
+        var g = got[st[0]], d = g && g.who ? (st[0] === 'response' ? 'From ' : st[0] === 'delivered' ? 'To ' : 'With ') + esc(g.who) : '';
+        return '<li class="' + (g ? 'done' : '') + (st[0] === last ? ' cur' : '') + '"><span>' + st[1] + '</span>' + (g && (d || g.date) ? '<i>' + (g.url ? '<a href="' + esc(g.url) + '" target="_blank" rel="noopener">' + (d || esc(g.date)) + '</a>' : (d || esc(g.date))) + (d && g.date ? ' · ' + esc(g.date) : '') + '</i>' : '') + (g && g.note ? '<em>' + esc(g.note) + '</em>' : '') + '</li>';
+      }).join('') + '</ol>';
+    }
+    function card(p) {
       var j = p.joined || [], where = p.area || (p.scope === 'city' ? 'Across ' + name : 'Near the pin on the map');
       var links = (p.links || []).map(function (l) { return link(l.kind, l.id); }).filter(Boolean);
-      // Who's asking, by neighborhood only; reasons only where people agreed to show them
+      // Where support comes from, by neighborhood only; reasons only where people agreed to show them
       var by = {}; [{ area: p.area }].concat(j).forEach(function (x) { var k = x.area || ''; by[k] = (by[k] || 0) + 1; });
       var parts = Object.keys(by).filter(Boolean).sort(function (a, b) { return by[b] - by[a]; }).map(function (k) { return esc(k) + ' ' + by[k]; }); if (by['']) parts.push((parts.length ? 'elsewhere ' : 'no neighborhood given ') + by['']);
-      var why = [p.why].concat(j.map(function (x) { return x.why; })).filter(Boolean);
+      var why = [p.why].concat(j.map(function (x) { return x.why; })).filter(Boolean), have = mineB.indexOf(p.id) >= 0;
       return '<article class="pfi" id="idea-' + esc(p.id) + '"><b>' + esc(p.idea) + '</b><span class="pfi-m">' + esc(where) + (p.lat != null ? ' <button type="button" class="linkbtn" data-idea-map="' + p.lat + ',' + p.lng + '">See on the map</button>' : '') +
-        ((p.topic || []).length ? ' · ' + p.topic.map(function (t) { return esc((TT[t] || [t])[0]); }).join(', ') : '') + '</span>' +
-        (j.length ? '<span class="pfi-by">Asking from: ' + parts.join(' · ') + '</span>' : '') +
+        (!pilot && (p.topic || []).length ? ' · ' + p.topic.map(function (t) { return esc((TT[t] || [t])[0]); }).join(', ') : '') + '</span>' +
+        '<span class="pfi-n" data-idea-n="' + esc(p.id) + '" data-base="' + (j.length + 1) + '"></span>' +
+        (j.length ? '<span class="pfi-by">Support from ' + parts.join(' · ') + '</span>' : '') +
         (why.length ? '<details class="pfi-j"><summary>' + (why.length === 1 ? 'The reason shared' : why.length + ' reasons people shared') + '</summary><ul>' + why.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul></details>' : '') +
-        (links.length ? '<span class="pfi-l">Connected to ' + links.join(', ') + '</span>' : '') +
-        '<span class="pjc-act"><button type="button" class="btn" data-idea-join="' + esc(p.id) + '">I want this too</button><span class="pfi-n" data-idea-n="' + esc(p.id) + '" data-base="' + (j.length + 1) + '"></span></span></article>';
-    }).join('') + mine.map(function (m) {
-      return '<article class="pfi wait"><b>' + esc(m.idea) + '</b><span class="pfi-m">' + esc(m.area || (m.scope === 'city' ? 'Across ' + name : 'Pinned on the map')) + '</span><span class="pfi-w">Your idea' + (m.link ? (m.mode === 'join' ? ', added to “' : ', connected to “') + esc(m.link) + '”' : '') + ' · waiting for review (only you can see this)</span></article>';
+        (links.length ? '<span class="pfi-l">Linked to ' + links.join(', ') + '</span>' : '') + pathHtml(p) +
+        '<span class="pjc-act">' + (have ? '<span class="pfi-have">&#10003; You support this</span>' : '<button type="button" class="btn" data-idea-join="' + esc(p.id) + '">I want this too</button>') + '</span></article>';
+    }
+    var waiting = mine.map(function (m) {
+      return '<article class="pfi wait"><b>' + esc(m.idea) + '</b><span class="pfi-m">' + esc(m.area || (m.scope === 'city' ? 'Across ' + name : 'Pinned on the map')) + '</span><span class="pfi-w">Your idea' + (m.link ? (m.mode === 'join' ? ', added to \u201c' : ', connected to \u201c') + esc(m.link) + '\u201d' : '') + ' \u00b7 waiting for review (only you can see this)</span></article>';
     }).join('');
-    $('#pf-ideas').innerHTML = html || '<p class="pf-none">No ideas here yet. What would you change first?</p>';
-    // How many want it: the person who posted it, everyone added after review, and anyone added since who is still waiting
-    var cnt = function (c) { document.querySelectorAll('[data-idea-n]').forEach(function (n) { var k = Math.max(+n.dataset.base, (c[n.dataset.ideaN] || 0) + 1); n.textContent = k + (k === 1 ? ' person wants this' : ' people want this'); }); };
+    var html;
+    if (pilot) {   // a pilot place: one column per kind of change, each inviting the first idea if empty
+      html = '<div class="pfi-cols">' + pilot.concat(['other']).map(function (k) {
+        var L = list.filter(function (p) { return k === 'other' ? pilot.indexOf(p.type) < 0 : p.type === k; });
+        if (k === 'other' && !L.length) return '';
+        return '<section class="pfi-col"><h4>' + esc(k === 'other' ? 'Other ideas' : TY[k].label) + '</h4>' + (L.length ? L.map(card).join('') : '<p class="pf-none">No ' + esc(TY[k].label.toLowerCase()) + ' ideas yet.</p>') +
+          (k !== 'other' ? '<button type="button" class="linkbtn pfi-add" data-idea-type="' + k + '">Suggest ' + esc(TY[k].label.toLowerCase()) + ' &rarr;</button>' : '') + '</section>';
+      }).join('') + '</div>' + (waiting ? '<div class="pfi-list">' + waiting + '</div>' : '');
+    } else html = list.length || waiting ? '<div class="pfi-list">' + list.map(card).join('') + waiting + '</div>' : '<p class="pf-none">No ideas here yet. What would you change first?</p>';
+    $('#pf-ideas').innerHTML = html + '<p class="pfi-rule"><b>One person, one voice.</b> Each person can support an idea once, and no one can pay to boost one. Counts are support among people using Threadlands, not a citywide vote. Ideas gain weight by reaching the groups and decision-makers who can act on them, shown on each idea&rsquo;s path.</p>';
+    // How many support it: the person who posted it, everyone added after review, and anyone added since who is still waiting
+    var cnt = function (c) { document.querySelectorAll('[data-idea-n]').forEach(function (n) { var k = Math.max(+n.dataset.base, (c[n.dataset.ideaN] || 0) + 1); n.textContent = k + (k === 1 ? ' Threadlands participant supports this' : ' Threadlands participants support this'); }); };
     cnt({}); T.support().then(cnt).catch(function () {});
   }
   function proposeCtx(e, extra) {
     return Object.assign({ slug: SLUG, name: e.name, lat: e.lat, lng: e.lng, base: '{B}', areas: IDN && IDN.areas ? IDN.areas.names : [],
       projects: D.projects.filter(function (p) { return p.place === SLUG; }), proposals: PROPS.filter(function (p) { return p.place === SLUG; }),
-      groups: GROUPS.filter(function (g) { return g.place === SLUG; }), onPosted: function () { renderIdeas(e); } }, extra || {});
+      groups: GROUPS.filter(function (g) { return g.place === SLUG; }), pilot: IDN && IDN.pilot ? IDN.pilot : null, onPosted: function () { renderIdeas(e); } }, extra || {});
   }
   document.addEventListener('click', function (ev) {
     var e = D && D.lib[SLUG]; if (!e || !window.TLPropose) return;
     if (ev.target.closest('#pp-open')) TLPropose.open(proposeCtx(e));
+    var ty = ev.target.closest('[data-idea-type]'); if (ty) TLPropose.open(proposeCtx(e, { type: ty.dataset.ideaType }));
     var j = ev.target.closest('[data-idea-join]'); if (j) { var p = PROPS.filter(function (x) { return x.id === j.dataset.ideaJoin; })[0]; if (p) TLPropose.open(proposeCtx(e, { idea: p.idea, join: { id: p.id, name: p.idea } })); }
     var m = ev.target.closest('[data-idea-map]'); if (m && HM) { var ll = m.dataset.ideaMap.split(',').map(Number); document.getElementById('here').scrollIntoView({ block: 'start' }); HM.setView(ll, 15); L.circleMarker(ll, { radius: 9, color: '#fff', weight: 3, fillColor: '#C0542C', fillOpacity: 1 }).addTo(HM); }
   });

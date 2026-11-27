@@ -126,6 +126,7 @@ function ideaFields(b) {
   const o = {
     place: String(b.place || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 80),
     idea: text(b.idea, 120), why: text(b.why, 280), show_why: b.show_why === true, area: text(b.area, 80),
+    ctype: ['cycling', 'food', 'shade-water', 'other'].includes(b.ctype) ? b.ctype : '',   // the kind of change (not the request type)
     scope: ['pin', 'area', 'city'].includes(b.scope) ? b.scope : '',
     topic: (Array.isArray(b.topic) ? b.topic : []).filter((t) => TOPIC_KEYS.includes(t)).slice(0, 4),
     lat: num(b.lat), lng: num(b.lng),
@@ -172,7 +173,7 @@ async function ideaReview(b, request, env, origin) {
   const why = o.show_why ? o.why : '';
   const pub = o.mode === 'join'
     ? { mode: 'join', place: o.place, link_id: o.link_id, area: o.area, why }
-    : { mode: o.mode, place: o.place, idea: o.idea, why, area: o.area, scope: o.scope, topic: o.topic, lat: o.lat, lng: o.lng,
+    : { mode: o.mode, place: o.place, idea: o.idea, why, area: o.area, scope: o.scope, type: o.ctype, topic: o.topic, lat: o.lat, lng: o.lng,
         links: o.link_kind && o.link_id ? [{ kind: o.link_kind, id: o.link_id }] : [] };
   pub.id = 'i' + item.id.slice(-6) + Date.now().toString(36).slice(-3);
   const r = await fetch(`https://api.github.com/repos/${env.REPO || 'Bartolucci41/Threadlands-'}/dispatches`, {
@@ -183,6 +184,23 @@ async function ideaReview(b, request, env, origin) {
   if (r.status !== 204) return reply({ error: 'Could not publish right now.', status: r.status }, 502, origin);
   await env.SUPPORT.delete(key);
   return reply({ ok: true, id: pub.id }, 200, origin);
+}
+
+// The path of a published idea: connected with a group, delivered to an organizer or decision-maker, response received.
+// Set by the reviewer from the inbox; each step names who and when, with a public link where there is one.
+async function ideaStep(b, request, env, origin) {
+  if (!inboxOk(request, env)) return reply({ error: 'Wrong inbox key.' }, 401, origin);
+  const step = ['connected', 'delivered', 'response'].includes(b.step) ? b.step : '';
+  const st = { id: String(b.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40), step, date: /^\d{4}-\d{2}-\d{2}$/.test(b.date || '') ? b.date : new Date().toISOString().slice(0, 10),
+    who: text(b.who, 120), note: text(b.note, 400), url: url(b.url), remove: b.remove === true };
+  if (!st.id || !st.step || (!st.remove && !st.who)) return reply({ error: 'Choose a step and say who.' }, 400, origin);
+  const r = await fetch(`https://api.github.com/repos/${env.REPO || 'Bartolucci41/Threadlands-'}/dispatches`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${env.GITHUB_TOKEN}`, 'Accept': 'application/vnd.github+json', 'User-Agent': 'threadlands-relay', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ event_type: 'proposal-step', client_payload: { step: st } }),
+  });
+  if (r.status !== 204) return reply({ error: 'Could not update right now.', status: r.status }, 502, origin);
+  return reply({ ok: true }, 200, origin);
 }
 
 // "Back this project": one count per project, one back per visitor per project.
@@ -341,6 +359,7 @@ export default {
     if (b.type === 'inbox-status') return inboxStatus(b, request, env, origin);
     if (b.type === 'idea-review') return ideaReview(b, request, env, origin);
     if (b.type === 'note-review') return noteReview(b, request, env, origin);
+    if (b.type === 'idea-step') return ideaStep(b, request, env, origin);
     // Build a new place. Only an OpenStreetMap record chosen from the search results is accepted: the relay looks the
     // record up itself and takes its name, country and kind from there, never from what the visitor typed.
     const osm = String(b.osm || '').toUpperCase();
