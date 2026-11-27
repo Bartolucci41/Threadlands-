@@ -1,0 +1,24 @@
+name: Relay check
+# Asks the live relay what it can take (?features=1) and saves the answer, to see whether the private review queues are on.
+on:
+  push:
+    branches: [main]
+    paths: ['.github/relay-check.txt']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ask the relay
+        run: |
+          mkdir -p checks
+          { date -u; echo "features: $(curl -s -m 20 'https://threadlands-relay.rob41pitt.workers.dev/?features=1' || echo 'no answer')"; } > checks/relay-check.md
+          cat checks/relay-check.md
+      - name: Save
+        run: |
+          git config user.name "threadlands-bot"; git config user.email "threadlands-bot@users.noreply.github.com"
+          git add checks/relay-check.md; git commit -m "Relay check result" || exit 0
+          git pull --rebase origin main && git push
