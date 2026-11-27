@@ -1696,5 +1696,9 @@
 "Au niveau de la rue, les bâtiments se dressent à leurs vraies hauteurs, depuis OpenStreetMap, ou estimés où ils ne sont pas cartographiés. C'est une simple vue inclinée, pas une scène pleine {0}D.",
 "Vue inclinée",
 "Vue inclinée : bâtiments, murs et arbres se dressent au niveau de la rue",
-"Clé de vue inclinée"
+"Clé de vue inclinée",
+"Rues",
+"Satellite",
+"Terrain",
+"Calque"
 ]

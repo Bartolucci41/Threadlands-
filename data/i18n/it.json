@@ -1696,5 +1696,9 @@
 "A livello di strada, gli edifici si alzano alle loro altezze reali, da OpenStreetMap, o stimato dove non sono mappati. È una semplice vista inclinata, non una scena completa {0}D.",
 "Vista panoramica",
 "Vista limitata: edifici, pareti e alberi si alzano a livello stradale",
-"Chiave di visualizzazione limitata"
+"Chiave di visualizzazione limitata",
+"Streets",
+"Satellite",
+"Terra",
+"Livelli"
 ]

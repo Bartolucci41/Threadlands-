@@ -1696,5 +1696,9 @@
 "At street level, buildings stand up at their real altitudes, from OpenStreetMap, or estimated where they not mapped. It’s a simple tilted view, not a full {0}D scene.",
 "وجهة نظر مائلة",
 "النظرة المائلة: المباني والجدارات والأشجار تقف عند مستوى الشارع",
-"مفتاح المنظر"
+"مفتاح المنظر",
+"الشوارع",
+"الساتل",
+"المنطقة",
+"Layers"
 ]

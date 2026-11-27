@@ -1696,5 +1696,9 @@
 "A nivel de la calle, los edificios se levantan en sus alturas reales, desde OpenStreetMap, o se calculan donde no se mapean. Es una simple vista inclinada, no una escena completa {0}D.",
 "Tilted view",
 "Vista Tilted: edificios, paredes y árboles se levantan a nivel de calle",
-"Tecla de la vista"
+"Tecla de la vista",
+"Streets",
+"Satélite",
+"Terrain",
+"Capas"
 ]
