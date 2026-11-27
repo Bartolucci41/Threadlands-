@@ -42,7 +42,7 @@
     <p class="page-lead">Open any place to see its key findings, and where they are on the map. Don&rsquo;t see yours? <a href="../explore/">Search for it in Explore</a> and build it in about ten minutes.</p>
   </header>
   <div class="lib-map" id="lib-map"><canvas id="lib-canvas" role="img" aria-label="World map with a dot for every city"></canvas><span class="lib-tip" id="lib-tip" hidden></span><span class="lib-hint" id="lib-hint" hidden>Hold Ctrl or &#8984; and scroll to zoom</span>
-    <div class="lib-bg" role="group" aria-label="Map background"><button type="button" class="lib-sw" data-bg="light" style="--sw:#ECEAE3" aria-label="Light background" title="Light" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="gray" style="--sw:#2B2E30" aria-label="Dark gray background" title="Dark gray" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="green" style="--sw:#1E4A3C" aria-label="Dark green background" title="Dark green" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="red" style="--sw:#4E2226" aria-label="Dark red background" title="Dark red" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="purple" style="--sw:#3A2A5C" aria-label="Dark purple background" title="Dark purple" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="blue" style="--sw:#1D4469" aria-label="Blue background" title="Blue" aria-pressed="false"></button></div>
+    <div class="lib-bg" role="group" aria-label="Map background"><button type="button" class="lib-sw" data-bg="light" style="--sw:#ECEAE3" aria-label="Light background" title="Light" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="gray" style="--sw:#2B2E30" aria-label="Dark gray background" title="Dark gray" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="green" style="--sw:#2E6150" aria-label="Dark green background" title="Dark green" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="red" style="--sw:#6B3236" aria-label="Dark red background" title="Dark red" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="purple" style="--sw:#4F3E7A" aria-label="Dark purple background" title="Dark purple" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="blue" style="--sw:#2B5C88" aria-label="Blue background" title="Blue" aria-pressed="false"></button></div>
     <div class="lib-zoom"><button type="button" class="chip" id="lz-in" aria-label="Zoom in">+</button><button type="button" class="chip" id="lz-out" aria-label="Zoom out">&minus;</button><button type="button" class="chip" id="lz-fit" aria-label="Show the whole world" title="Show the whole world">&#8634;</button></div></div>
 
   <div class="filters" role="group" aria-label="Sort by">
@@ -119,7 +119,7 @@
   }
   fetch('../assets/land.json').then(function (r) { return r.json(); }).then(function (l) { LAND = l; drawMap(); }).catch(function () { /* map without coastlines */ });
   // Map backgrounds: chosen once, remembered on this device
-  var BGS = { gray: ['#2B2E30', '#3E4245', '#54595C', '#F2A65A', '#C9CDCF'], green: ['#1E4A3C', '#2F6553', '#41796A', '#F2B56B', '#B9D3C8'], red: ['#4E2226', '#6E3533', '#85463F', '#F6C36A', '#E2C2BE'], purple: ['#3A2A5C', '#544379', '#695A90', '#F2B56B', '#D2C8E6'], blue: ['#1D4469', '#2F5E8A', '#42739E', '#F2B56B', '#C3D4E6'] };
+  var BGS = { gray: ['#2B2E30', '#3E4245', '#54595C', '#F2A65A', '#C9CDCF'], green: ['#2E6150', '#43806B', '#589584', '#F2B56B', '#B9D3C8'], red: ['#6B3236', '#8E4A48', '#A65F58', '#F6C36A', '#E2C2BE'], purple: ['#4F3E7A', '#6E5D9B', '#8576AF', '#F2B56B', '#D2C8E6'], blue: ['#2B5C88', '#4479A8', '#5B8DBA', '#F2B56B', '#C3D4E6'] };
   var MAPBG = 'light'; try { MAPBG = localStorage.getItem('threadlands:mapbg') || 'light'; } catch (e) {}
   if (MAPBG !== 'light' && !BGS[MAPBG]) MAPBG = 'light';
   function color(name) {
@@ -185,7 +185,8 @@
         var t = d.e.name, w = ctx.measureText(t).width, bx = d.x + d.r + 4, by = d.y - 8, bw = w + 6, bh = 16;
         if (boxes.some(function (o) { return bx < o[0] + o[2] && bx + bw > o[0] && by < o[1] + o[3] && by + bh > o[1]; })) return;
         boxes.push([bx, by, bw, bh]);
-        ctx.globalAlpha = 0.85; ctx.fillStyle = color('--surface'); ctx.fillRect(bx - 2, by, bw, bh);
+        // Plain text, no box: a thin outline in the map's own color keeps it readable over coastlines and grid lines
+        ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = color('--surface'); ctx.globalAlpha = 0.9; ctx.strokeText(t, bx + 1, d.y);
         ctx.globalAlpha = 1; ctx.fillStyle = color('--ink'); ctx.fillText(t, bx + 1, d.y);
       });
     }
