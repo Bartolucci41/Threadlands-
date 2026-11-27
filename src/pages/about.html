@@ -3,7 +3,7 @@
 
 <main class="wrap">
   <div class="about-grid">
-    <section>
+    <section class="ab-intro">
       <p class="eyebrow">About Threadlands</p>
       <h1 class="page-h">Cities don&rsquo;t run on their own.</h1>
       <p class="page-lede">By 2050, nearly 7 in 10 people are expected to live in cities. That future is already on its way. What is still open is whether those cities can stand up to the heat, floods and droughts that will come with it.</p>
@@ -32,6 +32,7 @@
       <p>If you plan cities, manage land or work on climate, you have seen what happens when a city is planned as if it stood alone. The work now is to make cities behave more like living systems, with more green, more water held in place and more room for wildlife, and to plan them together with the land that keeps them alive. It is urgent, and Threadlands is built to help.</p>
     </section>
 
+    <div class="ab-pair">
     <section>
       <h2>What Threadlands gives you</h2>
       <ul class="about-list">
@@ -52,7 +53,9 @@
         <li><b>Builders:</b> GIS analysts, developers, designers and climate scientists who want to help build Threadlands, we would like to hear from you.</li>
       </ul>
     </section>
+    </div>
 
+    <div class="ab-feature">
     <section class="bio">
       <img class="bio-photo" src="{B}assets/robert.webp?v=3" width="200" height="250" alt="Portrait of Robert Bartolucci">
       <div>
@@ -67,7 +70,15 @@
       <p>For questions, partnerships or a project in your city, reach us through our founder on LinkedIn. We are also looking for people who want to help build Threadlands: in GIS, ecology, planning, engineering and design.</p>
       <p style="margin:0"><a class="btn" href="https://www.linkedin.com/in/robert-bartolucci-26229ba4/" target="_blank" rel="noopener">Get in touch on LinkedIn</a></p>
     </section>
+    </div>
 
     <p class="hint">Urban population projection: United Nations, World Urbanization Prospects 2018.</p>
   </div>
 </main>
+<!--SCRIPT-->
+(function () {
+  // Wide screens: the threads diagram sits open beside the text; phones keep it behind "See the threads"
+  var d = document.querySelector('.ab-intro .ab-more'), mq = window.matchMedia('(min-width: 980px)');
+  function fit() { if (d) { if (mq.matches) d.open = true; d.classList.toggle('side', mq.matches); } }
+  fit(); if (mq.addEventListener) mq.addEventListener('change', fit);
+})();

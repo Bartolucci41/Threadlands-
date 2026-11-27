@@ -1006,6 +1006,19 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .about-list { margin: 0; padding-left: 1.2rem; display: grid; gap: 8px; color: var(--ink2); }
   .about-list b { color: var(--ink); }
   .about-grid a:not(.btn) { color: var(--accent); text-underline-offset: 2px; }
+  .ab-pair, .ab-feature { display: grid; gap: 28px; }
+  /* About, wide screens: text at reading width with the threads diagram beside it; lists side by side; founder + contact as one full-width feature */
+  @media (min-width: 980px) {
+    .about-grid { max-width: none; }
+    .ab-intro { display: grid; grid-template-columns: minmax(0, 40rem) minmax(0, 1fr); column-gap: 56px; align-items: start; }
+    .ab-intro > * { grid-column: 1; } .ab-intro > .ab-more.side { grid-column: 2; grid-row: 1 / span 7; position: sticky; top: 20px; margin: 0; }
+    .ab-more.side > summary { display: none; } .ab-more.side .ab-svg { margin-top: 0; } .ab-more.side .ab-fig img { max-height: 300px; }
+    .ab-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; } .ab-pair > section { max-width: 40rem; }
+    .ab-feature { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px; align-items: stretch; padding: 28px; border-radius: 18px; background: var(--surface2); }
+    .ab-feature .bio { grid-template-columns: 240px minmax(0, 1fr); gap: 28px; align-items: center; } .ab-feature .bio-photo { width: 240px; height: 300px; }
+    .ab-feature .bio h2 { font-size: 2rem; } .ab-feature .bio p:not(.eyebrow) { font-size: 1.08rem; line-height: 1.55; }
+    .ab-feature .contact-box { align-self: center; }
+  }
   .contact-box { padding: 20px 22px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); scroll-margin-top: 20px; }
 
   /* ---- Two faces: the side switch in the top bar */
