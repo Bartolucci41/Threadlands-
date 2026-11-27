@@ -1008,7 +1008,7 @@ def APP(base):
             '<meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">\n'
             '<meta name="theme-color" content="#0D1613" media="(prefers-color-scheme: dark)">\n'
             f'<link rel="icon" type="image/png" sizes="32x32" href="{base}assets/icons/favicon-32.png">\n'
-            f'<link rel="apple-touch-icon" href="{base}assets/icons/apple-touch-icon.png">\n'
+            f'<link rel="apple-touch-icon" href="{base}assets/icons/apple-touch-icon.png?v=2">\n'
             '<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="mobile-web-app-capable" content="yes">\n'
             '<meta name="apple-mobile-web-app-title" content="Threadlands">\n<meta name="apple-mobile-web-app-status-bar-style" content="default">\n'
             "<script>if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });</script>\n")
