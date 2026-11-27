@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Effort | Threadlands</title>
+<meta name="description" content="A shared local effort: the ask, where it is, what the map shows, who has taken responsibility, what's next and what changed.">
+<meta property="og:title" content="Effort | Threadlands">
+<meta property="og:description" content="A shared local effort: the ask, where it is, what the map shows, who has taken responsibility, what's next and what changed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css?v=74">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
+<script src="../assets/i18n.js?v=3" defer></script>
+<script src="../assets/feedback.js?v=1" defer></script>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D1613" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png?v=2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Threadlands">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });</script>
+<script>window.TL_DATA = "https://pub-5cc2f5116c6c462596fbf16596585b83.r2.dev";</script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a92b6704e81e4aaba11a9f8a11832ae1"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+<header class="wrap site-head" id="top">
+  <div class="topbar">
+    <a class="wordmark" href="../" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="28" height="28" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#123B38" stroke="none"/></svg><span>Threadlands</span></a>
+    <div class="topright"><nav class="topnav" aria-label="Site"><a href="../"><svg class="nav-home" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Home</a><a href="../places/">Places</a><a href="../involved/">Get involved</a><a href="../about/">About</a><a href="../lab/" class="nav-lab">ThreadLab</a></nav><label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>
+  </div>
+</header>
+<script>(function(){var n=document.querySelector('.topnav');if(!n)return;function f(){n.classList.toggle('at-end',n.scrollLeft+n.clientWidth>=n.scrollWidth-4);}n.addEventListener('scroll',f,{passive:true});window.addEventListener('resize',f);f();})();</script>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="../assets/public.js?v=7"></script>
+<main class="ef" id="ef">
+  <p class="ef-missing wrap" id="ef-missing" hidden></p>
+  <div id="ef-body" hidden>
+    <aside class="ef-sample" id="ef-sample" hidden>
+      <div class="wrap"><b>Example effort.</b> <span>This page previews how efforts will work. Threadlands made it from its own map data: nobody has proposed it yet, no one has been contacted, and joining is switched off.</span></div>
+    </aside>
+    <header class="ef-head">
+      <div class="wrap">
+        <p class="ef-kick"><a id="ef-place" href="#"></a> <span aria-hidden="true">&middot;</span> <span>Shared effort</span></p>
+        <h1 class="ef-title" id="ef-title"></h1>
+        <p class="ef-ask" id="ef-ask"></p>
+        <div class="ef-status-row"><span class="ef-pill" id="ef-pill"></span><span class="ef-status-note" id="ef-status-note"></span></div>
+      </div>
+    </header>
+
+    <section class="wrap ef-top" aria-label="At a glance">
+      <div class="ef-glance">
+        <div class="ef-g ef-g-where"><span class="ef-k">Where</span><p id="ef-where"></p></div>
+        <div class="ef-g ef-g-who"><span class="ef-k">Who has taken responsibility</span><p id="ef-who"></p></div>
+        <div class="ef-g ef-g-next"><span class="ef-k">Next step</span><p id="ef-next"></p><p class="ef-by" id="ef-by"></p></div>
+        <div class="ef-g ef-g-path"><span class="ef-k">Where it is</span><div id="ef-path"></div></div>
+      </div>
+      <div class="ef-mapcol">
+        <div class="ef-map" id="ef-map" role="img" aria-label="Map of the effort’s area and the heat around it"></div>
+        <div class="ef-key"><div class="ef-key-bar"></div><div class="ef-key-l"><span>Cooler</span><span>Hotter</span></div><p>Measured surface heat from Landsat, compared across the region. Grey: no reading.</p><p><span class="ef-sw ef-sw-area"></span><span>The effort’s area</span> <span class="ef-sw ef-sw-pj"></span><span>Related existing work</span></p></div>
+      </div>
+    </section>
+
+    <section class="wrap ef-sec" aria-labelledby="ef-ev-h">
+      <h2 id="ef-ev-h">What the map shows</h2>
+      <p class="ef-sub" id="ef-scale"></p>
+      <ul class="ef-facts" id="ef-facts"></ul>
+      <p class="ef-src">Surface heat: Landsat 8-9 (USGS and NASA). Land cover: ESA WorldCover 2021. People: WorldPop 2020. Surface heat is read from satellites, not measured on the street; local knowledge is what the map needs next.</p>
+    </section>
+
+    <section class="wrap ef-sec ef-two" aria-label="Related work and who might act">
+      <div>
+        <h2>Related existing work</h2>
+        <p class="ef-sub">Work already happening that this effort relates to. Related to, not part of: none of these organizers has adopted this effort.</p>
+        <ul class="ef-list" id="ef-projects"></ul>
+        <h3>Organizations working on this kind of change</h3>
+        <p class="ef-sub">Listed because their public work is related. Not contacted, and listing doesn't mean they endorse or have taken on this effort.</p>
+        <ul class="ef-list" id="ef-groups"></ul>
+      </div>
+      <div>
+        <h2>Possible jurisdictions</h2>
+        <p class="ef-sub">Governments whose area covers this effort, from map boundaries. None has been contacted. A specific office is named only once someone has confirmed it can act on this.</p>
+        <ul class="ef-list" id="ef-gov"></ul>
+      </div>
+    </section>
+
+    <section class="wrap ef-sec ef-two" aria-label="What happened and what changed">
+      <div>
+        <h2>What happened</h2>
+        <ol class="ef-record" id="ef-record"></ol>
+      </div>
+      <div>
+        <h2>What changed</h2>
+        <p class="ef-none" id="ef-changed"></p>
+      </div>
+    </section>
+
+    <section class="wrap ef-sec" aria-labelledby="ef-join-h">
+      <div class="ef-join">
+        <div>
+          <h2 id="ef-join-h">Join this effort</h2>
+          <p><b>Joining isn't open yet.</b> It opens once Threadlands can run it safely: a private record in place, a tested check of who can see what, consent recorded, and a simple way to leave.</p>
+          <p class="ef-sub">When it opens, joining shows publicly only as a count by neighborhood, and never for fewer than three people. There are no profiles, follower counts or feed. People who join get a short note when the effort moves a step.</p>
+        </div>
+        <button type="button" class="btn" disabled aria-disabled="true">Join this effort</button>
+      </div>
+    </section>
+  </div>
+</main>
+<footer class="site-foot2">
+  <div class="wrap foot-grid">
+    <div class="foot-brand"><a class="wordmark foot-wm" href="../" translate="no">Threadlands</a><p>A civic climate map. See what&rsquo;s happening where you live, map what you notice, and explore what could change.</p><button type="button" class="fb-btn" data-feedback=""><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Send feedback</button></div>
+    <nav aria-label="Get involved"><h2>Get involved</h2><a href="../involved/">Places you stand with</a><a href="../projects/">Projects</a><a href="../places/">All places</a></nav>
+    <nav aria-label="ThreadLab"><h2>ThreadLab</h2><a href="../lab/">Overview</a><a href="../explore/">Explore</a><a href="../studio/">Studio</a><a href="../guide/">How to use</a><a href="../how-it-works/">Method</a></nav>
+    <nav aria-label="About"><h2>About</h2><a href="../about/">About Threadlands</a><a href="#" data-feedback="">Send feedback</a></nav>
+  </div>
+  <div class="wrap foot-small">
+    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>
+    <p>Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS, Natural Earth, Landsat (USGS and NASA), Open-Meteo and GBIF.</p>
+  </div>
+</footer>
+<script>
+
+(function () {
+  var T = window.TLP, esc = T.esc, $ = function (s) { return document.querySelector(s); };
+  var STEPS = [['suggested', 'Suggested'], ['connected', 'Connected with a group'], ['delivered', 'Delivered'], ['response', 'Response received']];
+  var DATA = window.TL_DATA ? window.TL_DATA.replace(/\/$/, '') + '/' : '../data/';
+  function get(u) { return fetch(u).then(function (r) { if (!r.ok) throw new Error(u); return r.json(); }); }
+  function day(iso) { if (!iso) return ''; var d = new Date(iso + 'T12:00:00'); return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }); }
+  function pctOf(arr, v) { var n = 0, k = 0; for (var i = 0; i < arr.length; i++) { if (arr[i] == null) continue; n++; if (arr[i] <= v) k++; } return n ? k / n : null; }
+  function standing(p, w) {
+    if (p == null) return null;
+    if (p >= 0.9) return 'among the ' + w[0] + ' tenth of the modeled region';
+    if (p >= 0.75) return w[1] + ' than three quarters of the modeled region';
+    if (p <= 0.1) return 'among the ' + w[2] + ' tenth of the modeled region';
+    if (p <= 0.25) return w[3] + ' than three quarters of the modeled region';
+    return 'around the middle for the modeled region';
+  }
+  var id = decodeURIComponent(location.hash.slice(1));
+  function missing(msg) { $('#ef-missing').hidden = false; $('#ef-missing').innerHTML = msg; }
+
+  Promise.all([get('../data/efforts.json'), get('../data/groups.json').catch(function () { return { groups: [] }; }), get('../data/projects.json').catch(function () { return { projects: [] }; }), get('../data/index.json').catch(function () { return { places: [] }; })]).then(function (x) {
+    var list = x[0].efforts || [], ef = list.filter(function (e) { return e.id === id; })[0] || (!id && list[0]);
+    if (!ef) return missing('<span>We don’t have that effort.</span> <a href="../places/">Choose a place</a>');
+    var place = (x[3].places || []).filter(function (p) { return p.slug === ef.place; })[0] || { name: ef.place, slug: ef.place };
+    render(ef, place, x[1].groups || [], x[2].projects || []);
+  }).catch(function () { missing('This effort could not be loaded. Check your connection and refresh.'); });
+
+  function render(ef, place, groups, projects) {
+    document.title = ef.title + ' | Threadlands';
+    $('#ef-body').hidden = false; $('#ef-sample').hidden = !ef.example;
+    $('#ef-place').textContent = place.name; $('#ef-place').href = '../place/#' + place.slug;
+    $('#ef-title').textContent = ef.title; $('#ef-ask').textContent = ef.ask;
+    var taken = !!ef.responsible;
+    $('#ef-pill').textContent = taken ? 'Taken on' : 'Proposed'; $('#ef-pill').className = 'ef-pill ' + (taken ? 'on' : 'prop');
+    $('#ef-status-note').textContent = taken ? 'A person or organization has agreed to take the next step.' : 'Proposed until a person or organization takes responsibility for the next step.';
+    $('#ef-where').innerHTML = '<b>' + esc(ef.area) + '</b>, <span>' + esc(place.name) + '</span>';
+    $('#ef-who').innerHTML = taken ? '<b>' + esc(ef.responsible.name) + '</b>' + (ef.responsible.since ? '<span class="ef-by">Since ' + esc(day(ef.responsible.since)) + '</span>' : '') : '<b>No one yet</b>';
+    $('#ef-next').textContent = ef.next ? ef.next.text : '';
+    $('#ef-by').textContent = ef.next && ef.next.by ? 'By ' + day(ef.next.by) : 'No date set';
+
+    var got = {}; (ef.path || []).forEach(function (p) { got[p.step] = p; });
+    var last = STEPS.filter(function (s) { return got[s[0]]; }).pop();
+    $('#ef-path').innerHTML = '<ol class="pfi-path">' + STEPS.map(function (s) {
+      var g = got[s[0]];
+      return '<li class="' + (g ? 'done' : '') + (last && s[0] === last[0] ? ' cur' : '') + '"><span>' + s[1] + '</span>' + (g ? '<i>' + esc(day(g.date)) + (g.who ? ' · ' + esc(g.who) : '') + '</i>' : '<i>Not yet</i>') + '</li>';
+    }).join('') + '</ol>';
+
+    var rel = ef.related || {};
+    var pj = projects.filter(function (p) { return (rel.projects || []).indexOf(p.id) >= 0; });
+    $('#ef-projects').innerHTML = pj.length ? pj.map(function (p) {
+      var st = { proposed: 'Proposed', approved: 'Approved', underway: 'Under way', built: 'Built' }[p.status] || '';
+      return '<li><a href="../place/#' + esc(place.slug) + '" data-pj="' + esc(p.id) + '"><b>' + esc(p.name) + '</b></a><span>' + st + (p.year ? ' · ' + p.year : '') + (p.org ? ' · ' + esc(p.org) : '') + '</span></li>';
+    }).join('') : '<li class="ef-none">None listed yet.</li>';
+    var gs = groups.filter(function (g) { return (rel.groups || []).indexOf(g.id) >= 0; });
+    $('#ef-groups').innerHTML = gs.length ? gs.map(function (g) {
+      return '<li><a href="' + esc(g.url) + '" target="_blank" rel="noopener"><b>' + esc(g.name) + '</b></a><span>' + esc(g.what) + '</span></li>';
+    }).join('') : '<li class="ef-none">None listed yet.</li>';
+    $('#ef-gov').innerHTML = (ef.jurisdictions || []).map(function (j) { return '<li><b>' + esc(j.name) + '</b><span>' + esc(j.level) + ' · not contacted</span></li>'; }).join('');
+
+    $('#ef-record').innerHTML = (ef.record || []).slice().reverse().map(function (r) { return '<li><time datetime="' + esc(r.date) + '">' + esc(day(r.date)) + '</time><p>' + esc(r.text) + '</p></li>'; }).join('');
+    $('#ef-changed').textContent = (ef.changed || []).length ? '' : 'Nothing yet. This is where the result goes, including “not this year” or “didn’t work”.';
+    if ((ef.changed || []).length) $('#ef-changed').outerHTML = '<ol class="ef-record">' + ef.changed.map(function (r) { return '<li><time>' + esc(day(r.date)) + '</time><p>' + esc(r.text) + '</p></li>'; }).join('') + '</ol>';
+
+    get(DATA + 'places/' + ef.place + '.json').catch(function () { return get('../data/places/' + ef.place + '.json'); })
+      .then(function (d) { evidence(ef, d, pj); })
+      .catch(function () { $('#ef-facts').innerHTML = '<li>The map data could not be loaded right now.</li>'; });
+  }
+
+  function evidence(ef, d, pj) {
+    var c = d.cells, N = c.lat.length, heat = [], green = [], best = -1, bd = Infinity, k = Math.cos(ef.lat * Math.PI / 180);
+    for (var i = 0; i < N; i++) {
+      heat.push(c.lst_rel && c.lst_rel[i] != null ? +c.lst_rel[i] : null);
+      green.push((+c.tree[i] || 0) + (+c.grass[i] || 0) + (+c.shrub[i] || 0) + (+c.wetland[i] || 0) + (+c.crop[i] || 0) * 0.5);
+      var dx = (c.lng[i] - ef.lng) * k, dy = c.lat[i] - ef.lat, d2 = dx * dx + dy * dy; if (d2 < bd) { bd = d2; best = i; }
+    }
+    var a = +d.hex_km2 || 1, size = a < 0.5 ? a.toFixed(1) : Math.round(a);
+    $('#ef-scale').textContent = 'The area of about ' + size + ' km² around the effort’s location. For what happens on a single street or corner, local knowledge is what the map needs.';
+    var hp = heat[best] != null ? pctOf(heat, heat[best]) : null, gp = pctOf(green, green[best]), out = [];
+    var hs = standing(hp, ['hottest', 'hotter', 'coolest', 'cooler']), gsd = standing(gp, ['greenest', 'greener', 'least green', 'less green']);
+    if (hs) out.push('<li><b>Heat:</b> <span>this area is ' + hs + ', from satellite readings of surface heat.</span></li>');
+    out.push('<li><b>Green:</b> <span>' + Math.round(100 * Math.min(1, green[best])) + '% trees, grass, wetland or farmland; ' + gsd + '.</span></li>');
+    out.push('<li><b>Trees:</b> <span>tree cover is ' + Math.round(100 * (+c.tree[best] || 0)) + '% of the ground.</span></li>');
+    if (+c.pop[best]) out.push('<li><b>People:</b> <span>about ' + T.fmtN(+c.pop[best]) + ' live in this patch.</span></li>');
+    $('#ef-facts').innerHTML = out.join('');
+    map(ef, c, heat, best, pj);
+  }
+
+  function map(ef, c, heat, best, pj) {
+    if (!window.L) return;
+    var m = L.map('ef-map', { scrollWheelZoom: false, zoomControl: true }).setView([ef.lat, ef.lng], 13);
+    T.mapBackgrounds(L, m);
+    var v = heat.filter(function (x) { return x != null; }).sort(function (a, b) { return a - b; }), lo = v[Math.floor(v.length * 0.05)], hi = v[Math.floor(v.length * 0.95)];
+    var rend = L.canvas({ padding: 0.3 }), g = [], kk = Math.cos(ef.lat * Math.PI / 180);
+    for (var i = 0; i < c.lat.length; i++) {
+      var dx = (c.lng[i] - ef.lng) * kk * 111, dy = (c.lat[i] - ef.lat) * 111; if (dx * dx + dy * dy > 16 || !c.poly[i]) continue;
+      var ll = []; for (var q = 0; q < c.poly[i].length; q += 2) ll.push([c.poly[i][q], c.poly[i][q + 1]]);
+      var h = heat[i], t = h == null ? null : Math.max(0, Math.min(1, (h - lo) / ((hi - lo) || 1)));
+      g.push(L.polygon(ll, { renderer: rend, stroke: false, fillOpacity: 0.55, fillColor: t == null ? '#bbb' : 'hsl(' + (48 - 44 * t) + ', ' + (70 + 20 * t) + '%, ' + (82 - 34 * t) + '%)', interactive: false }));
+    }
+    L.layerGroup(g).addTo(m);
+    var bp = c.poly[best], bl = []; for (var j = 0; j < bp.length; j += 2) bl.push([bp[j], bp[j + 1]]);
+    var area = L.polygon(bl, { color: '#123B38', weight: 3, fill: false }).addTo(m);
+    area.bindTooltip('The effort’s area', { permanent: true, direction: 'top', className: 'ef-lbl' });
+    pj.forEach(function (p) { if (isFinite(p.lat)) L.circleMarker([p.lat, p.lng], { radius: 8, color: '#fff', weight: 2.5, fillColor: '#C0603A', fillOpacity: 1 }).addTo(m).bindTooltip(p.name); });
+  }
+})();
+
+</script>
+</body>
+</html>

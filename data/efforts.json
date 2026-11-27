@@ -1,0 +1,34 @@
+{
+ "about": "Shared local efforts: a finding on the map that people take forward together, linked to related work, organizations and the governments that might act. 'example' marks a sample made by Threadlands to preview the page: nobody proposed it and nobody has been contacted. An effort stays 'proposed' until a person or organization has actually taken responsibility for its next step.",
+ "fields": {
+  "status": "proposed | taken-on | delivered | response",
+  "responsible": "who has taken responsibility for the next step, only once they have agreed: {name, kind: organization|person|office, since}",
+  "next": "the next step, who does it and by when",
+  "jurisdictions": "governments whose area covers the effort: possible, not contacted, until a step says otherwise",
+  "record": "dated public record; private correspondence and unconsented photos are never published"
+ },
+ "efforts": [
+  {
+   "id": "iztapalapa-shade-example",
+   "example": true,
+   "place": "mexico-city",
+   "type": "shade-water",
+   "title": "Shade and water in eastern Iztapalapa",
+   "ask": "More street trees and shade, and a public drinking-water point, in one of the hottest, least green parts of eastern Iztapalapa.",
+   "area": "Eastern Iztapalapa",
+   "lat": 19.3637,
+   "lng": -99.0368,
+   "status": "proposed",
+   "responsible": null,
+   "next": { "text": "A person or organization takes responsibility for the next step: walking the area with the people who raised it and choosing the first stretch to work on.", "by": null },
+   "related": { "projects": ["mx-cosecha-lluvia"], "groups": ["g-reforestamos", "g-isla-urbana"] },
+   "jurisdictions": [
+    { "name": "Alcaldía Iztapalapa", "level": "Borough government" },
+    { "name": "Gobierno de la Ciudad de México", "level": "City government" }
+   ],
+   "path": [ { "step": "suggested", "date": "2026-11-27", "who": "Threadlands (example)" } ],
+   "record": [ { "date": "2026-11-27", "text": "Example created from the heat map to preview this page. Not a real proposal; no one has been contacted." } ],
+   "changed": []
+  }
+ ]
+}

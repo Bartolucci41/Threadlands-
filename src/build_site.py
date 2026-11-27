@@ -26,6 +26,52 @@ explore = read(SRC, "explore.html")
 css = explore[explore.index("<style>") + len("<style>"):explore.index("</style>")]
 css = ":root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%;height:auto}\n" + css
 css += """
+  .pf-efforts { margin: 30px 0 22px; } .pf-ef { display: grid; gap: 4px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--ink); text-decoration: none; max-width: 40rem; }
+  .pf-ef:hover b { text-decoration: underline; } .pf-ef > span { font-size: 0.86rem; color: var(--ink2); } .pf-ef-ex { display: inline-block; padding: 1px 8px; border-radius: 999px; background: #FFF4D6; color: #5a4300; font-weight: 600; font-size: 0.78rem; }
+  /* Effort page: one shared local effort, read-only */
+  .ef-sample { background: #FFF4D6; color: #5a4300; border-bottom: 1px solid #ecd9a0; font-size: 0.9rem; padding: 10px 0; }
+  .ef-sample b { font-weight: 700; }
+  .ef-head { background: var(--deep, #123B38); color: #fff; padding: 34px 0 30px; }
+  .ef-kick { margin: 0 0 10px; font: 600 0.8rem var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: #8fd3bf; }
+  .ef-kick a { color: #8fd3bf; text-underline-offset: 3px; }
+  .ef-title { margin: 0 0 12px; font-size: clamp(2rem, 5.4vw, 3.3rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; max-width: 22ch; text-wrap: balance; }
+  .ef-ask { margin: 0 0 18px; font-size: 1.15rem; max-width: 46rem; color: rgba(255,255,255,0.88); text-wrap: pretty; }
+  .ef-status-row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+  .ef-pill { display: inline-flex; align-items: center; min-height: 30px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.02em; }
+  .ef-pill.prop { background: transparent; color: #fff; border: 1.5px dashed rgba(255,255,255,0.7); }
+  .ef-pill.on { background: #8fd3bf; color: #0b2624; }
+  .ef-status-note { font-size: 0.92rem; color: rgba(255,255,255,0.8); }
+  .ef-top { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; padding-top: 26px; }
+  @media (min-width: 900px) { .ef-top { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; } }
+  .ef-glance { display: grid; gap: 12px; }
+  .ef-g { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+  .ef-g p { margin: 4px 0 0; } .ef-g b { font-weight: 700; }
+  .ef-k { display: block; font: 600 0.74rem var(--font-mono, 'IBM Plex Mono', monospace); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink2); }
+  .ef-g-who b { font-size: 1.05rem; } .ef-g-next p:first-of-type { font-weight: 600; }
+  .ef-by { display: block; margin-top: 4px; font-size: 0.85rem; color: var(--ink2); }
+  .ef-g-path .pfi-path { margin-top: 8px; }
+  .ef-map { height: clamp(320px, 52vh, 520px); border-radius: 14px; overflow: hidden; border: 1px solid var(--line); }
+  .ef-key { margin-top: 10px; font-size: 0.82rem; color: var(--ink2); } .ef-key p { margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .ef-key-bar { height: 10px; border-radius: 5px; background: linear-gradient(90deg, hsl(48,70%,82%), hsl(26,80%,65%), hsl(4,90%,48%)); }
+  .ef-key-l { display: flex; justify-content: space-between; margin-top: 4px; }
+  .ef-sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; } .ef-sw-area { border: 3px solid #123B38; } .ef-sw-pj { border-radius: 50%; background: #C0603A; margin-left: 10px; }
+  .ef-lbl { font-weight: 700; }
+  .ef-sec { padding-top: 44px; }
+  .ef-sec h2 { margin: 0 0 8px; font-size: clamp(1.5rem, 3.6vw, 2.1rem); letter-spacing: -0.02em; line-height: 1.1; }
+  .ef-sec h3 { margin: 26px 0 6px; font-size: 1.12rem; }
+  .ef-sub { margin: 0 0 14px; color: var(--ink2); max-width: 60ch; text-wrap: pretty; }
+  .ef-two { display: grid; gap: 34px; } @media (min-width: 900px) { .ef-two { grid-template-columns: 1fr 1fr; gap: 56px; } }
+  .ef-facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; max-width: 56rem; } .ef-facts li { padding-left: 14px; border-left: 3px solid var(--line); }
+  .ef-src { margin: 14px 0 0; font-size: 0.82rem; color: var(--ink2); max-width: 60rem; }
+  .ef-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .ef-list li { display: grid; gap: 2px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+  .ef-list li span { font-size: 0.88rem; color: var(--ink2); } .ef-list a { color: var(--ink); text-underline-offset: 3px; }
+  .ef-none { color: var(--ink2); }
+  .ef-record { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+  .ef-record li { display: grid; gap: 2px; } .ef-record time { font: 600 0.8rem var(--font-mono, 'IBM Plex Mono', monospace); color: var(--ink2); } .ef-record p { margin: 0; }
+  .ef-join { display: flex; flex-wrap: wrap; gap: 18px 40px; align-items: center; justify-content: space-between; padding: 22px 24px; border: 1.5px dashed var(--line); border-radius: 16px; margin-bottom: 64px; }
+  .ef-join > div { max-width: 46rem; } .ef-join p { margin: 0 0 8px; } .ef-join .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+  .ef-missing { padding: 60px 0; font-size: 1.1rem; }
   /* Site pages */
   .site-head .topnav a[aria-current="page"] { color: var(--ink); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
   .page-h { font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin: 26px 0 12px; }
@@ -1033,7 +1079,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=71">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=74">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
@@ -1090,7 +1136,7 @@ for i, sc in enumerate(re.findall(r"<script>(.*?)</script>", doc, re.S)):
     write(f"src/.check/explore{i}.js", sc)
 
 # ---- The other pages
-for name in ("home", "involved", "place", "lab", "studio", "places", "projects", "how-it-works", "about", "inbox", "time", "guide"):
+for name in ("home", "involved", "place", "lab", "studio", "places", "projects", "how-it-works", "about", "inbox", "time", "guide", "effort"):
     spec = read(SRC, "pages", name + ".html")
     meta = dict(re.findall(r"<!--\s*(\w+):\s*(.*?)\s*-->", spec.split("\n\n", 1)[0]))
     content = spec.split("\n\n", 1)[1]
@@ -1098,7 +1144,7 @@ for name in ("home", "involved", "place", "lab", "studio", "places", "projects",
     rel = "index.html" if name == "home" else f"{name}/index.html"
     base = "" if name == "home" else "../"
     here = "" if name == "home" else f"{name}/"
-    if name == "inbox":   # private: kept out of search engines
+    if name in ("inbox", "effort"):   # private, or (effort) only examples so far: kept out of search engines
         parts[0] = '<meta name="robots" content="noindex, nofollow">\n' + parts[0]
     page(rel, base, here, meta["title"], meta["description"], parts[0].replace("{B}", base),
          parts[1].replace("{B}", base) if len(parts) > 1 else "")

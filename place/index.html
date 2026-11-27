@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=71">
+<link rel="stylesheet" href="../assets/site.css?v=74">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js?v=3" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -139,6 +139,7 @@
       </div>
       <div class="pf-proj" id="pf-proj"></div>
       <p class="pf-allpj" id="pf-allpj"></p>
+      <div class="pf-efforts" id="pf-efforts" hidden></div>
       <div class="pf-ideas" id="pf-ideas-box"><h3 class="pfi-h">Ideas from people here</h3><div id="pf-ideas"></div></div>
       <div class="pf-add"><p><b>Know a project that belongs here?</b> A new park, a wetland, a tree-planting drive, a flood barrier. Add it with a link to a public source and it is checked before it appears.</p><a class="btn" id="pf-add" href="../explore/?add=1">Add a project</a></div>
     </section>
@@ -454,6 +455,18 @@
     }).catch(function () {});
   }
   // Ideas from people here: published after review, plus this visitor's own while they wait
+  // Shared efforts here: read-only for now; an example is labelled as one
+  var EFFORTS = null;
+  function renderEfforts(e) {
+    var box = $('#pf-efforts'); if (!box) return;
+    (EFFORTS ? Promise.resolve(EFFORTS) : fetch('../data/efforts.json').then(function (r) { return r.json(); }).then(function (d) { return (EFFORTS = d.efforts || []); })).then(function (list) {
+      var mine = list.filter(function (x) { return x.place === e.slug; });
+      box.hidden = !mine.length; if (!mine.length) return;
+      box.innerHTML = '<h3 class="pfi-h">Shared efforts</h3>' + mine.map(function (x) {
+        return '<a class="pf-ef" href="../effort/#' + esc(x.id) + '"><b>' + esc(x.title) + '</b><span>' + (x.example ? '<span class="pf-ef-ex">Example</span> ' : '') + '<span>' + (x.responsible ? 'Taken on' : 'Proposed') + '</span> · <span>' + esc(x.area) + '</span></span></a>';
+      }).join('');
+    }).catch(function () { box.hidden = true; });
+  }
   function renderIdeas(e) {
     var name = e.name, list = PROPS.filter(function (p) { return p.place === SLUG; }), mine = window.TLPropose ? TLPropose.mine(SLUG) : [];
     document.querySelectorAll('.pp-cn').forEach(function (n) { n.textContent = name; });
@@ -878,7 +891,7 @@
       if (pjId) { var pc = document.getElementById('pj-' + pjId); if (pc) { pc.scrollIntoView({ block: 'center' }); pc.classList.add('pjc-hl'); var bb = pc.querySelector('.back-btn'); if (bb) setTimeout(function () { bb.focus({ preventScroll: true }); }, 300); } return; }
       if (addK) { PRESET = /^(heat|water|shade|green|change|idea|other)$/.test(addK) ? addK : 'other'; var hint = document.querySelector('.here-hint'); if (hint) hint.innerHTML = '<b>Tap the map where it is</b>, then choose \u201cAdd what you know here\u201d.'; var g = document.querySelector('.here-grid'); g.insertAdjacentHTML('beforebegin', '<p class="here-addnote" id="here-addnote"><b>Add what you know:</b> tap the map where it is. You can drag and zoom to find the spot first.</p>'); document.getElementById('here-addnote').scrollIntoView({ block: 'start' }); return; }
     }, 0);
-    setTimeout(function () { var sh = new URLSearchParams(location.search).get('show'), p = sh && PRESS_NOW.filter(function (x) { return x.key === sh; })[0]; if (!p) return; if (p.layer) { setLayer(p.layer); showWhy(p.key); document.getElementById('here').scrollIntoView({ block: 'start' }); } else { var t = document.getElementById(p.key === 'food' ? 'tied' : 'pressing'); if (t) t.scrollIntoView({ block: 'start' }); } }, 0); renderReady(e, r, sm); renderProjects(e); allProjectsLink(e); renderIdeas(e); loadVisit(e); renderNews(e);
+    setTimeout(function () { var sh = new URLSearchParams(location.search).get('show'), p = sh && PRESS_NOW.filter(function (x) { return x.key === sh; })[0]; if (!p) return; if (p.layer) { setLayer(p.layer); showWhy(p.key); document.getElementById('here').scrollIntoView({ block: 'start' }); } else { var t = document.getElementById(p.key === 'food' ? 'tied' : 'pressing'); if (t) t.scrollIntoView({ block: 'start' }); } }, 0); renderReady(e, r, sm); renderProjects(e); allProjectsLink(e); renderEfforts(e); renderIdeas(e); loadVisit(e); renderNews(e);
     try { loadMap(e); } catch (err) { /* the map is extra */ }
     window.scrollTo(0, 0);
   }
