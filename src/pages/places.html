@@ -7,8 +7,10 @@
     <h1>Every place has a story in its data.</h1>
     <p class="page-lead">Open any place to see its key findings, and where they are on the map. Don&rsquo;t see yours? <a href="{B}explore/">Search for it in Explore</a> and build it in about ten minutes.</p>
   </header>
-  <div class="lib-map" id="lib-map"><canvas id="lib-canvas" role="img" aria-label="World map with a dot for every city"></canvas><span class="lib-tip" id="lib-tip" hidden></span><span class="lib-hint" id="lib-hint" hidden>Hold Ctrl or &#8984; and scroll to zoom</span>
-    <div class="lib-bg" role="group" aria-label="Map background"><button type="button" class="lib-sw" data-bg="light" style="--sw:#ECEAE3" aria-label="Light background" title="Light" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="gray" style="--sw:#2B2E30" aria-label="Dark gray background" title="Dark gray" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="green" style="--sw:#2E6150" aria-label="Dark green background" title="Dark green" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="red" style="--sw:#6B3236" aria-label="Dark red background" title="Dark red" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="purple" style="--sw:#4F3E7A" aria-label="Dark purple background" title="Dark purple" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="blue" style="--sw:#2B5C88" aria-label="Blue background" title="Blue" aria-pressed="false"></button></div>
+  <div class="filters lib-find"><label><span class="sr-only">Find a city</span><input type="search" id="rk-q" placeholder="Find a city or country"></label><span class="rk-count" id="rk-count"></span></div>
+  <div class="lib-map" id="lib-map"><canvas id="lib-canvas" role="img" aria-label="World map of the places in Threadlands"></canvas><span class="lib-tip" id="lib-tip" hidden></span><span class="lib-hint" id="lib-hint" hidden>Hold Ctrl or &#8984; and scroll to zoom</span>
+    <div class="lib-bg" role="group" aria-label="Map background"><button type="button" class="lib-sw" data-bg="light" style="--sw:#D9E5EA" aria-label="Light background" title="Light" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="gray" style="--sw:#2B2E30" aria-label="Dark gray background" title="Dark gray" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="green" style="--sw:#2E6150" aria-label="Dark green background" title="Dark green" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="red" style="--sw:#6B3236" aria-label="Dark red background" title="Dark red" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="purple" style="--sw:#4F3E7A" aria-label="Dark purple background" title="Dark purple" aria-pressed="false"></button><button type="button" class="lib-sw" data-bg="blue" style="--sw:#2B5C88" aria-label="Blue background" title="Blue" aria-pressed="false"></button></div>
+    <p class="lib-key"><span><i class="k-dot"></i>A place in Threadlands</span><span><i class="k-grp">5</i>Places close together: tap to zoom in</span></p>
     <div class="lib-zoom"><button type="button" class="chip" id="lz-in" aria-label="Zoom in">+</button><button type="button" class="chip" id="lz-out" aria-label="Zoom out">&minus;</button><button type="button" class="chip" id="lz-fit" aria-label="Show the whole world" title="Show the whole world">&#8634;</button></div></div>
 
   <div class="filters" role="group" aria-label="Sort by">
@@ -25,7 +27,7 @@
     <button type="button" class="chip" data-sort="index" aria-pressed="false">Overall index</button>
   </div>
   <div class="filters" id="rk-regions" role="group" aria-label="Region"></div>
-  <div class="filters"><label><span class="sr-only">Find a city</span><input type="search" id="rk-q" placeholder="Find a city or country"></label><span class="rk-count" id="rk-count"></span></div>
+
 
   <div class="filters" id="rk-grid" role="group" aria-label="Grid-cell size" hidden></div>
   <div class="rk-cmp-note" id="rk-cmp-note" hidden></div>
@@ -70,6 +72,13 @@
       lng = /^America/.test(tz) ? -78 : /^(Asia\/(Kolkata|Calcutta|Dhaka|Karachi|Colombo|Kathmandu)|Indian)/.test(tz) ? 80 : /^Asia/.test(tz) ? 110 : /^(Australia|Pacific)/.test(tz) ? 140 : 15; }
     return { z: z, lng: lng, lat: (LAT0 + LAT1) / 2 };
   }
+  var BORDERS = null, LAND50 = null, FEAT = { 'mexico-city': 2 }, FONT = (getComputedStyle(document.documentElement).getPropertyValue('--font-body') || 'system-ui').trim();
+  fetch('{B}assets/borders.json').then(function (r) { return r.json(); }).then(function (l) { BORDERS = l; drawMap(); }).catch(function () {});
+  // sea, land, country lines, dots, the ring around them, numbers in clusters, names
+  var PAL = { light: ['#D9E5EA', '#F6F4EE', '#CFCBC0', '#1F6B5C', '#FFFFFF', '#FFFFFF', '#1D2A26'], gray: ['#2B2E30', '#44494C', '#5E6468', '#F2A65A', '#2B2E30', '#2B1A08', '#F3F1EC'],
+    green: ['#2E6150', '#4A8572', '#6A9C8C', '#F6C27E', '#2E6150', '#2B1A08', '#FFFFFF'], red: ['#6B3236', '#90504D', '#AD6C65', '#F6C87E', '#6B3236', '#2B1A08', '#FFFFFF'],
+    purple: ['#4F3E7A', '#7262A0', '#8C7EB6', '#F6C27E', '#4F3E7A', '#2B1A08', '#FFFFFF'], blue: ['#2B5C88', '#4A7FAE', '#6A97C2', '#F6C27E', '#2B5C88', '#2B1A08', '#FFFFFF'] };
+  function pal() { var c = PAL[MAPBG] || PAL.light; return { sea: c[0], land: c[1], border: c[2], dot: c[3], halo: c[4], num: c[5], label: c[6] }; }
   fetch('{B}assets/land.json').then(function (r) { return r.json(); }).then(function (l) { LAND = l; drawMap(); }).catch(function () { /* map without coastlines */ });
   // Map backgrounds: chosen once, remembered on this device
   var BGS = { gray: ['#2B2E30', '#3E4245', '#54595C', '#F2A65A', '#C9CDCF'], green: ['#2E6150', '#43806B', '#589584', '#F2B56B', '#B9D3C8'], red: ['#6B3236', '#8E4A48', '#A65F58', '#F6C36A', '#E2C2BE'], purple: ['#4F3E7A', '#6E5D9B', '#8576AF', '#F2B56B', '#D2C8E6'], blue: ['#2B5C88', '#4479A8', '#5B8DBA', '#F2B56B', '#C3D4E6'] };
@@ -100,49 +109,63 @@
     cv.width = W * dpr; cv.height = H * dpr; cv.style.height = H + 'px';
     var ctx = cv.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = color('--surface'); ctx.fillRect(0, 0, W, H);
-    // Equirectangular view from 60 S to 75 N, where nearly all cities are
+    var P = pal();
+    ctx.fillStyle = P.sea; ctx.fillRect(0, 0, W, H);
     var X = px, Y = py;
-    if (LAND) {
+    // Finer coastlines once zoomed in (loaded only then)
+    if (V.z > 3.5 && !LAND50) { LAND50 = 'loading'; fetch('{B}assets/land-50m.json').then(function (r) { return r.json(); }).then(function (l) { LAND50 = l; drawMap(); }).catch(function () { LAND50 = null; }); }
+    var LND = V.z > 3.5 && Array.isArray(LAND50) ? LAND50 : LAND;
+    if (LND) {
       ctx.beginPath();
-      LAND.forEach(function (r) { for (var k = 0; k + 1 < r.length; k += 2) { var lx = X(r[k]), ly = Y(r[k + 1]); if (k) ctx.lineTo(lx, ly); else ctx.moveTo(lx, ly); } ctx.closePath(); });
-      ctx.fillStyle = color('--surface2'); ctx.fill('nonzero');
+      LND.forEach(function (r) { for (var k = 0; k + 1 < r.length; k += 2) { var lx = X(r[k]), ly = Y(r[k + 1]); if (k) ctx.lineTo(lx, ly); else ctx.moveTo(lx, ly); } ctx.closePath(); });
+      ctx.fillStyle = P.land; ctx.fill('nonzero');
     }
-    ctx.strokeStyle = color('--line'); ctx.lineWidth = 1; ctx.globalAlpha = 0.6;
-    var step = V.z >= 6 ? 5 : V.z >= 3 ? 10 : 30;
-    for (var g = -180; g <= 180; g += step) { ctx.beginPath(); ctx.moveTo(X(g), 0); ctx.lineTo(X(g), H); ctx.stroke(); }
-    for (var t = -60; t <= 75; t += step / 2) { ctx.beginPath(); ctx.moveTo(0, Y(t)); ctx.lineTo(W, Y(t)); ctx.stroke(); }
-    ctx.globalAlpha = 1;
-    ctx.strokeStyle = color('--ink2'); ctx.setLineDash([3, 4]);
-    ctx.beginPath(); ctx.moveTo(0, Y(0)); ctx.lineTo(W, Y(0)); ctx.stroke(); ctx.setLineDash([]);
+    if (BORDERS) {   // country outlines, quiet
+      ctx.beginPath();
+      BORDERS.forEach(function (r) { for (var k = 0; k + 1 < r.length; k += 2) { var lx = X(r[k]), ly = Y(r[k + 1]); if (k) ctx.lineTo(lx, ly); else ctx.moveTo(lx, ly); } });
+      ctx.strokeStyle = P.border; ctx.lineWidth = V.z > 4 ? 1 : 0.7; ctx.lineJoin = 'round'; ctx.stroke();
+    }
+    // Places: every dot the same size. Places close together on screen merge into one numbered circle; tap it to zoom in.
     var ids = {}; shown.forEach(function (e) { ids[e.slug] = 1; });
-    dots = [];
-    var DK = Math.max(0.42, Math.min(1, W / 900)) * Math.min(1.6, Math.sqrt(V.z));   // a little bigger as you zoom in   // narrower map, smaller dots: a phone shows the same world at about a third of the width
-    // Smaller places appear as you zoom in, so the world view stays readable however many towns are added
-    var filtering = shown.length < LIB.length, minPop = filtering ? 0 : 1e6 / Math.pow(360 / (W / ppd()), 2);
-    LIB.slice().sort(function (a, b) { return b.pop - a.pop; }).forEach(function (e) {
-      if ((e.pop || 0) < minPop) return;
-      var x = X(e.lng), y = Y(e.lat), r = Math.max(2.2, Math.min(11, Math.sqrt(e.pop / 1e6) * 2.4 + 2.5) * DK), on = ids[e.slug];
-      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.globalAlpha = on ? 0.85 : 0.18; ctx.fillStyle = color('--accent'); ctx.fill();
-      ctx.globalAlpha = on ? 1 : 0.3; ctx.strokeStyle = color('--surface'); ctx.lineWidth = 1.2; ctx.stroke();
-      ctx.globalAlpha = 1;
-      if (on) dots.push({ x: x, y: y, r: r, e: e });
+    var on = LIB.filter(function (e) { return ids[e.slug]; }).sort(function (a, b) { return (FEAT[b.slug] || 0) - (FEAT[a.slug] || 0) || b.pop - a.pop; });
+    if (on.length < LIB.length) LIB.forEach(function (e) { if (ids[e.slug]) return; ctx.beginPath(); ctx.arc(X(e.lng), Y(e.lat), 2.5, 0, Math.PI * 2); ctx.globalAlpha = 0.25; ctx.fillStyle = P.dot; ctx.fill(); ctx.globalAlpha = 1; });
+    var CR = W < 600 ? 30 : 26, groups = [];
+    on.forEach(function (e) {
+      var x = X(e.lng), y = Y(e.lat); if (x < -40 || x > W + 40 || y < -40 || y > H + 40) return;
+      for (var i = 0; i < groups.length; i++) { var g = groups[i]; if (Math.abs(g.x - x) < CR && Math.abs(g.y - y) < CR) { g.list.push(e); return; } }
+      groups.push({ x: x, y: y, list: [e] });
     });
-    // Names, biggest places first, wherever they fit without overlapping
-    if (W / ppd() < 130) {   // names once the view is narrower than about a third of the world
-      var boxes = [];
-      ctx.font = '600 ' + (W < 600 ? 13 : 12) + 'px ' + (color('--font-body') || 'system-ui'); ctx.textBaseline = 'middle';
-      dots.forEach(function (d) {
-        if (d.x < -20 || d.x > W + 20 || d.y < -10 || d.y > H + 10) return;
-        var t = d.e.name, w = ctx.measureText(t).width, bx = d.x + d.r + 4, by = d.y - 8, bw = w + 6, bh = 16;
-        if (boxes.some(function (o) { return bx < o[0] + o[2] && bx + bw > o[0] && by < o[1] + o[3] && by + bh > o[1]; })) return;
-        boxes.push([bx, by, bw, bh]);
-        // Plain text, no box: a thin outline in the map's own color keeps it readable over coastlines and grid lines
-        ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = color('--surface'); ctx.globalAlpha = 0.9; ctx.strokeText(t, bx + 1, d.y);
-        ctx.globalAlpha = 1; ctx.fillStyle = color('--ink'); ctx.fillText(t, bx + 1, d.y);
-      });
-    }
+    dots = [];
+    var DR = W < 600 ? 5.5 : 5;
+    groups.forEach(function (g) {
+      var n = g.list.length;
+      if (n === 1) {
+        ctx.beginPath(); ctx.arc(g.x, g.y, DR, 0, Math.PI * 2); ctx.fillStyle = P.dot; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = P.halo; ctx.stroke();
+        dots.push({ x: g.x, y: g.y, r: DR, e: g.list[0] });
+      } else {
+        var r = 10 + Math.min(8, Math.sqrt(n) * 1.8);
+        ctx.beginPath(); ctx.arc(g.x, g.y, r, 0, Math.PI * 2); ctx.fillStyle = P.dot; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = P.halo; ctx.stroke();
+        ctx.font = '700 ' + (n > 99 ? 11 : 12) + 'px ' + FONT; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = P.num; ctx.fillText(n, g.x, g.y + 0.5); ctx.textAlign = 'left';
+        dots.push({ x: g.x, y: g.y, r: r, group: g.list, e: g.list[0] });
+      }
+    });
+    // Names: a few featured places when looking at the world, more as you zoom in; never overlapping each other or a dot
+    var span = W / ppd(), maxN = span > 130 ? Math.max(3, Math.round(W / 140)) : span > 40 ? Math.round(W / 70) : 99;
+    ctx.font = '600 ' + (W < 600 ? 13 : 12.5) + 'px ' + FONT; ctx.textBaseline = 'middle';
+    var boxes = dots.map(function (d) { return [d.x - d.r - 1, d.y - d.r - 1, 2 * d.r + 2, 2 * d.r + 2]; }), named = 0;
+    var order = dots.filter(function (d) { return FEAT[d.e.slug]; }).concat(dots.filter(function (d) { return !FEAT[d.e.slug] && !d.group; }));
+    order.forEach(function (d) {
+      if (named >= maxN || d.x < 0 || d.x > W || d.y < 0 || d.y > H) return;
+      var t = d.e.name, w = ctx.measureText(t).width, cand = [[d.x + d.r + 5, d.y - 8], [d.x - d.r - 5 - w, d.y - 8], [d.x - w / 2, d.y - d.r - 18], [d.x - w / 2, d.y + d.r + 3]];
+      for (var c = 0; c < cand.length; c++) {
+        var bx = cand[c][0], by = cand[c][1], bw = w, bh = 16;
+        if (bx < 4 || bx + bw > W - 4 || by < 4 || by + bh > H - 4) continue;
+        if (boxes.some(function (o) { return bx < o[0] + o[2] && bx + bw > o[0] && by < o[1] + o[3] && by + bh > o[1]; })) continue;
+        boxes.push([bx - 2, by, bw + 4, bh]); named++;
+        ctx.lineJoin = 'round'; ctx.lineWidth = 3.5; ctx.strokeStyle = P.land; ctx.strokeText(t, bx, by + 8);
+        ctx.fillStyle = P.label; ctx.fillText(t, bx, by + 8); break;
+      }
+    });
     $('#lz-out').disabled = V.z <= 1.001;   // zoomed all the way out: the whole world's width
     cv.style.cursor = V.z > 1.001 ? 'grab' : 'default';
     cv.style.touchAction = 'pan-y';   // one finger up and down always scrolls the page; sideways moves the map; two fingers pinch
@@ -209,10 +232,17 @@
   cv.addEventListener('pointerup', function (ev) {
     if (lift(ev)) return;
     var dr = drag; drag = null;
-    if (dr && !dr.moved) { var d = hit(ev); if (d) { if (ev.pointerType === 'mouse') location.href = '{B}place/#' + d.e.slug; else showTip(d, true); } }
+    if (dr && !dr.moved) { var d = hit(ev); if (d) { if (d.group) zoomGroup(d); else if (ev.pointerType === 'mouse') location.href = '{B}place/#' + d.e.slug; else showTip(d, true); } else tip.hidden = true; }
   });
   cv.addEventListener('pointercancel', function (ev) { lift(ev); drag = null; });
+  function zoomGroup(d) {
+    var L = d.group, a = Math.min.apply(null, L.map(function (e) { return e.lng; })), b = Math.max.apply(null, L.map(function (e) { return e.lng; }));
+    var c = Math.min.apply(null, L.map(function (e) { return e.lat; })), dd = Math.max.apply(null, L.map(function (e) { return e.lat; }));
+    V.z = Math.max(V.z * 2, Math.min(360 / Math.max(1.5, (b - a) * 2.2), H * 360 / (W * SY * Math.max(1.5, (dd - c) * 2.4)), 60));
+    V.lng = (a + b) / 2; V.lat = (c + dd) / 2; clampV(); tip.hidden = true; drawMap();
+  }
   function showTip(d, tap) {
+    if (d.group) { tip.hidden = false; tip.style.pointerEvents = 'none'; tip.textContent = d.group.length + ' places here. Click to zoom in'; tip.style.left = d.x + 'px'; tip.style.top = d.y + 'px'; return; }
     tip.hidden = false; tip.innerHTML = '';
     tip.style.pointerEvents = tap ? 'auto' : 'none';
     if (tap) { var a = document.createElement('a'); a.href = '{B}place/#' + d.e.slug; a.textContent = d.e.name + ', ' + d.e.country + ' \u2192'; tip.appendChild(a); }
