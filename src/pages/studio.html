@@ -110,13 +110,13 @@
           </ul>
           <p class="st-g3-row"><button type="button" class="chip" id="st-g3-ok">Got it</button><button type="button" class="chip" id="st-g3-flat">Back to flat map</button></p>
         </div>
-        <div class="st-legend3d" id="st-legend3d" hidden aria-label="3D legend">
+        <details class="st-legend3d" id="st-legend3d" hidden aria-label="3D key"><summary>Key</summary>
           <span><i style="background:#d8d3c8"></i>Today&rsquo;s buildings</span>
-          <span><i style="background:var(--accent)"></i>Your buildings (faded while being built)</span>
+          <span><i style="background:var(--accent)"></i>Yours (faded while being built)</span>
           <span><i style="background:var(--m-forest)"></i>Trees, green roofs</span>
           <span><i style="background:#283e60"></i>Solar</span>
           <span><i style="background:#96928a"></i>Sea walls</span>
-        </div>
+        </details>
         <span class="st-attr" id="st-attr">&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</span>
         <p class="st-loading" id="st-loading">Loading&hellip;</p>
         <div class="st-tip" id="st-tip" hidden></div>
@@ -806,6 +806,7 @@
     if (in3d && S.basemap !== 'none') { ctx.globalAlpha = S.basemap === 'satellite' ? 0.18 : 0.42; ctx.fillStyle = '#eef2e8'; ctx.fillRect(0, 0, view.W, view.H); ctx.globalAlpha = 1; }
     drawOSM(in3d);
     S.feats.forEach(function (f) { if (!in3d || !SOLID[f.kind]) drawFeat(f, false); });
+    if (!in3d && view.z >= 17 && OSM.list.length && S.feats.length) { ctx.save(); ctx.globalAlpha = 0.45; ctx.strokeStyle = css('--ink'); ctx.lineWidth = 0.7; OSM.list.forEach(function (o) { if (o.kind === 'building' && inView(o)) { osmPath(o); ctx.stroke(); } }); ctx.restore(); }
     if (in3d) draw3D();
     drawSelection();
     if (snapPt) { ctx.save(); ctx.beginPath(); ctx.arc(snapPt.x, snapPt.y, 6, 0, 7); ctx.lineWidth = 2; ctx.strokeStyle = css('--accent'); ctx.stroke(); ctx.restore(); }
@@ -816,11 +817,11 @@
     ctx.beginPath();
     f.pts.forEach(function (p, j) { var x = sx(mx(p[1])), y = sy(my(p[0])); if (j) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
     if (f.type === 'area') {
-      ctx.closePath(); ctx.globalAlpha = 0.35 + 0.5 * m; ctx.fillStyle = col; ctx.fill();
+      ctx.closePath(); ctx.globalAlpha = (view.z >= OSM_Z ? 0.22 + 0.28 * m : 0.35 + 0.5 * m); ctx.fillStyle = col; ctx.fill();
       if ((f.kind === 'farmblock' || f.kind === 'park') && view.z >= 16) {
         // Crop rows on farms, a softer texture on parks
-        ctx.save(); ctx.clip(); ctx.globalAlpha = 0.35 + 0.4 * m; ctx.strokeStyle = f.kind === 'farmblock' ? '#6f9a4f' : '#5f9a66'; ctx.lineWidth = Math.max(1, ppm() * 0.8);
-        var gap = Math.max(4, ppm() * (f.kind === 'farmblock' ? 2.2 : 5)), bb = f.pts.map(function (p) { return [sx(mx(p[1])), sy(my(p[0]))]; });
+        ctx.save(); ctx.clip(); ctx.globalAlpha = 0.12 + 0.18 * m; ctx.strokeStyle = f.kind === 'farmblock' ? '#5d8a3f' : '#4f8a58'; ctx.lineWidth = 1;
+        var gap = Math.max(9, ppm() * (f.kind === 'farmblock' ? 4 : 8)), bb = f.pts.map(function (p) { return [sx(mx(p[1])), sy(my(p[0]))]; });
         var minX = Math.min.apply(null, bb.map(function (q) { return q[0]; })), maxX = Math.max.apply(null, bb.map(function (q) { return q[0]; }));
         var minY = Math.min.apply(null, bb.map(function (q) { return q[1]; })), maxY = Math.max.apply(null, bb.map(function (q) { return q[1]; }));
         ctx.beginPath();
@@ -843,12 +844,25 @@
   var OSM = { cells: {}, list: [], seen: {}, loading: 0 }, OSM_Z = 16, CELL = 0.01;
   // Public Overpass servers; if one is busy or slow, the next is tried
   var OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
-  function overpass(q, n) {
+  // Ask the first server; if it hasn't answered in 4 s, ask the next too, and use whichever answers first
+  function overpass(q) {
+    return new Promise(function (ok, no) {
+      var done = false, left = OVERPASS.length, timers = [];
+      OVERPASS.forEach(function (u, n) {
+        timers.push(setTimeout(function () {
+          if (done) { left--; return; }
+          overpassOne(q, n).then(function (j) { if (!done) { done = true; timers.forEach(clearTimeout); ok(j); } })
+            .catch(function (e) { if (--left === 0 && !done) no(e); });
+        }, n * 4000));
+      });
+    });
+  }
+  function overpassOne(q, n) {
     n = n || 0;
     var ctl = window.AbortController ? new AbortController() : null, t = ctl ? setTimeout(function () { ctl.abort(); }, 25000) : 0;
     return fetch(OVERPASS[n], { method: 'POST', body: 'data=' + encodeURIComponent(q), headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, signal: ctl ? ctl.signal : undefined })
       .then(function (r) { clearTimeout(t); if (!r.ok) throw new Error(r.status); return r.json(); })
-      .catch(function (e) { clearTimeout(t); if (n + 1 < OVERPASS.length) return overpass(q, n + 1); throw e; });
+      .catch(function (e) { clearTimeout(t); throw e; });
   }
   var LABELS = { building: 'Building', parking: 'Parking lot', lot: 'Vacant or unused lot', grass: 'Grass lot', park: 'Park or garden', pitch: 'Sports field', street: 'Street', waterway: 'River or canal', coast: 'Coastline' };
   var PLURAL = { building: 'buildings', parking: 'parking lots', lot: 'vacant lots', grass: 'grass lots', park: 'parks', pitch: 'sports fields', street: 'streets', waterway: 'rivers and canals', coast: 'coastlines' };
@@ -911,21 +925,25 @@
   var osmT = null;
   function osmSoon() { clearTimeout(osmT); osmT = setTimeout(function () { loadOSM(); blockSummary(); }, 250); }
   function loadOSM() {
-    if (!view || view.z < OSM_Z || !S.P) return;
+    if (!view || view.z < OSM_Z - 1 || !S.P) return;   // start one zoom level early, so streets are usually ready on arrival
     var lat0 = uny(wy(view.H)), lat1 = uny(wy(0)), lng0 = unx(wx(0)), lng1 = unx(wx(view.W)), cells = [];
     for (var a = Math.floor(lat0 / CELL); a <= Math.floor(lat1 / CELL); a++) for (var b = Math.floor(lng0 / CELL); b <= Math.floor(lng1 / CELL); b++) cells.push([a, b]);
-    if (cells.length > 12) return;
+    if (cells.length > 16) return;
     var now = Date.now();
-    cells.forEach(function (c) {
-      var key = c[0] + ':' + c[1], st = OSM.cells[key];
-      if (st === 'ok' || st === 'loading' || (typeof st === 'number' && now - st < 30000)) return;
-      OSM.cells[key] = 'loading'; OSM.loading++; modeChanged();
-      var bb = '(' + [c[0] * CELL, c[1] * CELL, (c[0] + 1) * CELL, (c[1] + 1) * CELL].map(function (v) { return v.toFixed(4); }).join(',') + ')';
+    var need = cells.filter(function (c) { var st = OSM.cells[c[0] + ':' + c[1]]; return !(st === 'ok' || st === 'loading' || (typeof st === 'number' && now - st < 30000)); });
+    if (!need.length) return;
+    // All missing cells in one request (public servers queue each request, so one is much faster than several)
+    var a0 = Math.min.apply(null, need.map(function (c) { return c[0]; })), a1 = Math.max.apply(null, need.map(function (c) { return c[0]; }));
+    var b0 = Math.min.apply(null, need.map(function (c) { return c[1]; })), b1 = Math.max.apply(null, need.map(function (c) { return c[1]; }));
+    var keys = need.map(function (c) { return c[0] + ':' + c[1]; });
+    keys.forEach(function (key) { OSM.cells[key] = 'loading'; }); OSM.loading++; modeChanged();
+    [0].forEach(function () {
+      var bb = '(' + [a0 * CELL, b0 * CELL, (a1 + 1) * CELL, (b1 + 1) * CELL].map(function (v) { return v.toFixed(4); }).join(',') + ')';
       var q = '[out:json][timeout:25];(way["building"]' + bb + ';way["amenity"="parking"]' + bb + ';way["landuse"~"^(brownfield|greenfield|vacant|construction|grass)$"]' + bb +
         ';way["leisure"~"^(park|garden|playground|pitch)$"]' + bb + ';way["waterway"~"^(river|canal|stream)$"]' + bb + ';way["natural"="coastline"]' + bb + ';way["highway"~"^(primary|secondary|tertiary|residential|unclassified|living_street|pedestrian)$"]' + bb + ';);out geom;';
       overpass(q)
-        .then(function (j) { OSM.cells[key] = 'ok'; addOSM(j.elements || []); })
-        .catch(function () { OSM.cells[key] = Date.now(); })
+        .then(function (j) { keys.forEach(function (key) { OSM.cells[key] = 'ok'; }); addOSM(j.elements || []); })
+        .catch(function () { keys.forEach(function (key) { OSM.cells[key] = Date.now(); }); })
         .then(function () { OSM.loading--; modeChanged(); blockSummary(); scheduleDraw(); });
     });
   }

@@ -85,7 +85,8 @@ css += """
   .st-guide3d { position: absolute; left: 10px; top: 46px; z-index: 3; width: min(340px, calc(100% - 80px)); padding: 12px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 6px 20px rgba(0,0,0,0.18); font-size: 0.875rem; color: var(--ink); }
   .st-guide3d p { margin: 0 0 6px; } .st-guide3d ul { margin: 0 0 8px; padding-left: 1.1rem; display: grid; gap: 4px; color: var(--ink2); } .st-guide3d ul b { color: var(--ink); }
   .st-g3-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 !important; }
-  .st-legend3d:not([hidden]) { position: absolute; left: 10px; bottom: 26px; z-index: 2; display: flex; flex-wrap: wrap; gap: 4px 10px; max-width: calc(100% - 20px); padding: 6px 10px; border-radius: 10px; background: var(--surface); opacity: 0.95; font-size: 0.75rem; color: var(--ink); }
+  .st-legend3d:not([hidden]) { position: absolute; left: 10px; bottom: 26px; z-index: 2; max-width: calc(100% - 20px); padding: 5px 10px; border-radius: 10px; background: var(--surface); opacity: 0.95; font-size: 0.75rem; color: var(--ink); }
+  .st-legend3d summary { cursor: pointer; font-weight: 700; } .st-legend3d[open] { display: flex; flex-wrap: wrap; gap: 4px 10px; } .st-legend3d[open] summary { flex-basis: 100%; }
   .st-legend3d span { display: inline-flex; align-items: center; gap: 5px; } .st-legend3d i { width: 11px; height: 11px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.3); }
   .st-banner:not([hidden]) { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--accent); font-size: 0.9375rem; }
   .st-linkbox { flex: 1 1 260px; min-height: 34px; padding: 0 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 0.8125rem var(--font-mono); }
@@ -1023,7 +1024,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=66">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=67">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
