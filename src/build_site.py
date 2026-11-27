@@ -851,6 +851,11 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .ib-note { font-size: .9rem; color: var(--ink2); max-width: 60rem; } .ib-l { display: grid; gap: 4px; font-weight: 600; font-size: .85rem; margin: 8px 0; } .ib-in { font: inherit; font-weight: 400; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; width: 100%; } .ib-meta { font-size: .85rem; color: var(--ink2); } .ib-ok { display: flex; gap: 8px; font-size: .85rem; align-items: center; }
   .ib-steps { margin: 6px 0; padding-left: 18px; font-size: .9rem; } .ib-stepform { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; align-items: center; margin-top: 8px; }
   .pfi-by { font-size: 0.85rem; color: var(--ink); } .pp-ok { display: flex; gap: 10px; align-items: flex-start; margin-top: 10px; font-size: 0.9rem; line-height: 1.45; cursor: pointer; } .pp-ok input { margin-top: 3px; width: 18px; height: 18px; flex: none; accent-color: var(--accent); }
+  .vx-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px 22px; align-items: start; }
+  .vx-sec h3 { font-size: 0.8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink2); margin: 0 0 8px; } .vx-sec ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .vx-sec li { display: grid; gap: 4px; padding: 12px 14px; background: var(--surface); border-radius: 12px; font-size: 0.92rem; line-height: 1.45; } .vx-sec li b { font: 700 1.02rem/1.3 var(--font-display); }
+  .vx-how { color: var(--ink2); font-size: 0.86rem; } .vx-src { font-size: 0.82rem; color: var(--ink2); } .vx-src a { color: var(--accent); font-weight: 600; }
+  .vx-none { font-size: 0.9rem; color: var(--ink2); margin: 0; padding: 12px 14px; border: 1px dashed var(--line); border-radius: 12px; } .vx-policy { font-size: 0.84rem; color: var(--ink2); margin: 14px 0 0; max-width: 46rem; }
   .pfi-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: start; } .pfi-col { display: grid; gap: 10px; } .pp-tg { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; } .pp-tg label { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1.5px solid var(--line); border-radius: 999px; cursor: pointer; font-weight: 600; font-size: 0.92rem; } .pp-tg label:has(input:checked) { border-color: var(--accent); background: var(--accent); color: #fff; } .pp-tg input { position: absolute; opacity: 0; pointer-events: none; }
   .pfi-col h4 { margin: 0; font-size: 0.8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink2); }
   .pfi-add { justify-self: start; color: var(--accent); font-weight: 700; font-size: 0.9rem; }
@@ -998,7 +1003,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=62">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=63">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

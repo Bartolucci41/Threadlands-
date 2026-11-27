@@ -108,6 +108,11 @@
       <div class="pf-add"><p><b>Know a project that belongs here?</b> A new park, a wetland, a tree-planting drive, a flood barrier. Add it with a link to a public source and it is checked before it appears.</p><a class="btn" id="pf-add" href="{B}explore/?add=1">Add a project</a></div>
     </section>
 
+    <section class="sect pf-sec visit" id="visit" aria-labelledby="visit-h" hidden>
+      <div class="sect-top"><div><h2 id="visit-h">Visit and explore</h2><p id="visit-intro"></p></div></div>
+      <div class="vx-grid" id="visit-body"></div>
+      <p class="vx-policy" id="visit-policy"></p>
+    </section>
     <section class="sect pf-sec gazette" aria-labelledby="pf-news-h">
       <header class="gz-head">
         <h2 id="pf-news-h" class="gz-mast">In the news</h2>
@@ -349,6 +354,23 @@
   }
   // A place's own identity, where one has been made by hand: its landscape, its neighborhoods and what sustains it
   var IDN = null, PROPS = [], GROUPS = [];
+  // Visit and explore: ways to see and support a place, hand-picked with sources; only where a file exists
+  function loadVisit(e) {
+    var box = $('#visit'); box.hidden = true;
+    fetch('{B}data/visit/' + SLUG + '.json').then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (V) {
+      if (V.slug !== SLUG) return;
+      $('#visit-intro').textContent = V.intro || ''; $('#visit-policy').textContent = V.policy || '';
+      $('#visit-body').innerHTML = V.sections.map(function (sc) {
+        return '<section class="vx-sec"><h3>' + esc(sc.title) + '</h3>' + (sc.items.length ? '<ul>' + sc.items.map(function (it) {
+          var go = it.project ? '<a href="#pj-' + esc(it.project) + '">See the project</a>' : it.link ? '<a href="' + esc(it.link) + '" target="_blank" rel="noopener">Visit their site</a>' : '';
+          return '<li><b>' + esc(it.name) + '</b><span>' + esc(it.what) + '</span>' + (it.how ? '<span class="vx-how">' + esc(it.how) + '</span>' : '') +
+            ((go || it.url) ? '<span class="vx-src">' + go + (go && it.url ? ' · ' : '') + (it.url ? '<a href="' + esc(it.url) + '" target="_blank" rel="noopener">' + esc(it.source || 'Source') + '</a>' + (it.asof ? ', ' + esc(fmtAsof(it.asof)) : '') : '') + '</span>' : '') + '</li>';
+        }).join('') + '</ul>' : '<p class="vx-none">' + esc(sc.none || '') + '</p>') + '</section>';
+      }).join('');
+      box.hidden = false;
+    }).catch(function () {});
+  }
+  function fmtAsof(a) { var m = /^(\d{4})-(\d{2})/.exec(a); return m ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][+m[2] - 1] + ' ' + m[1] : a; }
   function loadIdentity(e) {
     IDN = null;
     var head = $('.pf-head'), kick = $('#pf-kick'), box = $('#pf-local');
@@ -778,7 +800,7 @@
       if (pjId) { var pc = document.getElementById('pj-' + pjId); if (pc) { pc.scrollIntoView({ block: 'center' }); pc.classList.add('pjc-hl'); var bb = pc.querySelector('.back-btn'); if (bb) setTimeout(function () { bb.focus({ preventScroll: true }); }, 300); } return; }
       if (addK) { PRESET = /^(heat|water|shade|green|change|idea|other)$/.test(addK) ? addK : 'other'; var hint = document.querySelector('.here-hint'); if (hint) hint.innerHTML = '<b>Tap the map where it is</b>, then choose \u201cAdd what you know here\u201d.'; var g = document.querySelector('.here-grid'); g.insertAdjacentHTML('beforebegin', '<p class="here-addnote" id="here-addnote"><b>Add what you know:</b> tap the map where it is. You can drag and zoom to find the spot first.</p>'); document.getElementById('here-addnote').scrollIntoView({ block: 'start' }); return; }
     }, 0);
-    setTimeout(function () { var sh = new URLSearchParams(location.search).get('show'), p = sh && PRESS_NOW.filter(function (x) { return x.key === sh; })[0]; if (!p) return; if (p.layer) { setLayer(p.layer); showWhy(p.key); document.getElementById('here').scrollIntoView({ block: 'start' }); } else { var t = document.getElementById(p.key === 'food' ? 'tied' : 'pressing'); if (t) t.scrollIntoView({ block: 'start' }); } }, 0); renderReady(e, r, sm); renderProjects(e); allProjectsLink(e); renderIdeas(e); renderNews(e);
+    setTimeout(function () { var sh = new URLSearchParams(location.search).get('show'), p = sh && PRESS_NOW.filter(function (x) { return x.key === sh; })[0]; if (!p) return; if (p.layer) { setLayer(p.layer); showWhy(p.key); document.getElementById('here').scrollIntoView({ block: 'start' }); } else { var t = document.getElementById(p.key === 'food' ? 'tied' : 'pressing'); if (t) t.scrollIntoView({ block: 'start' }); } }, 0); renderReady(e, r, sm); renderProjects(e); allProjectsLink(e); renderIdeas(e); loadVisit(e); renderNews(e);
     try { loadMap(e); } catch (err) { /* the map is extra */ }
     window.scrollTo(0, 0);
   }
