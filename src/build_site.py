@@ -516,7 +516,13 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .lib-empty { color: var(--ink2); }
   .bio { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 22px; align-items: start; }
   .bio-photo { width: 200px; height: 250px; border-radius: 14px; object-fit: cover; }
-  @media (max-width: 560px) { .bio { grid-template-columns: minmax(0, 1fr); } .bio-photo { width: 160px; height: 200px; } }
+  @media (max-width: 560px) {   /* phones: portrait beside the name, bio full width below */
+    .bio { grid-template-columns: minmax(0, 46%) minmax(0, 1fr); grid-template-rows: 1fr auto auto 1fr auto; gap: 0 16px; }
+    .bio > div { display: contents; }
+    .bio-photo { grid-column: 1; grid-row: 1 / 5; width: 100%; height: auto; aspect-ratio: 4 / 5; }
+    .bio .eyebrow { grid-column: 2; grid-row: 2; margin: 0 0 6px; } .bio h2 { grid-column: 2; grid-row: 3; margin: 0; font-size: 1.6rem; line-height: 1.15; }
+    .bio > div > p:not(.eyebrow) { grid-column: 1 / -1; grid-row: 5; margin-top: 18px; }
+  }
   .about-grid { display: grid; gap: 28px; max-width: 46rem; }
   .about-grid h2 { font-size: 1.5rem; margin: 0 0 8px; }
   .about-grid p { margin: 0 0 10px; color: var(--ink2); }
@@ -1003,7 +1009,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=63">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=64">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
