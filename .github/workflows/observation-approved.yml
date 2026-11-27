@@ -1,0 +1,35 @@
+name: Note published
+# A reviewer published a note from the private inbox (threadlands.org/inbox/). The relay sends only its public
+# parts here, with the pin already generalized; unreviewed notes never reach GitHub.
+on:
+  repository_dispatch:
+    types: [observation-approved]
+permissions:
+  contents: write
+concurrency: { group: observations, cancel-in-progress: false }
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add the note
+        env:
+          O: ${{ toJSON(github.event.client_payload.observation) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, datetime
+          o = json.loads(os.environ['O'])
+          keep = {k: o.get(k) for k in ['id', 'place', 'kind', 'text', 'source_url', 'lat', 'lng', 'precision_m', 'review']}
+          keep['added'] = datetime.date.today().isoformat()
+          path = 'data/observations.json'
+          d = json.load(open(path)) if os.path.exists(path) else {'observations': []}
+          d['observations'] = [x for x in d.get('observations', []) if x.get('id') != keep['id']] + [keep]
+          json.dump(d, open(path, 'w'), indent=1, ensure_ascii=False)
+          PY
+      - name: Commit
+        run: |
+          git config user.name "threadlands-bot"
+          git config user.email "threadlands-bot@users.noreply.github.com"
+          git add data/observations.json
+          git commit -m "Publish a note" || exit 0
+          git pull --rebase origin main && git push

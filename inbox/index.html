@@ -48,7 +48,8 @@
     </form>
     <p class="ib-msg" id="ib-msg" role="status"></p>
   </header>
-  <div class="ib-filters" id="ib-tabs" hidden><button type="button" class="chip" data-tab="reports" aria-pressed="true">Feedback</button><button type="button" class="chip" data-tab="ideas" aria-pressed="false">Ideas to review <span id="ib-ideas-n"></span></button></div>
+  <div class="ib-filters" id="ib-tabs" hidden><button type="button" class="chip" data-tab="reports" aria-pressed="true">Feedback</button><button type="button" class="chip" data-tab="ideas" aria-pressed="false">Ideas to review <span id="ib-ideas-n"></span></button><button type="button" class="chip" data-tab="notes" aria-pressed="false">Notes to review <span id="ib-notes-n"></span></button></div>
+  <section id="ib-notes" hidden><p class="ib-note">Notes from &ldquo;Add what you notice&rdquo;. They stay private here, with the exact pin, until you publish one. Publishing sends the note with the spot generalized as you choose and deletes the private copy; rejecting deletes it. Unreviewed notes are deleted after 90 days.</p><ol class="ib-list" id="ib-notes-list"></ol></section>
   <section id="ib-ideas" hidden><p class="ib-note">Ideas from &ldquo;What would make this place better?&rdquo;. They stay private here until you publish one. Publishing sends only the public parts to the site and deletes the private copy; rejecting deletes it. Unreviewed ideas are deleted after 90 days. Remove names, phone numbers and home addresses before publishing.</p><ol class="ib-list" id="ib-ideas-list"></ol></section>
   <div id="ib-reports">
   <div class="ib-filters" id="ib-filters" hidden>
@@ -87,7 +88,7 @@
   function load() {
     $('#ib-msg').textContent = 'Loading…';
     api('?inbox=1').then(function (j) {
-      ITEMS = j.items || []; $('#ib-filters').hidden = false; $('#ib-tabs').hidden = false; $('#ib-form').hidden = true; loadIdeas();
+      ITEMS = j.items || []; $('#ib-filters').hidden = false; $('#ib-tabs').hidden = false; $('#ib-form').hidden = true; loadIdeas(); loadNotes();
       try { sessionStorage.setItem('tl-inbox', KEY); } catch (e) { /* ignore */ }
       render();
     }).catch(function (e) { $('#ib-msg').textContent = e.message; $('#ib-form').hidden = false; });
@@ -159,7 +160,34 @@
   $('#ib-tabs').addEventListener('click', function (e) {
     var b = e.target.closest('[data-tab]'); if (!b) return;
     document.querySelectorAll('[data-tab]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
-    $('#ib-ideas').hidden = b.dataset.tab !== 'ideas'; $('#ib-reports').hidden = b.dataset.tab === 'ideas';
+    $('#ib-ideas').hidden = b.dataset.tab !== 'ideas'; $('#ib-notes').hidden = b.dataset.tab !== 'notes'; $('#ib-reports').hidden = b.dataset.tab !== 'reports';
+  });
+  // ---- Notes to review
+  var NOTES = [], NK = { heat: 'Too hot here', water: 'Water collects here', shade: 'Needs shade or trees', green: 'Green space matters here', change: 'Something is changing here', idea: 'An idea for this spot', other: 'Something else' };
+  function loadNotes() { api('?notes=1').then(function (j) { NOTES = j.items || []; $('#ib-notes-n').textContent = NOTES.length ? '(' + NOTES.length + ')' : ''; renderNotes(); }).catch(function () {}); }
+  function renderNotes() {
+    $('#ib-notes-list').innerHTML = NOTES.length ? NOTES.map(function (it) {
+      return '<li class="ib-item" data-note="' + esc(it.id) + '"><div class="ib-top"><span class="ib-kind">' + esc(it.place) + '</span><span class="ib-at">' + esc(new Date(it.at).toLocaleString()) + '</span></div>' +
+        '<label class="ib-l">Kind <select class="ib-in" data-f="kind">' + Object.keys(NK).map(function (k) { return '<option value="' + k + '"' + (k === it.kind ? ' selected' : '') + '>' + NK[k] + '</option>'; }).join('') + '</select></label>' +
+        '<label class="ib-l">Note <textarea class="ib-in" data-f="text" rows="3" maxlength="500">' + esc(it.text) + '</textarea></label>' +
+        '<p class="ib-meta">Exact pin (private): ' + it.lat + ', ' + it.lng + ' <a href="https://www.openstreetmap.org/?mlat=' + it.lat + '&mlon=' + it.lng + '#map=18/' + it.lat + '/' + it.lng + '" target="_blank" rel="noopener">check on a map</a>' + (it.source_url ? ' · Source: <a href="' + esc(it.source_url) + '" target="_blank" rel="noopener">' + esc(it.source_url) + '</a>' : ' · No source (firsthand)') + '</p>' +
+        '<label class="ib-l">Show the spot on the public map <select class="ib-in" data-p><option value="100" selected>To about 100 m (default)</option><option value="1000">To about 1 km (when 100 m could still point to someone\u2019s home)</option><option value="exact">Exactly, about 10 m (only a public feature that needs it, like a blocked drain)</option></select></label>' +
+        '<label class="ib-l">What the review confirms <select class="ib-in" data-r><option value="checked" selected>Checked: the location makes sense, and the source if one was given</option><option value="corroborated">Corroborated: a local partner confirmed it</option></select></label>' +
+        '<div class="ib-act"><button type="button" class="btn" data-npub="' + esc(it.id) + '">Publish</button><button type="button" class="btn ghost" data-nrej="' + esc(it.id) + '">Reject and delete</button></div></li>';
+    }).join('') : '<li class="ib-empty">No notes waiting.</li>';
+  }
+  function reviewNote(id, action) {
+    var li = document.querySelector('[data-note="' + id + '"]'), edits = {};
+    li.querySelectorAll('[data-f]').forEach(function (f) { edits[f.dataset.f] = f.value; });
+    li.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
+    api('', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'note-review', id: id, action: action, edits: edits, precision: li.querySelector('[data-p]').value, review: li.querySelector('[data-r]').value }) })
+      .then(function () { NOTES = NOTES.filter(function (i) { return i.id !== id; }); $('#ib-notes-n').textContent = NOTES.length ? '(' + NOTES.length + ')' : ''; renderNotes(); })
+      .catch(function (err) { alert(err.message); li.querySelectorAll('button').forEach(function (b) { b.disabled = false; }); });
+  }
+  $('#ib-notes-list').addEventListener('click', function (e) {
+    var p = e.target.closest('[data-npub]'), r = e.target.closest('[data-nrej]');
+    if (p) reviewNote(p.dataset.npub, 'publish');
+    if (r && confirm('Delete this note? This can\u2019t be undone.')) reviewNote(r.dataset.nrej, 'reject');
   });
   if (KEY) load();
 })();

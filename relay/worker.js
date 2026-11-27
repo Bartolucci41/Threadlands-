@@ -59,10 +59,13 @@ async function project(b, request, env, origin) {
   return reply({ ok: true }, 202, origin);
 }
 
-// "Add what you know": an observation pinned on the map (too hot here, water collects here, a proposal...).
-// It opens a GitHub issue for review; nothing appears on the map until it is checked (see observation-reviewed.yml).
+// "Add what you notice": a note pinned on the map (too hot here, water collects here...).
+// Privacy: notes wait in a PRIVATE queue here (Workers KV), readable only with the inbox key, with the exact pin so the
+// reviewer can assess them. Nothing goes to GitHub, which is public, until a reviewer publishes it; the published pin is
+// generalized (about 100 m by default) and the private copy is deleted. Unreviewed notes are deleted after 90 days.
 const OBS = ['heat', 'water', 'shade', 'green', 'change', 'idea', 'other'];
 async function observation(b, request, env, origin) {
+  if (!env.SUPPORT) return reply({ error: 'Notes are not switched on yet.' }, 503, origin);
   const o = {
     place: String(b.place || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 80),
     kind: OBS.includes(b.kind) ? b.kind : 'other', text: text(b.text, 500), source_url: url(b.source_url),
@@ -73,13 +76,41 @@ async function observation(b, request, env, origin) {
   const times = (recent.get('o' + ip) || []).filter((t) => now - t < 3600e3);
   if (times.length >= 10) return reply({ error: 'You have sent several notes in the last hour. Please try again later.' }, 429, origin);
   times.push(now); recent.set('o' + ip, times);
+  const id = String(9999999999999 - now).padStart(13, '0') + '-' + Math.random().toString(36).slice(2, 8);
+  await env.SUPPORT.put('oq:' + id, JSON.stringify(Object.assign({ id, at: new Date(now).toISOString() }, o)), { expirationTtl: 60 * 60 * 24 * 90, metadata: { place: o.place } });
+  return reply({ ok: true }, 201, origin);
+}
+async function notesInbox(request, env, origin) {
+  if (!inboxOk(request, env)) return reply({ error: 'Wrong inbox key.' }, 401, origin);
+  const list = await env.SUPPORT.list({ prefix: 'oq:', limit: 200 });
+  const items = await Promise.all(list.keys.map((k) => env.SUPPORT.get(k.name, { type: 'json' })));
+  return reply({ items: items.filter(Boolean) }, 200, origin);
+}
+// Publish (with what the review confirms and how precisely to show the spot) or reject. Either way the private copy is deleted.
+async function noteReview(b, request, env, origin) {
+  if (!inboxOk(request, env)) return reply({ error: 'Wrong inbox key.' }, 401, origin);
+  const key = 'oq:' + String(b.id || '').replace(/[^0-9a-z-]/g, '');
+  const item = await env.SUPPORT.get(key, { type: 'json' });
+  if (!item) return reply({ error: 'Not found.' }, 404, origin);
+  if (b.action === 'reject') { await env.SUPPORT.delete(key); return reply({ ok: true }, 200, origin); }
+  if (b.action !== 'publish') return reply({ error: 'Choose publish or reject.' }, 400, origin);
+  const e = b.edits || {}, dp = { exact: 4, '100': 3, '1000': 2 }[String(b.precision || '100')] || 3, k = Math.pow(10, dp);
+  const pub = {
+    id: 'o' + item.id.slice(-6) + Date.now().toString(36).slice(-3), place: item.place,
+    kind: OBS.includes(e.kind) ? e.kind : item.kind, text: text(e.text === undefined ? item.text : e.text, 500),
+    source_url: e.source_url === undefined ? item.source_url : url(e.source_url),
+    lat: Math.round(item.lat * k) / k, lng: Math.round(item.lng * k) / k, precision_m: dp === 4 ? 10 : dp === 3 ? 100 : 1000,
+    review: b.review === 'corroborated' ? 'corroborated' : 'checked',
+  };
+  if (!pub.text) return reply({ error: 'The note is empty.' }, 400, origin);
   const r = await fetch(`https://api.github.com/repos/${env.REPO || 'Bartolucci41/Threadlands-'}/dispatches`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${env.GITHUB_TOKEN}`, 'Accept': 'application/vnd.github+json', 'User-Agent': 'threadlands-relay', 'Content-Type': 'application/json' },
-    body: JSON.stringify({ event_type: 'observation-submitted', client_payload: { observation: o } }),
+    body: JSON.stringify({ event_type: 'observation-approved', client_payload: { observation: pub } }),
   });
-  if (r.status !== 204) return reply({ error: 'Your note could not be sent right now.', status: r.status }, 502, origin);
-  return reply({ ok: true }, 202, origin);
+  if (r.status !== 204) return reply({ error: 'Could not publish right now.', status: r.status }, 502, origin);
+  await env.SUPPORT.delete(key);
+  return reply({ ok: true, id: pub.id }, 200, origin);
 }
 
 // "What would make this place better?": a simple idea with where it would help and, optionally, why.
@@ -285,6 +316,7 @@ export default {
     // The private feedback inbox (needs the inbox key)
     if (request.method === 'GET' && new URL(request.url).searchParams.has('inbox')) return inbox(request, env, origin);
     if (request.method === 'GET' && new URL(request.url).searchParams.has('ideas')) return ideasInbox(request, env, origin);
+    if (request.method === 'GET' && new URL(request.url).searchParams.has('notes')) return notesInbox(request, env, origin);
     // Approximate location from the connection, city level, for when the browser can't share one.
     // Cloudflare estimates it from the connection. This worker does not write it to storage or log it;
     // Cloudflare's own request logs may still hold request details for a short time (Workers Logs: up to 7 days).
@@ -308,6 +340,7 @@ export default {
     if (b.type === 'feedback') return feedback(b, request, env, origin);
     if (b.type === 'inbox-status') return inboxStatus(b, request, env, origin);
     if (b.type === 'idea-review') return ideaReview(b, request, env, origin);
+    if (b.type === 'note-review') return noteReview(b, request, env, origin);
     // Build a new place. Only an OpenStreetMap record chosen from the search results is accepted: the relay looks the
     // record up itself and takes its name, country and kind from there, never from what the visitor typed.
     const osm = String(b.osm || '').toUpperCase();
