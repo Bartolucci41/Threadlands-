@@ -1301,6 +1301,30 @@ html[dir="rtl"] .st-bom th:nth-child(n+2), html[dir="rtl"] .st-bom td:nth-child(
   .pjc-next .linkbtn { color: var(--accent); font-weight: 600; font-size: inherit; }
   #pj-list .pjc { display: grid; grid-template-columns: minmax(0,1fr) auto; } #pj-list .pjc > :not(.pjc-thumb) { grid-column: 1 / -1; } #pj-list .pjc > .pjc-go { grid-column: 1; grid-row: 1; min-width: 0; } #pj-list .pjc-thumb { grid-column: 2; grid-row: 1; width: 112px; height: 84px; object-fit: cover; border-radius: 10px; margin: 12px 14px 0 0; }
   #pj-list .pjc-more { margin: 4px 16px 0; } #pj-list .pjc-next { font-size: 0.84rem; } @media (max-width: 420px) { #pj-list .pjc-thumb { width: 84px; height: 70px; } }
+  /* "What would make this place better?" */
+  .pp-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; padding: 16px 18px; margin: 0 0 14px; border-radius: 14px; background: var(--deep, #123B38); color: #fff; }
+  .pp-cta b { display: block; font: 700 1.2rem/1.3 var(--font-display); margin-bottom: 4px; } .pp-cta > div > span { font-size: 0.92rem; opacity: .9; line-height: 1.45; } .pp-cta b span { font: inherit; opacity: 1; } .pp-cta > div { flex: 1 1 320px; }
+  .pp-cta .btn { background: #8fd3bf; color: #0b2624; border-color: #8fd3bf; white-space: nowrap; }
+  .pp-steps { display: flex; gap: 6px; list-style: none; margin: 0; padding: 4px 22px 8px; counter-reset: s; }
+  .pp-steps li { flex: 1; counter-increment: s; font-size: 0.78rem; font-weight: 600; color: var(--ink2); padding-top: 8px; border-top: 3px solid var(--line); } .pp-steps li::before { content: counter(s) " · "; }
+  .pp-steps li.on { color: var(--ink); border-color: var(--accent); } .pp-steps li.done { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+  .pp-in { width: 100%; font: inherit; font-size: 1.05rem; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg, #fff); color: inherit; margin-bottom: 8px; }
+  .pp-dlg textarea { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg, #fff); color: inherit; }
+  .pp-ex { font-size: 0.85rem; color: var(--ink2); line-height: 2; margin: 6px 0 0; } .pp-ex button { font: inherit; font-size: 0.85rem; padding: 3px 10px; margin: 0 2px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .pp-where { display: grid; gap: 6px; margin-bottom: 10px; } .pp-where label { display: flex; gap: 10px; align-items: center; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; font-weight: 600; } .pp-where label:has(input:checked) { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .pp-map { height: 260px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); }
+  .pp-note { font-size: 0.85rem; color: var(--ink2); margin: 8px 0 0; line-height: 1.45; } .pp-note .linkbtn { color: var(--accent); font-weight: 700; font-size: inherit; }
+  .pp-none { padding: 12px 14px; border-radius: 10px; background: var(--surface); margin: 0; }
+  .pp-rel { display: grid; gap: 3px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; margin-top: 8px; } .pp-rel.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .pp-k { font-size: 0.72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink2); } .pp-rel b { font-size: 1rem; } .pp-m { font-size: 0.85rem; color: var(--ink2); }
+  .pp-acts { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; margin-top: 6px; } .pp-acts a { font-size: 0.85rem; font-weight: 600; color: var(--accent); }
+  .pp-act { font: 600 0.85rem var(--font-body); padding: 6px 12px; border-radius: 999px; border: 1.5px solid var(--accent); background: none; color: var(--accent); cursor: pointer; } .pp-act.on { background: var(--accent); color: #fff; }
+  .pf-ideas { margin-top: 22px; } .pfi-h { font-size: 1.15rem; margin: 0 0 10px; } .pfi-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .pfi { display: grid; gap: 6px; align-content: start; padding: 14px 16px; background: var(--surface); border-radius: 14px; border-left: 4px solid #C0542C; } .pfi b { font: 700 1.05rem/1.3 var(--font-display); }
+  .pfi-m { font-size: 0.85rem; color: var(--ink2); } .pfi-m .linkbtn { color: var(--accent); font-weight: 600; font-size: inherit; } .pfi-why { margin: 0; font-size: 0.92rem; line-height: 1.45; }
+  .pfi-j { font-size: 0.85rem; } .pfi-j summary { cursor: pointer; font-weight: 600; } .pfi-j ul { margin: 6px 0 0; padding-left: 18px; color: var(--ink2); }
+  .pfi-l { font-size: 0.85rem; color: var(--ink2); } .pfi-l a { color: var(--accent); font-weight: 600; } .pfi-n { font-size: 0.85rem; color: var(--ink2); }
+  .pfi.wait { border-left-color: var(--line); opacity: .85; } .pfi-w { font-size: 0.8rem; font-weight: 600; color: var(--ink2); }
   .pjc-back { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 16px 0; } .pf-proj .pjc-back { padding: 6px 0 0; }
   .back-btn { min-height: 36px; padding: 0 16px; font-size: 0.88rem; }
   .back-btn[aria-pressed="true"] { background: transparent; color: var(--accent); border-color: var(--accent); }

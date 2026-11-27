@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="{B}assets/public.js?v=4"></script>
+<script src="{B}assets/propose.js?v=1"></script>
   <div class="pf-missing" id="pf-missing" hidden></div>
   <article class="pf" id="pf" hidden>
     <section class="pf-head bleed band-deep" aria-labelledby="pf-name">
@@ -93,7 +94,8 @@
     </section>
 
     <section class="sect pf-sec" id="changing" aria-labelledby="changing-h">
-      <div class="sect-top"><div><h2 id="changing-h">Get involved</h2><p>Real parks, wetlands, trees and water projects here, each with a public source and the people running it.</p></div></div>
+      <div class="sect-top"><div><h2 id="changing-h">Get involved</h2><p>Suggest a change, join others asking for the same thing, or back the real projects already under way here.</p></div></div>
+      <div class="pp-cta"><div><b>What would make <span class="pp-cn"></span> better?</b><span>Suggest a simple change, like more shade, a safe crossing or fresh food nearby. You&rsquo;ll see who is already asking or working on it before you post.</span></div><button type="button" class="btn" id="pp-open">Suggest a change</button></div>
       <div class="gi-ways" role="list">
         <a role="listitem" class="gi-w" href="#pf-proj"><b>Back a project</b><span>The count shows city teams and funders where public support is.</span></a>
         <a role="listitem" class="gi-w" id="gi-add" href="?add=other"><b>Add what you notice</b><span>Water that collects, streets without shade: pin it on the map.</span></a>
@@ -102,6 +104,7 @@
       </div>
       <div class="pf-proj" id="pf-proj"></div>
       <p class="pf-allpj" id="pf-allpj"></p>
+      <div class="pf-ideas" id="pf-ideas-box"><h3 class="pfi-h">Ideas from people here</h3><div class="pfi-list" id="pf-ideas"></div></div>
       <div class="pf-add"><p><b>Know a project that belongs here?</b> A new park, a wetland, a tree-planting drive, a flood barrier. Add it with a link to a public source and it is checked before it appears.</p><a class="btn" id="pf-add" href="{B}explore/?add=1">Add a project</a></div>
     </section>
 
@@ -345,11 +348,13 @@
       ' <span class="pjc-asof">' + (asof ? 'As of ' + asof : '') + (n.source && n.source.url ? (asof ? ' · ' : '') + '<a href="' + esc(n.source.url) + '" target="_blank" rel="noopener">source</a>' : '') + (n.url ? ' · <a href="' + esc(n.url) + '" target="_blank" rel="noopener">official site</a>' : '') + (old ? ' · may be out of date' : '') + '</span></span>';
   }
   // A place's own identity, where one has been made by hand: its landscape, its neighborhoods and what sustains it
+  var IDN = null, PROPS = [], GROUPS = [];
   function loadIdentity(e) {
+    IDN = null;
     var head = $('.pf-head'), kick = $('#pf-kick'), box = $('#pf-local');
     head.classList.remove('local'); head.style.removeProperty('--mark'); head.style.removeProperty('--city'); kick.hidden = true; box.hidden = true; box.innerHTML = '';
     fetch('{B}data/identity/' + SLUG + '.json').then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (I) {
-      if (I.slug !== SLUG) return;
+      if (I.slug !== SLUG) return; IDN = I;
       head.classList.add('local'); head.style.setProperty('--mark', 'url({B}' + I.mark + ')'); head.style.setProperty('--city', I.accent);
       kick.textContent = I.kicker; kick.hidden = false;
       var ICO = { water: '≋', food: '❦', nature: '▲' };
@@ -359,6 +364,43 @@
       box.hidden = false;
     }).catch(function () {});
   }
+  // Ideas from people here: published after review, plus this visitor's own while they wait
+  function renderIdeas(e) {
+    var name = e.name, list = PROPS.filter(function (p) { return p.place === SLUG; }), mine = window.TLPropose ? TLPropose.mine(SLUG) : [];
+    document.querySelectorAll('.pp-cn').forEach(function (n) { n.textContent = name; });
+    var TT = (window.TLPropose || {}).TOPICS || {}, link = function (k, id) {
+      if (k === 'project') { var pr = D.projects.filter(function (x) { return x.id === id; })[0]; return pr ? '<a href="#pj-' + esc(id) + '">' + esc(pr.name) + '</a>' : ''; }
+      if (k === 'group') { var g = GROUPS.filter(function (x) { return x.id === id; })[0]; return g ? '<a href="' + esc(g.url) + '" target="_blank" rel="noopener">' + esc(g.name) + '</a>' : ''; }
+      var q = PROPS.filter(function (x) { return x.id === id; })[0]; return q ? '<a href="#idea-' + esc(id) + '">' + esc(q.idea) + '</a>' : '';
+    };
+    var html = list.map(function (p) {
+      var j = p.joined || [], where = p.area || (p.scope === 'city' ? 'Across ' + name : 'Pinned on the map');
+      var links = (p.links || []).map(function (l) { return link(l.kind, l.id); }).filter(Boolean);
+      return '<article class="pfi" id="idea-' + esc(p.id) + '"><b>' + esc(p.idea) + '</b><span class="pfi-m">' + esc(where) + (p.lat != null ? ' <button type="button" class="linkbtn" data-idea-map="' + p.lat + ',' + p.lng + '">See on the map</button>' : '') +
+        ((p.topic || []).length ? ' · ' + p.topic.map(function (t) { return esc((TT[t] || [t])[0]); }).join(', ') : '') + '</span>' + (p.why ? '<p class="pfi-why">' + esc(p.why) + '</p>' : '') +
+        (j.length ? '<details class="pfi-j"><summary>' + j.length + (j.length === 1 ? ' more person' : ' more people') + ' asking' + (j.some(function (x) { return x.area; }) ? ' in ' + j.map(function (x) { return x.area; }).filter(Boolean).filter(function (a, i, A) { return A.indexOf(a) === i; }).slice(0, 4).map(esc).join(', ') : '') + '</summary><ul>' +
+          j.map(function (x) { return '<li>' + esc(x.area || (x.lat != null ? 'Pinned on the map' : 'Across ' + name)) + (x.why ? ': ' + esc(x.why) : '') + '</li>'; }).join('') + '</ul></details>' : '') +
+        (links.length ? '<span class="pfi-l">Connected to ' + links.join(', ') + '</span>' : '') +
+        '<span class="pjc-act"><button type="button" class="btn" data-idea-join="' + esc(p.id) + '">I want this too</button><span class="pfi-n" data-idea-n="' + esc(p.id) + '" data-base="' + (j.length + 1) + '"></span></span></article>';
+    }).join('') + mine.map(function (m) {
+      return '<article class="pfi wait"><b>' + esc(m.idea) + '</b><span class="pfi-m">' + esc(m.area || (m.scope === 'city' ? 'Across ' + name : 'Pinned on the map')) + '</span><span class="pfi-w">Your idea' + (m.link ? (m.mode === 'join' ? ', added to “' : ', connected to “') + esc(m.link) + '”' : '') + ' · waiting for review (only you can see this)</span></article>';
+    }).join('');
+    $('#pf-ideas').innerHTML = html || '<p class="pf-none">No ideas here yet. What would you change first?</p>';
+    // How many want it: the person who posted it, everyone added after review, and anyone added since who is still waiting
+    var cnt = function (c) { document.querySelectorAll('[data-idea-n]').forEach(function (n) { var k = Math.max(+n.dataset.base, (c[n.dataset.ideaN] || 0) + 1); n.textContent = k + (k === 1 ? ' person wants this' : ' people want this'); }); };
+    cnt({}); T.support().then(cnt).catch(function () {});
+  }
+  function proposeCtx(e, extra) {
+    return Object.assign({ slug: SLUG, name: e.name, lat: e.lat, lng: e.lng, base: '{B}', areas: IDN && IDN.areas ? IDN.areas.names : [],
+      projects: D.projects.filter(function (p) { return p.place === SLUG; }), proposals: PROPS.filter(function (p) { return p.place === SLUG; }),
+      groups: GROUPS.filter(function (g) { return g.place === SLUG; }), onPosted: function () { renderIdeas(e); } }, extra || {});
+  }
+  document.addEventListener('click', function (ev) {
+    var e = D && D.lib[SLUG]; if (!e || !window.TLPropose) return;
+    if (ev.target.closest('#pp-open')) TLPropose.open(proposeCtx(e));
+    var j = ev.target.closest('[data-idea-join]'); if (j) { var p = PROPS.filter(function (x) { return x.id === j.dataset.ideaJoin; })[0]; if (p) TLPropose.open(proposeCtx(e, { idea: p.idea, join: { id: p.id, name: p.idea } })); }
+    var m = ev.target.closest('[data-idea-map]'); if (m && HM) { var ll = m.dataset.ideaMap.split(',').map(Number); document.getElementById('here').scrollIntoView({ block: 'start' }); HM.setView(ll, 15); L.circleMarker(ll, { radius: 9, color: '#fff', weight: 3, fillColor: '#C0542C', fillOpacity: 1 }).addTo(HM); }
+  });
   function ideaLine(p) {
     var ID = D.ideas || {}, SG = D.stages || {}, others = p.idea ? D.projects.filter(function (x) { return x.idea === p.idea && x.place !== p.place; }) : [];
     var link = function (x) { var e2 = D.lib[x.place] || {}; return '<a href="{B}place/?pj=' + esc(x.id) + '#' + esc(x.place) + '">' + esc(e2.name || x.place) + '</a>'; };
@@ -708,10 +750,13 @@
       if (pjId) { var pc = document.getElementById('pj-' + pjId); if (pc) { pc.scrollIntoView({ block: 'center' }); pc.classList.add('pjc-hl'); var bb = pc.querySelector('.back-btn'); if (bb) setTimeout(function () { bb.focus({ preventScroll: true }); }, 300); } return; }
       if (addK) { PRESET = /^(heat|water|shade|green|change|idea|other)$/.test(addK) ? addK : 'other'; var hint = document.querySelector('.here-hint'); if (hint) hint.innerHTML = '<b>Tap the map where it is</b>, then choose \u201cAdd what you know here\u201d.'; var g = document.querySelector('.here-grid'); g.insertAdjacentHTML('beforebegin', '<p class="here-addnote" id="here-addnote"><b>Add what you know:</b> tap the map where it is. You can drag and zoom to find the spot first.</p>'); document.getElementById('here-addnote').scrollIntoView({ block: 'start' }); return; }
     }, 0);
-    setTimeout(function () { var sh = new URLSearchParams(location.search).get('show'), p = sh && PRESS_NOW.filter(function (x) { return x.key === sh; })[0]; if (!p) return; if (p.layer) { setLayer(p.layer); showWhy(p.key); document.getElementById('here').scrollIntoView({ block: 'start' }); } else { var t = document.getElementById(p.key === 'food' ? 'tied' : 'pressing'); if (t) t.scrollIntoView({ block: 'start' }); } }, 0); renderReady(e, r, sm); renderProjects(e); allProjectsLink(e); renderNews(e);
+    setTimeout(function () { var sh = new URLSearchParams(location.search).get('show'), p = sh && PRESS_NOW.filter(function (x) { return x.key === sh; })[0]; if (!p) return; if (p.layer) { setLayer(p.layer); showWhy(p.key); document.getElementById('here').scrollIntoView({ block: 'start' }); } else { var t = document.getElementById(p.key === 'food' ? 'tied' : 'pressing'); if (t) t.scrollIntoView({ block: 'start' }); } }, 0); renderReady(e, r, sm); renderProjects(e); allProjectsLink(e); renderIdeas(e); renderNews(e);
     try { loadMap(e); } catch (err) { /* the map is extra */ }
     window.scrollTo(0, 0);
   }
+  Promise.all([fetch('{B}data/proposals.json').then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }), fetch('{B}data/groups.json').then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })]).then(function (x) {
+    PROPS = x[0].proposals || []; GROUPS = x[1].groups || []; if (D && D.lib[SLUG]) renderIdeas(D.lib[SLUG]);
+  });
   fetch('{B}data/observations.json').then(function (r) { return r.json(); }).then(function (j) { OBSV = j.observations || []; }).catch(function () {});
   T.all().then(function (d) { D = d; open(); }).catch(function () { $('#pf-missing').hidden = false; $('#pf-missing').innerHTML = '<p class="page-lede">This profile could not be loaded. Check your connection and refresh.</p>'; });
   window.addEventListener('hashchange', function () { if (D) open(); });

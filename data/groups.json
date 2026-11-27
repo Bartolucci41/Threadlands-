@@ -1,0 +1,15 @@
+{
+ "about": "Local groups, campaigns and networks working on something in a place, each with a public link. Added by hand after checking; shown when someone suggests a related idea.",
+ "fields": {
+  "id": "short id",
+  "place": "place slug",
+  "name": "group or campaign name",
+  "topic": "topics from assets/propose.js (food, mobility, trees, heat, water, parks, safety, waste, air)",
+  "what": "one line on what they do",
+  "area": "neighborhood, if local",
+  "lat": "optional",
+  "lng": "optional",
+  "url": "public page"
+ },
+ "groups": []
+}

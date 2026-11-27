@@ -1,0 +1,39 @@
+name: Idea submitted
+# Someone answered "What would make this place better?". The relay sends it here; this opens an issue for review.
+# Nothing is published until the issue gets the "publish" label (see proposal-reviewed.yml).
+on:
+  repository_dispatch:
+    types: [proposal-submitted]
+permissions:
+  issues: write
+jobs:
+  open-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const o = context.payload.client_payload.proposal || {};
+            const where = o.scope === 'pin' ? `${o.lat}, ${o.lng} (https://www.openstreetmap.org/?mlat=${o.lat}&mlon=${o.lng}#map=16/${o.lat}/${o.lng})` : o.scope === 'area' ? `Neighborhood: ${o.area}` : 'Across the whole place';
+            const how = o.mode === 'join' ? `Joins the existing idea **${o.link_id}** (same idea; adds this location and reason to it)` : o.mode === 'connect' ? `New idea, connected to ${o.link_kind} **${o.link_id}**` : 'New idea';
+            const body = [
+              '**Someone suggested a change on Threadlands.**',
+              '',
+              `- Place: ${o.place}`,
+              `- Idea: ${o.idea}`,
+              `- Why: ${o.why || '(none given)'}`,
+              `- Where: ${where}`,
+              `- Topics: ${(o.topic || []).join(', ') || '(none detected)'}`,
+              `- ${how}`,
+              '',
+              'Review it, then:',
+              '- add the label **publish** to put it on the place page (a join is added to the existing idea)',
+              '- or close the issue to leave it off.',
+              'Remove anything personal first (names, phone numbers, private home addresses) by editing the JSON below. Fix a wrong topic there too.',
+              '',
+              '```json',
+              JSON.stringify(o, null, 2),
+              '```'
+            ].join('\n');
+            await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo,
+              title: `Idea: ${String(o.idea || '').slice(0, 60)} (${o.place})`, body, labels: ['proposal'] });

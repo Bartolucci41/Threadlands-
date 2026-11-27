@@ -82,15 +82,50 @@ async function observation(b, request, env, origin) {
   return reply({ ok: true }, 202, origin);
 }
 
+// "What would make this place better?": a simple idea with where it would help and, optionally, why.
+// It may join an existing idea (same thing, own location and reason) or connect to a related idea, project or group.
+// Like observations, it opens a GitHub issue for review; nothing is public until it is checked (see proposal-reviewed.yml).
+const TOPIC_KEYS = ['food', 'mobility', 'trees', 'heat', 'water', 'parks', 'safety', 'waste', 'air'];
+async function proposal(b, request, env, origin) {
+  const num = (v) => (v === null || v === '' || v === undefined || !isFinite(Number(v))) ? null : Math.round(Number(v) * 1e4) / 1e4;
+  const o = {
+    place: String(b.place || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 80),
+    idea: text(b.idea, 120), why: text(b.why, 280), area: text(b.area, 80),
+    scope: ['pin', 'area', 'city'].includes(b.scope) ? b.scope : '',
+    topic: (Array.isArray(b.topic) ? b.topic : []).filter((t) => TOPIC_KEYS.includes(t)).slice(0, 4),
+    lat: num(b.lat), lng: num(b.lng),
+    mode: ['new', 'join', 'connect'].includes(b.mode) ? b.mode : 'new',
+    link_kind: ['proposal', 'project', 'group'].includes(b.link_kind) ? b.link_kind : '', link_id: String(b.link_id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40),
+  };
+  if (o.scope !== 'pin') { o.lat = null; o.lng = null; }
+  if (!o.place || o.idea.length < 4 || !o.scope) return reply({ error: 'Write your idea and say where it would help.' }, 400, origin);
+  if (o.scope === 'pin' && (o.lat === null || o.lng === null || Math.abs(o.lat) > 90 || Math.abs(o.lng) > 180)) return reply({ error: 'Tap the map to drop a pin.' }, 400, origin);
+  if (o.scope === 'area' && !o.area) return reply({ error: 'Choose a neighborhood.' }, 400, origin);
+  if (o.mode !== 'new' && (!o.link_kind || !o.link_id)) o.mode = 'new';
+  if (!(await knownPlaces(env)).has(o.place)) return reply({ error: 'Unknown place.' }, 400, origin);
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown', now = Date.now();
+  const times = (recent.get('i' + ip) || []).filter((t) => now - t < 3600e3);
+  if (times.length >= 8) return reply({ error: 'You have sent several ideas in the last hour. Please try again later.' }, 429, origin);
+  times.push(now); recent.set('i' + ip, times);
+  const r = await fetch(`https://api.github.com/repos/${env.REPO || 'Bartolucci41/Threadlands-'}/dispatches`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${env.GITHUB_TOKEN}`, 'Accept': 'application/vnd.github+json', 'User-Agent': 'threadlands-relay', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ event_type: 'proposal-submitted', client_payload: { proposal: o } }),
+  });
+  if (r.status !== 204) return reply({ error: 'Your idea could not be sent right now.', status: r.status }, 502, origin);
+  return reply({ ok: true }, 202, origin);
+}
+
 // "Back this project": one count per project, one back per visitor per project.
 // Counts live in a single KV entry so the website can read them all at once. Visitors are remembered only as a
 // one-way fingerprint (a hash of their network address, the project and a secret salt), never the address itself.
 async function knownProjects(env) {
-  const site = env.SITE || 'https://threadlands.org';
-  const r = await fetch(`${site}/data/projects.json`, { cf: { cacheTtl: 300 } });
-  if (!r.ok) return new Set();
-  const j = await r.json();
-  return new Set((j.projects || []).map((p) => String(p.id)));
+  // Projects and published ideas can both be backed ("I want this too" on an idea counts the same way)
+  const site = env.SITE || 'https://threadlands.org', ids = new Set();
+  for (const [file, key] of [['projects.json', 'projects'], ['proposals.json', 'proposals']]) {
+    try { const r = await fetch(`${site}/data/${file}`, { cf: { cacheTtl: 300 } }); if (r.ok) ((await r.json())[key] || []).forEach((p) => ids.add(String(p.id))); } catch (e) { /* one list missing shouldn't block the other */ }
+  }
+  return ids;
 }
 async function fingerprint(text) {
   const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
@@ -230,6 +265,7 @@ export default {
     if (b.type === 'back') return back(b, request, env, origin);
     if (b.type === 'stand') return stand(b, request, env, origin);
     if (b.type === 'observation') return observation(b, request, env, origin);
+    if (b.type === 'proposal') return proposal(b, request, env, origin);
     if (b.type === 'feedback') return feedback(b, request, env, origin);
     if (b.type === 'inbox-status') return inboxStatus(b, request, env, origin);
     // Build a new place. Only an OpenStreetMap record chosen from the search results is accepted: the relay looks the
