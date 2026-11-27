@@ -1,0 +1,13 @@
+# Deploy settings for the relay (used by .github/workflows/deploy-relay.yml).
+# Secrets (GITHUB_TOKEN, INBOX_KEY, SALT) stay in Cloudflare and are not touched by a deploy.
+name = "threadlands-relay"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+keep_vars = true            # keep any plain settings added in the Cloudflare dashboard
+
+[[kv_namespaces]]
+binding = "SUPPORT"
+id = "KV_ID_FROM_GITHUB_SECRET"   # filled in at deploy time from the RELAY_KV_ID secret
+
+[observability]
+enabled = true              # Workers Logs stay on, as decided
