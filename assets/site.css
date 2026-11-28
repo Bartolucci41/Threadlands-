@@ -557,6 +557,9 @@
   @media (max-width: 899px) { .mw-key p { display: none; } .mw-key { bottom: 48px; width: min(220px, calc(100% - 60px)); padding: 7px 10px; } .mw-mapwrap { height: 68vh; } }
   .mw-count { position: absolute; top: 56px; left: 10px; padding: 6px 12px; border-radius: 999px; background: #123B38; color: #fff; font: 600 0.82rem var(--font-body); text-decoration: none; z-index: 2; box-shadow: 0 1px 5px rgba(0,0,0,0.2); } .mw-count[hidden] { display: none; } .mw-count b { font-weight: 800; }
   @media (min-width: 900px) { .mw-count { pointer-events: none; } }
+  .mw-count.warn { background: #FFF4D6; color: #5a4300; border: 1.5px solid #d9b85c; }
+  .mw-scope { margin: 0 0 8px; font-size: 0.88rem; color: var(--ink2); } .mw-scope.warn { padding: 8px 10px; border-radius: 10px; background: #FFF4D6; color: #5a4300; } .mw-scope.warn b { display: block; color: #3d2e00; }
+  .mw-key .mw-scenk { display: block !important; margin: 0 0 6px; padding-bottom: 6px; border-bottom: 1px solid #e4e0d6; } .mw-scenk b { display: block; color: #8a4b00; }
   .mw-loading { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(242,240,233,0.8); font-weight: 600; z-index: 3; } .mw-loading[hidden] { display: none; }
   .mw-slider { position: absolute; top: 0; bottom: 0; width: 0; z-index: 2; } .mw-slider[hidden] { display: none; }
   .mw-slider::before { content: ""; position: absolute; top: 0; bottom: 0; left: -1.5px; width: 3px; background: #fff; box-shadow: 0 0 4px rgba(0,0,0,0.35); }
@@ -564,6 +567,7 @@
   .mw-handle span { display: block; font: 700 1rem/1 var(--font-body); color: #123B38; letter-spacing: -0.05em; }
   .mw-sl-l, .mw-sl-r { position: absolute; top: 56px; padding: 3px 9px; border-radius: 999px; background: rgba(18,59,56,0.9); color: #fff; font: 600 0.75rem var(--font-body); white-space: nowrap; }
   .mw-sl-l { right: 10px; } .mw-sl-r { left: 10px; }
+  @media (max-width: 899px) { .mw-sl-l, .mw-sl-r { white-space: normal; max-width: 110px; line-height: 1.25; text-align: center; } }
   .mw-pop p { margin: 0 0 4px; font-size: 0.82rem; } .mw-pk { font: 600 0.72rem var(--font-mono, monospace); text-transform: uppercase; letter-spacing: 0.05em; color: #5b6460; } .mw-pm { font-weight: 700; color: #123B38; } .mw-pn { color: #5b6460; font-size: 0.76rem !important; }
   .vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   /* Effort page: one shared local effort, read-only */

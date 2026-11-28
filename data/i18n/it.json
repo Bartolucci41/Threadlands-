@@ -2180,5 +2180,15 @@
 "Non è stato possibile caricare la mappa. Controlla la connessione e ricarica la pagina.",
 "Piogge intense in arrivo: {0} in nei prossimi {1} giorni. Strade basse e tombini potrebbero allagarsi.",
 "Meno persone",
-"Più persone"
+"Più persone",
+"{0} · scenario modellato",
+"Mappa centrata su",
+"i risultati coprono tutta",
+"celle in tutta",
+"L’analisi per una sola alcaldía non è ancora disponibile, perché Threadlands non ha i confini delle alcaldías.",
+"I risultati coprono tutta",
+"I confini delle alcaldías non sono ancora caricati, quindi i risultati non possono essere limitati a Iztapalapa.",
+"Scenario modellato, non una previsione.",
+"Presuppone zone umide su {0} km² di antico fondo del lago non edificato e il {1} di alberi stradali in più, sulla traiettoria climatica intermedia per il {2}. Nessuna casa spostata. Questa vista mostra solo le zone umide.",
+"Celle di circa {0} km²."
 ]

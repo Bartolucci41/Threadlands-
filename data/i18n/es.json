@@ -2180,5 +2180,15 @@
 "No se pudo cargar el mapa. Revisa tu conexión y vuelve a cargar.",
 "Se esperan lluvias fuertes: {0} in en los próximos {1} días. Las calles bajas y las coladeras podrían inundarse.",
 "Menos personas",
-"Más personas"
+"Más personas",
+"{0} · escenario modelado",
+"Mapa centrado en",
+"los resultados abarcan toda",
+"celdas en toda",
+"El análisis de una sola alcaldía aún no está disponible, porque Threadlands no tiene los límites de las alcaldías.",
+"Los resultados abarcan toda",
+"Los límites de las alcaldías aún no están cargados, así que los resultados no pueden limitarse a Iztapalapa.",
+"Escenario modelado, no un pronóstico.",
+"Supone humedales en {0} km² del antiguo lecho del lago sin construir y un {1} más de árboles en las calles, en la trayectoria climática intermedia para {2}. No se mueven viviendas. Esta vista muestra solo los humedales.",
+"Celdas de unos {0} km²."
 ]

@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=88">
+<link rel="stylesheet" href="../assets/site.css?v=90">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js?v=4" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -78,7 +78,7 @@
   <div class="mw-mapwrap" id="mw-mapwrap">
     <div class="mw-map" id="mw-map" role="region" aria-label="Map"></div>
     <div class="mw-map mw-map2" id="mw-map2" hidden aria-hidden="true"></div>
-    <div class="mw-slider" id="mw-slider" hidden><span class="mw-sl-l">Today</span><span class="mw-sl-r">2050 scenario</span><button type="button" class="mw-handle" id="mw-handle" aria-label="Drag to compare"><span aria-hidden="true">&lsaquo;&rsaquo;</span></button></div>
+    <div class="mw-slider" id="mw-slider" hidden><span class="mw-sl-l">Today</span><span class="mw-sl-r">2050 · modeled scenario</span><button type="button" class="mw-handle" id="mw-handle" aria-label="Drag to compare"><span aria-hidden="true">&lsaquo;&rsaquo;</span></button></div>
     <div class="mw-layers" id="mw-layers" role="group" aria-label="Layer"></div>
     <div class="mw-key" id="mw-key"></div>
     <a class="mw-count" id="mw-count" href="#mw-res" hidden></a>
@@ -289,10 +289,13 @@
     paintResult();
     var cellKm2 = DET.ix.cell_km2 || 0.015;
     $('#mw-res').hidden = false;
-    $('#mw-count').hidden = false; $('#mw-count').innerHTML = '<b>' + cnt.toLocaleString('en-US') + '</b> <span>cells match</span> <span aria-hidden="true">·</span> <span>How it was made</span>';
+    var where = esc(PLACE.name), focus = r.fly ? 'Iztapalapa' : null;
+    $('#mw-count').hidden = false; $('#mw-count').classList.toggle('warn', !!focus);
+    $('#mw-count').innerHTML = focus ? '<span>Map focused on</span> <b>' + focus + '</b> <span aria-hidden="true">·</span> <span>results cover all of</span> <b>' + where + '</b>'
+      : '<b>' + cnt.toLocaleString('en-US') + '</b> <span>cells across</span> <b>' + where + '</b> <span aria-hidden="true">·</span> <span>How it was made</span>';
     if (window.innerWidth < 900 && push !== false) $('#mw-mapwrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
     $('#mw-understood').innerHTML = understood || '';
-    $('#mw-sum').innerHTML = '<p class="mw-big"><b>' + cnt.toLocaleString('en-US') + '</b> <span>cells match</span></p><p><span>Roughly</span> <b>' + (cnt * cellKm2).toFixed(1) + ' km²</b> <span>where about</span> <b>' + T.fmtN(ppl) + '</b> <span>people live.</span></p>';
+    $('#mw-sum').innerHTML = (focus ? '<p class="mw-scope warn"><b><span>Map focused on</span> ' + focus + ' · <span>results cover all of</span> ' + where + '.</b> <span>Analysis for one borough alone isn’t available yet, because Threadlands doesn’t have borough boundaries.</span></p>' : '<p class="mw-scope"><span>Results cover all of</span> ' + where + '.</p>') + '<p class="mw-big"><b>' + cnt.toLocaleString('en-US') + '</b> <span>cells match</span></p><p><span>Roughly</span> <b>' + (cnt * cellKm2).toFixed(1) + ' km²</b> <span>where about</span> <b>' + T.fmtN(ppl) + '</b> <span>people live.</span></p>';
     $('#mw-steps').innerHTML = steps.map(function (s) { return '<li><label><input type="checkbox" checked data-step="' + s.k + '"> <span>' + s.t + '</span></label>' + (s.s ? '<small>' + esc(s.s) + '</small>' : '') + '</li>'; }).join('');
     var cant = ['<span>Street-level shade, private trees and building shadows are not in these layers.</span>', '<span>Each result is a cell about 140 m across, not a single street or corner.</span>'];
     if (r.school != null) cant.push('<span>Schools missing from OpenStreetMap are not counted, and access routes to schools aren’t known.</span>');
@@ -330,7 +333,7 @@
       ev.preventDefault(); var t = $('#mw-q').value.trim(); if (!t) return;
       var x = read(t);
       if (!x.heard.length) { $('#mw-res').hidden = false; $('#mw-understood').innerHTML = '<span>Threadlands didn’t recognize a layer in that. It can map heat, tree cover, people, schools and listed shade projects so far.</span>'; $('#mw-sum').innerHTML = ''; $('#mw-steps').innerHTML = ''; $('#mw-cant').innerHTML = ''; return; }
-      if (x.r.fly && AREAS[x.r.fly]) { M.fitBounds(AREAS[x.r.fly], { padding: 30 }); x.r.flyNote = 'Threadlands doesn’t have borough boundaries yet, so “Iztapalapa” moved the map there; the filters still cover the whole city. Read the counts as city-wide.'; }
+      if (x.r.fly && AREAS[x.r.fly]) { M.fitBounds(AREAS[x.r.fly], { padding: 30 }); x.r.flyNote = 'Borough boundaries aren’t loaded yet, so results can’t be limited to Iztapalapa.'; }
       run(x.r, '<span>Understood:</span> <b>' + x.heard.map(function (h) { return '<span>' + h + '</span>'; }).join(' · ') + '</b>' + (x.missed.length ? '<br><span class="mw-missed">' + x.missed.map(function (m) { return '<span>Not used: ' + m + '</span>'; }).join(' ') + '</span>' : ''));
     });
     $('#mw-steps').addEventListener('change', function (ev) {
@@ -352,8 +355,9 @@
     });
     $('#mw-layers').innerHTML = Object.keys(LAYERS).map(function (k) { return '<button type="button" data-ly="' + k + '" aria-pressed="' + (k === LY) + '">' + LAYERS[k].name + '</button>'; }).join('');
     $('#mw-layers').addEventListener('click', function (ev) { var b = ev.target.closest('[data-ly]'); if (b) setLayer(b.dataset.ly); });
-    $('#mw-3d').addEventListener('click', function () { set3D($('#mw-3d').getAttribute('aria-pressed') !== 'true'); });
-    $('#mw-swipe').addEventListener('click', function () { setSwipe($('#mw-swipe').getAttribute('aria-pressed') !== 'true'); });
+    var toMap = function () { if (window.innerWidth < 900) $('#mw-mapwrap').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    $('#mw-3d').addEventListener('click', function () { var on = $('#mw-3d').getAttribute('aria-pressed') !== 'true'; set3D(on); if (on) toMap(); });
+    $('#mw-swipe').addEventListener('click', function () { var on = $('#mw-swipe').getAttribute('aria-pressed') !== 'true'; setSwipe(on); if (on) toMap(); });
   }
 
   // ---------- Click: the value for the cell the point falls in, never a point reading ----------
@@ -419,7 +423,8 @@
       M2.resize(); sync(); clip();
       M.fitBounds([[TIME.bbox[2], TIME.bbox[0]], [TIME.bbox[3], TIME.bbox[1]]], { padding: 20 });   // bbox is south, north, west, east
       $('#mw-layers').hidden = true; $('#mw-count').hidden = true;
-      $('#mw-key').innerHTML = '<p class="mw-krow"><span class="mw-ksw" style="background:#3D7FA6"></span><span>Open water and wetland today</span></p><p class="mw-krow"><span class="mw-ksw" style="background:#2E9C86"></span><span>Wetland in the 2050 scenario</span></p><p class="mw-krow"><span class="mw-ksw" style="background:#9CC3D3;opacity:.6"></span><span>The old lake</span></p><p>Cells of about 0.85 km². One modeled idea, not a forecast or a plan.</p>';
+      var F = TIME.future || {};
+      $('#mw-key').innerHTML = '<p class="mw-scenk"><b>Modeled scenario, not a forecast.</b> <span>Assumes wetlands on ' + (F.wetland_km2 || '') + ' km² of unbuilt old lakebed and ' + (F.canopy || '') + '% more street tree cover, on the middle climate path for 2050. No homes moved. This view shows the wetlands only.</span></p><p class="mw-krow"><span class="mw-ksw" style="background:#3D7FA6"></span><span>Open water and wetland today</span></p><p class="mw-krow"><span class="mw-ksw" style="background:#2E9C86"></span><span>Wetland in the 2050 scenario</span></p><p class="mw-krow"><span class="mw-ksw" style="background:#9CC3D3;opacity:.6"></span><span>The old lake</span></p><p>Cells of about 0.85 km².</p>';
       $('#mw-chnote').innerHTML = '<span>Left: open water and wetland today. Right: the 2050 scenario from the Mexico City through-time page, with wetlands back on unbuilt land of the old lakebed (teal). Pale blue: the old lake. One modeled idea, not a forecast or a plan.</span>';
     } else {
       $('#mw-map2').hidden = true; $('#mw-slider').hidden = true; $('#mw-layers').hidden = false; if (RES) $('#mw-count').hidden = false; drawKey();
