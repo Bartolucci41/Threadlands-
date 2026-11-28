@@ -75,7 +75,7 @@ css += """
   .mw-key { position: absolute; left: 10px; bottom: 26px; width: min(300px, calc(100% - 20px)); padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.95); box-shadow: 0 1px 5px rgba(0,0,0,0.18); font-size: 0.76rem; color: #1f2a27; z-index: 2; }
   .mw-key p { margin: 6px 0 0; line-height: 1.35; } .mw-kbar { height: 9px; border-radius: 5px; } .mw-kl { display: flex; justify-content: space-between; margin-top: 3px; }
   .mw-krow { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; } .mw-ksch, .mw-kpj, .mw-kmatch { display: inline-block; width: 11px; height: 11px; border-radius: 50%; } .mw-ksch { background: #fff; border: 1.5px solid #2B4FA0; } .mw-kpj { background: #C0603A; margin-left: 8px; } .mw-kmatch { border: 1.5px solid #123B38; background: #E07B4A; } .mw-ksw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
-  @media (max-width: 899px) { .mw-key p { display: none; } .mw-key { bottom: 24px; width: min(220px, calc(100% - 60px)); padding: 7px 10px; } .mw-mapwrap { height: 68vh; } }
+  @media (max-width: 899px) { .mw-key p { display: none; } .mw-key { bottom: 48px; width: min(220px, calc(100% - 60px)); padding: 7px 10px; } .mw-mapwrap { height: 68vh; } }
   .mw-count { position: absolute; top: 56px; left: 10px; padding: 6px 12px; border-radius: 999px; background: #123B38; color: #fff; font: 600 0.82rem var(--font-body); text-decoration: none; z-index: 2; box-shadow: 0 1px 5px rgba(0,0,0,0.2); } .mw-count[hidden] { display: none; } .mw-count b { font-weight: 800; }
   @media (min-width: 900px) { .mw-count { pointer-events: none; } }
   .mw-loading { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(242,240,233,0.8); font-weight: 600; z-index: 3; } .mw-loading[hidden] { display: none; }
@@ -1138,7 +1138,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=87">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=88">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
