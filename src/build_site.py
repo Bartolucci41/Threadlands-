@@ -38,6 +38,55 @@ css += """
   .ef-steps, .efk-steps { display: inline-flex; gap: 2px; font-style: normal; } .ef-steps b, .efk-steps b { width: 6px; height: 6px; border-radius: 50%; border: 1.5px solid #0E5A52; } .ef-steps b.on, .efk-steps b.on { background: #0E5A52; }
   .efk-steps { justify-self: center; }
   .ef-tip b { font-weight: 700; }
+  /* Map workspace */
+  .here-ws { margin: 10px 0 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; } .here-ws a { color: var(--ink); text-decoration: none; padding: 10px 14px; border-radius: 12px; border: 1.5px solid #123B38; background: var(--surface); display: inline-flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; } .here-ws a:hover b { text-decoration: underline; } .here-ws a span { color: var(--ink2); font-size: 0.9rem; } .here-ws[hidden] { display: none; }
+  .mw { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .mw-panel { padding: 18px 16px 28px; background: var(--bg); }
+  .mw-mapwrap { position: relative; height: 64vh; min-height: 360px; order: -1; overflow: hidden; }
+  @media (min-width: 900px) { .mw { grid-template-columns: 390px minmax(0, 1fr); height: calc(100vh - 72px); } .mw-panel { overflow-y: auto; border-right: 1px solid var(--line); padding: 22px 22px 32px; } .mw-mapwrap { height: 100%; min-height: 0; order: 0; } }
+  .mw-map { position: absolute !important; inset: 0; width: 100%; height: 100%; } .mw-map2 { pointer-events: none; }
+  .mw-kick { margin: 0 0 6px; font: 600 0.78rem var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink2); }
+  .mw-kick a { color: var(--accent); }
+  .mw-proto { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 999px; background: #FFF4D6; color: #5a4300; letter-spacing: 0.02em; }
+  .mw-h { margin: 0 0 12px; font-size: clamp(1.7rem, 4vw, 2.2rem); letter-spacing: -0.02em; line-height: 1.05; }
+  .mw-ask { display: grid; gap: 8px; }
+  .mw-ask textarea { width: 100%; min-height: 64px; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink); font: 1rem/1.4 var(--font-body); resize: vertical; }
+  .mw-ask .btn { justify-self: start; }
+  .mw-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; }
+  .mw-chip { min-height: 34px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 0.85rem var(--font-body); cursor: pointer; text-align: left; }
+  .mw-chip:hover { border-color: var(--ink); }
+  .mw-res { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .mw-understood { margin: 0 0 10px; font-size: 0.9rem; color: var(--ink2); } .mw-understood b { color: var(--ink); } .mw-missed { color: #8a5a00; }
+  .mw-sum p { margin: 0 0 4px; } .mw-big { font-size: 1.15rem; } .mw-big b { font-size: 1.9rem; letter-spacing: -0.02em; }
+  .mw-sh { margin: 18px 0 8px; font: 600 0.74rem var(--font-mono, 'IBM Plex Mono', monospace); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink2); }
+  .mw-steps { margin: 0; padding-left: 1.2em; display: grid; gap: 10px; } .mw-steps label { display: flex; gap: 6px; align-items: flex-start; cursor: pointer; } .mw-steps input { margin-top: 4px; accent-color: #123B38; }
+  .mw-steps small { display: block; margin: 2px 0 0 22px; color: var(--ink2); font-size: 0.8rem; line-height: 1.35; }
+  .mw-cant { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; font-size: 0.88rem; color: var(--ink2); }
+  .mw-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; } .mw-acts .btn { min-height: 38px; font-size: 0.9rem; }
+  .mw-msg { min-height: 1em; margin: 8px 0 0; font-size: 0.85rem; color: var(--ink2); word-break: break-all; }
+  .mw-draft { margin-top: 10px; padding: 14px; border: 1.5px dashed #0E5A52; border-radius: 12px; } .mw-draft p { margin: 0 0 6px; } .mw-dk { font: 600 0.74rem var(--font-mono, monospace); text-transform: uppercase; letter-spacing: 0.06em; color: #0E5A52; }
+  .mw-change { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .mw-tools { display: flex; flex-wrap: wrap; gap: 8px; } .mw-tools .btn { min-height: 38px; font-size: 0.88rem; } .mw-tools .btn[aria-pressed="true"] { background: #123B38; color: #fff; border-color: #123B38; }
+  .mw-note { font-size: 0.85rem; color: var(--ink2); margin: 8px 0 0; } .mw-foot { margin: 22px 0 0; font-size: 0.8rem; color: var(--ink2); }
+  .mw-layers[hidden] { display: none; }
+  .mw-layers { position: absolute; top: 10px; left: 10px; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(255,255,255,0.94); box-shadow: 0 1px 5px rgba(0,0,0,0.18); z-index: 2; }
+  .mw-layers button { min-height: 32px; padding: 0 12px; border-radius: 999px; border: 0; background: transparent; color: #1f2a27; font: 600 0.82rem var(--font-body); cursor: pointer; }
+  .mw-layers button[aria-pressed="true"] { background: #123B38; color: #fff; }
+  .mw-key { position: absolute; left: 10px; bottom: 26px; width: min(300px, calc(100% - 20px)); padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.95); box-shadow: 0 1px 5px rgba(0,0,0,0.18); font-size: 0.76rem; color: #1f2a27; z-index: 2; }
+  .mw-key p { margin: 6px 0 0; line-height: 1.35; } .mw-kbar { height: 9px; border-radius: 5px; } .mw-kl { display: flex; justify-content: space-between; margin-top: 3px; }
+  .mw-krow { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; } .mw-ksch, .mw-kpj, .mw-kmatch { display: inline-block; width: 11px; height: 11px; border-radius: 50%; } .mw-ksch { background: #fff; border: 1.5px solid #2B4FA0; } .mw-kpj { background: #C0603A; margin-left: 8px; } .mw-kmatch { border: 1.5px solid #123B38; background: #E07B4A; } .mw-ksw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+  @media (max-width: 899px) { .mw-key p { display: none; } .mw-key { bottom: 24px; width: min(220px, calc(100% - 60px)); padding: 7px 10px; } .mw-mapwrap { height: 68vh; } }
+  .mw-count { position: absolute; top: 56px; left: 10px; padding: 6px 12px; border-radius: 999px; background: #123B38; color: #fff; font: 600 0.82rem var(--font-body); text-decoration: none; z-index: 2; box-shadow: 0 1px 5px rgba(0,0,0,0.2); } .mw-count[hidden] { display: none; } .mw-count b { font-weight: 800; }
+  @media (min-width: 900px) { .mw-count { pointer-events: none; } }
+  .mw-loading { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(242,240,233,0.8); font-weight: 600; z-index: 3; } .mw-loading[hidden] { display: none; }
+  .mw-slider { position: absolute; top: 0; bottom: 0; width: 0; z-index: 2; } .mw-slider[hidden] { display: none; }
+  .mw-slider::before { content: ""; position: absolute; top: 0; bottom: 0; left: -1.5px; width: 3px; background: #fff; box-shadow: 0 0 4px rgba(0,0,0,0.35); }
+  .mw-handle { position: absolute; top: 50%; left: -20px; width: 40px; height: 40px; margin-top: -20px; border-radius: 50%; border: 0; background: #fff; box-shadow: 0 1px 6px rgba(0,0,0,0.35); cursor: ew-resize; touch-action: none; }
+  .mw-handle span { display: block; font: 700 1rem/1 var(--font-body); color: #123B38; letter-spacing: -0.05em; }
+  .mw-sl-l, .mw-sl-r { position: absolute; top: 56px; padding: 3px 9px; border-radius: 999px; background: rgba(18,59,56,0.9); color: #fff; font: 600 0.75rem var(--font-body); white-space: nowrap; }
+  .mw-sl-l { right: 10px; } .mw-sl-r { left: 10px; }
+  .mw-pop p { margin: 0 0 4px; font-size: 0.82rem; } .mw-pk { font: 600 0.72rem var(--font-mono, monospace); text-transform: uppercase; letter-spacing: 0.05em; color: #5b6460; } .mw-pm { font-weight: 700; color: #123B38; } .mw-pn { color: #5b6460; font-size: 0.76rem !important; }
+  .vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   /* Effort page: one shared local effort, read-only */
   .ef-sample { background: #FFF4D6; color: #5a4300; border-bottom: 1px solid #ecd9a0; font-size: 0.9rem; padding: 10px 0; }
   .ef-sample b { font-weight: 700; }
@@ -1089,7 +1138,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=82">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=87">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):
@@ -1146,7 +1195,7 @@ for i, sc in enumerate(re.findall(r"<script>(.*?)</script>", doc, re.S)):
     write(f"src/.check/explore{i}.js", sc)
 
 # ---- The other pages
-for name in ("home", "involved", "place", "lab", "studio", "places", "projects", "how-it-works", "about", "inbox", "time", "guide", "effort"):
+for name in ("home", "involved", "place", "lab", "studio", "places", "projects", "how-it-works", "about", "inbox", "time", "guide", "effort", "map"):
     spec = read(SRC, "pages", name + ".html")
     meta = dict(re.findall(r"<!--\s*(\w+):\s*(.*?)\s*-->", spec.split("\n\n", 1)[0]))
     content = spec.split("\n\n", 1)[1]

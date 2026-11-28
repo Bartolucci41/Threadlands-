@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Map | Threadlands</title>
+<meta name="description" content="Ask the map a question about a place. Threadlands combines its climate and land layers, shows exactly how it built the answer, and lets you explore a change or start a shared effort.">
+<meta property="og:title" content="Map | Threadlands">
+<meta property="og:description" content="Ask the map a question about a place. Threadlands combines its climate and land layers, shows exactly how it built the answer, and lets you explore a change or start a shared effort.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css?v=87">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
+<script src="../assets/i18n.js?v=4" defer></script>
+<script src="../assets/feedback.js?v=1" defer></script>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D1613" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png?v=2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Threadlands">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });</script>
+<script>window.TL_DATA = "https://pub-5cc2f5116c6c462596fbf16596585b83.r2.dev";</script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a92b6704e81e4aaba11a9f8a11832ae1"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+<header class="wrap site-head" id="top">
+  <div class="topbar">
+    <a class="wordmark" href="../" translate="no"><svg class="wm-sym" viewBox="0 0 48 48" width="28" height="28" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 8C14 8 18 24 28 24H35" stroke="#2E6E8E"/><path d="M4 24H28" stroke="#4C9A5B"/><path d="M4 40C14 40 18 24 28 24" stroke="#C0603A"/><circle cx="40" cy="24" r="5" fill="#123B38" stroke="none"/></svg><span>Threadlands</span></a>
+    <div class="topright"><nav class="topnav" aria-label="Site"><a href="../"><svg class="nav-home" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Home</a><a href="../places/">Places</a><a href="../involved/">Get involved</a><a href="../about/">About</a><a href="../lab/" class="nav-lab">ThreadLab</a></nav><label class="lang-l"><span class="sr-only">Language</span><select id="lang" class="lang-sel" translate="no" aria-label="Language"><option value="en">English</option></select></label></div>
+  </div>
+</header>
+<script>(function(){var n=document.querySelector('.topnav');if(!n)return;function f(){n.classList.toggle('at-end',n.scrollLeft+n.clientWidth>=n.scrollWidth-4);}n.addEventListener('scroll',f,{passive:true});window.addEventListener('resize',f);f();})();</script>
+<link rel="stylesheet" href="../assets/vendor/maplibre/maplibre-gl.css">
+<script src="../assets/vendor/maplibre/maplibre-gl.js"></script>
+<script src="../assets/public.js?v=7"></script>
+<main class="mw" id="mw">
+  <aside class="mw-panel" id="mw-panel" aria-label="Ask the map">
+    <div class="mw-top">
+      <p class="mw-kick"><a id="mw-place" href="#"></a> <span aria-hidden="true">&middot;</span> <span>Map workspace</span> <span class="mw-proto">Prototype</span></p>
+      <h1 class="mw-h">Ask the map</h1>
+      <form class="mw-ask" id="mw-ask" autocomplete="off">
+        <label for="mw-q" class="vh">Describe what you want to see</label>
+        <textarea id="mw-q" rows="2" placeholder="For example: hot areas with few trees near schools, without a shade project"></textarea>
+        <button class="btn btn-primary" type="submit">Make the map</button>
+      </form>
+      <div class="mw-chips" id="mw-chips" aria-label="Start from a recipe"></div>
+    </div>
+    <section class="mw-res" id="mw-res" hidden aria-live="polite">
+      <p class="mw-understood" id="mw-understood"></p>
+      <div class="mw-sum" id="mw-sum"></div>
+      <h2 class="mw-sh">How the map was made</h2>
+      <ol class="mw-steps" id="mw-steps"></ol>
+      <h2 class="mw-sh">What it couldn&rsquo;t determine</h2>
+      <ul class="mw-cant" id="mw-cant"></ul>
+      <div class="mw-acts">
+        <button type="button" class="btn" id="mw-undo">Undo</button>
+        <button type="button" class="btn" id="mw-share">Copy link to this map</button>
+        <button type="button" class="btn btn-primary" id="mw-draft">Start a draft effort</button>
+      </div>
+      <p class="mw-msg" id="mw-msg" role="status"></p>
+      <div class="mw-draft" id="mw-draftbox" hidden></div>
+    </section>
+    <section class="mw-change" aria-labelledby="mw-ch-h">
+      <h2 class="mw-sh" id="mw-ch-h">Explore a change</h2>
+      <div class="mw-tools">
+        <button type="button" class="btn" id="mw-swipe" aria-pressed="false">Compare: today and the wetland scenario</button>
+        <button type="button" class="btn" id="mw-3d" aria-pressed="false">3D terrain and buildings</button>
+      </div>
+      <p class="mw-note" id="mw-chnote"></p>
+    </section>
+    <p class="mw-foot">Every result shows its layers, filters, sources and resolution. The calculations behind heat and tree cover are the same ones used across Threadlands; <a href="../how-it-works/">see the methods</a>.</p>
+  </aside>
+  <div class="mw-mapwrap" id="mw-mapwrap">
+    <div class="mw-map" id="mw-map" role="region" aria-label="Map"></div>
+    <div class="mw-map mw-map2" id="mw-map2" hidden aria-hidden="true"></div>
+    <div class="mw-slider" id="mw-slider" hidden><span class="mw-sl-l">Today</span><span class="mw-sl-r">2050 scenario</span><button type="button" class="mw-handle" id="mw-handle" aria-label="Drag to compare"><span aria-hidden="true">&lsaquo;&rsaquo;</span></button></div>
+    <div class="mw-layers" id="mw-layers" role="group" aria-label="Layer"></div>
+    <div class="mw-key" id="mw-key"></div>
+    <a class="mw-count" id="mw-count" href="#mw-res" hidden></a>
+    <div class="mw-loading" id="mw-loading">Loading the map&hellip;</div>
+  </div>
+</main>
+<footer class="site-foot2">
+  <div class="wrap foot-grid">
+    <div class="foot-brand"><a class="wordmark foot-wm" href="../" translate="no">Threadlands</a><p>A civic climate map. See what&rsquo;s happening where you live, map what you notice, and explore what could change.</p><button type="button" class="fb-btn" data-feedback=""><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Send feedback</button></div>
+    <nav aria-label="Get involved"><h2>Get involved</h2><a href="../involved/">Places you stand with</a><a href="../projects/">Projects</a><a href="../places/">All places</a></nav>
+    <nav aria-label="ThreadLab"><h2>ThreadLab</h2><a href="../lab/">Overview</a><a href="../explore/">Explore</a><a href="../studio/">Studio</a><a href="../guide/">How to use</a><a href="../how-it-works/">Method</a></nav>
+    <nav aria-label="About"><h2>About</h2><a href="../about/">About Threadlands</a><a href="#" data-feedback="">Send feedback</a></nav>
+  </div>
+  <div class="wrap foot-small">
+    <p>&copy; 2026 Robert Bartolucci. All rights reserved. Threadlands is created by Robert Bartolucci.</p>
+    <p>Data from OpenStreetMap, ESA WorldCover, Copernicus DEM, WorldPop, HydroBASINS, Natural Earth, Landsat (USGS and NASA), Open-Meteo and GBIF.</p>
+  </div>
+</footer>
+<script>
+
+(function () {
+  var T = window.TLP, esc = T.esc, $ = function (s) { return document.querySelector(s); };
+  T.setBase('../');
+  var LANG = function () { return (document.documentElement.lang || 'en').slice(0, 2); };
+
+  // One place to swap map providers: OpenFreeMap vector tiles and fonts, AWS open terrain tiles.
+  // Both are free public services without availability guarantees; point these at a mirror or self-hosted copy if needed.
+  var TILES = window.TL_TILES || {
+    vector: 'https://tiles.openfreemap.org/planet',
+    glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+    terrain: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'
+  };
+  var SLUG = decodeURIComponent((location.hash.slice(1).split('?')[0]) || 'mexico-city');
+  var DATA = window.TL_DATA ? window.TL_DATA.replace(/\/$/, '') + '/' : '../data/';
+  function get(u) { return fetch(u).then(function (r) { if (!r.ok) throw new Error(u); return r.json(); }); }
+  function getData(p) { return get(DATA + p).catch(function () { return get('../data/' + p); }); }
+
+  // ---------- Basemap: quiet, in Threadlands colors, names in the reader's language ----------
+  function nameExpr() { var l = LANG(); return l === 'en' ? ['get', 'name'] : ['coalesce', ['get', 'name:' + l], ['get', 'name']]; }   // English readers see local names
+  function style() {
+    var road = '#FFFFFF', casing = '#DCD8CE', ink = '#4E5753';
+    return {
+      version: 8, glyphs: TILES.glyphs,
+      sources: {
+        om: { type: 'vector', url: TILES.vector, attribution: '<a href="https://openfreemap.org">OpenFreeMap</a> · <a href="https://www.openmaptiles.org/">OpenMapTiles</a> · <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>' },
+        dem: { type: 'raster-dem', tiles: [TILES.terrain], tileSize: 256, encoding: 'terrarium', maxzoom: 13, attribution: 'Terrain: <a href="https://registry.opendata.aws/terrain-tiles/">AWS Terrain Tiles</a>' },
+        dem3d: { type: 'raster-dem', tiles: [TILES.terrain], tileSize: 256, encoding: 'terrarium', maxzoom: 13 }
+      },
+      layers: [
+        { id: 'bg', type: 'background', paint: { 'background-color': '#F2F0E9' } },
+        { id: 'relief', type: 'hillshade', source: 'dem', paint: { 'hillshade-exaggeration': 0.35, 'hillshade-shadow-color': '#7d786c', 'hillshade-highlight-color': '#ffffff', 'hillshade-accent-color': '#9a958a' } },
+        { id: 'park', type: 'fill', source: 'om', 'source-layer': 'park', paint: { 'fill-color': '#DDE6D3', 'fill-opacity': 0.8 } },
+        { id: 'landcover-wood', type: 'fill', source: 'om', 'source-layer': 'landcover', filter: ['in', ['get', 'class'], ['literal', ['wood', 'grass']]], paint: { 'fill-color': '#E1E8D8', 'fill-opacity': 0.6 } },
+        { id: 'water', type: 'fill', source: 'om', 'source-layer': 'water', paint: { 'fill-color': '#C6DCE4' } },
+        { id: 'waterway', type: 'line', source: 'om', 'source-layer': 'waterway', paint: { 'line-color': '#B5D0DA', 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.5, 16, 2] } },
+        { id: 'building', type: 'fill', source: 'om', 'source-layer': 'building', minzoom: 14, paint: { 'fill-color': '#E3DFD5', 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 14, 0, 15, 0.8] } },
+        { id: 'road-casing', type: 'line', source: 'om', 'source-layer': 'transportation', filter: ['in', ['get', 'class'], ['literal', ['motorway', 'trunk', 'primary', 'secondary']]], layout: { 'line-join': 'round', 'line-cap': 'round' }, paint: { 'line-color': casing, 'line-width': ['interpolate', ['exponential', 1.5], ['zoom'], 8, 0.6, 12, 2.5, 16, 12] } },
+        { id: 'road-minor', type: 'line', source: 'om', 'source-layer': 'transportation', minzoom: 12, filter: ['in', ['get', 'class'], ['literal', ['tertiary', 'minor', 'service', 'street']]], layout: { 'line-join': 'round', 'line-cap': 'round' }, paint: { 'line-color': road, 'line-width': ['interpolate', ['exponential', 1.5], ['zoom'], 12, 0.4, 16, 6] } },
+        { id: 'road-major', type: 'line', source: 'om', 'source-layer': 'transportation', filter: ['in', ['get', 'class'], ['literal', ['motorway', 'trunk', 'primary', 'secondary']]], layout: { 'line-join': 'round', 'line-cap': 'round' }, paint: { 'line-color': road, 'line-width': ['interpolate', ['exponential', 1.5], ['zoom'], 8, 0.3, 12, 1.5, 16, 9] } },
+        { id: 'boundary', type: 'line', source: 'om', 'source-layer': 'boundary', filter: ['<=', ['get', 'admin_level'], 4], paint: { 'line-color': '#9C978B', 'line-width': 1, 'line-dasharray': [3, 2] } },
+        { id: 'building-3d', type: 'fill-extrusion', source: 'om', 'source-layer': 'building', minzoom: 14, layout: { visibility: 'none' }, paint: { 'fill-extrusion-color': '#E6E1D6', 'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 6], 'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0], 'fill-extrusion-opacity': 0.85 } },
+        { id: 'road-label', type: 'symbol', source: 'om', 'source-layer': 'transportation_name', minzoom: 14, layout: { 'symbol-placement': 'line', 'text-field': nameExpr(), 'text-font': ['Noto Sans Regular'], 'text-size': 11 }, paint: { 'text-color': '#7A817D', 'text-halo-color': '#F2F0E9', 'text-halo-width': 1.5 } },
+        { id: 'place-label', type: 'symbol', source: 'om', 'source-layer': 'place', filter: ['in', ['get', 'class'], ['literal', ['city', 'town', 'suburb', 'neighbourhood', 'quarter', 'village']]], layout: { 'text-field': nameExpr(), 'text-font': ['Noto Sans Bold'], 'text-size': ['interpolate', ['linear'], ['zoom'], 9, ['match', ['get', 'class'], 'city', 15, 11], 14, ['match', ['get', 'class'], 'city', 18, 13]], 'text-max-width': 8, 'text-letter-spacing': 0.02 }, paint: { 'text-color': ink, 'text-halo-color': 'rgba(242,240,233,0.95)', 'text-halo-width': 2 } }
+      ]
+    };
+  }
+
+  // ---------- Data ----------
+  var M, M2, PLACE, DET = null, REG = null, SCH = [], PJ = [], EF = [], TIME = null, LY = 'heat';
+  var RES = null, HIST = [];
+  function q(arr, p) { var a = arr.filter(function (v) { return v != null && isFinite(v); }).sort(function (x, y) { return x - y; }); return a.length ? a[Math.min(a.length - 1, Math.floor(p * a.length))] : null; }
+  var KX = function (lat) { return 111.32 * Math.cos(lat * Math.PI / 180); };
+  function dist(la1, ln1, la2, ln2) { var dx = (ln2 - ln1) * KX(la1), dy = (la2 - la1) * 110.57; return Math.sqrt(dx * dx + dy * dy); }   // km
+
+  // A simple grid index so "within 300 m of a school" stays fast over ~90,000 cells
+  function grid(pts, cell) { var g = {}; pts.forEach(function (p, i) { var k = Math.floor(p[0] / cell) + ':' + Math.floor(p[1] / cell); (g[k] = g[k] || []).push(i); }); return { g: g, c: cell, p: pts }; }
+  function nearestKm(G, la, ln, maxKm) {
+    var c = G.c, r = Math.ceil((maxKm / 110) / c) + 1, i0 = Math.floor(la / c), j0 = Math.floor(ln / c), best = Infinity;
+    for (var i = i0 - r; i <= i0 + r; i++) for (var j = j0 - r; j <= j0 + r; j++) { var b = G.g[i + ':' + j]; if (!b) continue; for (var n = 0; n < b.length; n++) { var p = G.p[b[n]], d = dist(la, ln, p[0], p[1]); if (d < best) best = d; } }
+    return best;
+  }
+
+  function hexOf(p) {
+    var i0 = Math.floor(p.lat.length / 2), best = Infinity, bx = 0, by = 0, kx = KX(p.lat[i0]);
+    for (var j = 0; j < p.lat.length; j++) { if (j === i0) continue; var dx = (p.lng[j] - p.lng[i0]) * kx, dy = (p.lat[j] - p.lat[i0]) * 110.57, d = dx * dx + dy * dy; if (d < best) { best = d; bx = dx; by = dy; } }
+    return { rad: Math.sqrt(best) / Math.sqrt(3), rot: Math.atan2(by, bx) };   // km, radians
+  }
+  function hexRing(la, ln, radKm, rot) {
+    var r = [], kx = KX(la);
+    for (var k = 0; k < 6; k++) { var a = rot + Math.PI / 6 + k * Math.PI / 3; r.push([ln + radKm * Math.cos(a) / kx, la + radKm * Math.sin(a) / 110.57]); }
+    r.push(r[0]); return [r];
+  }
+  function load() {
+    var place = getData('places/' + SLUG + '.json');
+    var detail = get('../data/detail/' + SLUG + '/index.json').then(function (ix) {
+      return Promise.all(ix.tiles.map(function (t) { return get('../data/detail/' + SLUG + '/' + t.id + '.json'); })).then(function (parts) { return { ix: ix, parts: parts }; });
+    }).catch(function () { return null; });
+    return Promise.all([T.all(), place, detail,
+      get('../data/layers/' + SLUG + '/schools.json').catch(function () { return null; }),
+      get('../data/efforts.json').catch(function () { return { efforts: [] }; }),
+      get('../data/time/' + SLUG + '.json').catch(function () { return null; })
+    ]).then(function (x) {
+      var D = x[0]; PLACE = D.lib[SLUG] || { name: SLUG, slug: SLUG };
+      PJ = (D.projects || []).filter(function (p) { return p.place === SLUG && isFinite(p.lat); });
+      REG = x[1]; SCH = x[3]; EF = (x[4].efforts || []).filter(function (e) { return e.place === SLUG; }); TIME = x[5];
+      if (x[2]) {
+        var L = { lat: [], lng: [], heat: [], tree: [], green: [], built: [], pop: [] };
+        L.rot = []; L.rad = [];
+        x[2].parts.forEach(function (p) {
+          // Each tile's cells sit on one hexagonal grid: read its spacing and angle from the nearest neighbour of one cell
+          var o = hexOf(p);
+          for (var i = 0; i < p.lat.length; i++) { L.lat.push(p.lat[i]); L.lng.push(p.lng[i]); L.heat.push(p.heat[i]); L.tree.push(p.tree[i]); L.green.push(p.tree[i] + p.grass[i] + p.wetland[i]); L.built.push(p.built[i]); L.pop.push(p.pop[i]); L.rot.push(o.rot); L.rad.push(o.rad); }
+        });
+        DET = { ix: x[2].ix, c: L, n: L.lat.length };
+      }
+    });
+  }
+
+  // ---------- Layers ----------
+  var LAYERS = {
+    heat: { name: 'Heat', key: ['Cooler', 'Hotter'], note: 'Surface heat from Landsat compared with the city’s typical, in cells of about 0.015 km² (about 140 m across).', ramp: ['#F6F1E4', '#F2D7A0', '#E8935C', '#B8322B'] },
+    tree: { name: 'Tree cover', key: ['Few trees', 'Many trees'], note: 'Share of each cell covered by trees, from ESA WorldCover 2021 (10 m), in cells of about 0.015 km².', ramp: ['#F3F0E6', '#C9DDB0', '#7FB070', '#2E6B3F'] },
+    people: { name: 'People', key: ['Fewer people', 'More people'], note: 'People per cell from WorldPop 2020, shared among built-up land.', ramp: ['#F3F0E6', '#D7CCE6', '#9C86C2', '#5B3F8C'] }
+  };
+  function cellsGeo() {
+    var c = DET.c, f = new Array(DET.n), hq = [q(c.heat, 0.1), q(c.heat, 0.9)], pq = q(c.pop, 0.95) || 1;
+    for (var i = 0; i < DET.n; i++) {
+      f[i] = { type: 'Feature', id: i, geometry: { type: 'Polygon', coordinates: hexRing(c.lat[i], c.lng[i], c.rad[i], c.rot[i]) },
+        properties: { h: c.heat[i] == null ? -1 : Math.max(0, Math.min(1, (c.heat[i] - hq[0]) / ((hq[1] - hq[0]) || 1))), t: c.tree[i] / 100, p: Math.min(1, c.pop[i] / pq) } };
+    }
+    return { type: 'FeatureCollection', features: f };
+  }
+  function rampExpr(prop, r) { return ['case', ['<', ['get', prop], 0], '#C9C6BE', ['interpolate', ['linear'], ['get', prop], 0, r[0], 0.4, r[1], 0.72, r[2], 1, r[3]]]; }
+  // Each cell is drawn as the hexagon it really is (about 140 m across), so the map never claims finer detail than the data has
+  function addCells(m) {
+    m.addSource('cells', { type: 'geojson', data: cellsGeo(), tolerance: 0 });
+    m.addLayer({ id: 'cells', type: 'fill', source: 'cells', paint: { 'fill-color': rampExpr('h', LAYERS.heat.ramp), 'fill-opacity': ['case', ['boolean', ['feature-state', 'dim'], false], 0.1, 0.78], 'fill-antialias': false } }, 'road-casing');
+    m.addLayer({ id: 'cells-hit', type: 'line', source: 'cells', minzoom: 13, paint: { 'line-color': '#123B38', 'line-width': ['interpolate', ['linear'], ['zoom'], 13, 0.4, 16, 1.4], 'line-opacity': ['case', ['boolean', ['feature-state', 'match'], false], 0.7, 0] } }, 'road-casing');
+  }
+  function setLayer(id) {
+    LY = id; var L = LAYERS[id];
+    [M, M2].forEach(function (m) { if (m && m.getLayer('cells')) m.setPaintProperty('cells', 'fill-color', rampExpr(id === 'heat' ? 'h' : id === 'tree' ? 't' : 'p', L.ramp)); });
+    document.querySelectorAll('#mw-layers button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.ly === id ? 'true' : 'false'); });
+    drawKey();
+  }
+  function drawKey() {
+    var L = LAYERS[LY];
+    $('#mw-key').innerHTML = '<div class="mw-kbar" style="background:linear-gradient(90deg,' + L.ramp.join(',') + ')"></div><div class="mw-kl"><span>' + L.key[0] + '</span><span>' + L.key[1] + '</span></div><p>' + L.note + '</p>' +
+      '<p class="mw-krow"><span class="mw-ksch"></span><span>School (OpenStreetMap)</span> <span class="mw-kpj"></span><span>Listed project</span></p>' + (RES ? '<p class="mw-krow"><span class="mw-kmatch"></span><span>Matches your map</span></p>' : '');
+  }
+
+  // ---------- Points: schools, projects, efforts ----------
+  function addPoints(m) {
+    var sf = (SCH && SCH.points || []).map(function (p, i) { return { type: 'Feature', id: i, geometry: { type: 'Point', coordinates: [p[1], p[0]] }, properties: { n: p[2] || '' } }; });
+    m.addSource('schools', { type: 'geojson', data: { type: 'FeatureCollection', features: sf } });
+    m.addLayer({ id: 'schools', type: 'circle', source: 'schools', minzoom: 12, paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 2, 16, 5], 'circle-color': '#FFFFFF', 'circle-stroke-color': '#2B4FA0', 'circle-stroke-width': 1.5 } });
+    var pf = PJ.map(function (p) { return { type: 'Feature', geometry: { type: 'Point', coordinates: [p.lng, p.lat] }, properties: { n: p.name, k: p.kind || '' } }; });
+    m.addSource('projects', { type: 'geojson', data: { type: 'FeatureCollection', features: pf } });
+    m.addLayer({ id: 'projects', type: 'circle', source: 'projects', paint: { 'circle-radius': 7, 'circle-color': '#C0603A', 'circle-stroke-color': '#fff', 'circle-stroke-width': 2 } });
+  }
+
+  // ---------- Recipes: approved map actions only; nothing new is calculated ----------
+  var DEF = { heat: 0.75, tree: 5, school: 300, noshade: 500 };
+  var CHIPS = [
+    { t: 'Hot, few trees, near schools, no shade work', r: { heat: 0.75, tree: 5, school: 300, noshade: 500 } },
+    { t: 'Hot and few trees, where people live', r: { heat: 0.75, tree: 5, people: 1 } },
+    { t: 'Hottest places', r: { heat: 0.9 } }
+  ];
+  // A plain reader, not AI: it recognizes a few words in English, Spanish and Italian and says what it understood
+  function read(text) {
+    var s = (text || '').toLowerCase(), r = {}, heard = [], missed = [];
+    if (/hot|heat|calor|calur|calient|cald/.test(s)) { r.heat = /hottest|más calur|più cald/.test(s) ? 0.9 : 0.75; heard.push('heat'); }
+    if (/tree|shade|canopy|árbol|arbol|sombra|alber|ombra/.test(s) && /few|low|little|less|without|no |poc|sin|senza|scars/.test(s)) { r.tree = 5; heard.push('few trees'); }
+    else if (/tree|árbol|arbol|alber/.test(s)) { r.tree = 5; heard.push('few trees'); }
+    if (/school|escuela|scuol/.test(s)) { var mm = s.match(/(\d{2,4})\s?m\b/); r.school = mm ? Math.min(1500, +mm[1]) : 300; heard.push('near schools'); }
+    if (/(no|without|sin|senza|not)\b.*(shade|project|effort|proyecto|progett|esfuerzo|impegn)/.test(s) || /no shade|sin sombra|senza ombra/.test(s)) { r.noshade = 500; heard.push('no shade project or effort'); }
+    if (/people|live|residents|gente|personas|vive|abitant|persone/.test(s)) { r.people = 1; heard.push('where people live'); }
+    if (/flood|inunda|alluvion|allag/.test(s)) missed.push('flooding (only at 1 km in this map so far)');
+    if (/iztapalapa/.test(s)) r.fly = 'iztapalapa';
+    return { r: r, heard: heard, missed: missed };
+  }
+  var AREAS = { iztapalapa: [[-99.12, 19.30], [-98.94, 19.40]] };
+  function run(r, understood, push) {
+    if (!DET) return;
+    if (push !== false && RES) HIST.push(RES.r);
+    var c = DET.c, n = DET.n, keep = new Uint8Array(n).fill(1), steps = [], hasAny = false;
+    var heatCut = r.heat != null ? q(c.heat, r.heat) : null;
+    var SG = SCH && SCH.points && SCH.points.length ? grid(SCH.points.map(function (p) { return [p[0], p[1]]; }), 0.01) : null;
+    var shadeSites = PJ.filter(function (p) { return /park|corridor|wetland|trees|shade/.test(p.kind || ''); }).map(function (p) { return [p.lat, p.lng, p.name]; })
+      .concat(EF.filter(function (e) { return !e.example && /shade/.test(e.type || ''); }).map(function (e) { return [e.lat, e.lng, e.title]; }));
+    var PG = shadeSites.length ? grid(shadeSites, 0.02) : null;
+    if (r.heat != null) { hasAny = true; steps.push({ k: 'heat', t: 'Kept the hottest ' + Math.round((1 - r.heat) * 100) + '% of cells: surface heat at least ' + heatCut.toFixed(1) + ' °C above the city’s typical.', s: 'Landsat 8–9 surface temperature, ' + (DET.ix.heat_scenes || '') + ' clear summer scenes, per cell of about 0.015 km². Surface heat, not air temperature.' }); }
+    if (r.tree != null) { hasAny = true; steps.push({ k: 'tree', t: 'Kept cells where trees cover under ' + r.tree + '% of the ground.', s: 'ESA WorldCover 2021, 10 m land cover, summarized per cell.' }); }
+    if (r.people) { hasAny = true; steps.push({ k: 'people', t: 'Kept cells where people live.', s: 'WorldPop 2020, shared among built-up land in each cell.' }); }
+    if (r.school != null) { hasAny = true; steps.push({ k: 'school', t: SG ? 'Kept cells within ' + r.school + ' m of a school.' : 'Couldn’t filter by schools: the school layer isn’t loaded yet.', s: SG ? 'OpenStreetMap schools (' + SCH.count.toLocaleString('en-US') + ' mapped), fetched ' + SCH.fetched + '. Distance measured from cell centers.' : '' }); }
+    if (r.noshade != null) { hasAny = true; steps.push({ k: 'noshade', t: 'Removed cells within ' + r.noshade + ' m of a listed shade or greening project or effort (' + shadeSites.length + ').', s: shadeSites.length ? shadeSites.map(function (p) { return p[2]; }).join(', ') : 'None listed here yet.' }); }
+    for (var i = 0; i < n; i++) {
+      if (r.heat != null && !(c.heat[i] != null && c.heat[i] >= heatCut)) { keep[i] = 0; continue; }
+      if (r.tree != null && !(c.tree[i] < r.tree)) { keep[i] = 0; continue; }
+      if (r.people && !(c.pop[i] > 0)) { keep[i] = 0; continue; }
+      if (r.school != null && SG && !(nearestKm(SG, c.lat[i], c.lng[i], r.school / 1000) <= r.school / 1000)) { keep[i] = 0; continue; }
+      if (r.noshade != null && PG && nearestKm(PG, c.lat[i], c.lng[i], r.noshade / 1000) <= r.noshade / 1000) { keep[i] = 0; continue; }
+    }
+    if (!hasAny) { msg('Nothing to map yet. Try one of the recipes, or mention heat, trees, schools or people.'); return; }
+    var cnt = 0, ppl = 0, sch = 0;
+    for (i = 0; i < n; i++) if (keep[i]) { cnt++; ppl += c.pop[i] || 0; }
+    RES = { r: r, keep: keep, cnt: cnt, ppl: ppl, steps: steps };
+    paintResult();
+    var cellKm2 = DET.ix.cell_km2 || 0.015;
+    $('#mw-res').hidden = false;
+    $('#mw-count').hidden = false; $('#mw-count').innerHTML = '<b>' + cnt.toLocaleString('en-US') + '</b> <span>cells match</span> <span aria-hidden="true">·</span> <span>How it was made</span>';
+    if (window.innerWidth < 900 && push !== false) $('#mw-mapwrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('#mw-understood').innerHTML = understood || '';
+    $('#mw-sum').innerHTML = '<p class="mw-big"><b>' + cnt.toLocaleString('en-US') + '</b> <span>cells match</span></p><p><span>Roughly</span> <b>' + (cnt * cellKm2).toFixed(1) + ' km²</b> <span>where about</span> <b>' + T.fmtN(ppl) + '</b> <span>people live.</span></p>';
+    $('#mw-steps').innerHTML = steps.map(function (s) { return '<li><label><input type="checkbox" checked data-step="' + s.k + '"> <span>' + s.t + '</span></label>' + (s.s ? '<small>' + esc(s.s) + '</small>' : '') + '</li>'; }).join('');
+    var cant = ['<span>Street-level shade, private trees and building shadows are not in these layers.</span>', '<span>Each result is a cell about 140 m across, not a single street or corner.</span>'];
+    if (r.school != null) cant.push('<span>Schools missing from OpenStreetMap are not counted, and access routes to schools aren’t known.</span>');
+    if (r.noshade != null) cant.push('<span>Only projects and efforts listed on Threadlands are excluded; the illustrative example is not counted.</span>');
+    if (r.flyNote) cant.push('<span>' + r.flyNote + '</span>');
+    $('#mw-cant').innerHTML = cant.map(function (x) { return '<li>' + x + '</li>'; }).join('');
+    $('#mw-undo').disabled = !HIST.length;
+    $('#mw-draftbox').hidden = true;
+    writeHash();
+    drawKey();
+  }
+  var DIMMED = false;
+  function paintResult() {
+    var keep = RES && RES.keep;
+    [M, M2].forEach(function (m) {
+      if (!m || !m.getSource('cells')) return;
+      for (var i = 0; i < DET.n; i++) m.setFeatureState({ source: 'cells', id: i }, { dim: !!keep && !keep[i], match: !!keep && !!keep[i] });
+    });
+  }
+  function clearResult() { RES = null; paintResult(); $('#mw-res').hidden = true; $('#mw-count').hidden = true; writeHash(); drawKey(); }
+
+  // ---------- Share, undo, draft ----------
+  function enc(r) { return Object.keys(r).filter(function (k) { return k !== 'fly' && k !== 'flyNote'; }).map(function (k) { return k + ':' + r[k]; }).join(','); }
+  function dec(s) { var r = {}; (s || '').split(',').forEach(function (p) { var kv = p.split(':'); if (kv[0] && kv[1] != null && /^(heat|tree|school|noshade|people)$/.test(kv[0])) r[kv[0]] = +kv[1]; }); return r; }
+  function writeHash() {
+    var c = M ? M.getCenter() : null, h = '#' + SLUG + '?' + (RES ? 'r=' + enc(RES.r) + '&' : '') + (c ? 'v=' + c.lat.toFixed(4) + ',' + c.lng.toFixed(4) + ',' + M.getZoom().toFixed(1) : '');
+    history.replaceState(null, '', h);
+  }
+  function msg(t) { $('#mw-msg').textContent = t; }
+
+  function wire() {
+    $('#mw-chips').innerHTML = CHIPS.map(function (ch, i) { return '<button type="button" class="mw-chip" data-chip="' + i + '">' + ch.t + '</button>'; }).join('');
+    $('#mw-chips').addEventListener('click', function (ev) { var b = ev.target.closest('[data-chip]'); if (!b) return; var ch = CHIPS[+b.dataset.chip]; $('#mw-q').value = ''; run(Object.assign({}, ch.r), '<span>Recipe:</span> <b>' + b.textContent + '</b>'); });
+    $('#mw-ask').addEventListener('submit', function (ev) {
+      ev.preventDefault(); var t = $('#mw-q').value.trim(); if (!t) return;
+      var x = read(t);
+      if (!x.heard.length) { $('#mw-res').hidden = false; $('#mw-understood').innerHTML = '<span>Threadlands didn’t recognize a layer in that. It can map heat, tree cover, people, schools and listed shade projects so far.</span>'; $('#mw-sum').innerHTML = ''; $('#mw-steps').innerHTML = ''; $('#mw-cant').innerHTML = ''; return; }
+      if (x.r.fly && AREAS[x.r.fly]) { M.fitBounds(AREAS[x.r.fly], { padding: 30 }); x.r.flyNote = 'Threadlands doesn’t have borough boundaries yet, so “Iztapalapa” moved the map there; the filters still cover the whole city. Read the counts as city-wide.'; }
+      run(x.r, '<span>Understood:</span> <b>' + x.heard.map(function (h) { return '<span>' + h + '</span>'; }).join(' · ') + '</b>' + (x.missed.length ? '<br><span class="mw-missed">' + x.missed.map(function (m) { return '<span>Not used: ' + m + '</span>'; }).join(' ') + '</span>' : ''));
+    });
+    $('#mw-steps').addEventListener('change', function (ev) {
+      var cb = ev.target.closest('[data-step]'); if (!cb || !RES) return;
+      var r = Object.assign({}, RES.r); if (!cb.checked) delete r[cb.dataset.step];
+      if (!Object.keys(r).filter(function (k) { return k !== 'flyNote' && k !== 'fly'; }).length) { HIST.push(RES.r); clearResult(); $('#mw-undo').disabled = false; return; }
+      run(r, $('#mw-understood').innerHTML);
+    });
+    $('#mw-undo').addEventListener('click', function () { var p = HIST.pop(); if (p) run(p, '<span>Back to the previous map.</span>', false); else clearResult(); $('#mw-undo').disabled = !HIST.length; });
+    $('#mw-share').addEventListener('click', function () {
+      writeHash(); var u = location.href;
+      (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(function () { msg('Link copied. Anyone opening it sees this same map and how it was made.'); }).catch(function () { msg(u); });
+    });
+    $('#mw-draft').addEventListener('click', function () {
+      if (!RES) return; var box = $('#mw-draftbox');
+      box.hidden = false;
+      box.innerHTML = '<p class="mw-dk">Draft effort · preview</p><p><b>' + RES.cnt.toLocaleString('en-US') + '</b> <span>cells, about</span> <b>' + T.fmtN(RES.ppl) + '</b> <span>people</span></p><p>' + RES.steps.map(function (s) { return '<span>' + esc(s.t) + '</span>'; }).join(' ') + '</p>' +
+        '<p class="mw-note">An effort would carry this map recipe as its evidence, with a search area people narrow down together. Starting real efforts opens once Threadlands can run them safely; until then, see how an effort page works.</p><p><a class="btn" href="../effort/#iztapalapa-shade-example">See the example effort</a></p>';
+    });
+    $('#mw-layers').innerHTML = Object.keys(LAYERS).map(function (k) { return '<button type="button" data-ly="' + k + '" aria-pressed="' + (k === LY) + '">' + LAYERS[k].name + '</button>'; }).join('');
+    $('#mw-layers').addEventListener('click', function (ev) { var b = ev.target.closest('[data-ly]'); if (b) setLayer(b.dataset.ly); });
+    $('#mw-3d').addEventListener('click', function () { set3D($('#mw-3d').getAttribute('aria-pressed') !== 'true'); });
+    $('#mw-swipe').addEventListener('click', function () { setSwipe($('#mw-swipe').getAttribute('aria-pressed') !== 'true'); });
+  }
+
+  // ---------- Click: the value for the cell the point falls in, never a point reading ----------
+  function readout(m) {
+    m.on('click', function (ev) {
+      if (!DET) return;
+      var c = DET.c, best = -1, bd = Infinity, la = ev.lngLat.lat, ln = ev.lngLat.lng;
+      for (var i = 0; i < DET.n; i++) { var d = Math.abs(c.lat[i] - la) + Math.abs(c.lng[i] - ln) * 0.94; if (d < bd) { bd = d; best = i; } }
+      if (best < 0 || bd > 0.003) return;
+      var hp = Math.round(100 * pctile(c.heat, c.heat[best]));
+      new maplibregl.Popup({ maxWidth: '280px', className: 'mw-pop' }).setLngLat([c.lng[best], c.lat[best]])
+        .setHTML('<p class="mw-pk">This cell · about 0.015 km²</p><p><b>Heat:</b> <span>' + (c.heat[best] == null ? 'no reading' : (c.heat[best] >= 0 ? '+' : '') + c.heat[best].toFixed(1) + ' °C vs the city’s typical (hotter than ' + hp + '% of cells)') + '</span></p><p><b>Trees:</b> <span>' + c.tree[best] + '% of the cell</span></p><p><b>People:</b> <span>about ' + Math.round(c.pop[best]) + '</span></p>' + (RES ? '<p class="mw-pm">' + (RES.keep[best] ? 'Matches your map' : 'Not in your map') + '</p>' : '') + '<p class="mw-pn">One value for the whole cell, not a reading at this exact point.</p>')
+        .addTo(m);
+    });
+  }
+  var SORTED = null;
+  function pctile(arr, v) { if (!SORTED) SORTED = arr.filter(function (x) { return x != null; }).sort(function (a, b) { return a - b; }); var lo = 0, hi = SORTED.length; while (lo < hi) { var mid = (lo + hi) >> 1; if (SORTED[mid] <= v) lo = mid + 1; else hi = mid; } return lo / SORTED.length; }
+
+  // ---------- 3D ----------
+  function set3D(on) {
+    $('#mw-3d').setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (on) { M.setTerrain({ source: 'dem3d', exaggeration: 1.4 }); M.setLayoutProperty('building-3d', 'visibility', 'visible'); M.easeTo({ pitch: 60, bearing: -20, zoom: Math.max(M.getZoom(), 14.5), duration: 900 }); $('#mw-chnote').textContent = 'Terrain from open elevation tiles, buildings from OpenStreetMap heights where mapped. Drag with two fingers or right-click to tilt and turn.'; }
+    else { M.setTerrain(null); M.setLayoutProperty('building-3d', 'visibility', 'none'); M.easeTo({ pitch: 0, bearing: 0, duration: 700 }); $('#mw-chnote').textContent = ''; }
+  }
+
+  // ---------- Swipe: today's land and water vs the modeled wetland scenario ----------
+  var SWX = 0.58;
+  // The scenario uses the place's 1 km cells; each is drawn as its own hexagon
+  var POLY_AT = null;
+  function polyAt(la, ln) {
+    var c = REG && REG.cells; if (!c) return null;
+    if (!POLY_AT) { POLY_AT = {}; for (var i = 0; i < c.lat.length; i++) POLY_AT[c.lat[i].toFixed(3) + ',' + c.lng[i].toFixed(3)] = i; }
+    var k = POLY_AT[la.toFixed(3) + ',' + ln.toFixed(3)]; if (k == null || !c.poly[k]) return null;
+    var ring = []; for (var q2 = 0; q2 < c.poly[k].length; q2 += 2) ring.push([c.poly[k][q2 + 1], c.poly[k][q2]]); ring.push(ring[0]); return [ring];
+  }
+  function scenarioGeo(fut) {
+    var c = TIME.cells, f = [];
+    for (var i = 0; i < c.lat.length; i++) {
+      var w = fut ? (c.fut[i] ? 1 : c.water[i] >= 30 ? 0.6 : 0) : (c.water[i] >= 30 ? 0.6 : 0);
+      if (!w && !c.lake[i]) continue;
+      var g = polyAt(c.lat[i], c.lng[i]);
+      f.push({ type: 'Feature', geometry: g ? { type: 'Polygon', coordinates: g } : { type: 'Point', coordinates: [c.lng[i], c.lat[i]] }, properties: { w: w, l: c.lake[i] ? 1 : 0 } });
+    }
+    return { type: 'FeatureCollection', features: f };
+  }
+  function scenLayers(m, fut) {
+    m.addSource('scen', { type: 'geojson', data: scenarioGeo(fut) });
+    m.addLayer({ id: 'scen-lake', type: 'fill', source: 'scen', filter: ['==', ['get', 'w'], 0], paint: { 'fill-color': '#9CC3D3', 'fill-opacity': 0.28 } }, 'road-casing');
+    m.addLayer({ id: 'scen-w', type: 'fill', source: 'scen', filter: ['>', ['get', 'w'], 0], paint: { 'fill-color': ['case', ['==', ['get', 'w'], 1], '#2E9C86', '#3D7FA6'], 'fill-opacity': 0.8 } }, 'road-casing');
+  }
+  function setSwipe(on) {
+    $('#mw-swipe').setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (!TIME) { $('#mw-chnote').textContent = 'No scenario is available for this place yet.'; return; }
+    if (on) {
+      if (M.getLayer('cells')) { M.setLayoutProperty('cells', 'visibility', 'none'); M.setLayoutProperty('cells-hit', 'visibility', 'none'); }
+      if (!M.getSource('scen')) scenLayers(M, false);
+      M.setLayoutProperty('scen-lake', 'visibility', 'visible'); M.setLayoutProperty('scen-w', 'visibility', 'visible');
+      $('#mw-map2').hidden = false; $('#mw-slider').hidden = false;
+      if (!M2) {
+        M2 = new maplibregl.Map({ container: 'mw-map2', style: style(), center: M.getCenter(), zoom: M.getZoom(), attributionControl: false, interactive: false });
+        M2.once('style.load', function () { scenLayers(M2, true); });
+      }
+      M2.resize(); sync(); clip();
+      M.fitBounds([[TIME.bbox[2], TIME.bbox[0]], [TIME.bbox[3], TIME.bbox[1]]], { padding: 20 });   // bbox is south, north, west, east
+      $('#mw-layers').hidden = true; $('#mw-count').hidden = true;
+      $('#mw-key').innerHTML = '<p class="mw-krow"><span class="mw-ksw" style="background:#3D7FA6"></span><span>Open water and wetland today</span></p><p class="mw-krow"><span class="mw-ksw" style="background:#2E9C86"></span><span>Wetland in the 2050 scenario</span></p><p class="mw-krow"><span class="mw-ksw" style="background:#9CC3D3;opacity:.6"></span><span>The old lake</span></p><p>Cells of about 0.85 km². One modeled idea, not a forecast or a plan.</p>';
+      $('#mw-chnote').innerHTML = '<span>Left: open water and wetland today. Right: the 2050 scenario from the Mexico City through-time page, with wetlands back on unbuilt land of the old lakebed (teal). Pale blue: the old lake. One modeled idea, not a forecast or a plan.</span>';
+    } else {
+      $('#mw-map2').hidden = true; $('#mw-slider').hidden = true; $('#mw-layers').hidden = false; if (RES) $('#mw-count').hidden = false; drawKey();
+      if (M.getLayer('scen-w')) { M.setLayoutProperty('scen-lake', 'visibility', 'none'); M.setLayoutProperty('scen-w', 'visibility', 'none'); }
+      if (M.getLayer('cells')) { M.setLayoutProperty('cells', 'visibility', 'visible'); M.setLayoutProperty('cells-hit', 'visibility', 'visible'); }
+      $('#mw-chnote').textContent = '';
+    }
+  }
+  function sync() { if (M2 && !$('#mw-map2').hidden) M2.jumpTo({ center: M.getCenter(), zoom: M.getZoom(), bearing: M.getBearing(), pitch: M.getPitch() }); }
+  function clip() { var w = $('#mw-mapwrap').clientWidth, x = Math.round(SWX * w); $('#mw-map2').style.clipPath = 'inset(0 0 0 ' + x + 'px)'; $('#mw-slider').style.left = x + 'px'; }
+  function dragSlider() {
+    var h = $('#mw-handle'), on = false;
+    var mv = function (ev) { if (!on) return; var r = $('#mw-mapwrap').getBoundingClientRect(), x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left; SWX = Math.max(0.05, Math.min(0.95, x / r.width)); clip(); ev.preventDefault(); };
+    h.addEventListener('pointerdown', function (ev) { on = true; h.setPointerCapture(ev.pointerId); });
+    h.addEventListener('pointermove', mv); h.addEventListener('pointerup', function () { on = false; });
+    h.addEventListener('keydown', function (ev) { if (ev.key === 'ArrowLeft') SWX = Math.max(0.05, SWX - 0.05); else if (ev.key === 'ArrowRight') SWX = Math.min(0.95, SWX + 0.05); else return; clip(); ev.preventDefault(); });
+    window.addEventListener('resize', clip);
+  }
+
+  // ---------- Efforts on the map ----------
+  function addEfforts(m) {
+    // Each effort is drawn on the same 1 km area the place map uses; a search area is where a site will be chosen, not the footprint of the work
+    var c = REG && REG.cells, areas = [], labels = [];
+    EF.filter(function (e) { return isFinite(e.lat); }).forEach(function (e) {
+      var best = -1, bd = Infinity;
+      if (c) for (var i = 0; i < c.lat.length; i++) { var d = Math.pow(c.lat[i] - e.lat, 2) + Math.pow(c.lng[i] - e.lng, 2); if (d < bd && c.poly[i]) { bd = d; best = i; } }
+      var props = { id: e.id, n: (e.example ? 'Example effort' : 'Effort') + (e.area_kind === 'search' ? ' · search area' : ''), taken: e.responsible ? 1 : 0 };
+      if (best >= 0) { var ring = []; for (var q2 = 0; q2 < c.poly[best].length; q2 += 2) ring.push([c.poly[best][q2 + 1], c.poly[best][q2]]); ring.push(ring[0]); areas.push({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [ring] }, properties: props }); }
+      labels.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [e.lng, e.lat] }, properties: props });
+    });
+    m.addSource('ef-areas', { type: 'geojson', data: { type: 'FeatureCollection', features: areas } });
+    m.addSource('efforts', { type: 'geojson', data: { type: 'FeatureCollection', features: labels } });
+    m.addLayer({ id: 'efforts-r', type: 'fill', source: 'ef-areas', paint: { 'fill-color': 'rgba(14,90,82,0.06)' } });
+    m.addLayer({ id: 'efforts-o', type: 'line', source: 'ef-areas', paint: { 'line-color': '#0E5A52', 'line-width': 2.5, 'line-dasharray': [2, 1.5] } });
+    m.addLayer({ id: 'efforts-l', type: 'symbol', source: 'efforts', layout: { 'text-field': ['get', 'n'], 'text-font': ['Noto Sans Bold'], 'text-size': 12, 'text-offset': [0, -2.4], 'text-anchor': 'bottom' }, paint: { 'text-color': '#0E5A52', 'text-halo-color': '#fff', 'text-halo-width': 2.5 } });
+    m.on('click', 'efforts-l', function (ev) { location.href = '../effort/#' + ev.features[0].properties.id; });
+  }
+
+  // ---------- Start ----------
+  function start() {
+    wire(); dragSlider(); drawKey();
+    var hs = location.hash.split('?')[1] || '', P = new URLSearchParams(hs), v = (P.get('v') || '').split(',').map(Number);
+    M = new maplibregl.Map({ container: 'mw-map', style: style(), center: v.length === 3 && isFinite(v[0]) ? [v[1], v[0]] : [-99.07, 19.38], zoom: v.length === 3 && isFinite(v[2]) ? v[2] : 11, maxPitch: 75, attributionControl: { compact: true } });
+    window.TL_MAP = M;
+    M.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+    M.on('move', function () { sync(); });
+    requestAnimationFrame(function () { M.resize(); }); window.addEventListener('load', function () { M.resize(); });
+    M.on('moveend', function () { writeHash(); });
+    readout(M);
+    Promise.all([load(), new Promise(function (res) { if (M.isStyleLoaded()) res(); else M.once('style.load', res); })]).then(function () {
+      $('#mw-loading').hidden = true; M.resize();
+      $('#mw-place').textContent = PLACE.name; $('#mw-place').href = '../place/#' + SLUG;
+      document.title = PLACE.name + ' map | Threadlands';
+      if (DET) addCells(M);
+      addPoints(M); addEfforts(M);
+      var r = dec(P.get('r')); if (Object.keys(r).length) run(r, '<span>Opened from a shared link.</span>', false);
+    }).catch(function (e) { $('#mw-loading').textContent = 'The map could not be loaded. Check your connection and refresh.'; console.log(e); });
+  }
+  if (window.maplibregl) start(); else $('#mw-loading').textContent = 'The map could not be loaded in this browser.';
+})();
+
+</script>
+</body>
+</html>

@@ -64,6 +64,7 @@
         <button type="button" class="chip" data-ly="green" aria-pressed="false">Green and nature</button>
         <button type="button" class="chip" data-ly="none" aria-pressed="false">Streets only</button>
       </div>
+      <p class="here-ws" id="here-ws" hidden><a id="here-ws-a" href="{B}map/"><b>Ask the map</b> <span>Combine heat, trees, schools and projects, see how the map was made, and compare a change in 3D</span> <span aria-hidden="true">&rarr;</span></a> <span class="mw-proto">Prototype</span></p>
       <div class="here-grid">
         <div class="here-map" id="here-map" role="region" aria-label="Map of the place, tap a spot to see what is there"></div>
         <aside class="here-card" id="here-card" aria-live="polite">
@@ -905,6 +906,7 @@
       if (addK) { PRESET = /^(heat|water|shade|green|change|idea|other)$/.test(addK) ? addK : 'other'; var hint = document.querySelector('.here-hint'); if (hint) hint.innerHTML = '<b>Tap the map where it is</b>, then choose \u201cAdd what you know here\u201d.'; var g = document.querySelector('.here-grid'); g.insertAdjacentHTML('beforebegin', '<p class="here-addnote" id="here-addnote"><b>Add what you know:</b> tap the map where it is. You can drag and zoom to find the spot first.</p>'); document.getElementById('here-addnote').scrollIntoView({ block: 'start' }); return; }
     }, 0);
     setTimeout(function () { var sh = new URLSearchParams(location.search).get('show'), p = sh && PRESS_NOW.filter(function (x) { return x.key === sh; })[0]; if (!p) return; if (p.layer) { setLayer(p.layer); showWhy(p.key); document.getElementById('here').scrollIntoView({ block: 'start' }); } else { var t = document.getElementById(p.key === 'food' ? 'tied' : 'pressing'); if (t) t.scrollIntoView({ block: 'start' }); } }, 0); renderReady(e, r, sm); renderProjects(e); allProjectsLink(e); renderEfforts(e); renderIdeas(e); loadVisit(e); renderNews(e);
+    var WS = ['mexico-city']; $('#here-ws').hidden = WS.indexOf(SLUG) < 0; $('#here-ws-a').href = '{B}map/#' + SLUG;
     try { loadMap(e); } catch (err) { /* the map is extra */ }
     window.scrollTo(0, 0);
   }
