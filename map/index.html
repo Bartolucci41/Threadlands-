@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=90">
+<link rel="stylesheet" href="../assets/site.css?v=91">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js?v=4" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -39,17 +39,91 @@
 <script src="../assets/vendor/maplibre/maplibre-gl.js"></script>
 <script src="../assets/public.js?v=7"></script>
 <main class="mw" id="mw">
-  <aside class="mw-panel" id="mw-panel" aria-label="Ask the map">
-    <div class="mw-top">
-      <p class="mw-kick"><a id="mw-place" href="#"></a> <span aria-hidden="true">&middot;</span> <span>Map workspace</span> <span class="mw-proto">Prototype</span></p>
-      <h1 class="mw-h">Ask the map</h1>
+  <div class="mw-top">
+    <p class="mw-kick"><a id="mw-place" href="#"></a> <span aria-hidden="true">&middot;</span> <span>Map workspace</span> <span class="mw-proto">Prototype</span></p>
+    <h1 class="mw-h">Work on the map</h1>
+    <p class="mw-lede">Ask in words, set the layers yourself, or draw a change. All four tools work on the same map, and you can switch between them at any time.</p>
+  </div>
+  <div class="mw-mapwrap" id="mw-mapwrap">
+    <div class="mw-map" id="mw-map" role="region" aria-label="Map"></div>
+    <div class="mw-map mw-map2" id="mw-map2" hidden aria-hidden="true"></div>
+    <div class="mw-slider" id="mw-slider" hidden><span class="mw-sl-l">Today</span><span class="mw-sl-r">2050 · modeled scenario</span><button type="button" class="mw-handle" id="mw-handle" aria-label="Drag to compare"><span aria-hidden="true">&lsaquo;&rsaquo;</span></button></div>
+    <div class="mw-mapctl" id="mw-mapctl" hidden>
+      <button type="button" class="mw-mc" id="mw-move" aria-pressed="false">Move map</button>
+      <button type="button" class="mw-mc" id="mw-expand" aria-expanded="false">Expand map</button>
+    </div>
+    <p class="mw-hint" id="mw-hint" hidden></p>
+    <div class="mw-key" id="mw-key"></div>
+    <a class="mw-count" id="mw-count" href="#mw-res" hidden></a>
+    <div class="mw-loading" id="mw-loading">Loading the map&hellip;</div>
+  </div>
+  <div class="mw-tabs" role="tablist" aria-label="Ways to work on the map" id="mw-tabs">
+    <button type="button" role="tab" id="tab-ask" data-tab="ask" aria-controls="pane-ask" aria-selected="true">Ask</button>
+    <button type="button" role="tab" id="tab-layers" data-tab="layers" aria-controls="pane-layers" aria-selected="false" tabindex="-1">Layers</button>
+    <button type="button" role="tab" id="tab-draw" data-tab="draw" aria-controls="pane-draw" aria-selected="false" tabindex="-1">Draw</button>
+    <button type="button" role="tab" id="tab-compare" data-tab="compare" aria-controls="pane-compare" aria-selected="false" tabindex="-1">Compare</button>
+  </div>
+  <aside class="mw-panel" id="mw-panel" aria-label="Map tools">
+
+    <section class="mw-pane" id="pane-ask" role="tabpanel" aria-labelledby="tab-ask">
       <form class="mw-ask" id="mw-ask" autocomplete="off">
-        <label for="mw-q" class="vh">Describe what you want to see</label>
+        <label for="mw-q" class="mw-lab">Describe what you want to see</label>
         <textarea id="mw-q" rows="2" placeholder="For example: hot areas with few trees near schools, without a shade project"></textarea>
         <button class="btn btn-primary" type="submit">Make the map</button>
       </form>
       <div class="mw-chips" id="mw-chips" aria-label="Start from a recipe"></div>
-    </div>
+      <p class="mw-note">Ask turns your words into the same filters you can set by hand in Layers.</p>
+    </section>
+
+    <section class="mw-pane" id="pane-layers" role="tabpanel" aria-labelledby="tab-layers" hidden>
+      <h2 class="mw-sh">Color the map by</h2>
+      <div class="mw-seg" id="mw-base" role="group" aria-label="Color the map by"></div>
+      <p class="mw-note" id="mw-basenote"></p>
+      <h2 class="mw-sh">Keep only cells that are</h2>
+      <div class="mw-fs" id="mw-fs">
+        <div class="mw-f"><label class="mw-fl"><input type="checkbox" data-f="heat"> <span id="l-heat"></span></label><input type="range" class="mw-rg" id="r-heat" min="5" max="50" step="5" value="25" aria-labelledby="l-heat"></div>
+        <div class="mw-f"><label class="mw-fl"><input type="checkbox" data-f="tree"> <span id="l-tree"></span></label><input type="range" class="mw-rg" id="r-tree" min="1" max="30" step="1" value="5" aria-labelledby="l-tree"></div>
+        <div class="mw-f"><label class="mw-fl"><input type="checkbox" data-f="school"> <span id="l-school"></span></label><input type="range" class="mw-rg" id="r-school" min="100" max="1000" step="50" value="300" aria-labelledby="l-school"></div>
+        <div class="mw-f"><label class="mw-fl"><input type="checkbox" data-f="noshade"> <span id="l-noshade"></span></label><input type="range" class="mw-rg" id="r-noshade" min="100" max="1500" step="100" value="500" aria-labelledby="l-noshade"></div>
+        <div class="mw-f"><label class="mw-fl"><input type="checkbox" data-f="people"> <span>Where people live</span></label></div>
+      </div>
+      <button type="button" class="btn mw-sm" id="mw-fclear">Clear filters</button>
+      <h2 class="mw-sh">Show on the map</h2>
+      <div class="mw-ov" id="mw-ov">
+        <label><input type="checkbox" data-ov="schools" checked> <span class="mw-ksch"></span> <span>Schools</span></label>
+        <label><input type="checkbox" data-ov="projects" checked> <span class="mw-kpj"></span> <span>Listed projects</span></label>
+        <label><input type="checkbox" data-ov="efforts" checked> <span class="mw-kef"></span> <span>Efforts</span></label>
+        <label><input type="checkbox" data-ov="design" checked> <span class="mw-kdr"></span> <span>Your drawings</span></label>
+      </div>
+    </section>
+
+    <section class="mw-pane" id="pane-draw" role="tabpanel" aria-labelledby="tab-draw" hidden>
+      <h2 class="mw-sh">Draw a change</h2>
+      <div class="mw-seg mw-dtools" id="mw-dtools" role="group" aria-label="Drawing tool">
+        <button type="button" data-tool="tree" aria-pressed="false"><span class="mw-dt t"></span> <span>Tree</span></button>
+        <button type="button" data-tool="pond" aria-pressed="false"><span class="mw-dt p"></span> <span>Pond</span></button>
+        <button type="button" data-tool="farm" aria-pressed="false"><span class="mw-dt f"></span> <span>Farm plot</span></button>
+      </div>
+      <p class="mw-note" id="mw-dhow">Pick a tool, then tap the map.</p>
+      <div class="mw-acts">
+        <button type="button" class="btn btn-primary mw-sm" id="mw-dfinish" hidden>Finish shape</button>
+        <button type="button" class="btn mw-sm" id="mw-dundo" disabled>Undo</button>
+        <button type="button" class="btn mw-sm" id="mw-dclear" disabled>Clear drawings</button>
+      </div>
+      <ul class="mw-dlist" id="mw-dlist"></ul>
+      <p class="mw-note">Drawings are your sketch, not a plan. For each one, Threadlands shows what its layers already say about that spot. It doesn&rsquo;t estimate cooling or other effects yet. Drawings are kept in this browser and in the map link.</p>
+    </section>
+
+    <section class="mw-pane" id="pane-compare" role="tabpanel" aria-labelledby="tab-compare" hidden>
+      <h2 class="mw-sh">Compare and explore</h2>
+      <div class="mw-tools">
+        <button type="button" class="btn" id="mw-swipe" aria-pressed="false">Compare: today and the wetland scenario</button>
+        <button type="button" class="btn" id="mw-3d" aria-pressed="false">3D terrain and buildings</button>
+      </div>
+      <p class="mw-note" id="mw-chnote"></p>
+      <p class="mw-note">While comparing, the scenario replaces the heat cells. Your drawings stay on the map, and your filters come back when you turn comparing off.</p>
+    </section>
+
     <section class="mw-res" id="mw-res" hidden aria-live="polite">
       <p class="mw-understood" id="mw-understood"></p>
       <div class="mw-sum" id="mw-sum"></div>
@@ -58,32 +132,16 @@
       <h2 class="mw-sh">What it couldn&rsquo;t determine</h2>
       <ul class="mw-cant" id="mw-cant"></ul>
       <div class="mw-acts">
-        <button type="button" class="btn" id="mw-undo">Undo</button>
-        <button type="button" class="btn" id="mw-share">Copy link to this map</button>
-        <button type="button" class="btn btn-primary" id="mw-draft">Start a draft effort</button>
+        <button type="button" class="btn mw-sm" id="mw-tolayers">Adjust in Layers</button>
+        <button type="button" class="btn mw-sm" id="mw-undo">Undo</button>
+        <button type="button" class="btn mw-sm" id="mw-share">Copy link to this map</button>
+        <button type="button" class="btn btn-primary mw-sm" id="mw-draft">Start a draft effort</button>
       </div>
       <p class="mw-msg" id="mw-msg" role="status"></p>
       <div class="mw-draft" id="mw-draftbox" hidden></div>
     </section>
-    <section class="mw-change" aria-labelledby="mw-ch-h">
-      <h2 class="mw-sh" id="mw-ch-h">Explore a change</h2>
-      <div class="mw-tools">
-        <button type="button" class="btn" id="mw-swipe" aria-pressed="false">Compare: today and the wetland scenario</button>
-        <button type="button" class="btn" id="mw-3d" aria-pressed="false">3D terrain and buildings</button>
-      </div>
-      <p class="mw-note" id="mw-chnote"></p>
-    </section>
     <p class="mw-foot">Every result shows its layers, filters, sources and resolution. The calculations behind heat and tree cover are the same ones used across Threadlands; <a href="../how-it-works/">see the methods</a>.</p>
   </aside>
-  <div class="mw-mapwrap" id="mw-mapwrap">
-    <div class="mw-map" id="mw-map" role="region" aria-label="Map"></div>
-    <div class="mw-map mw-map2" id="mw-map2" hidden aria-hidden="true"></div>
-    <div class="mw-slider" id="mw-slider" hidden><span class="mw-sl-l">Today</span><span class="mw-sl-r">2050 · modeled scenario</span><button type="button" class="mw-handle" id="mw-handle" aria-label="Drag to compare"><span aria-hidden="true">&lsaquo;&rsaquo;</span></button></div>
-    <div class="mw-layers" id="mw-layers" role="group" aria-label="Layer"></div>
-    <div class="mw-key" id="mw-key"></div>
-    <a class="mw-count" id="mw-count" href="#mw-res" hidden></a>
-    <div class="mw-loading" id="mw-loading">Loading the map&hellip;</div>
-  </div>
 </main>
 <footer class="site-foot2">
   <div class="wrap foot-grid">
@@ -221,13 +279,14 @@
   function setLayer(id) {
     LY = id; var L = LAYERS[id];
     [M, M2].forEach(function (m) { if (m && m.getLayer('cells')) m.setPaintProperty('cells', 'fill-color', rampExpr(id === 'heat' ? 'h' : id === 'tree' ? 't' : 'p', L.ramp)); });
-    document.querySelectorAll('#mw-layers button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.ly === id ? 'true' : 'false'); });
+    document.querySelectorAll('#mw-base button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.ly === id ? 'true' : 'false'); });
+    $('#mw-basenote').textContent = L.note;
     drawKey();
   }
   function drawKey() {
     var L = LAYERS[LY];
-    $('#mw-key').innerHTML = '<div class="mw-kbar" style="background:linear-gradient(90deg,' + L.ramp.join(',') + ')"></div><div class="mw-kl"><span>' + L.key[0] + '</span><span>' + L.key[1] + '</span></div><p>' + L.note + '</p>' +
-      '<p class="mw-krow"><span class="mw-ksch"></span><span>School (OpenStreetMap)</span> <span class="mw-kpj"></span><span>Listed project</span></p>' + (RES ? '<p class="mw-krow"><span class="mw-kmatch"></span><span>Matches your map</span></p>' : '');
+    $('#mw-key').innerHTML = '<p class="mw-kn"><b>' + L.name + '</b></p><div class="mw-kbar" style="background:linear-gradient(90deg,' + L.ramp.join(',') + ')"></div><div class="mw-kl"><span>' + L.key[0] + '</span><span>' + L.key[1] + '</span></div><p>' + L.note + '</p>' +
+      '<p class="mw-krow"><span class="mw-ksch"></span><span>School (OpenStreetMap)</span> <span class="mw-kpj"></span><span>Listed project</span></p>' + (RES ? '<p class="mw-krow"><span class="mw-kmatch"></span><span>Matches your map</span></p>' : '') + (DR.length ? '<p class="mw-krow"><span class="mw-kdr"></span><span>Your drawings</span></p>' : '');
   }
 
   // ---------- Points: schools, projects, efforts ----------
@@ -261,7 +320,7 @@
     return { r: r, heard: heard, missed: missed };
   }
   var AREAS = { iztapalapa: [[-99.12, 19.30], [-98.94, 19.40]] };
-  function run(r, understood, push) {
+  function run(r, understood, push, scroll) {
     if (!DET) return;
     if (push !== false && RES) HIST.push(RES.r);
     var c = DET.c, n = DET.n, keep = new Uint8Array(n).fill(1), steps = [], hasAny = false;
@@ -292,8 +351,8 @@
     var where = esc(PLACE.name), focus = r.fly ? 'Iztapalapa' : null;
     $('#mw-count').hidden = false; $('#mw-count').classList.toggle('warn', !!focus);
     $('#mw-count').innerHTML = focus ? '<span>Map focused on</span> <b>' + focus + '</b> <span aria-hidden="true">·</span> <span>results cover all of</span> <b>' + where + '</b>'
-      : '<b>' + cnt.toLocaleString('en-US') + '</b> <span>cells across</span> <b>' + where + '</b> <span aria-hidden="true">·</span> <span>How it was made</span>';
-    if (window.innerWidth < 900 && push !== false) $('#mw-mapwrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      : '<b>' + cnt.toLocaleString('en-US') + '</b> <span>cells across</span> <b>' + where + '</b><span class="mw-cx"> <span aria-hidden="true">·</span> <span>How it was made</span></span>';
+    if (scroll && window.innerWidth < 900) toMap();
     $('#mw-understood').innerHTML = understood || '';
     $('#mw-sum').innerHTML = (focus ? '<p class="mw-scope warn"><b><span>Map focused on</span> ' + focus + ' · <span>results cover all of</span> ' + where + '.</b> <span>Analysis for one borough alone isn’t available yet, because Threadlands doesn’t have borough boundaries.</span></p>' : '<p class="mw-scope"><span>Results cover all of</span> ' + where + '.</p>') + '<p class="mw-big"><b>' + cnt.toLocaleString('en-US') + '</b> <span>cells match</span></p><p><span>Roughly</span> <b>' + (cnt * cellKm2).toFixed(1) + ' km²</b> <span>where about</span> <b>' + T.fmtN(ppl) + '</b> <span>people live.</span></p>';
     $('#mw-steps').innerHTML = steps.map(function (s) { return '<li><label><input type="checkbox" checked data-step="' + s.k + '"> <span>' + s.t + '</span></label>' + (s.s ? '<small>' + esc(s.s) + '</small>' : '') + '</li>'; }).join('');
@@ -304,6 +363,7 @@
     $('#mw-cant').innerHTML = cant.map(function (x) { return '<li>' + x + '</li>'; }).join('');
     $('#mw-undo').disabled = !HIST.length;
     $('#mw-draftbox').hidden = true;
+    syncControls(r);
     writeHash();
     drawKey();
   }
@@ -315,26 +375,26 @@
       for (var i = 0; i < DET.n; i++) m.setFeatureState({ source: 'cells', id: i }, { dim: !!keep && !keep[i], match: !!keep && !!keep[i] });
     });
   }
-  function clearResult() { RES = null; paintResult(); $('#mw-res').hidden = true; $('#mw-count').hidden = true; writeHash(); drawKey(); }
+  function clearResult() { RES = null; paintResult(); $('#mw-res').hidden = true; $('#mw-count').hidden = true; syncControls({}); writeHash(); drawKey(); }
 
   // ---------- Share, undo, draft ----------
   function enc(r) { return Object.keys(r).filter(function (k) { return k !== 'fly' && k !== 'flyNote'; }).map(function (k) { return k + ':' + r[k]; }).join(','); }
   function dec(s) { var r = {}; (s || '').split(',').forEach(function (p) { var kv = p.split(':'); if (kv[0] && kv[1] != null && /^(heat|tree|school|noshade|people)$/.test(kv[0])) r[kv[0]] = +kv[1]; }); return r; }
   function writeHash() {
-    var c = M ? M.getCenter() : null, h = '#' + SLUG + '?' + (RES ? 'r=' + enc(RES.r) + '&' : '') + (c ? 'v=' + c.lat.toFixed(4) + ',' + c.lng.toFixed(4) + ',' + M.getZoom().toFixed(1) : '');
+    var c = M ? M.getCenter() : null, h = '#' + SLUG + '?' + (RES ? 'r=' + enc(RES.r) + '&' : '') + (c ? 'v=' + c.lat.toFixed(4) + ',' + c.lng.toFixed(4) + ',' + M.getZoom().toFixed(1) : '') + (DR.length ? '&d=' + encDraw() : '');
     history.replaceState(null, '', h);
   }
   function msg(t) { $('#mw-msg').textContent = t; }
 
   function wire() {
     $('#mw-chips').innerHTML = CHIPS.map(function (ch, i) { return '<button type="button" class="mw-chip" data-chip="' + i + '">' + ch.t + '</button>'; }).join('');
-    $('#mw-chips').addEventListener('click', function (ev) { var b = ev.target.closest('[data-chip]'); if (!b) return; var ch = CHIPS[+b.dataset.chip]; $('#mw-q').value = ''; run(Object.assign({}, ch.r), '<span>Recipe:</span> <b>' + b.textContent + '</b>'); });
+    $('#mw-chips').addEventListener('click', function (ev) { var b = ev.target.closest('[data-chip]'); if (!b) return; var ch = CHIPS[+b.dataset.chip]; $('#mw-q').value = ''; run(Object.assign({}, ch.r), '<span>Recipe:</span> <b>' + b.textContent + '</b>', true, true); });
     $('#mw-ask').addEventListener('submit', function (ev) {
       ev.preventDefault(); var t = $('#mw-q').value.trim(); if (!t) return;
       var x = read(t);
       if (!x.heard.length) { $('#mw-res').hidden = false; $('#mw-understood').innerHTML = '<span>Threadlands didn’t recognize a layer in that. It can map heat, tree cover, people, schools and listed shade projects so far.</span>'; $('#mw-sum').innerHTML = ''; $('#mw-steps').innerHTML = ''; $('#mw-cant').innerHTML = ''; return; }
       if (x.r.fly && AREAS[x.r.fly]) { M.fitBounds(AREAS[x.r.fly], { padding: 30 }); x.r.flyNote = 'Borough boundaries aren’t loaded yet, so results can’t be limited to Iztapalapa.'; }
-      run(x.r, '<span>Understood:</span> <b>' + x.heard.map(function (h) { return '<span>' + h + '</span>'; }).join(' · ') + '</b>' + (x.missed.length ? '<br><span class="mw-missed">' + x.missed.map(function (m) { return '<span>Not used: ' + m + '</span>'; }).join(' ') + '</span>' : ''));
+      run(x.r, '<span>Understood:</span> <b>' + x.heard.map(function (h) { return '<span>' + h + '</span>'; }).join(' · ') + '</b>' + (x.missed.length ? '<br><span class="mw-missed">' + x.missed.map(function (m) { return '<span>Not used: ' + m + '</span>'; }).join(' ') + '</span>' : ''), true, true);
     });
     $('#mw-steps').addEventListener('change', function (ev) {
       var cb = ev.target.closest('[data-step]'); if (!cb || !RES) return;
@@ -350,12 +410,13 @@
     $('#mw-draft').addEventListener('click', function () {
       if (!RES) return; var box = $('#mw-draftbox');
       box.hidden = false;
-      box.innerHTML = '<p class="mw-dk">Draft effort · preview</p><p><b>' + RES.cnt.toLocaleString('en-US') + '</b> <span>cells, about</span> <b>' + T.fmtN(RES.ppl) + '</b> <span>people</span></p><p>' + RES.steps.map(function (s) { return '<span>' + esc(s.t) + '</span>'; }).join(' ') + '</p>' +
-        '<p class="mw-note">An effort would carry this map recipe as its evidence, with a search area people narrow down together. Starting real efforts opens once Threadlands can run them safely; until then, see how an effort page works.</p><p><a class="btn" href="../effort/#iztapalapa-shade-example">See the example effort</a></p>';
+      box.innerHTML = '<p class="mw-dk">Draft effort · preview</p><p><b>' + RES.cnt.toLocaleString('en-US') + '</b> <span>cells, about</span> <b>' + T.fmtN(RES.ppl) + '</b> <span>people</span></p>' + (DR.length ? '<p><span>Your sketch:</span> ' + drawSummary() + '</p>' : '') + '<p>' + RES.steps.map(function (s) { return '<span>' + esc(s.t) + '</span>'; }).join(' ') + '</p>' +
+        '<p class="mw-note">An effort would carry this map recipe as its evidence, with a search area people narrow down together, and any sketch you drew. Starting real efforts opens once Threadlands can run them safely; until then, see how an effort page works.</p><p><a class="btn" href="../effort/#iztapalapa-shade-example">See the example effort</a></p>';
     });
-    $('#mw-layers').innerHTML = Object.keys(LAYERS).map(function (k) { return '<button type="button" data-ly="' + k + '" aria-pressed="' + (k === LY) + '">' + LAYERS[k].name + '</button>'; }).join('');
-    $('#mw-layers').addEventListener('click', function (ev) { var b = ev.target.closest('[data-ly]'); if (b) setLayer(b.dataset.ly); });
-    var toMap = function () { if (window.innerWidth < 900) $('#mw-mapwrap').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    $('#mw-base').innerHTML = Object.keys(LAYERS).map(function (k) { return '<button type="button" data-ly="' + k + '" aria-pressed="' + (k === LY) + '">' + LAYERS[k].name + '</button>'; }).join('');
+    $('#mw-base').addEventListener('click', function (ev) { var b = ev.target.closest('[data-ly]'); if (b) setLayer(b.dataset.ly); });
+    $('#mw-tolayers').addEventListener('click', function () { setTab('layers'); });
+    wireTabs(); wireLayers(); wireDraw(); wireMapCtl();
     $('#mw-3d').addEventListener('click', function () { var on = $('#mw-3d').getAttribute('aria-pressed') !== 'true'; set3D(on); if (on) toMap(); });
     $('#mw-swipe').addEventListener('click', function () { var on = $('#mw-swipe').getAttribute('aria-pressed') !== 'true'; setSwipe(on); if (on) toMap(); });
   }
@@ -363,7 +424,7 @@
   // ---------- Click: the value for the cell the point falls in, never a point reading ----------
   function readout(m) {
     m.on('click', function (ev) {
-      if (!DET) return;
+      if (!DET || DTOOL) return;
       var c = DET.c, best = -1, bd = Infinity, la = ev.lngLat.lat, ln = ev.lngLat.lng;
       for (var i = 0; i < DET.n; i++) { var d = Math.abs(c.lat[i] - la) + Math.abs(c.lng[i] - ln) * 0.94; if (d < bd) { bd = d; best = i; } }
       if (best < 0 || bd > 0.003) return;
@@ -422,12 +483,12 @@
       }
       M2.resize(); sync(); clip();
       M.fitBounds([[TIME.bbox[2], TIME.bbox[0]], [TIME.bbox[3], TIME.bbox[1]]], { padding: 20 });   // bbox is south, north, west, east
-      $('#mw-layers').hidden = true; $('#mw-count').hidden = true;
+      $('#mw-count').hidden = true;
       var F = TIME.future || {};
       $('#mw-key').innerHTML = '<p class="mw-scenk"><b>Modeled scenario, not a forecast.</b> <span>Assumes wetlands on ' + (F.wetland_km2 || '') + ' km² of unbuilt old lakebed and ' + (F.canopy || '') + '% more street tree cover, on the middle climate path for 2050. No homes moved. This view shows the wetlands only.</span></p><p class="mw-krow"><span class="mw-ksw" style="background:#3D7FA6"></span><span>Open water and wetland today</span></p><p class="mw-krow"><span class="mw-ksw" style="background:#2E9C86"></span><span>Wetland in the 2050 scenario</span></p><p class="mw-krow"><span class="mw-ksw" style="background:#9CC3D3;opacity:.6"></span><span>The old lake</span></p><p>Cells of about 0.85 km².</p>';
       $('#mw-chnote').innerHTML = '<span>Left: open water and wetland today. Right: the 2050 scenario from the Mexico City through-time page, with wetlands back on unbuilt land of the old lakebed (teal). Pale blue: the old lake. One modeled idea, not a forecast or a plan.</span>';
     } else {
-      $('#mw-map2').hidden = true; $('#mw-slider').hidden = true; $('#mw-layers').hidden = false; if (RES) $('#mw-count').hidden = false; drawKey();
+      $('#mw-map2').hidden = true; $('#mw-slider').hidden = true; if (RES) $('#mw-count').hidden = false; drawKey();
       if (M.getLayer('scen-w')) { M.setLayoutProperty('scen-lake', 'visibility', 'none'); M.setLayoutProperty('scen-w', 'visibility', 'none'); }
       if (M.getLayer('cells')) { M.setLayoutProperty('cells', 'visibility', 'visible'); M.setLayoutProperty('cells-hit', 'visibility', 'visible'); }
       $('#mw-chnote').textContent = '';
@@ -460,14 +521,209 @@
     m.addLayer({ id: 'efforts-r', type: 'fill', source: 'ef-areas', paint: { 'fill-color': 'rgba(14,90,82,0.06)' } });
     m.addLayer({ id: 'efforts-o', type: 'line', source: 'ef-areas', paint: { 'line-color': '#0E5A52', 'line-width': 2.5, 'line-dasharray': [2, 1.5] } });
     m.addLayer({ id: 'efforts-l', type: 'symbol', source: 'efforts', layout: { 'text-field': ['get', 'n'], 'text-font': ['Noto Sans Bold'], 'text-size': 12, 'text-offset': [0, -2.4], 'text-anchor': 'bottom' }, paint: { 'text-color': '#0E5A52', 'text-halo-color': '#fff', 'text-halo-width': 2.5 } });
-    m.on('click', 'efforts-l', function (ev) { location.href = '../effort/#' + ev.features[0].properties.id; });
+    m.on('click', 'efforts-l', function (ev) { if (DTOOL) return; location.href = '../effort/#' + ev.features[0].properties.id; });
+  }
+
+
+  // ---------- Four ways to work on one map ----------
+  var TAB = 'ask';
+  function toMap() { var r = $('#mw-mapwrap').getBoundingClientRect(); if (window.innerWidth < 900 && (r.top < 0 || r.top > window.innerHeight * 0.4)) $('#mw-mapwrap').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  function setTab(t) {
+    TAB = t;
+    document.querySelectorAll('#mw-tabs [role=tab]').forEach(function (b) { var on = b.dataset.tab === t; b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; });
+    ['ask', 'layers', 'draw', 'compare'].forEach(function (k) { $('#pane-' + k).hidden = k !== t; });
+    $('#mw-res').classList.toggle('mw-off', t === 'draw' || t === 'compare');
+    if (t !== 'draw') setTool(null);
+    if (window.innerWidth < 900) { var tb = $('#mw-tabs').getBoundingClientRect(); if (tb.top < 0) $('#mw-tabs').scrollIntoView({ block: 'start' }); }
+  }
+  function wireTabs() {
+    var tabs = $('#mw-tabs');
+    tabs.addEventListener('click', function (ev) { var b = ev.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); });
+    tabs.addEventListener('keydown', function (ev) {
+      var order = ['ask', 'layers', 'draw', 'compare'], i = order.indexOf(TAB);
+      if (ev.key === 'ArrowRight') i = (i + 1) % 4; else if (ev.key === 'ArrowLeft') i = (i + 3) % 4; else return;
+      setTab(order[i]); $('#tab-' + order[i]).focus(); ev.preventDefault();
+    });
+  }
+
+  // ---------- Layers: the same filters Ask uses, set by hand ----------
+  var FL = {
+    heat: function (v) { return 'Hottest ' + v + '% of cells'; },
+    tree: function (v) { return 'Trees cover under ' + v + '% of the ground'; },
+    school: function (v) { return 'Within ' + v + ' m of a school'; },
+    noshade: function (v) { return 'At least ' + v + ' m from a listed shade project'; }
+  };
+  function labelFilters() { Object.keys(FL).forEach(function (k) { $('#l-' + k).textContent = FL[k]($('#r-' + k).value); }); }
+  function syncControls(r) {
+    var box = function (k) { return document.querySelector('[data-f="' + k + '"]'); };
+    box('heat').checked = r.heat != null; if (r.heat != null) $('#r-heat').value = Math.round((1 - r.heat) * 100);
+    box('tree').checked = r.tree != null; if (r.tree != null) $('#r-tree').value = r.tree;
+    box('school').checked = r.school != null; if (r.school != null) $('#r-school').value = r.school;
+    box('noshade').checked = r.noshade != null; if (r.noshade != null) $('#r-noshade').value = r.noshade;
+    box('people').checked = !!r.people;
+    labelFilters();
+  }
+  function fromControls() {
+    var r = {}, on = function (k) { return document.querySelector('[data-f="' + k + '"]').checked; };
+    if (on('heat')) r.heat = +(1 - $('#r-heat').value / 100).toFixed(2);
+    if (on('tree')) r.tree = +$('#r-tree').value;
+    if (on('school')) r.school = +$('#r-school').value;
+    if (on('noshade')) r.noshade = +$('#r-noshade').value;
+    if (on('people')) r.people = 1;
+    if (RES && RES.r.fly) { r.fly = RES.r.fly; r.flyNote = RES.r.flyNote; }
+    return r;
+  }
+  function applyControls() {
+    if ($('#mw-swipe').getAttribute('aria-pressed') === 'true') setSwipe(false);
+    var r = fromControls();
+    if (!Object.keys(r).filter(function (k) { return k !== 'fly' && k !== 'flyNote'; }).length) { if (RES) { HIST.push(RES.r); clearResult(); } return; }
+    run(r, '<span>Filters set in Layers.</span>');
+  }
+  function wireLayers() {
+    labelFilters();
+    $('#mw-fs').addEventListener('input', function (ev) {
+      if (ev.target.type !== 'range') return;
+      var k = ev.target.id.slice(2); labelFilters();
+      document.querySelector('[data-f="' + k + '"]').checked = true;
+    });
+    $('#mw-fs').addEventListener('change', function () { applyControls(); });
+    $('#mw-fclear').addEventListener('click', function () { document.querySelectorAll('[data-f]').forEach(function (c) { c.checked = false; }); applyControls(); });
+    $('#mw-ov').addEventListener('change', function (ev) {
+      var k = ev.target.dataset.ov, vis = ev.target.checked ? 'visible' : 'none';
+      var ids = { schools: ['schools'], projects: ['projects'], efforts: ['efforts-r', 'efforts-o', 'efforts-l'], design: ['design-fill', 'design-line', 'design-tree'] }[k] || [];
+      ids.forEach(function (id) { if (M.getLayer(id)) M.setLayoutProperty(id, 'visibility', vis); });
+    });
+  }
+
+  // ---------- Draw: sketch trees, ponds and farm plots on the same map ----------
+  var DR = [], DHIST = [], PEND = [], DTOOL = null;
+  var DK = { tree: { name: 'Tree', col: '#2E6B3F' }, pond: { name: 'Pond', col: '#3D7FA6' }, farm: { name: 'Farm plot', col: '#B07D2B' } };
+  var HOW = { tree: 'Tap the map to place a tree. Each tap adds one.', pond: 'Tap the map to add corners, then press Finish shape.', farm: 'Tap the map to add corners, then press Finish shape.' };
+  function setTool(t) {
+    if (t === DTOOL) t = null;
+    if (DTOOL && DTOOL !== 'tree' && PEND.length && t !== DTOOL) PEND = [];
+    DTOOL = t;
+    document.querySelectorAll('#mw-dtools [data-tool]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.tool === t ? 'true' : 'false'); });
+    $('#mw-dhow').textContent = t ? HOW[t] : 'Pick a tool, then tap the map.';
+    $('#mw-mapwrap').classList.toggle('mw-drawing', !!t);
+    $('#mw-hint').hidden = !t; $('#mw-hint').textContent = t ? HOW[t] : '';
+    if (M) M.getCanvas().style.cursor = t ? 'crosshair' : '';
+    refreshDesign(true);
+  }
+  function ringArea(c) {   // m², on a local flat projection: fine at the size of a pond or a plot
+    var la0 = c[0][1], kx = KX(la0) * 1000, ky = 110570, a = 0;
+    for (var i = 0; i < c.length; i++) { var j = (i + 1) % c.length; a += (c[i][0] * kx) * (c[j][1] * ky) - (c[j][0] * kx) * (c[i][1] * ky); }
+    return Math.abs(a / 2);
+  }
+  function inRing(x, y, c) { var ins = false; for (var i = 0, j = c.length - 1; i < c.length; j = i++) { if (((c[i][1] > y) !== (c[j][1] > y)) && (x < (c[j][0] - c[i][0]) * (y - c[i][1]) / (c[j][1] - c[i][1]) + c[i][0])) ins = !ins; } return ins; }
+  function nearestCell(ln, la) { var c = DET.c, best = -1, bd = Infinity; for (var i = 0; i < DET.n; i++) { var d = Math.abs(c.lat[i] - la) + Math.abs(c.lng[i] - ln) * 0.94; if (d < bd) { bd = d; best = i; } } return bd > 0.003 ? -1 : best; }
+  // What the existing layers say about the spot: no new calculation, no estimate of effect
+  function spotFacts(d) {
+    if (!DET) return '';
+    var c = DET.c, idx = [];
+    if (d.k === 'tree') { var n = nearestCell(d.c[0][0], d.c[0][1]); if (n >= 0) idx.push(n); }
+    else {
+      var xs = d.c.map(function (p) { return p[0]; }), ys = d.c.map(function (p) { return p[1]; }), x0 = Math.min.apply(0, xs), x1 = Math.max.apply(0, xs), y0 = Math.min.apply(0, ys), y1 = Math.max.apply(0, ys);
+      for (var i = 0; i < DET.n; i++) if (c.lng[i] >= x0 && c.lng[i] <= x1 && c.lat[i] >= y0 && c.lat[i] <= y1 && inRing(c.lng[i], c.lat[i], d.c)) idx.push(i);
+      if (!idx.length) { var cx = xs.reduce(function (a, b) { return a + b; }, 0) / xs.length, cy = ys.reduce(function (a, b) { return a + b; }, 0) / ys.length, m = nearestCell(cx, cy); if (m >= 0) idx.push(m); }
+    }
+    if (!idx.length) return '<span>Outside the detailed cells.</span>';
+    var hs = idx.map(function (i) { return c.heat[i]; }).filter(function (v) { return v != null; }), tr = 0;
+    idx.forEach(function (i) { tr += c.tree[i]; }); tr = Math.round(tr / idx.length);
+    var hp = hs.length ? Math.round(100 * pctile(c.heat, hs.reduce(function (a, b) { return a + b; }, 0) / hs.length)) : null;
+    return (hp != null ? '<span>Hotter than ' + hp + '% of cells in the city</span> · ' : '') + '<span>trees cover ' + tr + '% of ' + (idx.length > 1 ? 'these cells' : 'this cell') + '</span>';
+  }
+  function fmtArea(a) { return a >= 10000 ? (a / 10000).toFixed(a >= 100000 ? 0 : 1) + ' ha' : Math.round(a / 10) * 10 + ' m²'; }
+  function drawSummary() {
+    var n = { tree: 0, pond: 0, farm: 0 }, ar = { pond: 0, farm: 0 };
+    DR.forEach(function (d) { n[d.k]++; if (d.k !== 'tree') ar[d.k] += ringArea(d.c); });
+    var out = [];
+    if (n.tree) out.push('<span>' + (n.tree === 1 ? '1 tree' : n.tree + ' trees') + '</span>');
+    if (n.pond) out.push('<span>' + (n.pond === 1 ? '1 pond' : n.pond + ' ponds') + '</span> <span class="notranslate">(' + fmtArea(ar.pond) + ')</span>');
+    if (n.farm) out.push('<span>' + (n.farm === 1 ? '1 farm plot' : n.farm + ' farm plots') + '</span> <span class="notranslate">(' + fmtArea(ar.farm) + ')</span>');
+    return out.join(', ');
+  }
+  function designGeo() {
+    var f = DR.map(function (d, i) { return d.k === 'tree' ? { type: 'Feature', geometry: { type: 'Point', coordinates: d.c[0] }, properties: { k: d.k, i: i } } : { type: 'Feature', geometry: { type: 'Polygon', coordinates: [d.c.concat([d.c[0]])] }, properties: { k: d.k, i: i } }; });
+    return { type: 'FeatureCollection', features: f };
+  }
+  function pendGeo() {
+    var f = PEND.map(function (p) { return { type: 'Feature', geometry: { type: 'Point', coordinates: p }, properties: {} }; });
+    if (PEND.length > 1) f.push({ type: 'Feature', geometry: { type: 'LineString', coordinates: PEND.length > 2 ? PEND.concat([PEND[0]]) : PEND }, properties: {} });
+    return { type: 'FeatureCollection', features: f };
+  }
+  function addDesign(m) {
+    var col = ['match', ['get', 'k'], 'pond', DK.pond.col, 'farm', DK.farm.col, DK.tree.col];
+    m.addSource('design', { type: 'geojson', data: designGeo() });
+    m.addSource('design-tmp', { type: 'geojson', data: pendGeo() });
+    m.addLayer({ id: 'design-fill', type: 'fill', source: 'design', filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'fill-color': col, 'fill-opacity': 0.45 } });
+    m.addLayer({ id: 'design-line', type: 'line', source: 'design', filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'line-color': col, 'line-width': 2 } });
+    m.addLayer({ id: 'design-tree', type: 'circle', source: 'design', filter: ['==', ['geometry-type'], 'Point'], paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 3, 16, 8], 'circle-color': DK.tree.col, 'circle-stroke-color': '#fff', 'circle-stroke-width': 1.5 } });
+    m.addLayer({ id: 'tmp-line', type: 'line', source: 'design-tmp', filter: ['==', ['geometry-type'], 'LineString'], paint: { 'line-color': '#123B38', 'line-width': 2, 'line-dasharray': [2, 1.5] } });
+    m.addLayer({ id: 'tmp-pt', type: 'circle', source: 'design-tmp', filter: ['==', ['geometry-type'], 'Point'], paint: { 'circle-radius': 5, 'circle-color': '#fff', 'circle-stroke-color': '#123B38', 'circle-stroke-width': 2 } });
+    m.on('click', function (ev) {
+      if (!DTOOL) return;
+      var p = [+ev.lngLat.lng.toFixed(6), +ev.lngLat.lat.toFixed(6)];
+      if (DTOOL === 'tree') { DHIST.push(JSON.stringify(DR)); DR.push({ k: 'tree', c: [p] }); }
+      else PEND.push(p);
+      refreshDesign();
+    });
+  }
+  function refreshDesign(quiet) {
+    if (M && M.getSource('design')) { M.getSource('design').setData(designGeo()); M.getSource('design-tmp').setData(pendGeo()); }
+    var poly = DTOOL && DTOOL !== 'tree';
+    $('#mw-dfinish').hidden = !poly; $('#mw-dfinish').disabled = PEND.length < 3;
+    $('#mw-dundo').disabled = !(PEND.length || DHIST.length); $('#mw-dclear').disabled = !DR.length;
+    $('#mw-dlist').innerHTML = (DR.length ? '<li class="mw-dsum"><b>' + drawSummary() + '</b></li>' : '') + DR.map(function (d, i) {
+      return '<li><span class="mw-dt ' + d.k[0] + '"></span> <span><b>' + DK[d.k].name + '</b>' + (d.k !== 'tree' ? ' <span class="notranslate">· ' + fmtArea(ringArea(d.c)) + '</span>' : '') + '<br><small>' + spotFacts(d) + '</small></span> <button type="button" class="mw-dx" data-del="' + i + '" aria-label="Remove">&times;</button></li>';
+    }).join('');
+    if (!quiet) { try { localStorage.setItem('tl-draw-' + SLUG, JSON.stringify(DR)); } catch (e) {} writeHash(); drawKey(); }
+  }
+  function encDraw() { return DR.map(function (d) { return d.k[0] + d.c.map(function (p) { return p[1].toFixed(5) + '_' + p[0].toFixed(5); }).join('_'); }).join('!'); }
+  function decDraw(s) {
+    var K = { t: 'tree', p: 'pond', f: 'farm' }, out = [];
+    (s || '').split('!').forEach(function (x) { var k = K[x[0]], n = x.slice(1).split('_').map(Number), c = []; if (!k) return; for (var i = 0; i + 1 < n.length; i += 2) if (isFinite(n[i]) && isFinite(n[i + 1])) c.push([n[i + 1], n[i]]); if ((k === 'tree' && c.length === 1) || (k !== 'tree' && c.length >= 3)) out.push({ k: k, c: c }); });
+    return out;
+  }
+  function wireDraw() {
+    $('#mw-dtools').addEventListener('click', function (ev) { var b = ev.target.closest('[data-tool]'); if (b) { setTool(b.dataset.tool); if (DTOOL) toMap(); } });
+    $('#mw-dfinish').addEventListener('click', function () { if (PEND.length < 3) return; DHIST.push(JSON.stringify(DR)); DR.push({ k: DTOOL, c: PEND }); PEND = []; refreshDesign(); });
+    $('#mw-dundo').addEventListener('click', function () { if (PEND.length) PEND.pop(); else if (DHIST.length) DR = JSON.parse(DHIST.pop()); refreshDesign(); });
+    $('#mw-dclear').addEventListener('click', function () { DHIST.push(JSON.stringify(DR)); DR = []; PEND = []; refreshDesign(); });
+    $('#mw-dlist').addEventListener('click', function (ev) { var b = ev.target.closest('[data-del]'); if (!b) return; DHIST.push(JSON.stringify(DR)); DR.splice(+b.dataset.del, 1); refreshDesign(); });
+  }
+
+  // ---------- Phones: one finger scrolls the page; moving the map is deliberate ----------
+  var TOUCH = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  function setMove(on) {
+    $('#mw-move').setAttribute('aria-pressed', on ? 'true' : 'false');
+    $('#mw-move').textContent = on ? 'Done moving' : 'Move map';
+    if (M && M.cooperativeGestures) { if (on) M.cooperativeGestures.disable(); else M.cooperativeGestures.enable(); }
+    $('#mw-mapwrap').classList.toggle('mw-moving', on);
+  }
+  function setExpand(on) {
+    $('#mw').classList.toggle('mw-exp', on);
+    $('#mw-expand').setAttribute('aria-expanded', on ? 'true' : 'false');
+    $('#mw-expand').textContent = on ? 'Smaller map' : 'Expand map';
+    setMove(on);
+    setTimeout(function () { M.resize(); if (M2) M2.resize(); clip(); if (on) $('#mw-mapwrap').scrollIntoView({ block: 'start' }); }, 30);
+  }
+  function wireMapCtl() {
+    $('#mw-mapctl').hidden = !TOUCH && window.innerWidth >= 900;
+    $('#mw-move').addEventListener('click', function () { setMove($('#mw-move').getAttribute('aria-pressed') !== 'true'); });
+    $('#mw-expand').addEventListener('click', function () { setExpand($('#mw-expand').getAttribute('aria-expanded') !== 'true'); });
   }
 
   // ---------- Start ----------
+  var GL = {
+    es: { 'CooperativeGesturesHandler.MobileHelpText': 'Usa dos dedos o «Mover mapa» para mover el mapa', 'CooperativeGesturesHandler.WindowsHelpText': 'Usa Ctrl + rueda para hacer zoom', 'CooperativeGesturesHandler.MacHelpText': 'Usa ⌘ + rueda para hacer zoom' },
+    it: { 'CooperativeGesturesHandler.MobileHelpText': 'Usa due dita o «Sposta mappa» per muovere la mappa', 'CooperativeGesturesHandler.WindowsHelpText': 'Usa Ctrl + rotellina per lo zoom', 'CooperativeGesturesHandler.MacHelpText': 'Usa ⌘ + rotellina per lo zoom' },
+    en: { 'CooperativeGesturesHandler.MobileHelpText': 'Use two fingers, or Move map, to move the map' }
+  };
   function start() {
-    wire(); dragSlider(); drawKey();
+    wire(); dragSlider(); setLayer(LY);
     var hs = location.hash.split('?')[1] || '', P = new URLSearchParams(hs), v = (P.get('v') || '').split(',').map(Number);
-    M = new maplibregl.Map({ container: 'mw-map', style: style(), center: v.length === 3 && isFinite(v[0]) ? [v[1], v[0]] : [-99.07, 19.38], zoom: v.length === 3 && isFinite(v[2]) ? v[2] : 11, maxPitch: 75, attributionControl: { compact: true } });
+    M = new maplibregl.Map({ container: 'mw-map', style: style(), center: v.length === 3 && isFinite(v[0]) ? [v[1], v[0]] : [-99.07, 19.38], zoom: v.length === 3 && isFinite(v[2]) ? v[2] : 11, maxPitch: 75, attributionControl: { compact: true }, cooperativeGestures: TOUCH || window.innerWidth < 900, locale: GL[LANG()] || {} });
     window.TL_MAP = M;
     M.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
     M.on('move', function () { sync(); });
@@ -476,10 +732,14 @@
     readout(M);
     Promise.all([load(), new Promise(function (res) { if (M.isStyleLoaded()) res(); else M.once('style.load', res); })]).then(function () {
       $('#mw-loading').hidden = true; M.resize();
+      if (window.innerWidth < 900) document.querySelectorAll('.maplibregl-ctrl-attrib').forEach(function (e) { e.classList.remove('maplibregl-compact-show'); e.removeAttribute('open'); });
       $('#mw-place').textContent = PLACE.name; $('#mw-place').href = '../place/#' + SLUG;
       document.title = PLACE.name + ' map | Threadlands';
       if (DET) addCells(M);
-      addPoints(M); addEfforts(M);
+      addPoints(M); addEfforts(M); addDesign(M);
+      var dd = P.get('d'); if (dd) DR = decDraw(dd); else { try { DR = JSON.parse(localStorage.getItem('tl-draw-' + SLUG) || '[]') || []; } catch (e) { DR = []; } }
+      if (!Array.isArray(DR)) DR = [];
+      refreshDesign(true); drawKey();
       var r = dec(P.get('r')); if (Object.keys(r).length) run(r, '<span>Opened from a shared link.</span>', false);
     }).catch(function (e) { $('#mw-loading').textContent = 'The map could not be loaded. Check your connection and refresh.'; console.log(e); });
   }

@@ -34,6 +34,7 @@ const VISITS = [
   { url: '/studio/', wait: 4000 },
   { url: '/how-it-works/' },
   { url: '/about/' },
+  { url: '/map/#mexico-city', wait: 9000, clicks: ['[data-chip="0"]', '#tab-layers', '#tab-draw', '[data-tool="tree"]', '#tab-compare'] },
 ];
 
 (async () => {
