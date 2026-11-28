@@ -161,17 +161,34 @@
     });
   }
   function setLang(l, save) {
-    lang = l;
+    lang = l; if (l === 'en') note(l);
     if (save) { try { localStorage.setItem('threadlands:lang', l); } catch (e) { /* ignore */ } }
     var h = document.documentElement; h.lang = l; h.dir = RTL[l] ? 'rtl' : 'ltr'; h.dataset.lang = l;
     font(l);
     var sel = document.getElementById('lang'); if (sel) sel.value = l;
     return load(l).then(function (d) {
-      DICT = d; obs.disconnect(); walk(document.body);
+      DICT = d; obs.disconnect(); note(l); walk(document.body);
       document.title = tr(TITLE);
       observe();
       document.dispatchEvent(new CustomEvent('threadlands:lang', { detail: l }));
     }).catch(function () { /* keep English */ });
+  }
+  // Every translation is machine-made until a person has reviewed it, and says so
+  var NOTE = {
+    es: 'Traducción hecha con IA, todavía sin revisar por una persona.',
+    it: 'Traduzione fatta con l’IA, non ancora rivista da una persona.',
+    fr: 'Traduction automatique, pas encore relue par une personne.',
+    pt: 'Tradução automática, ainda não revista por uma pessoa.',
+    ru: 'Машинный перевод, ещё не проверенный человеком.',
+    zh: '机器翻译，尚未经过人工审校。',
+    hi: 'मशीन अनुवाद, अभी किसी व्यक्ति ने जाँचा नहीं है।',
+    ar: 'ترجمة آلية، لم يراجعها شخص بعد.'
+  };
+  function note(l) {
+    var old = document.getElementById('tl-mt'); if (old) old.remove();
+    if (l === 'en' || !NOTE[l]) return;
+    var p = document.createElement('p'); p.id = 'tl-mt'; p.className = 'tl-mt'; p.setAttribute('translate', 'no'); p.lang = l; p.textContent = NOTE[l];
+    var hd = document.querySelector('.site-head'); if (hd && hd.parentNode) hd.parentNode.insertBefore(p, hd.nextSibling); else document.body.insertBefore(p, document.body.firstChild);
   }
   var TITLE = null;
   function menu() {

@@ -28,6 +28,7 @@ css = ":root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding
 css += """
   .pf-efforts { margin: 30px 0 22px; } .pf-ef { display: grid; gap: 4px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--ink); text-decoration: none; max-width: 40rem; }
   .pf-ef:hover b { text-decoration: underline; } .pf-ef > span { font-size: 0.86rem; color: var(--ink2); } .pf-ef-ex { display: inline-block; padding: 1px 8px; border-radius: 999px; background: #FFF4D6; color: #5a4300; font-weight: 600; font-size: 0.78rem; }
+  .tl-mt { margin: 0; padding: 6px 16px; text-align: center; font-size: 0.8rem; color: var(--ink2); background: var(--surface); border-bottom: 1px solid var(--line); }
   /* Effort page: one shared local effort, read-only */
   .ef-sample { background: #FFF4D6; color: #5a4300; border-bottom: 1px solid #ecd9a0; font-size: 0.9rem; padding: 10px 0; }
   .ef-sample b { font-weight: 700; }
@@ -1059,7 +1060,7 @@ PRO_PAGES = ("lab/", "explore/", "studio/", "how-it-works/", "guide/")
 
 def APP(base):
     # Installable app: icon, manifest and offline support
-    return (f'<script src="{base}assets/i18n.js?v=3" defer></script>\n<script src="{base}assets/feedback.js?v=1" defer></script>\n'
+    return (f'<script src="{base}assets/i18n.js?v=4" defer></script>\n<script src="{base}assets/feedback.js?v=1" defer></script>\n'
             f'<link rel="manifest" href="{base}manifest.webmanifest">\n'
             '<meta name="theme-color" content="#E8EDE6" media="(prefers-color-scheme: light)">\n'
             '<meta name="theme-color" content="#0D1613" media="(prefers-color-scheme: dark)">\n'
@@ -1079,7 +1080,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=76">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=77">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

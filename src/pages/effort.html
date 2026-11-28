@@ -28,7 +28,7 @@
       </div>
       <div class="ef-mapcol">
         <div class="ef-map" id="ef-map" role="img" aria-label="Map of the effort’s area and the heat around it"></div>
-        <div class="ef-key"><div class="ef-key-bar"></div><div class="ef-key-l"><span>Cooler</span><span>Hotter</span></div><p>Measured surface heat from Landsat, compared across the region. Grey: no reading.</p><p><span class="ef-sw ef-sw-area"></span><span>The effort’s area</span> <span class="ef-sw ef-sw-pj" data-pjkey></span><span data-pjkey>Related existing work</span></p></div>
+        <div class="ef-key"><div class="ef-key-bar"></div><div class="ef-key-l"><span>Cooler</span><span>Hotter</span></div><p>Measured surface heat from Landsat, compared across the region. Grey: no reading.</p><p><span class="ef-sw ef-sw-area"></span><span>Search area</span> <span class="ef-sw ef-sw-pj" data-pjkey></span><span data-pjkey>Related existing work</span></p></div>
       </div>
     </section>
 
@@ -153,7 +153,7 @@
       var dx = (c.lng[i] - ef.lng) * k, dy = c.lat[i] - ef.lat, d2 = dx * dx + dy * dy; if (d2 < bd) { bd = d2; best = i; }
     }
     var a = +d.hex_km2 || 1, size = a < 0.5 ? a.toFixed(1) : Math.round(a);
-    $('#ef-scale').textContent = 'The area of about ' + size + ' km² around the effort’s location. For what happens on a single street or corner, local knowledge is what the map needs.';
+    $('#ef-scale').textContent = 'The search area, about ' + size + ' km². For what happens on a single street or corner, local knowledge is what the map needs.';
     var hp = heat[best] != null ? pctOf(heat, heat[best]) : null, gp = pctOf(green, green[best]), out = [];
     var hs = standing(hp, ['hottest', 'hotter', 'coolest', 'cooler']), gsd = standing(gp, ['greenest', 'greener', 'least green', 'less green']);
     if (hs) out.push('<li><b>Heat:</b> <span>this area is ' + hs + ', from satellite readings of surface heat.</span></li>');
@@ -179,7 +179,7 @@
     L.layerGroup(g).addTo(m);
     var bp = c.poly[best], bl = []; for (var j = 0; j < bp.length; j += 2) bl.push([bp[j], bp[j + 1]]);
     var area = L.polygon(bl, { color: '#123B38', weight: 3, fill: false }).addTo(m);
-    area.bindTooltip('The effort’s area', { permanent: true, direction: 'top', className: 'ef-lbl' });
+    area.bindTooltip('Search area', { permanent: true, direction: 'top', className: 'ef-lbl' });
     if (!pj.some(function (p) { return isFinite(p.lat); })) document.querySelectorAll('[data-pjkey]').forEach(function (x) { x.hidden = true; });
     pj.forEach(function (p) { if (isFinite(p.lat)) L.circleMarker([p.lat, p.lng], { radius: 8, color: '#fff', weight: 2.5, fillColor: '#C0603A', fillOpacity: 1 }).addTo(m).bindTooltip(p.name); });
   }
