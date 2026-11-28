@@ -1,0 +1,81 @@
+name: Map fixtures
+# Fetches what the map workspace needs from outside:
+# - schools for Mexico City from OpenStreetMap (saved to data/layers/, with the date and attribution)
+# - a small set of OpenFreeMap vector tiles, fonts and terrain tiles for local testing (saved to the "fixtures" branch, never served by the site)
+on:
+  push:
+    branches: [main]
+    paths: ['.github/map-fixtures.txt']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Schools from OpenStreetMap
+        run: |
+          python3 - <<'PY'
+          import json, os, time, urllib.parse, urllib.request, datetime
+          bb = (18.77, -99.66, 19.88, -98.64)
+          q = '[out:json][timeout:180];(node["amenity"="school"](%s,%s,%s,%s);way["amenity"="school"](%s,%s,%s,%s););out center tags;' % (bb + bb)
+          data = None
+          for u in ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter', 'https://overpass.kumi.systems/api/interpreter']:
+              try:
+                  r = urllib.request.urlopen(urllib.request.Request(u, data=urllib.parse.urlencode({'data': q}).encode(), headers={'User-Agent': 'Threadlands map fixtures (threadlands.org)'}), timeout=200)
+                  data = json.loads(r.read()); break
+              except Exception as e:
+                  print('failed', u, e)
+          if not data: raise SystemExit('no Overpass server answered')
+          pts = []
+          for el in data['elements']:
+              la = el.get('lat') or (el.get('center') or {}).get('lat'); ln = el.get('lon') or (el.get('center') or {}).get('lon')
+              if la is None: continue
+              pts.append([round(la, 5), round(ln, 5), (el.get('tags') or {}).get('name', '')[:60]])
+          os.makedirs('data/layers/mexico-city', exist_ok=True)
+          json.dump({'layer': 'schools', 'source': 'OpenStreetMap contributors (ODbL)', 'query': 'amenity=school, nodes and areas', 'fetched': datetime.date.today().isoformat(), 'count': len(pts), 'note': 'Only schools mapped in OpenStreetMap; coverage may be incomplete.', 'points': pts}, open('data/layers/mexico-city/schools.json', 'w'), ensure_ascii=False, separators=(',', ':'))
+          print(len(pts), 'schools')
+          PY
+      - name: Save schools
+        run: |
+          git config user.name "threadlands-bot"; git config user.email "threadlands-bot@users.noreply.github.com"
+          git add data/layers; git commit -m "Map layer: Mexico City schools from OpenStreetMap" || true
+          git pull --rebase origin main && git push || true
+      - name: Test tiles, fonts and terrain
+        run: |
+          python3 - <<'PY'
+          import json, math, os, urllib.request
+          H = {'User-Agent': 'Threadlands test fixtures (threadlands.org)', 'Origin': 'https://threadlands.org'}
+          def get(u):
+              return urllib.request.urlopen(urllib.request.Request(u, headers=H), timeout=60).read()
+          def tiles(z, s, w, n, e):
+              def x(lng): return int((lng + 180) / 360 * 2 ** z)
+              def y(lat): r = math.radians(lat); return int((1 - math.log(math.tan(r) + 1 / math.cos(r)) / math.pi) / 2 * 2 ** z)
+              for tx in range(x(w), x(e) + 1):
+                  for ty in range(y(n), y(s) + 1): yield z, tx, ty
+          root = '/tmp/fx'; os.makedirs(root, exist_ok=True)
+          tj = json.loads(get('https://tiles.openfreemap.org/planet')); json.dump(tj, open(root + '/tilejson.json', 'w'))
+          tpl = tj['tiles'][0]; print('tiles', tpl)
+          want = []
+          for z in range(5, 12): want += list(tiles(z, 18.77, -99.66, 19.88, -98.64))
+          for z in range(12, 15): want += list(tiles(z, 19.30, -99.13, 19.42, -98.98))
+          n = 0
+          for z, x, y in want:
+              for kind, url in (('v', tpl.replace('{z}', str(z)).replace('{x}', str(x)).replace('{y}', str(y))), ('t', 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/%d/%d/%d.png' % (z, x, y))):
+                  if kind == 't' and z > 13: continue
+                  p = '%s/%s/%d/%d/%d' % (root, kind, z, x, y); os.makedirs(os.path.dirname(p), exist_ok=True)
+                  try: open(p, 'wb').write(get(url)); n += 1
+                  except Exception as e: print('miss', url, e)
+          for f in ['Noto Sans Regular', 'Noto Sans Bold', 'Noto Sans Italic']:
+              for r in ['0-255', '256-511', '8192-8447']:
+                  p = '%s/fonts/%s/%s.pbf' % (root, f, r); os.makedirs(os.path.dirname(p), exist_ok=True)
+                  try: open(p, 'wb').write(get('https://tiles.openfreemap.org/fonts/%s/%s.pbf' % (urllib.request.quote(f), r)))
+                  except Exception as e: print('miss font', f, r, e)
+          print(n, 'tiles saved')
+          PY
+      - name: Save fixtures branch
+        run: |
+          git config user.name "threadlands-bot"; git config user.email "threadlands-bot@users.noreply.github.com"
+          cd /tmp/fx && git init -q -b fixtures && git add -A && git commit -q -m "Map test fixtures" && git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" fixtures
