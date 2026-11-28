@@ -2079,5 +2079,13 @@
 "Elegir una calle para un piloto de árboles de sombra, dentro del área de búsqueda marcada en el mapa: unos {0} km² del oriente de Iztapalapa donde los árboles cubren muy poco suelo.",
 "Área de búsqueda: unos {0} km² del oriente de Iztapalapa, marcados en el mapa",
 "Área de búsqueda",
-"El área de búsqueda, unos {0} km². Para lo que pasa en una sola calle o esquina, el mapa necesita el conocimiento local."
+"El área de búsqueda, unos {0} km². Para lo que pasa en una sola calle o esquina, el mapa necesita el conocimiento local.",
+"Esfuerzo compartido: punteado mientras está propuesto, o si es un ejemplo ilustrativo",
+"sólido cuando alguien lo asume",
+"Abrir el esfuerzo",
+"Esfuerzo compartido: punteado mientras está propuesto, o si es un ejemplo ilustrativo;",
+"Esfuerzo de ejemplo",
+"Esfuerzo",
+"Esfuerzo propuesto o de ejemplo",
+"Esfuerzo que alguien asumió"
 ]
