@@ -31,8 +31,12 @@ css += """
   .tl-mt { margin: 0; padding: 6px 16px; text-align: center; font-size: 0.8rem; color: var(--ink2); background: var(--surface); border-bottom: 1px solid var(--line); }
   .here-efkey { display: grid; grid-template-columns: auto auto; align-items: center; gap: 4px 7px; padding: 6px 9px; border-radius: 8px; background: rgba(255,255,255,0.92); font-size: 0.75rem; line-height: 1.3; color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
   .efk-sw { display: inline-block; width: 16px; height: 11px; border-radius: 2px; border: 2.5px dashed #0E5A52; } .efk-solid { border-style: solid; }
-  .ef-pin span { display: inline-block; transform: translate(-50%, -150%); white-space: nowrap; padding: 3px 9px; border-radius: 999px; background: #fff; color: #0E5A52; border: 2px dashed #0E5A52; font: 700 0.75rem var(--font-body); box-shadow: 0 1px 4px rgba(0,0,0,0.2); cursor: pointer; }
-  .ef-pin.on span { border-style: solid; }
+  .ef-pin { overflow: visible; }
+  .ef-lead line { stroke: #0E5A52; stroke-width: 1.5; } .ef-lead circle { fill: #0E5A52; }
+  .ef-pill { position: absolute; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; padding: 3px 9px; border-radius: 999px; background: #fff; color: #0E5A52; border: 2px dashed #0E5A52; font: 700 0.75rem var(--font-body); box-shadow: 0 1px 4px rgba(0,0,0,0.2); cursor: pointer; }
+  .ef-pill.taken { border-style: solid; }
+  .ef-steps, .efk-steps { display: inline-flex; gap: 2px; font-style: normal; } .ef-steps b, .efk-steps b { width: 6px; height: 6px; border-radius: 50%; border: 1.5px solid #0E5A52; } .ef-steps b.on, .efk-steps b.on { background: #0E5A52; }
+  .efk-steps { justify-self: center; }
   .ef-tip b { font-weight: 700; }
   /* Effort page: one shared local effort, read-only */
   .ef-sample { background: #FFF4D6; color: #5a4300; border-bottom: 1px solid #ecd9a0; font-size: 0.9rem; padding: 10px 0; }
@@ -1085,7 +1089,7 @@ def head(base, title, desc):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
             f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
-            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=80">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
+            + FONTS + f'<link rel="stylesheet" href="{base}assets/site.css?v=82">\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">\n' + APP(base) + f'<script>window.TL_DATA = "{DATA_URL}";</script>\n' + ANALYTICS + '</head>\n<body>\n')
 
 
 def nav(base, here):

@@ -5,7 +5,8 @@
   "responsible": "who has taken responsibility for the next step, only once they have agreed: {name, kind: organization|person|office, since}",
   "next": "the next step, who does it and by when",
   "jurisdictions": "governments whose area covers the effort: possible, not contacted, until a step says otherwise",
-  "record": "dated public record; private correspondence and unconsented photos are never published"
+  "record": "dated public record; private correspondence and unconsented photos are never published",
+  "area_kind": "'search' when the outlined area is where a site will be chosen, not the footprint of the work"
  },
  "efforts": [
   {
@@ -52,7 +53,8 @@
      "text": "Created as a Threadlands example from the heat map, to show how an effort page works. Not a real effort; no one has been contacted."
     }
    ],
-   "changed": []
+   "changed": [],
+   "area_kind": "search"
   }
  ]
 }

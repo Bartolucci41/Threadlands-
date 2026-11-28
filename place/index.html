@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Nunito:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=80">
+<link rel="stylesheet" href="../assets/site.css?v=82">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="../assets/i18n.js?v=4" defer></script>
 <script src="../assets/feedback.js?v=1" defer></script>
@@ -841,6 +841,17 @@
       .then(function () { $('#here-form').innerHTML = '<p class="here-ok"><b>Thank you.</b> Your note is private while it waits for review. Once it is checked it appears on this map, with what the review confirmed and the spot shown to about 100 m.</p>'; })
       .catch(function (e) { msg.textContent = (e && e.message && !/fetch/i.test(e.message) ? e.message : 'It could not be sent right now. Please try again later.'); });
   });
+  // Keep each effort label inside the map: if it would run off one side, mirror it to the other
+  function fitPills() {
+    var box = document.getElementById('here-map'); if (!box) return; var r = box.getBoundingClientRect();
+    box.querySelectorAll('.ef-pin').forEach(function (pin) {
+      var pill = pin.querySelector('.ef-pill'), line = pin.querySelector('line'); if (!pill) return;
+      var vx = +pill.dataset.vx, vy = +pill.dataset.vy;
+      var place = function (x, y, mid) { pill.style.left = x + 'px'; pill.style.top = y + 'px'; pill.style.transform = 'translate(' + (mid ? '-50%' : x < 0 ? '-100%' : '0') + ',' + (mid ? '-100%' : '-50%') + ')'; if (line) { line.setAttribute('x2', x); line.setAttribute('y2', y); } };
+      var out = function () { var pr = pill.getBoundingClientRect(); return pr.right > r.right - 6 || pr.left < r.left + 6; };
+      place(vx, vy); if (out()) { place(-vx, vy); if (out()) place(0, -56, true); }
+    });
+  }
   // Shared efforts on the map: each effort is drawn on its area; its outline shows how far it has moved
   var EFLAYER = null, EFKEY = null;
   var EFSTEP = { proposed: 0, 'taken-on': 1, delivered: 2, response: 3 };
@@ -857,22 +868,33 @@
         for (var i = 0; i < c.lat.length; i++) { var dx = (c.lng[i] - x.lng) * k, dy = c.lat[i] - x.lat, d2 = dx * dx + dy * dy; if (d2 < bd && c.poly[i]) { bd = d2; best = i; } }
         if (best < 0) return;
         var ll = []; for (var q = 0; q < c.poly[best].length; q += 2) ll.push([c.poly[best][q], c.poly[best][q + 1]]);
-        var step = x.example ? -1 : (EFSTEP[x.status] || 0), taken = step >= 1;
+        var step = x.example ? -1 : (EFSTEP[x.status] || 0), taken = step >= 1, search = x.area_kind === 'search';
         var col = '#0E5A52';
-        var shape = L.polygon(ll, { pane: 'efforts', color: col, weight: taken ? 3.5 : 3, dashArray: taken ? null : '6 5', fill: true, fillColor: col, fillOpacity: step >= 2 ? 0.28 : 0.1 });
+        // The fill never changes with progress, so it can't be read as land treated; progress is shown as steps in the label
+        var shape = L.polygon(ll, { pane: 'efforts', color: col, weight: taken ? 3.5 : 3, dashArray: taken ? null : '6 5', fill: true, fillColor: col, fillOpacity: 0.08 });
         var tag = x.example ? 'Illustrative example' : ['Proposed', 'Taken on', 'Delivered', 'Response received'][step];
-        shape.bindTooltip('<b>' + esc(x.title) + '</b><br><span>' + tag + '</span> \u00b7 <span>Open the effort</span>', { direction: 'top', sticky: false, className: 'ef-tip' });
-        shape.on('click', function (ev) { L.DomEvent.stopPropagation(ev); location.href = '../effort/#' + encodeURIComponent(x.id); });
+        shape.bindTooltip('<b>' + esc(x.title) + '</b><br>' + (search ? '<span>Search area, not the planting area</span><br>' : '') + '<span>' + tag + '</span> \u00b7 <span>Open the effort</span>', { direction: 'top', sticky: false, className: 'ef-tip' });
+        var go = function (ev) { L.DomEvent.stopPropagation(ev); location.href = '../effort/#' + encodeURIComponent(x.id); };
+        shape.on('click', go);
         EFLAYER.addLayer(shape);
-        // A label that stays readable at any zoom, where the area itself is too small to see
-        var mid = shape.getBounds().getCenter();
-        var pin = L.marker(mid, { pane: 'efforts', icon: L.divIcon({ className: 'ef-pin' + (taken ? ' on' : ''), html: '<span>' + (x.example ? 'Example effort' : 'Effort') + '</span>', iconSize: null, iconAnchor: [0, 0] }), keyboard: true, title: x.title });
-        pin.on('click', function (ev) { L.DomEvent.stopPropagation(ev); location.href = '../effort/#' + encodeURIComponent(x.id); });
+        // A label that stays readable at any zoom, set off to one side with a leader line so it never hides nearby projects
+        var mid = shape.getBounds().getCenter(), near = null, nd = Infinity;
+        D.projects.forEach(function (p) { if (p.place !== SLUG || !isFinite(p.lat)) return; var d2 = Math.pow(p.lat - mid.lat, 2) + Math.pow((p.lng - mid.lng) * Math.cos(mid.lat * Math.PI / 180), 2); if (d2 < nd) { nd = d2; near = p; } });
+        var vx = 1, vy = -1;   // default: up and to the right
+        if (near) { vx = (mid.lng - near.lng) * Math.cos(mid.lat * Math.PI / 180); vy = -(mid.lat - near.lat); var vl = Math.sqrt(vx * vx + vy * vy) || 1; vx /= vl; vy /= vl; if (vy > -0.35) vy = -0.35; }
+        var vl2 = Math.sqrt(vx * vx + vy * vy); vx = vx / vl2 * 64; vy = vy / vl2 * 64;
+        var steps = x.example ? '' : '<i class="ef-steps" aria-label="' + (step + 1) + ' of 4 steps">' + [0, 1, 2, 3].map(function (n) { return '<b class="' + (n <= step ? 'on' : '') + '"></b>'; }).join('') + '</i>';
+        var label = (x.example ? 'Example effort' : 'Effort') + (search ? ' \u00b7 search area' : '');
+        var html = '<svg class="ef-lead" width="1" height="1" style="overflow:visible"><line x1="0" y1="0" x2="' + vx.toFixed(1) + '" y2="' + vy.toFixed(1) + '"/><circle r="3"/></svg>' +
+          '<span class="ef-pill' + (taken ? ' taken' : '') + '" data-vx="' + vx.toFixed(1) + '" data-vy="' + vy.toFixed(1) + '" style="left:' + vx.toFixed(1) + 'px;top:' + vy.toFixed(1) + 'px;transform:translate(' + (vx < 0 ? '-100%' : '0') + ',-50%)">' + steps + '<span>' + label + '</span></span>';
+        var pin = L.marker(mid, { pane: 'efforts', icon: L.divIcon({ className: 'ef-pin', html: html, iconSize: [0, 0], iconAnchor: [0, 0] }), keyboard: true, title: x.title });
+        pin.on('click', go);
         EFLAYER.addLayer(pin);
       });
+      fitPills(); if (!HM._efFit) { HM._efFit = true; HM.on('moveend zoomend resize', fitPills); }
       if (!EFKEY) {
         EFKEY = L.control({ position: 'bottomleft' });
-        EFKEY.onAdd = function () { var d = L.DomUtil.create('div', 'here-efkey'); d.innerHTML = '<span class="efk-sw"></span><span>Effort, proposed or an example</span><span class="efk-sw efk-solid"></span><span>Effort someone has taken on</span>'; L.DomEvent.disableClickPropagation(d); return d; };
+        EFKEY.onAdd = function () { var d = L.DomUtil.create('div', 'here-efkey'); d.innerHTML = '<span class="efk-sw"></span><span>Effort, proposed or an example</span><span class="efk-sw efk-solid"></span><span>Effort someone has taken on</span><span class="efk-steps"><b class="on"></b><b></b><b></b><b></b></span><span>Steps done, not land treated</span>'; L.DomEvent.disableClickPropagation(d); return d; };
       }
       EFKEY.addTo(HM);
     }).catch(function () {});
