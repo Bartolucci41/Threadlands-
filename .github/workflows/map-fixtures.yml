@@ -78,4 +78,5 @@ jobs:
       - name: Save fixtures branch
         run: |
           git config user.name "threadlands-bot"; git config user.email "threadlands-bot@users.noreply.github.com"
+          git config --global user.name "threadlands-bot"; git config --global user.email "threadlands-bot@users.noreply.github.com"
           cd /tmp/fx && git init -q -b fixtures && git add -A && git commit -q -m "Map test fixtures" && git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" fixtures
